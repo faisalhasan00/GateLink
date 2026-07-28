@@ -16,8 +16,21 @@
   --text-primary: #111827;
   --text-secondary: #6B7280;
   
-  --sidebar-width: 260px;
-  --topbar-height: 70px;
+  --sidebar-width: 280px;
+  --sidebar-width-collapsed: 80px;
+  --topbar-height: 72px;
+  
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  --radius-md: 12px;
+  --radius-card: 16px;
+  --shadow-enterprise: 0 8px 24px rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -399,66 +412,59 @@ tr:last-child td {
   color: var(--text-primary);
 }
 
-/* Responsive Design */
+/* Responsive Design & Enterprise Component Overrides */
+.hamburger-btn {
+  display: none;
+}
+
+.enterprise-search-container {
+  width: 400px;
+}
+
 @media (max-width: 1024px) {
   .dashboard-grid {
     grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .enterprise-header-center {
+    max-width: 280px !important;
+  }
+  .enterprise-search-container {
+    width: 280px;
   }
 }
 
 @media (max-width: 768px) {
   .hamburger-btn {
-    display: block;
+    display: flex !important;
   }
 
-  .app-container {
-    flex-direction: row;
-  }
-  
-  .sidebar {
-    position: fixed;
+  .enterprise-sidebar {
+    position: fixed !important;
     top: 0;
-    left: -260px;
-    width: var(--sidebar-width);
+    left: -280px;
     height: 100vh;
-    z-index: 1000;
-    transition: left 0.3s ease;
-    border-right: 1px solid var(--border-color);
-    background-color: var(--surface-color);
+    z-index: 1000 !important;
+    transition: left 0.3s ease !important;
   }
 
-  .sidebar.open {
-    left: 0;
-  }
-  
-  .sidebar-logo {
-    display: flex;
-  }
-  
-  .sidebar-nav {
-    flex-direction: column;
-    overflow-y: auto;
-    padding: 24px 16px;
-    gap: 8px;
+  .enterprise-sidebar.open {
+    left: 0 !important;
   }
   
   .sidebar-overlay {
     display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 999;
   }
 
-  .topbar {
-    padding: 0 16px;
+  .enterprise-header {
+    padding: 0 16px !important;
+  }
+
+  .enterprise-header-center {
+    display: none !important;
   }
   
   .page-content {
-    padding: 16px;
+    padding: 16px !important;
   }
 }
 
@@ -466,8 +472,5 @@ tr:last-child td {
   .dashboard-grid {
     grid-template-columns: 1fr !important;
   }
-  
-  .topbar-actions input {
-    display: none;
-  }
 }
+
