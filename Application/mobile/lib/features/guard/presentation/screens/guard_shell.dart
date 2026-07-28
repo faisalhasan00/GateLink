@@ -38,6 +38,12 @@ class _GuardShellState extends State<GuardShell> {
       activeIcon: Icons.directions_car_rounded,
       route: '/vehicles',
     ),
+    _GuardNavItem(
+      label: 'Profile',
+      icon: Icons.person_outline_rounded,
+      activeIcon: Icons.person_rounded,
+      route: '/profile',
+    ),
   ];
 
   @override

@@ -169,7 +169,12 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
     final visitorsAsync = ref.watch(visitorsStreamProvider);
     final timeStr = DateFormat('hh:mm:ss a').format(_now);
     final dateStr = DateFormat('EEEE, d MMM').format(_now);
-    final guardEmail = FirebaseAuth.instance.currentUser?.email ?? 'Guard';
+    final user = FirebaseAuth.instance.currentUser;
+    final profile = ref.watch(userProfileProvider).value;
+    
+    final guardName = profile?['name'] ?? user?.displayName ?? user?.email ?? 'Security Guard';
+    final societyName = profile?['societyName'] ?? 'Greenwood Heights';
+    final gateName = profile?['gateName'] ?? 'Gate 1 — Main Entry';
 
     return visitorsAsync.when(
       loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
@@ -178,6 +183,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
         final docs = snapshot.docs;
         final insideCount = docs.where((d) => (d.data() as Map)['status'] == 'inside').length;
         final pendingCount = docs.where((d) => (d.data() as Map)['status'] == 'pending').length;
+        final approvedCount = docs.where((d) => (d.data() as Map)['status'] == 'approved').length;
         final exitedCount = docs.where((d) => (d.data() as Map)['status'] == 'left').length;
         final filtered = _filterDocs(docs);
 
@@ -211,27 +217,35 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const CircleAvatar(
-                                radius: 24,
-                                backgroundColor: AppColors.primary,
-                                child: Icon(Icons.shield_rounded, color: Colors.white, size: 24),
+                              GestureDetector(
+                                onTap: () => context.go('/profile'),
+                                child: const CircleAvatar(
+                                  radius: 24,
+                                  backgroundColor: AppColors.primary,
+                                  child: Icon(Icons.shield_rounded, color: Colors.white, size: 24),
+                                ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      guardEmail,
-                                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    const Text(
-                                      'Gate 1 — Main Entry',
-                                      style: TextStyle(fontSize: 11, color: Colors.white54),
-                                    ),
-                                  ],
+                                child: GestureDetector(
+                                  onTap: () => context.go('/profile'),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        guardName,
+                                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        '$societyName  •  $gateName',
+                                        style: const TextStyle(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.w500),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                               // SOS Button
@@ -370,11 +384,35 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                           const SizedBox(width: AppSpacing.sm),
                           Expanded(
                             child: _StatCard(
-                              title: 'Exited',
+                              title: 'Approved',
+                              value: '$approvedCount',
+                              icon: Icons.check_circle_rounded,
+                              color: AppColors.success,
+                              trend: 'Today',
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _StatCard(
+                              title: "Today's Exits",
                               value: '$exitedCount',
                               icon: Icons.exit_to_app_rounded,
                               color: AppColors.textSecondary,
-                              trend: 'Today',
+                              trend: 'Checked out',
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: _StatCard(
+                              title: 'Total Today',
+                              value: '${docs.length}',
+                              icon: Icons.groups_rounded,
+                              color: AppColors.info,
+                              trend: 'Total entries',
                             ),
                           ),
                         ],
