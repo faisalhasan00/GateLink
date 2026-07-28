@@ -4,6 +4,20 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 // In a real app, this would be set during login based on the guard's profile.
 const String kCurrentSocietyId = 'SOC-001';
 
+class FlatValidationResult {
+  final bool isValid;
+  final String? residentName;
+  final String? residentUid;
+  final String? error;
+
+  FlatValidationResult({
+    required this.isValid,
+    this.residentName,
+    this.residentUid,
+    this.error,
+  });
+}
+
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String societyId;
@@ -19,6 +33,47 @@ class FirestoreService {
         .snapshots();
   }
 
+  // ── FLAT VALIDATION ───────────────────────────────────────────────────────
+
+  /// Validates that a target flat exists in the society and has an assigned resident.
+  Future<FlatValidationResult> validateFlat(String hostFlat) async {
+    final trimmedFlat = hostFlat.trim();
+    if (trimmedFlat.isEmpty) {
+      return FlatValidationResult(isValid: false, error: 'Flat Number is required');
+    }
+
+    try {
+      final querySnapshot = await _db
+          .collection('societies/$societyId/users')
+          .where('flatNumber', isEqualTo: trimmedFlat)
+          .where('role', isEqualTo: 'resident')
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        // Check if flat exists at all or has no resident
+        final anyUserWithFlat = await _db
+            .collection('societies/$societyId/users')
+            .where('flatNumber', isEqualTo: trimmedFlat)
+            .get();
+
+        if (anyUserWithFlat.docs.isEmpty) {
+          return FlatValidationResult(isValid: false, error: 'Flat Number Not Found');
+        }
+        return FlatValidationResult(isValid: false, error: 'No Resident Assigned to this Flat');
+      }
+
+      final residentData = querySnapshot.docs.first.data();
+      final residentName = residentData['name'] ?? 'Resident';
+      return FlatValidationResult(
+        isValid: true, 
+        residentName: residentName,
+        residentUid: querySnapshot.docs.first.id,
+      );
+    } catch (e) {
+      return FlatValidationResult(isValid: false, error: 'Flat validation error: $e');
+    }
+  }
+
   Future<String> logVisitorEntry({
     required String name,
     required String type,
@@ -26,7 +81,16 @@ class FirestoreService {
     String? phone,
     String? vehicleNumber,
     String? company,
+    String? guardUid,
   }) async {
+    // 1. Strict Flat Validation
+    final validation = await validateFlat(hostFlat);
+    if (!validation.isValid) {
+      throw Exception(validation.error);
+    }
+
+    // 2. Write Document
+    final nowStr = DateTime.now().toIso8601String();
     final docRef = await _db
         .collection('societies/$societyId/visitors')
         .add({
@@ -39,6 +103,11 @@ class FirestoreService {
       'entryTime': null,
       'exitTime': null,
       'status': 'pending',
+      'societyId': societyId,
+      'createdDate': nowStr,
+      'guardUid': guardUid ?? 'guard_gate_1',
+      'hostResidentName': validation.residentName,
+      'hostResidentUid': validation.residentUid,
     });
     return docRef.id;
   }
@@ -49,7 +118,7 @@ class FirestoreService {
         .doc(visitorId)
         .update({
       'exitTime': DateTime.now().toIso8601String(),
-      'status': 'left',
+      'status': 'checked_out',
     });
   }
 
@@ -59,7 +128,37 @@ class FirestoreService {
         .doc(visitorId)
         .update({
       'status': status,
+      'updatedAt': DateTime.now().toIso8601String(),
     });
+  }
+
+  Future<void> updateVisitorApproval({
+    required String visitorId,
+    required String status, // 'approved' or 'rejected'
+    required String residentUid,
+    String? rejectionReason,
+  }) async {
+    final nowStr = DateTime.now().toIso8601String();
+    final updateData = <String, dynamic>{
+      'status': status,
+      'updatedAt': nowStr,
+    };
+
+    if (status == 'approved') {
+      updateData['approvedAt'] = nowStr;
+      updateData['approvedBy'] = residentUid;
+    } else if (status == 'rejected' || status == 'denied') {
+      updateData['rejectedAt'] = nowStr;
+      updateData['rejectedBy'] = residentUid;
+      if (rejectionReason != null) {
+        updateData['rejectionReason'] = rejectionReason;
+      }
+    }
+
+    await _db
+        .collection('societies/$societyId/visitors')
+        .doc(visitorId)
+        .update(updateData);
   }
 
   /// Stream of pending visitors for a specific flat (for resident notifications).

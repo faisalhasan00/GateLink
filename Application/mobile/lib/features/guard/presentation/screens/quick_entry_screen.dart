@@ -45,6 +45,26 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
 
     try {
       final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: 'SOC-001');
+      final targetFlat = '$_selectedTower-${_flatController.text.trim()}';
+
+      // 1. Explicit Flat Validation
+      final validation = await firestoreService.validateFlat(targetFlat);
+      if (!validation.isValid) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Row(children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 8),
+                Expanded(child: Text('❌ ${validation.error}')),
+              ]),
+              backgroundColor: AppColors.error,
+              duration: const Duration(seconds: 4),
+            ),
+          );
+        }
+        return;
+      }
 
       final visitorType = _selectedType == EntryType.guest
           ? 'Guest'
@@ -57,7 +77,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
       await firestoreService.logVisitorEntry(
         name: _nameController.text.trim(),
         type: visitorType,
-        hostFlat: '$_selectedTower-${_flatController.text.trim()}',
+        hostFlat: targetFlat,
         phone: _phoneController.text.trim(),
         vehicleNumber: _vehicleController.text.trim(),
         company: _companyController.text.trim(),
@@ -66,16 +86,17 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
       if (mounted) {
         _clearForm();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('✅ Visitor logged to Firestore!'),
+          SnackBar(
+            content: Text('✅ Visitor request sent to ${validation.residentName} ($targetFlat)!'),
             backgroundColor: AppColors.secondary,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        final errText = e.toString().replaceAll('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text('❌ $errText'), backgroundColor: AppColors.error),
         );
       }
     } finally {

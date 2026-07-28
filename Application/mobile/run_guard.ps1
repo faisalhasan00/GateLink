@@ -14,4 +14,4 @@ Write-Host "Target Device: Samsung SM S721B (RZCY90G2W8H)" -ForegroundColor Gree
 Write-Host "Launching Standalone Guard App (lib/main_guard.dart)..." -ForegroundColor Yellow
 Write-Host ""
 
-flutter run -d RZCY90G2W8H -t lib/main_guard.dart
+flutter run --flavor guard -t lib/main_guard.dart

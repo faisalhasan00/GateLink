@@ -190,8 +190,35 @@ class _VisitorTabView extends ConsumerWidget {
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () async {
-                            final svc = ref.read(firestoreServiceProvider);
-                            await svc.updateVisitorStatus(doc.id, 'denied');
+                            final confirm = await showDialog<bool>(
+                              context: context,
+                              builder: (ctx) => AlertDialog(
+                                title: const Text('Reject Visitor?'),
+                                content: Text('Are you sure you want to deny entry to $name?'),
+                                actions: [
+                                  TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                                  ElevatedButton(
+                                    onPressed: () => Navigator.pop(ctx, true),
+                                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+                                    child: const Text('Deny Entry'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            if (confirm == true) {
+                              final svc = ref.read(firestoreServiceProvider);
+                              final user = ref.read(currentUserProvider);
+                              await svc.updateVisitorApproval(
+                                visitorId: doc.id, 
+                                status: 'rejected', 
+                                residentUid: user?.uid ?? 'resident_user',
+                              );
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('🛑 Visitor $name denied entry.'), backgroundColor: AppColors.error),
+                                );
+                              }
+                            }
                           },
                           style: OutlinedButton.styleFrom(
                             foregroundColor: AppColors.error,
@@ -205,7 +232,17 @@ class _VisitorTabView extends ConsumerWidget {
                         child: ElevatedButton(
                           onPressed: () async {
                             final svc = ref.read(firestoreServiceProvider);
-                            await svc.updateVisitorStatus(doc.id, 'approved');
+                            final user = ref.read(currentUserProvider);
+                            await svc.updateVisitorApproval(
+                              visitorId: doc.id, 
+                              status: 'approved', 
+                              residentUid: user?.uid ?? 'resident_user',
+                            );
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('✅ Visitor $name approved for entry!'), backgroundColor: AppColors.success),
+                              );
+                            }
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.success,

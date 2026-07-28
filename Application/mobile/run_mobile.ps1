@@ -14,4 +14,4 @@ Write-Host "Target Device: Samsung SM S721B (RZCY90G2W8H)" -ForegroundColor Gree
 Write-Host "Launching SocietySphere on your phone..." -ForegroundColor Yellow
 Write-Host ""
 
-flutter run -d RZCY90G2W8H
+flutter run --flavor resident -t lib/main.dart
