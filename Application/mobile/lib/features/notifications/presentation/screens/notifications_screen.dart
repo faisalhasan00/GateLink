@@ -27,20 +27,69 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       appBar: AppBar(
         title: const Text('Notification Center'),
         actions: [
-          TextButton(
-            onPressed: () async {
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert_rounded),
+            onSelected: (value) async {
               final user = ref.read(currentUserProvider);
               final svc = ref.read(firestoreServiceProvider);
-              if (user != null && svc != null) {
+              if (user == null || svc == null) return;
+
+              if (value == 'mark_read') {
                 await svc.markAllNotificationsAsRead(user.uid);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('All notifications marked as read.')),
                   );
                 }
+              } else if (value == 'clear_all') {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (ctx) => AlertDialog(
+                    title: const Text('Clear All Notifications?'),
+                    content: const Text('Are you sure you want to clear all notifications? This cannot be undone.'),
+                    actions: [
+                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+                        child: const Text('Clear All'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirm == true) {
+                  await svc.clearAllNotifications(user.uid);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('All notifications cleared.'), backgroundColor: AppColors.error),
+                    );
+                  }
+                }
               }
             },
-            child: const Text('Mark all read', style: TextStyle(fontSize: 13, color: AppColors.primary)),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'mark_read',
+                child: Row(
+                  children: [
+                    Icon(Icons.done_all_rounded, size: 18, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Text('Mark all as read'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'clear_all',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_sweep_rounded, size: 18, color: AppColors.error),
+                    SizedBox(width: 10),
+                    Text('Clear all notifications', style: TextStyle(color: AppColors.error)),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -130,94 +179,136 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                       } catch (_) {}
                     }
 
-                    return GestureDetector(
-                      onTap: () async {
+                    return Dismissible(
+                      key: Key(doc.id),
+                      direction: DismissDirection.endToStart,
+                      background: Container(
+                        alignment: Alignment.centerRight,
+                        padding: const EdgeInsets.only(right: 20),
+                        decoration: BoxDecoration(
+                          color: AppColors.error,
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
+                        ),
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                            SizedBox(width: 6),
+                            Icon(Icons.delete_outline_rounded, color: Colors.white),
+                          ],
+                        ),
+                      ),
+                      onDismissed: (_) async {
                         final user = ref.read(currentUserProvider);
                         final svc = ref.read(firestoreServiceProvider);
-                        if (user != null && svc != null && !isRead) {
-                          await svc.markNotificationAsRead(doc.id, user.uid);
-                        }
-
-                        // Deep Link Navigation
-                        if (context.mounted) {
-                          if (type.contains('visitor')) {
-                            context.go(AppRoutes.visitors);
-                          } else if (type.contains('payment') || type.contains('bill')) {
-                            context.go(AppRoutes.maintenanceHistory);
-                          } else if (type.contains('complaint')) {
-                            context.go(AppRoutes.complaints);
-                          } else if (type.contains('amenity')) {
-                            context.go(AppRoutes.myBookings);
-                          } else if (type.contains('document')) {
-                            context.go(AppRoutes.documents);
-                          } else if (type.contains('notice')) {
-                            context.go(AppRoutes.notices);
+                        if (user != null && svc != null) {
+                          await svc.deleteNotification(doc.id, user.uid);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Notification deleted.')),
+                            );
                           }
                         }
                       },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.all(AppSpacing.md),
-                        decoration: BoxDecoration(
-                          color: isRead ? Colors.white : AppColors.primarySurface.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
-                          border: Border.all(
-                            color: isRead ? AppColors.border : AppColors.primary.withValues(alpha: 0.4),
-                            width: isRead ? 1 : 1.5,
+                      child: GestureDetector(
+                        onTap: () async {
+                          final user = ref.read(currentUserProvider);
+                          final svc = ref.read(firestoreServiceProvider);
+                          if (user != null && svc != null && !isRead) {
+                            await svc.markNotificationAsRead(doc.id, user.uid);
+                          }
+
+                          // Deep Link Navigation
+                          if (context.mounted) {
+                            if (type.contains('visitor')) {
+                              context.go(AppRoutes.visitors);
+                            } else if (type.contains('payment') || type.contains('bill')) {
+                              context.go(AppRoutes.maintenanceHistory);
+                            } else if (type.contains('complaint')) {
+                              context.go(AppRoutes.complaints);
+                            } else if (type.contains('amenity')) {
+                              context.go(AppRoutes.myBookings);
+                            } else if (type.contains('document')) {
+                              context.go(AppRoutes.documents);
+                            } else if (type.contains('notice')) {
+                              context.go(AppRoutes.notices);
+                            }
+                          }
+                        },
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          decoration: BoxDecoration(
+                            color: isRead ? Colors.white : AppColors.primarySurface.withValues(alpha: 0.3),
+                            borderRadius: BorderRadius.circular(AppRadius.lg),
+                            border: Border.all(
+                              color: isRead ? AppColors.border : AppColors.primary.withValues(alpha: 0.4),
+                              width: isRead ? 1 : 1.5,
+                            ),
                           ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: _getIconColorForType(type).withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(AppRadius.md),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: _getIconColorForType(type).withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(AppRadius.md),
+                                ),
+                                child: Icon(
+                                  _getIconForType(type),
+                                  color: _getIconColorForType(type),
+                                  size: 20,
+                                ),
                               ),
-                              child: Icon(
-                                _getIconForType(type),
-                                color: _getIconColorForType(type),
-                                size: 20,
-                              ),
-                            ),
-                            const SizedBox(width: AppSpacing.md),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          title,
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: isRead ? FontWeight.w600 : FontWeight.w800,
-                                            color: AppColors.textPrimary,
+                              const SizedBox(width: AppSpacing.md),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            title,
+                                            style: TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: isRead ? FontWeight.w600 : FontWeight.w800,
+                                              color: AppColors.textPrimary,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      if (!isRead)
-                                        Container(
-                                          width: 8,
-                                          height: 8,
-                                          decoration: const BoxDecoration(
-                                            color: AppColors.primary,
-                                            shape: BoxShape.circle,
+                                        if (!isRead)
+                                          Container(
+                                            width: 8,
+                                            height: 8,
+                                            decoration: const BoxDecoration(
+                                              color: AppColors.primary,
+                                              shape: BoxShape.circle,
+                                            ),
                                           ),
-                                        ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(body, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-                                  const SizedBox(height: 6),
-                                  Text(timeStr, style: const TextStyle(fontSize: 11, color: AppColors.textDisabled)),
-                                ],
+                                      ],
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(body, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                                    const SizedBox(height: 6),
+                                    Text(timeStr, style: const TextStyle(fontSize: 11, color: AppColors.textDisabled)),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                              IconButton(
+                                icon: const Icon(Icons.close_rounded, size: 18, color: AppColors.textDisabled),
+                                onPressed: () async {
+                                  final user = ref.read(currentUserProvider);
+                                  final svc = ref.read(firestoreServiceProvider);
+                                  if (user != null && svc != null) {
+                                    await svc.deleteNotification(doc.id, user.uid);
+                                  }
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );

@@ -510,4 +510,23 @@ class FirestoreService {
         .doc(uid)
         .set({'notificationPreferences': prefs}, SetOptions(merge: true));
   }
+
+  Future<void> deleteNotification(String notifId, String uid) async {
+    await _db
+        .collection('societies/$societyId/users/$uid/notifications')
+        .doc(notifId)
+        .delete();
+  }
+
+  Future<void> clearAllNotifications(String uid) async {
+    final snap = await _db
+        .collection('societies/$societyId/users/$uid/notifications')
+        .get();
+
+    final batch = _db.batch();
+    for (final doc in snap.docs) {
+      batch.delete(doc.reference);
+    }
+    await batch.commit();
+  }
 }
