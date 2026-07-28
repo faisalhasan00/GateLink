@@ -70,28 +70,29 @@ class _GuardShellState extends State<GuardShell> {
         child: SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: List.generate(_navItems.length, (index) {
                 final item = _navItems[index];
                 final isActive = _currentIndex == index;
-                return GestureDetector(
-                  onTap: () {
-                    setState(() => _currentIndex = index);
-                    context.go(item.route);
-                  },
-                  behavior: HitTestBehavior.opaque,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: isActive ? AppColors.primary : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
+                return Flexible(
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() => _currentIndex = index);
+                      context.go(item.route);
+                    },
+                    behavior: HitTestBehavior.opaque,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isActive ? AppColors.primary : Colors.transparent,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                         Icon(
                           isActive ? item.activeIcon : item.icon,
                           color: isActive ? Colors.white : AppColors.gray400,
@@ -109,8 +110,9 @@ class _GuardShellState extends State<GuardShell> {
                       ],
                     ),
                   ),
-                );
-              }),
+                ),
+              );
+            }),
             ),
           ),
         ),

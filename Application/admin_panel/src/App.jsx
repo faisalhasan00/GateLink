@@ -18,6 +18,7 @@ import Staff from './pages/Staff'
 import HelpersDeliveries from './pages/HelpersDeliveries'
 import EmergencySos from './pages/EmergencySos'
 import Reports from './pages/Reports'
+import Legal from './pages/Legal'
 import AdminLogin from './pages/AdminLogin'
 import AdminProfile from './pages/AdminProfile'
 
@@ -78,6 +79,7 @@ function App() {
           <Route path="helpers" element={<HelpersDeliveries />} />
           <Route path="sos" element={<EmergencySos />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="legal" element={<Legal />} />
           <Route path="profile" element={<AdminProfile />} />
         </Route>
 

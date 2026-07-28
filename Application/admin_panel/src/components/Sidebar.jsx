@@ -28,6 +28,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { name: 'Helpers & Deliveries', path: '/helpers', icon: <Truck size={20} /> },
     { name: 'Emergency SOS', path: '/sos', icon: <ShieldAlert size={20} /> },
     { name: 'Reports & Analytics', path: '/reports', icon: <BarChart2 size={20} /> },
+    { name: 'Terms & Legal', path: '/legal', icon: <FileText size={20} /> },
     { name: 'Settings', path: '/settings', icon: <Settings size={20} /> },
   ];
 
