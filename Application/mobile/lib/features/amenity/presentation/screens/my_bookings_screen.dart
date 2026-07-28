@@ -83,7 +83,7 @@ class MyBookingsScreen extends ConsumerWidget {
               if (upcomingDocs.isNotEmpty) ...[
                 const _SectionHeader(title: 'ACTIVE BOOKINGS', icon: Icons.event_available_rounded, color: AppColors.primary),
                 const SizedBox(height: AppSpacing.sm),
-                ...upcomingDocs.map((doc) => _LiveBookingCard(doc: doc, ref: ref, context: context)),
+                ...upcomingDocs.map((doc) => _LiveBookingCard(doc: doc, ref: ref)),
                 const SizedBox(height: AppSpacing.lg),
               ],
 
@@ -91,7 +91,7 @@ class MyBookingsScreen extends ConsumerWidget {
               if (historyDocs.isNotEmpty) ...[
                 const _SectionHeader(title: 'PAST & CANCELLED', icon: Icons.history_rounded, color: AppColors.textSecondary),
                 const SizedBox(height: AppSpacing.sm),
-                ...historyDocs.map((doc) => _LiveBookingCard(doc: doc, ref: ref, context: context)),
+                ...historyDocs.map((doc) => _LiveBookingCard(doc: doc, ref: ref)),
               ],
             ],
           );
@@ -104,9 +104,8 @@ class MyBookingsScreen extends ConsumerWidget {
 class _LiveBookingCard extends StatelessWidget {
   final dynamic doc;
   final WidgetRef ref;
-  final BuildContext context;
 
-  const _LiveBookingCard({required this.doc, required this.ref, required this.context});
+  const _LiveBookingCard({required this.doc, required this.ref});
 
   @override
   Widget build(BuildContext context) {
@@ -215,6 +214,8 @@ class _LiveBookingCard extends StatelessWidget {
                     foregroundColor: AppColors.error,
                     side: const BorderSide(color: AppColors.error),
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   child: const Text('Cancel Booking', style: TextStyle(fontSize: 12)),
                 ),
