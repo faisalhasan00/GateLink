@@ -25,6 +25,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { name: 'Complaints', path: '/complaints', icon: <ShieldAlert size={20} /> },
     { name: 'Notices', path: '/notices', icon: <Megaphone size={20} /> },
     { name: 'Staff Management', path: '/staff', icon: <UserCheck size={20} /> },
+    { name: 'Helpers & Deliveries', path: '/helpers', icon: <Truck size={20} /> },
     { name: 'Settings', path: '/settings', icon: <Settings size={20} /> },
   ];
 

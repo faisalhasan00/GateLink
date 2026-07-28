@@ -15,6 +15,7 @@ import Documents from './pages/Documents'
 import Parking from './pages/Parking'
 import Notices from './pages/Notices'
 import Staff from './pages/Staff'
+import HelpersDeliveries from './pages/HelpersDeliveries'
 import AdminLogin from './pages/AdminLogin'
 import AdminProfile from './pages/AdminProfile'
 
@@ -72,6 +73,7 @@ function App() {
           <Route path="parking" element={<Parking />} />
           <Route path="notices" element={<Notices />} />
           <Route path="staff" element={<Staff />} />
+          <Route path="helpers" element={<HelpersDeliveries />} />
           <Route path="profile" element={<AdminProfile />} />
         </Route>
 
