@@ -170,22 +170,36 @@ class _DashboardAppBar extends ConsumerWidget {
         ],
       ),
       actions: [
-        IconButton(
-          onPressed: () => context.go(AppRoutes.notifications),
-          icon: Stack(
-            children: [
-              const Icon(Icons.notifications_outlined, color: AppColors.textPrimary, size: 24),
-              Positioned(
-                right: 0,
-                top: 0,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
-                ),
+        Consumer(
+          builder: (context, ref, _) {
+            final unreadCountAsync = ref.watch(unreadNotificationsCountStreamProvider);
+            final count = unreadCountAsync.value ?? 0;
+
+            return IconButton(
+              onPressed: () => context.go(AppRoutes.notifications),
+              icon: Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  const Icon(Icons.notifications_outlined, color: AppColors.textPrimary, size: 24),
+                  if (count > 0)
+                    Positioned(
+                      right: -2,
+                      top: -2,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
+                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                        child: Text(
+                          count > 9 ? '9+' : '$count',
+                          style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
         const SizedBox(width: 8),
       ],

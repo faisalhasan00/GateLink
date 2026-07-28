@@ -475,4 +475,39 @@ class FirestoreService {
         .orderBy('createdAt', descending: true)
         .snapshots();
   }
+
+  Stream<int> unreadNotificationsCountStream(String uid) {
+    return _db
+        .collection('societies/$societyId/users/$uid/notifications')
+        .where('read', isEqualTo: false)
+        .snapshots()
+        .map((snap) => snap.docs.length);
+  }
+
+  Future<void> markNotificationAsRead(String notifId, String uid) async {
+    await _db
+        .collection('societies/$societyId/users/$uid/notifications')
+        .doc(notifId)
+        .update({'read': true});
+  }
+
+  Future<void> markAllNotificationsAsRead(String uid) async {
+    final unreadSnap = await _db
+        .collection('societies/$societyId/users/$uid/notifications')
+        .where('read', isEqualTo: false)
+        .get();
+
+    final batch = _db.batch();
+    for (final doc in unreadSnap.docs) {
+      batch.update(doc.reference, {'read': true});
+    }
+    await batch.commit();
+  }
+
+  Future<void> updateNotificationPreferences(String uid, Map<String, bool> prefs) async {
+    await _db
+        .collection('societies/$societyId/users')
+        .doc(uid)
+        .set({'notificationPreferences': prefs}, SetOptions(merge: true));
+  }
 }
