@@ -114,6 +114,21 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final profile = ref.watch(userProfileProvider).value;
+    final resName = profile?['name'] ?? 'Resident';
+    final flatNum = profile?['flatNumber'] ?? 'A-101';
+    final block = profile?['block'] ?? profile?['tower'] ?? 'Tower A';
+    final floor = profile?['floor'] ?? '1st Floor';
+    final societyId = profile?['societyId'] ?? 'SOC-001';
+
+    // Auto-fill controllers if not touched yet
+    if (_blockController.text.isEmpty && block.isNotEmpty) {
+      _blockController.text = block;
+    }
+    if (_floorController.text.isEmpty && floor.isNotEmpty) {
+      _floorController.text = floor;
+    }
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(title: const Text('Raise Complaint')),
@@ -124,6 +139,49 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Auto-linked Resident Information Card
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.primarySurface,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.2),
+                      child: const Icon(Icons.person_rounded, color: AppColors.primary, size: 22),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(resName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                              const SizedBox(width: 6),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(4)),
+                                child: const Text('AUTO-LINKED', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white)),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 2),
+                          Text('Flat $flatNum  •  $block ($floor)', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                          Text('Society Code: $societyId', style: const TextStyle(fontSize: 11, color: AppColors.textDisabled)),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
               // Category
               const _FieldLabel(label: 'Category'),
               const SizedBox(height: 6),

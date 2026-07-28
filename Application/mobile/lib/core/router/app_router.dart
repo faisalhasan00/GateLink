@@ -206,6 +206,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                 builder: (context, state) => const MyBookingsScreen(),
               ),
               GoRoute(
+                path: ':id',
+                builder: (context, state) {
+                  final id = state.pathParameters['id']!;
+                  return AmenityBookingScreen(amenityId: id);
+                },
+              ),
+              GoRoute(
                 path: ':id/book',
                 builder: (context, state) {
                   final id = state.pathParameters['id']!;
