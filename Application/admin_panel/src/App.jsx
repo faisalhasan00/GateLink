@@ -17,6 +17,7 @@ import Notices from './pages/Notices'
 import Staff from './pages/Staff'
 import HelpersDeliveries from './pages/HelpersDeliveries'
 import EmergencySos from './pages/EmergencySos'
+import Reports from './pages/Reports'
 import AdminLogin from './pages/AdminLogin'
 import AdminProfile from './pages/AdminProfile'
 
@@ -76,6 +77,7 @@ function App() {
           <Route path="staff" element={<Staff />} />
           <Route path="helpers" element={<HelpersDeliveries />} />
           <Route path="sos" element={<EmergencySos />} />
+          <Route path="reports" element={<Reports />} />
           <Route path="profile" element={<AdminProfile />} />
         </Route>
 

@@ -3,9 +3,12 @@ import { Bell, Search, Menu } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 
+import GlobalSearchModal from './GlobalSearchModal';
+
 export default function Topbar({ title, toggleSidebar }) {
   const [society, setSociety] = useState({ name: 'Society Admin', code: 'SOC-001', plan: 'ENTERPRISE', city: 'Mumbai' });
   const [userEmail, setUserEmail] = useState('Admin');
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -36,6 +39,7 @@ export default function Topbar({ title, toggleSidebar }) {
 
   return (
     <header className="topbar">
+      <GlobalSearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <button className="hamburger-btn" onClick={toggleSidebar}>
           <Menu size={24} />
@@ -44,18 +48,29 @@ export default function Topbar({ title, toggleSidebar }) {
       </div>
 
       <div className="topbar-actions">
-        <div style={{ position: 'relative' }}>
-          <Search size={18} style={{ position: 'absolute', left: 12, top: 10, color: 'var(--text-secondary)' }} />
+        <div 
+          onClick={() => setIsSearchOpen(true)}
+          style={{ 
+            position: 'relative', 
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          <Search size={18} style={{ position: 'absolute', left: 12, color: 'var(--text-secondary)' }} />
           <input 
+            readOnly
             type="text" 
-            placeholder="Search residents, visitors, bills..." 
+            placeholder="Search residents, visitors, bills... (Ctrl+K)" 
             style={{ 
               padding: '10px 16px 10px 40px', 
               borderRadius: '20px', 
               border: '1px solid var(--border-color)',
               background: 'var(--bg-color)',
               outline: 'none',
-              width: '260px'
+              width: '280px',
+              cursor: 'pointer',
+              fontSize: '13px'
             }} 
           />
         </div>
