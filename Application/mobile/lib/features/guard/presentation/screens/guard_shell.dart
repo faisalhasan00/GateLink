@@ -39,6 +39,12 @@ class _GuardShellState extends State<GuardShell> {
       route: '/vehicles',
     ),
     _GuardNavItem(
+      label: 'History',
+      icon: Icons.history_toggle_off_rounded,
+      activeIcon: Icons.history_rounded,
+      route: '/history',
+    ),
+    _GuardNavItem(
       label: 'Profile',
       icon: Icons.person_outline_rounded,
       activeIcon: Icons.person_rounded,

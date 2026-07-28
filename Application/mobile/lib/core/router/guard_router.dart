@@ -5,6 +5,7 @@ import '../../features/guard/presentation/screens/guard_shell.dart';
 import '../../features/guard/presentation/screens/guard_dashboard_screen.dart';
 import '../../features/guard/presentation/screens/guard_profile_screen.dart';
 import '../../features/guard/presentation/screens/guard_visitor_detail_screen.dart';
+import '../../features/guard/presentation/screens/guard_visitor_history_screen.dart';
 import '../../features/guard/presentation/screens/qr_scanner_screen.dart';
 import '../../features/guard/presentation/screens/quick_entry_screen.dart';
 import '../../features/guard/presentation/screens/vehicle_log_screen.dart';
@@ -16,6 +17,7 @@ class GuardRoutes {
   static const String scan = '/scan';
   static const String quickEntry = '/quick-entry';
   static const String vehicles = '/vehicles';
+  static const String history = '/history';
   static const String profile = '/profile';
 }
 
@@ -60,6 +62,10 @@ final guardRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: GuardRoutes.vehicles,
             builder: (context, state) => const VehicleLogScreen(),
+          ),
+          GoRoute(
+            path: GuardRoutes.history,
+            builder: (context, state) => const GuardVisitorHistoryScreen(),
           ),
           GoRoute(
             path: GuardRoutes.profile,
