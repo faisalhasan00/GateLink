@@ -231,7 +231,7 @@ class FirestoreService {
         .snapshots();
   }
 
-  // ── MAINTENANCE BILLS ────────────────────────────────────────────────────
+  // ── MAINTENANCE BILLS & PAYMENTS ─────────────────────────────────────────
 
   Stream<QuerySnapshot> maintenanceBillsStream(String uid) {
     return _db
@@ -240,13 +240,48 @@ class FirestoreService {
         .snapshots();
   }
 
-  Future<void> payMaintenanceBill(String billId) async {
+  Stream<QuerySnapshot> paymentReceiptsStream(String uid) {
+    return _db
+        .collection('societies/$societyId/payment_receipts')
+        .where('residentUid', isEqualTo: uid)
+        .snapshots();
+  }
+
+  Future<void> payMaintenanceBill({
+    required String billId,
+    required String residentUid,
+    required double amount,
+    required String paymentMethod,
+    required String invoiceNumber,
+    required String billingPeriod,
+  }) async {
+    final nowStr = DateTime.now().toIso8601String();
+    final txnId = 'TXN${DateTime.now().millisecondsSinceEpoch}';
+
+    // 1. Update Bill Document
     await _db
         .collection('societies/$societyId/maintenance_bills')
         .doc(billId)
         .update({
       'status': 'paid',
-      'paidAt': DateTime.now().toIso8601String(),
+      'paidAt': nowStr,
+      'paymentMethod': paymentMethod,
+      'transactionId': txnId,
+    });
+
+    // 2. Create Normalized Payment Receipt Document
+    await _db.collection('societies/$societyId/payment_receipts').add({
+      'billId': billId,
+      'residentUid': residentUid,
+      'amount': amount,
+      'paymentMethod': paymentMethod,
+      'transactionId': txnId,
+      'invoiceNumber': invoiceNumber,
+      'billingPeriod': billingPeriod,
+      'status': 'success',
+      'paidAt': nowStr,
+      'createdAt': nowStr,
+      'societyId': societyId,
     });
   }
 

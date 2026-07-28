@@ -176,3 +176,69 @@ exports.notifyResidentOnAmenityBooking = onDocumentCreated(
     }
   }
 );
+
+/**
+ * Triggers when a maintenance bill is updated to 'paid'.
+ * Dispatches payment receipt push notification, creates in-app notification, and logs audit trail.
+ */
+exports.notifyResidentOnPaymentSuccess = onDocumentUpdated(
+  "societies/{societyId}/maintenance_bills/{billId}",
+  async (event) => {
+    const beforeData = event.data.before.data();
+    const afterData = event.data.after.data();
+    const { societyId, billId } = event.params;
+
+    if (beforeData.status !== "paid" && afterData.status === "paid") {
+      console.log(`Maintenance bill ${billId} marked as PAID`);
+
+      const db = getFirestore();
+      const uid = afterData.residentUid;
+      const amount = afterData.amount || afterData.totalAmount || 0;
+      const invoiceNumber = afterData.invoiceNumber || billId;
+
+      // 1. Audit Log Entry
+      await db.collection(`societies/${societyId}/audit_logs`).add({
+        action: "BILL_PAYMENT_SUCCESS",
+        targetType: "maintenance_bill",
+        targetId: billId,
+        amount: amount,
+        paidBy: uid || "resident",
+        paymentMethod: afterData.paymentMethod || "UPI",
+        transactionId: afterData.transactionId || "",
+        timestamp: FieldValue.serverTimestamp(),
+      });
+
+      if (!uid) return;
+
+      // 2. In-App Notification
+      const notifRef = db.collection(`societies/${societyId}/users/${uid}/notifications`).doc();
+      await notifRef.set({
+        title: "💳 Payment Received",
+        body: `Payment of ₹${amount} for Invoice #${invoiceNumber} was successfully processed!`,
+        type: "payment_success",
+        billId: billId,
+        transactionId: afterData.transactionId || "",
+        createdAt: FieldValue.serverTimestamp(),
+        read: false,
+      });
+
+      // 3. FCM Push Notification
+      const userDoc = await db.doc(`societies/${societyId}/users/${uid}`).get();
+      if (userDoc.exists && userDoc.data().fcmToken) {
+        const fcmToken = userDoc.data().fcmToken;
+        const messaging = getMessaging();
+        await messaging.send({
+          token: fcmToken,
+          notification: {
+            title: "💳 Payment Successful",
+            body: `₹${amount} paid for Invoice #${invoiceNumber}`,
+          },
+          data: {
+            type: "payment_success",
+            billId: billId,
+          },
+        }).catch((err) => console.error("FCM Error:", err));
+      }
+    }
+  }
+);

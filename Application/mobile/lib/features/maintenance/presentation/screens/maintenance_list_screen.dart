@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -5,6 +6,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/firebase_providers.dart';
+import '../../../../core/providers/auth_providers.dart';
 
 class MaintenanceListScreen extends ConsumerStatefulWidget {
   const MaintenanceListScreen({super.key});
@@ -91,8 +93,61 @@ class _BillsListView extends StatelessWidget {
           Icon(isPaid ? Icons.check_circle_outline_rounded : Icons.receipt_long_rounded,
               size: 56, color: AppColors.textDisabled),
           const SizedBox(height: AppSpacing.md),
-          Text(isPaid ? 'No paid bills yet' : 'No pending bills 🎉',
+          Text(isPaid ? 'No paid bills recorded' : 'No pending maintenance bills 🎉',
               style: const TextStyle(color: AppColors.textSecondary)),
+          const SizedBox(height: AppSpacing.lg),
+          if (!isPaid)
+            ElevatedButton.icon(
+              onPressed: () async {
+                try {
+                  final user = ref.read(currentUserProvider);
+                  final db = FirebaseFirestore.instance;
+                  final batch = db.batch();
+
+                  final bills = [
+                    {
+                      'month': 'August 2026',
+                      'invoiceNumber': 'INV-2026-08-101',
+                      'amount': 3500.0,
+                      'maintenanceCharges': 2500.0,
+                      'waterCharges': 400.0,
+                      'electricityCharges': 600.0,
+                      'lateFee': 0.0,
+                      'dueDate': '10 Aug 2026',
+                      'status': 'pending',
+                      'residentUid': user?.uid ?? '',
+                      'societyId': 'SOC-001',
+                      'createdAt': DateTime.now().toIso8601String(),
+                    },
+                    {
+                      'month': 'July 2026',
+                      'invoiceNumber': 'INV-2026-07-101',
+                      'amount': 3700.0,
+                      'maintenanceCharges': 2500.0,
+                      'waterCharges': 450.0,
+                      'electricityCharges': 550.0,
+                      'lateFee': 200.0,
+                      'dueDate': '10 Jul 2026',
+                      'status': 'overdue',
+                      'residentUid': user?.uid ?? '',
+                      'societyId': 'SOC-001',
+                      'createdAt': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
+                    },
+                  ];
+
+                  for (final b in bills) {
+                    final docRef = db.collection('societies/SOC-001/maintenance_bills').doc();
+                    batch.set(docRef, b);
+                  }
+
+                  await batch.commit();
+                } catch (e) {
+                  debugPrint('Seeding error: $e');
+                }
+              },
+              icon: const Icon(Icons.receipt_rounded),
+              label: const Text('Generate Sample Maintenance Bills'),
+            ),
         ]),
       );
     }
@@ -196,9 +251,17 @@ class _BillCard extends StatelessWidget {
             ElevatedButton(
               onPressed: () async {
                 final firestoreService = ref.read(firestoreServiceProvider);
-                if (firestoreService == null) return;
+                final user = ref.read(currentUserProvider);
+                if (firestoreService == null || user == null) return;
                 try {
-                  await firestoreService.payMaintenanceBill(docId);
+                  await firestoreService.payMaintenanceBill(
+                    billId: docId,
+                    residentUid: user.uid,
+                    amount: amount,
+                    paymentMethod: 'UPI / Card',
+                    invoiceNumber: 'INV-$month',
+                    billingPeriod: month,
+                  );
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('✅ Payment recorded!'), backgroundColor: AppColors.success),

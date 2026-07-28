@@ -2,14 +2,29 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
-class PayMaintenanceScreen extends StatefulWidget {
-  const PayMaintenanceScreen({super.key});
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/providers/firebase_providers.dart';
+import '../../../../core/providers/auth_providers.dart';
+
+class PayMaintenanceScreen extends ConsumerStatefulWidget {
+  final String? billId;
+  final double? amount;
+  final String? month;
+  final String? invoiceNumber;
+
+  const PayMaintenanceScreen({
+    super.key,
+    this.billId,
+    this.amount,
+    this.month,
+    this.invoiceNumber,
+  });
 
   @override
-  State<PayMaintenanceScreen> createState() => _PayMaintenanceScreenState();
+  ConsumerState<PayMaintenanceScreen> createState() => _PayMaintenanceScreenState();
 }
 
-class _PayMaintenanceScreenState extends State<PayMaintenanceScreen> {
+class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
   int _selectedMethod = 0;
   bool _isProcessing = false;
 
@@ -21,54 +36,84 @@ class _PayMaintenanceScreenState extends State<PayMaintenanceScreen> {
 
   Future<void> _pay() async {
     setState(() => _isProcessing = true);
-    await Future.delayed(const Duration(seconds: 2));
-    setState(() => _isProcessing = false);
-    if (!mounted) return;
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (_) => Container(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xxl)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const CircleAvatar(
-              radius: 36,
-              backgroundColor: AppColors.successSurface,
-              child: Icon(Icons.check_circle_rounded, color: AppColors.success, size: 40),
-            ),
-            const SizedBox(height: 16),
-            const Text('Payment Successful!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-            const SizedBox(height: 8),
-            const Text('Rs. 3,500 paid for August 2026', style: TextStyle(color: AppColors.textSecondary)),
-            const SizedBox(height: 8),
-            Text('Transaction ID: TXN${DateTime.now().millisecondsSinceEpoch % 9999999}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-            const SizedBox(height: AppSpacing.xl),
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pop(context);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.success,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-                ),
-                child: const Text('Done', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+
+    try {
+      final firestoreService = ref.read(firestoreServiceProvider);
+      final user = ref.read(currentUserProvider);
+
+      final payMethodName = _methods[_selectedMethod].label;
+      final targetBillId = widget.billId ?? 'bill_latest';
+      final payAmount = widget.amount ?? 3500.0;
+      final invNum = widget.invoiceNumber ?? 'INV-2026-08-101';
+      final period = widget.month ?? 'August 2026';
+
+      if (firestoreService != null && user != null && widget.billId != null) {
+        await firestoreService.payMaintenanceBill(
+          billId: targetBillId,
+          residentUid: user.uid,
+          amount: payAmount,
+          paymentMethod: payMethodName,
+          invoiceNumber: invNum,
+          billingPeriod: period,
+        );
+      }
+
+      setState(() => _isProcessing = false);
+      if (!mounted) return;
+
+      showModalBottomSheet(
+        context: context,
+        backgroundColor: Colors.transparent,
+        isScrollControlled: true,
+        builder: (_) => Container(
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xxl)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const CircleAvatar(
+                radius: 36,
+                backgroundColor: AppColors.successSurface,
+                child: Icon(Icons.check_circle_rounded, color: AppColors.success, size: 40),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              const Text('Payment Successful!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              const SizedBox(height: 8),
+              Text('₹${payAmount.toStringAsFixed(0)} paid via $payMethodName', style: const TextStyle(color: AppColors.textSecondary)),
+              const SizedBox(height: 8),
+              Text('Invoice: $invNum', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+              const SizedBox(height: AppSpacing.xl),
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.success,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
+                  ),
+                  child: const Text('Done', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-    );
+      );
+    } catch (e) {
+      setState(() => _isProcessing = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Payment Error: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    }
   }
 
   @override
