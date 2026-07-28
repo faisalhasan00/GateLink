@@ -716,8 +716,10 @@ class _GateEntryCard extends StatelessWidget {
     } catch (_) {}
     final timeStr = entryTime != null ? DateFormat('hh:mm a').format(entryTime) : '--';
 
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
+    return GestureDetector(
+      onTap: () => context.go('/visitors/$docId'),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppRadius.xl),
@@ -882,7 +884,8 @@ class _GateEntryCard extends StatelessWidget {
           ],
         ],
       ),
-    );
+    ),
+  );
   }
 }
 

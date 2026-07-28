@@ -80,8 +80,13 @@ class FirestoreService {
     required String hostFlat,
     String? phone,
     String? vehicleNumber,
+    String? vehicleType,
     String? company,
+    String? gender,
+    String? photoUrl,
+    String? notes,
     String? guardUid,
+    String? gateName,
   }) async {
     // 1. Strict Flat Validation
     final validation = await validateFlat(hostFlat);
@@ -89,7 +94,23 @@ class FirestoreService {
       throw Exception(validation.error);
     }
 
-    // 2. Write Document
+    final cleanPhone = (phone ?? '').trim();
+
+    // 2. Duplicate Request Prevention
+    if (cleanPhone.isNotEmpty) {
+      final dupSnapshot = await _db
+          .collection('societies/$societyId/visitors')
+          .where('hostFlat', isEqualTo: hostFlat)
+          .where('phone', isEqualTo: cleanPhone)
+          .where('status', isEqualTo: 'pending')
+          .get();
+
+      if (dupSnapshot.docs.isNotEmpty) {
+        throw Exception('A pending visitor request already exists for this mobile number ($cleanPhone).');
+      }
+    }
+
+    // 3. Write Visitor Record
     final nowStr = DateTime.now().toIso8601String();
     final docRef = await _db
         .collection('societies/$societyId/visitors')
@@ -97,18 +118,41 @@ class FirestoreService {
       'name': name,
       'type': type,
       'hostFlat': hostFlat,
-      'phone': phone ?? '',
+      'phone': cleanPhone,
       'vehicleNumber': vehicleNumber ?? '',
+      'vehicleType': vehicleType ?? '4-Wheeler',
       'company': company ?? '',
+      'gender': gender ?? 'Not Specified',
+      'photoUrl': photoUrl,
+      'notes': notes ?? '',
       'entryTime': null,
       'exitTime': null,
       'status': 'pending',
       'societyId': societyId,
       'createdDate': nowStr,
+      'createdAt': nowStr,
       'guardUid': guardUid ?? 'guard_gate_1',
+      'gateName': gateName ?? 'Gate 1 — Main Entry',
       'hostResidentName': validation.residentName,
       'hostResidentUid': validation.residentUid,
     });
+
+    // 4. Send Instant In-App Notification to Resident
+    if (validation.residentUid != null && validation.residentUid!.isNotEmpty) {
+      try {
+        await _db
+            .collection('societies/$societyId/users/${validation.residentUid}/notifications')
+            .add({
+          'title': '🔔 New Visitor Request',
+          'body': '$name ($type) is waiting at ${gateName ?? "Gate 1"} for Flat $hostFlat.',
+          'type': 'visitor_pending',
+          'visitorId': docRef.id,
+          'read': false,
+          'createdAt': nowStr,
+        });
+      } catch (_) {}
+    }
+
     return docRef.id;
   }
 

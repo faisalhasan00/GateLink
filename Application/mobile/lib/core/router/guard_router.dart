@@ -4,6 +4,7 @@ import '../../features/guard/presentation/screens/guard_login_screen.dart';
 import '../../features/guard/presentation/screens/guard_shell.dart';
 import '../../features/guard/presentation/screens/guard_dashboard_screen.dart';
 import '../../features/guard/presentation/screens/guard_profile_screen.dart';
+import '../../features/guard/presentation/screens/guard_visitor_detail_screen.dart';
 import '../../features/guard/presentation/screens/qr_scanner_screen.dart';
 import '../../features/guard/presentation/screens/quick_entry_screen.dart';
 import '../../features/guard/presentation/screens/vehicle_log_screen.dart';
@@ -63,6 +64,13 @@ final guardRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: GuardRoutes.profile,
             builder: (context, state) => const GuardProfileScreen(),
+          ),
+          GoRoute(
+            path: '/visitors/:id',
+            builder: (context, state) {
+              final id = state.pathParameters['id']!;
+              return GuardVisitorDetailScreen(visitorId: id);
+            },
           ),
         ],
       ),
