@@ -34,8 +34,6 @@ class _VisitorListScreenState extends ConsumerState<VisitorListScreen> with Sing
   @override
   Widget build(BuildContext context) {
     final visitorsAsync = ref.watch(visitorsStreamProvider);
-    final userProfile = ref.watch(userProfileProvider).value;
-    final flatNumber = userProfile?['flatNumber'] ?? '';
 
     return Scaffold(
       backgroundColor: AppColors.background,
