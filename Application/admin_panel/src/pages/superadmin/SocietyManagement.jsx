@@ -11,6 +11,7 @@ export default function SocietyManagement() {
   const [showWizard, setShowWizard] = useState(false);
   const [createdCredentials, setCreatedCredentials] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [selectedSocietyDetails, setSelectedSocietyDetails] = useState(null);
 
   useEffect(() => {
     const q = query(collection(db, 'societies'));
@@ -25,6 +26,19 @@ export default function SocietyManagement() {
   const toggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
     await updateDoc(doc(db, 'societies', id), { status: newStatus });
+  };
+
+  const handleUpdatePlan = async (id, newPlan) => {
+    try {
+      const mrrMap = { Trial: 0, Standard: 5000, Premium: 10000, Enterprise: 25000 };
+      await updateDoc(doc(db, 'societies', id), {
+        plan: newPlan,
+        mrr: mrrMap[newPlan] || 10000
+      });
+      alert(`Updated subscription plan to ${newPlan}!`);
+    } catch (e) {
+      alert('Error updating subscription plan: ' + e.message);
+    }
   };
 
   const handleDeleteSociety = async (id, name) => {
@@ -113,6 +127,13 @@ Portal Link: http://localhost:3000/login`;
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <button
                           className="btn btn-outline"
+                          style={{ padding: '4px 8px', fontSize: '12px' }}
+                          onClick={() => setSelectedSocietyDetails(soc)}
+                        >
+                          Details
+                        </button>
+                        <button
+                          className="btn btn-outline"
                           style={{ padding: '4px 8px', fontSize: '12px', color: soc.status === 'Suspended' ? 'var(--secondary)' : 'var(--warning)' }}
                           onClick={() => toggleStatus(soc.id, soc.status)}
                         >
@@ -179,6 +200,61 @@ Portal Link: http://localhost:3000/login`;
               >
                 Done
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal: Full Society Details & Plan Management */}
+      {selectedSocietyDetails && (
+        <div className="modal-overlay" onClick={() => setSelectedSocietyDetails(null)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '580px' }}>
+            <div className="modal-header">
+              <h3 style={{ margin: 0 }}>Society Profile & Plan Management</h3>
+              <button className="btn-icon" onClick={() => setSelectedSocietyDetails(null)}><XCircle size={20} /></button>
+            </div>
+
+            <div style={{ padding: '16px 0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontSize: '18px', fontWeight: 800, color: 'var(--text-primary)' }}>{selectedSocietyDetails.name}</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>ID: <code>{selectedSocietyDetails.id}</code> • Code: <strong>{selectedSocietyDetails.code}</strong></div>
+                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>City: {selectedSocietyDetails.city || 'Mumbai'} • Type: {selectedSocietyDetails.type || 'Apartment'}</div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '13px' }}>
+                <div><strong>President:</strong> {selectedSocietyDetails.president || 'Management Committee'}</div>
+                <div><strong>Admin Email:</strong> {selectedSocietyDetails.adminEmail || 'admin@society.com'}</div>
+                <div><strong>Total Flats:</strong> {selectedSocietyDetails.flats || 100}</div>
+                <div><strong>Monthly Revenue:</strong> ₹{Number(selectedSocietyDetails.mrr || 10000).toLocaleString()}</div>
+              </div>
+
+              {/* Upgrade / Downgrade Subscription Plan */}
+              <div style={{ background: 'var(--bg-color)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', marginBottom: '8px' }}>
+                  CHANGE SUBSCRIPTION PLAN
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {['Trial', 'Standard', 'Premium', 'Enterprise'].map(plan => (
+                    <button
+                      key={plan}
+                      className={`btn ${selectedSocietyDetails.plan === plan ? 'btn-primary' : 'btn-outline'}`}
+                      style={{ flex: 1, padding: '6px', fontSize: '11px', fontWeight: 700 }}
+                      onClick={() => {
+                        handleUpdatePlan(selectedSocietyDetails.id, plan);
+                        setSelectedSocietyDetails(prev => ({ ...prev, plan: plan }));
+                      }}
+                    >
+                      {plan}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px' }}>
+                <button className="btn btn-primary" onClick={() => setSelectedSocietyDetails(null)}>
+                  Close Profile
+                </button>
+              </div>
             </div>
           </div>
         </div>
