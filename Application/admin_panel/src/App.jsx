@@ -32,13 +32,16 @@ import SuperAdminLogin from './pages/superadmin/SuperAdminLogin'
 
 import './index.css'
 
-// Protected Route: Redirect to /login if not authenticated
-function ProtectedRoute({ user, children, loginPath = '/login' }) {
+// Protected Route: Redirect to login if not authenticated or lacks required role
+function ProtectedRoute({ user, children, loginPath = '/login', requireSuperAdmin = false }) {
   if (user === undefined) {
     return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontSize: '16px', color: '#6B7280' }}>Loading...</div>;
   }
   if (!user) {
     return <Navigate to={loginPath} replace />;
+  }
+  if (requireSuperAdmin && user.email?.toLowerCase() !== 'mohammedfaisalhasan@gmail.com') {
+    return <Navigate to="/super-admin/login" replace />;
   }
   return children;
 }
@@ -85,7 +88,7 @@ function App() {
 
         {/* Super Admin Routes (Protected) */}
         <Route path="/super-admin" element={
-          <ProtectedRoute user={user} loginPath="/super-admin/login">
+          <ProtectedRoute user={user} loginPath="/super-admin/login" requireSuperAdmin={true}>
             <SuperAdminLayout />
           </ProtectedRoute>
         }>

@@ -11,7 +11,7 @@ import Breadcrumb from './Breadcrumb';
 import { onAuthStateChanged } from 'firebase/auth';
 
 export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSuperAdmin = false }) {
-  const defaultEmail = isSuperAdmin ? 'superadmin@societysphere.com' : 'admin@societysphere.com';
+  const defaultEmail = isSuperAdmin ? 'mohammedfaisalhasan@gmail.com' : 'admin@society.com';
   const [userEmail, setUserEmail] = useState(auth.currentUser?.email || defaultEmail);
   const [societyInfo, setSocietyInfo] = useState({ code: isSuperAdmin ? 'HQ-GLOBAL' : 'SOC-001', plan: 'ENTERPRISE' });
 
