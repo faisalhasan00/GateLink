@@ -546,44 +546,44 @@ export default function Staff() {
       {isAddModalOpen && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.55)', zIndex: 1000,
+          backgroundColor: 'rgba(0, 0, 0, 0.65)', backdropFilter: 'blur(4px)', zIndex: 1000,
           display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
         }}>
-          <div className="card" style={{ width: '100%', maxWidth: '560px', borderRadius: '16px' }}>
-            <div className="card-header">
-              <h3 className="card-title">{editingStaff ? 'Edit Staff Profile' : 'Onboard New Staff Member'}</h3>
+          <div className="card" style={{ width: '100%', maxWidth: '560px', borderRadius: '16px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+            <div className="card-header" style={{ margin: '-24px -24px 20px -24px', padding: '16px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 className="card-title" style={{ fontSize: '18px', fontWeight: 800 }}>{editingStaff ? 'Edit Staff Profile' : 'Onboard New Staff Member'}</h3>
               <button className="btn-icon" onClick={() => setIsAddModalOpen(false)}><X size={20} /></button>
             </div>
 
-            <form onSubmit={handleAddOrEditStaff} style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '12px' }}>
+            <form onSubmit={handleAddOrEditStaff} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Full Name *</label>
-                <input required type="text" placeholder="e.g. Rajesh Kumar" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px' }} />
+                <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Full Name *</label>
+                <input required type="text" placeholder="e.g. Rajesh Kumar" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }} />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Mobile Phone *</label>
-                  <input required type="tel" placeholder="+91 98765 43210" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px' }} />
+                  <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Mobile Phone *</label>
+                  <input required type="tel" placeholder="+91 98765 43210" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }} />
                 </div>
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Email Address</label>
-                  <input type="email" placeholder="staff@society.com" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px' }} />
+                  <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Email Address</label>
+                  <input type="email" placeholder="staff@society.com" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }} />
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Department *</label>
-                  <select className="form-select" value={formData.department} onChange={e => setFormData({ ...formData, department: e.target.value })} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', fontSize: '13px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Department *</label>
+                  <select className="form-select" value={formData.department} onChange={e => setFormData({ ...formData, department: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }}>
                     {DEPARTMENTS.map(d => (
                       <option key={d} value={d}>{d}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Assigned Role *</label>
-                  <select className="form-select" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', fontSize: '13px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Assigned Role *</label>
+                  <select className="form-select" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }}>
                     {PREDEFINED_ROLES.map(r => (
                       <option key={r} value={r}>{r}</option>
                     ))}
@@ -594,25 +594,25 @@ export default function Staff() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Assigned Gate / Block</label>
-                  <input type="text" placeholder="Gate 1 — Main Entry" value={formData.assignedGate} onChange={e => setFormData({ ...formData, assignedGate: e.target.value })} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px' }} />
+                  <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Assigned Gate / Block</label>
+                  <input type="text" placeholder="Gate 1 — Main Entry" value={formData.assignedGate} onChange={e => setFormData({ ...formData, assignedGate: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }} />
                 </div>
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Joining Date</label>
-                  <input type="date" value={formData.joiningDate} onChange={e => setFormData({ ...formData, joiningDate: e.target.value })} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px' }} />
+                  <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Joining Date</label>
+                  <input type="date" value={formData.joiningDate} onChange={e => setFormData({ ...formData, joiningDate: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }} />
                 </div>
               </div>
 
               <div>
-                <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Emergency Contact Phone</label>
-                <input type="tel" placeholder="+91 91234 56789" value={formData.emergencyContact} onChange={e => setFormData({ ...formData, emergencyContact: e.target.value })} style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px' }} />
+                <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Emergency Contact Phone</label>
+                <input type="tel" placeholder="+91 91234 56789" value={formData.emergencyContact} onChange={e => setFormData({ ...formData, emergencyContact: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }} />
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-                <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setIsAddModalOpen(false)} disabled={submitting}>Cancel</button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={submitting}>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '12px', paddingTop: '16px', borderTop: '1px solid var(--border-color)' }}>
+                <button type="button" className="btn btn-outline" style={{ flex: 1, padding: '10px' }} onClick={() => setIsAddModalOpen(false)} disabled={submitting}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: '10px' }} disabled={submitting}>
                   {submitting ? 'Saving...' : editingStaff ? 'Update Staff Record' : 'Complete Onboarding'}
                 </button>
               </div>
@@ -625,40 +625,40 @@ export default function Staff() {
       {isRoleModalOpen && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.65)', zIndex: 1000,
+          backgroundColor: 'rgba(0, 0, 0, 0.65)', backdropFilter: 'blur(4px)', zIndex: 1000,
           display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
         }}>
-          <div className="card" style={{ width: '100%', maxWidth: '680px', maxHeight: '88vh', overflowY: 'auto', borderRadius: '16px' }}>
-            <div className="card-header">
-              <h3 className="card-title">RBAC Role & Permission Matrix</h3>
+          <div className="card" style={{ width: '100%', maxWidth: '680px', maxHeight: '88vh', overflowY: 'auto', borderRadius: '16px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)' }}>
+            <div className="card-header" style={{ margin: '-24px -24px 20px -24px', padding: '16px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 className="card-title" style={{ fontSize: '18px', fontWeight: 800 }}>RBAC Role & Permission Matrix</h3>
               <button className="btn-icon" onClick={() => setIsRoleModalOpen(false)}><X size={20} /></button>
             </div>
 
-            <form onSubmit={handleSaveRole} style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '12px' }}>
+            <form onSubmit={handleSaveRole} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div>
-                <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '4px' }}>New Custom Role Name *</label>
+                <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '6px' }}>New Custom Role Name *</label>
                 <input 
                   required 
                   type="text" 
                   placeholder="e.g. Senior Security Supervisor"
                   value={roleFormData.roleName}
                   onChange={e => setRoleFormData({ ...roleFormData, roleName: e.target.value })}
-                  style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px' }}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }}
                 />
               </div>
 
               {/* Module Action Permission Matrix */}
-              <div style={{ background: 'var(--bg-color)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
-                <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', marginBottom: '12px' }}>MODULE ACTION PERMISSIONS</div>
+              <div style={{ background: 'var(--bg-color)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', marginBottom: '12px', letterSpacing: '0.5px' }}>MODULE ACTION PERMISSIONS</div>
                 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {MODULE_PERMISSIONS.map(mod => {
                     const selectedActions = roleFormData.permissions[mod.id] || [];
 
                     return (
-                      <div key={mod.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 12px', background: '#ffffff', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                      <div key={mod.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: '#ffffff', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                         <span style={{ fontSize: '13px', fontWeight: 700 }}>{mod.label}</span>
-                        <div style={{ display: 'flex', gap: '6px' }}>
+                        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                           {mod.actions.map(act => {
                             const isChecked = selectedActions.includes(act);
                             return (
@@ -667,14 +667,15 @@ export default function Staff() {
                                 type="button"
                                 onClick={() => togglePermissionAction(mod.id, act)}
                                 style={{
-                                  padding: '4px 8px',
+                                  padding: '4px 10px',
                                   borderRadius: '6px',
                                   fontSize: '11px',
                                   fontWeight: 700,
                                   border: isChecked ? '1px solid var(--primary)' : '1px solid var(--border-color)',
                                   backgroundColor: isChecked ? 'var(--primary-light)' : 'transparent',
                                   color: isChecked ? 'var(--primary)' : 'var(--text-secondary)',
-                                  cursor: 'pointer'
+                                  cursor: 'pointer',
+                                  transition: 'all 0.15s ease'
                                 }}
                               >
                                 {isChecked && <Check size={10} style={{ display: 'inline', marginRight: 2 }} />} {act}
@@ -688,9 +689,9 @@ export default function Staff() {
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', marginTop: '12px' }}>
-                <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setIsRoleModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={submitting}>
+              <div style={{ display: 'flex', gap: '12px', marginTop: '12px', paddingTop: '16px', borderTop: '1px solid var(--border-color)' }}>
+                <button type="button" className="btn btn-outline" style={{ flex: 1, padding: '10px' }} onClick={() => setIsRoleModalOpen(false)}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1, padding: '10px' }} disabled={submitting}>
                   {submitting ? 'Creating...' : 'Save Custom Role & Matrix'}
                 </button>
               </div>
@@ -703,38 +704,38 @@ export default function Staff() {
       {selectedStaffProfile && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.65)', zIndex: 1000,
+          backgroundColor: 'rgba(0, 0, 0, 0.65)', backdropFilter: 'blur(4px)', zIndex: 1000,
           display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px'
         }}>
-          <div className="card" style={{ width: '100%', maxWidth: '520px', borderRadius: '16px' }}>
-            <div className="card-header">
-              <h3 className="card-title">Staff Profile & Audit Trail</h3>
+          <div className="card" style={{ width: '100%', maxWidth: '520px', borderRadius: '16px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2)' }}>
+            <div className="card-header" style={{ margin: '-24px -24px 20px -24px', padding: '16px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 className="card-title" style={{ fontSize: '18px', fontWeight: 800 }}>Staff Profile & Audit Trail</h3>
               <button className="btn-icon" onClick={() => setSelectedStaffProfile(null)}><X size={20} /></button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginTop: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--primary-light)', padding: '14px', borderRadius: '10px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px', background: 'var(--primary-light)', padding: '16px', borderRadius: '12px' }}>
                 <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'var(--primary)', color: '#ffffff', fontSize: '20px', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {selectedStaffProfile.name.charAt(0)}
                 </div>
                 <div>
                   <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 800 }}>{selectedStaffProfile.name}</h4>
-                  <div style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 700 }}>
+                  <div style={{ fontSize: '12px', color: 'var(--primary)', fontWeight: 700, marginTop: '2px' }}>
                     <code>{selectedStaffProfile.employeeId || 'EMP-2026-001'}</code> • {selectedStaffProfile.role}
                   </div>
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '13px' }}>
-                <div><strong>Department:</strong> {selectedStaffProfile.department}</div>
-                <div><strong>Assigned Gate:</strong> {selectedStaffProfile.assignedGate || 'Gate 1'}</div>
-                <div><strong>Phone:</strong> {selectedStaffProfile.phone}</div>
-                <div><strong>Joining Date:</strong> {selectedStaffProfile.joiningDate || 'Jan 2025'}</div>
-                <div><strong>Status:</strong> <span className={`badge ${selectedStaffProfile.status === 'Active' ? 'success' : 'danger'}`}>{selectedStaffProfile.status}</span></div>
-                <div><strong>Emergency Contact:</strong> {selectedStaffProfile.emergencyContact || 'N/A'}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', fontSize: '13px', background: 'var(--bg-color)', padding: '16px', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
+                <div><span style={{ color: 'var(--text-secondary)' }}>Department:</span> <br/><strong>{selectedStaffProfile.department}</strong></div>
+                <div><span style={{ color: 'var(--text-secondary)' }}>Assigned Gate:</span> <br/><strong>{selectedStaffProfile.assignedGate || 'Gate 1'}</strong></div>
+                <div><span style={{ color: 'var(--text-secondary)' }}>Phone:</span> <br/><strong>{selectedStaffProfile.phone}</strong></div>
+                <div><span style={{ color: 'var(--text-secondary)' }}>Joining Date:</span> <br/><strong>{selectedStaffProfile.joiningDate || 'Jan 2025'}</strong></div>
+                <div><span style={{ color: 'var(--text-secondary)' }}>Status:</span> <br/><span className={`badge ${selectedStaffProfile.status === 'Active' ? 'success' : 'danger'}`}>{selectedStaffProfile.status}</span></div>
+                <div><span style={{ color: 'var(--text-secondary)' }}>Emergency Contact:</span> <br/><strong>{selectedStaffProfile.emergencyContact || 'N/A'}</strong></div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px', paddingTop: '16px', borderTop: '1px solid var(--border-color)' }}>
                 <button className="btn btn-primary" onClick={() => setSelectedStaffProfile(null)}>Close Profile</button>
               </div>
             </div>
