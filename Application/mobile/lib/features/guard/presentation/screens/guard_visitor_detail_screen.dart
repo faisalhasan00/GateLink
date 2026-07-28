@@ -136,6 +136,7 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                       _DetailRow(label: 'Logged At', value: createdDate.isEmpty ? 'Just now' : createdDate),
                       if (entryTime != null) _DetailRow(label: 'Entry Timestamp', value: entryTime),
                       if (exitTime != null) _DetailRow(label: 'Exit Timestamp', value: exitTime),
+                      if (data['durationString'] != null) _DetailRow(label: 'Visit Duration', value: data['durationString'] as String),
                     ],
                   ),
                 ),

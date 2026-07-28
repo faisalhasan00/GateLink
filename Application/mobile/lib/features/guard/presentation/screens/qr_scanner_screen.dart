@@ -1,17 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/providers/firebase_providers.dart';
+import '../../../../core/services/firestore_service.dart';
 
-class QrScannerScreen extends StatefulWidget {
+class QrScannerScreen extends ConsumerStatefulWidget {
   const QrScannerScreen({super.key});
 
   @override
-  State<QrScannerScreen> createState() => _QrScannerScreenState();
+  ConsumerState<QrScannerScreen> createState() => _QrScannerScreenState();
 }
 
-class _QrScannerScreenState extends State<QrScannerScreen> {
+class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
   final MobileScannerController _controller = MobileScannerController();
   bool _isProcessing = false;
   bool _torchOn = false;
@@ -27,9 +31,10 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
   void _onDetect(BarcodeCapture capture) {
     if (_isProcessing) return;
     for (final barcode in capture.barcodes) {
-      if (barcode.rawValue != null) {
+      if (barcode.rawValue != null && barcode.rawValue!.isNotEmpty) {
         setState(() => _isProcessing = true);
-        _lookupAndShowModal(barcode.rawValue!);
+        HapticFeedback.vibrate();
+        _processQrCode(barcode.rawValue!);
         break;
       }
     }
@@ -40,72 +45,105 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
     setState(() => _torchOn = !_torchOn);
   }
 
-  /// Looks up QR code in Firestore visitors (qrCode field) or uses it as docId
-  Future<void> _lookupAndShowModal(String code) async {
+  void _switchCamera() {
+    _controller.switchCamera();
+  }
+
+  /// Processes QR code scan with duplicate prevention, expiry check, and validation
+  Future<void> _processQrCode(String code) async {
     try {
-      // Try looking up by qrCode field first
-      final query = await FirebaseFirestore.instance
-          .collection('societies/SOC-001/visitors')
-          .where('qrCode', isEqualTo: code)
-          .limit(1)
-          .get();
-
-      Map<String, dynamic>? visitorData;
-      String? docId;
-
-      if (query.docs.isNotEmpty) {
-        visitorData = query.docs.first.data();
-        docId = query.docs.first.id;
-      } else {
-        // Try as docId directly
-        final doc = await FirebaseFirestore.instance
-            .doc('societies/SOC-001/visitors/$code')
-            .get();
-        if (doc.exists) {
-          visitorData = doc.data();
-          docId = doc.id;
-        }
-      }
+      final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: 'SOC-001');
+      final result = await firestoreService.validateAndProcessQrScan(code);
 
       if (!mounted) return;
 
-      if (visitorData != null && docId != null) {
-        _showValidationModal(code: code, data: visitorData, docId: docId, found: true);
-      } else {
-        _showValidationModal(code: code, data: {}, docId: null, found: false);
-      }
+      final bool isValid = result['valid'] == true;
+      final String reason = result['reason'] as String? ?? 'invalid';
+      final String? docId = result['docId'] as String?;
+      final Map<String, dynamic> data = (result['data'] as Map<String, dynamic>?) ?? {};
+
+      _showValidationModal(
+        code: code,
+        isValid: isValid,
+        reason: reason,
+        docId: docId,
+        data: data,
+        error: result['error'] as String?,
+      );
     } catch (e) {
       if (mounted) {
-        _showValidationModal(code: code, data: {}, docId: null, found: false, error: e.toString());
+        _showValidationModal(
+          code: code,
+          isValid: false,
+          reason: 'error',
+          docId: null,
+          data: {},
+          error: e.toString(),
+        );
       }
     }
   }
 
   Future<void> _allowEntry(String docId) async {
+    final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: 'SOC-001');
+    await firestoreService.updateVisitorStatus(docId, 'inside');
     await FirebaseFirestore.instance.doc('societies/SOC-001/visitors/$docId').update({
-      'status': 'inside',
       'entryTime': DateTime.now().toIso8601String(),
     });
   }
 
   Future<void> _denyEntry(String docId) async {
-    await FirebaseFirestore.instance.doc('societies/SOC-001/visitors/$docId').update({
-      'status': 'denied',
-    });
+    final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: 'SOC-001');
+    await firestoreService.updateVisitorStatus(docId, 'denied');
+  }
+
+  Future<void> _markExit(String docId) async {
+    final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: 'SOC-001');
+    await firestoreService.markVisitorExit(docId);
   }
 
   void _showValidationModal({
     required String code,
-    required Map<String, dynamic> data,
+    required bool isValid,
+    required String reason,
     required String? docId,
-    required bool found,
+    required Map<String, dynamic> data,
     String? error,
   }) {
+    final isAlreadyUsed = reason == 'already_used';
+    final isExpired = reason == 'expired';
+    final isDenied = reason == 'denied';
+
+    String headerTitle = 'PASS VERIFIED ✅';
+    String headerSub = 'Pre-approved visitor pass verified for gate entry.';
+    Color primaryColor = AppColors.success;
+    IconData statusIcon = Icons.verified_rounded;
+
+    if (isAlreadyUsed) {
+      headerTitle = 'ALREADY USED ❌';
+      headerSub = 'This pass has already been used for entry.';
+      primaryColor = AppColors.error;
+      statusIcon = Icons.cancel_rounded;
+      HapticFeedback.heavyImpact();
+    } else if (isExpired) {
+      headerTitle = 'QR CODE EXPIRED ❌';
+      headerSub = 'Pass expiration date & time has passed.';
+      primaryColor = AppColors.error;
+      statusIcon = Icons.timer_off_rounded;
+      HapticFeedback.heavyImpact();
+    } else if (!isValid) {
+      headerTitle = 'INVALID QR CODE ❌';
+      headerSub = error ?? 'QR code is not recognised or corrupted.';
+      primaryColor = AppColors.error;
+      statusIcon = Icons.error_rounded;
+      HapticFeedback.heavyImpact();
+    }
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
+      builder: (ctx) => Container(
         padding: const EdgeInsets.fromLTRB(
           AppSpacing.lg,
           AppSpacing.md,
@@ -119,7 +157,7 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle
+            // Handle bar
             Container(
               width: 40,
               height: 4,
@@ -133,106 +171,136 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
             // Status Icon
             CircleAvatar(
               radius: 32,
-              backgroundColor: found ? AppColors.successSurface : AppColors.errorSurface,
-              child: Icon(
-                found && data['status'] != 'inside' && data['status'] != 'denied' ? Icons.verified_rounded : Icons.cancel_rounded,
-                color: found && data['status'] != 'inside' && data['status'] != 'denied' ? AppColors.success : AppColors.error,
-                size: 36,
-              ),
+              backgroundColor: primaryColor.withValues(alpha: 0.15),
+              child: Icon(statusIcon, color: primaryColor, size: 38),
             ),
             const SizedBox(height: AppSpacing.sm),
+
             Text(
-              found 
-                ? (data['status'] == 'inside' ? 'PASS ALREADY USED ❌' : (data['status'] == 'denied' ? 'PASS DENIED ❌' : 'PASS VERIFIED ✅'))
-                : 'PASS NOT FOUND ❌',
+              headerTitle,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w800,
-                color: found && data['status'] != 'inside' && data['status'] != 'denied' ? AppColors.success : AppColors.error,
+                color: primaryColor,
               ),
             ),
             const SizedBox(height: AppSpacing.xs),
             Text(
-              found 
-                ? (data['status'] == 'inside' ? 'This visitor is already inside.' : (data['status'] == 'denied' ? 'This visitor was denied entry.' : 'Pre-approved visitor pass'))
-                : error ?? 'QR code not recognised',
+              headerSub,
+              textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.md),
             const Divider(),
             const SizedBox(height: AppSpacing.sm),
 
-            // Visitor Details
-            if (found) ...[
+            // Visitor Details Card
+            if (data.isNotEmpty) ...[
               _ModalInfoRow(label: 'Visitor Name', value: data['name'] as String? ?? '-'),
-              _ModalInfoRow(label: 'Visiting Flat', value: data['hostFlat'] as String? ?? '-'),
-              _ModalInfoRow(label: 'Type', value: data['type'] as String? ?? 'Guest'),
-              _ModalInfoRow(
-                label: 'Status',
-                value: (data['status'] as String? ?? 'pending').toUpperCase(),
-              ),
-              _ModalInfoRow(label: 'Pass Code', value: code.length > 16 ? '${code.substring(0, 16)}...' : code),
+              _ModalInfoRow(label: 'Destination Flat', value: data['hostFlat'] as String? ?? '-'),
+              _ModalInfoRow(label: 'Visitor Type', value: data['type'] as String? ?? 'Guest'),
+              _ModalInfoRow(label: 'Current Status', value: (data['status'] as String? ?? 'pending').toUpperCase()),
+              _ModalInfoRow(label: 'Pass Code', value: code.length > 18 ? '${code.substring(0, 18)}...' : code),
             ] else ...[
-              _ModalInfoRow(label: 'Scanned Code', value: code.length > 20 ? '${code.substring(0, 20)}...' : code),
+              _ModalInfoRow(label: 'Scanned Code', value: code.length > 22 ? '${code.substring(0, 22)}...' : code),
             ],
             const SizedBox(height: AppSpacing.lg),
 
             // Action Buttons
             Row(
               children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () async {
-                      // Capture navigator before async gap
-                      final nav = Navigator.of(context);
-                      if (found && docId != null) await _denyEntry(docId);
-                      nav.pop();
-                      setState(() => _isProcessing = false);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                if (isAlreadyUsed && docId != null)
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final nav = Navigator.of(ctx);
+                        final messenger = ScaffoldMessenger.of(context);
+                        await _markExit(docId);
+                        nav.pop();
+                        setState(() => _isProcessing = false);
+                        messenger.showSnackBar(
+                          const SnackBar(
+                            content: Text('✅ Visitor marked as checked out at gate!'),
+                            backgroundColor: AppColors.secondary,
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.exit_to_app_rounded),
+                      label: const Text('MARK VISITOR EXIT'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.secondary,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                      ),
                     ),
-                    child: const Text('Deny Entry'),
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
-                  flex: 2,
-                  child: ElevatedButton.icon(
-                    onPressed: found && docId != null && data['status'] != 'inside' && data['status'] != 'denied'
-                        ? () async {
-                            // Capture messenger and navigator before async gap
-                            final nav = Navigator.of(context);
-                            final messenger = ScaffoldMessenger.of(context);
-                            await _allowEntry(docId);
-                            nav.pop();
-                            setState(() => _isProcessing = false);
-                            messenger.showSnackBar(
-                              const SnackBar(
-                                content: Text('✅ Visitor allowed at Gate 1!'),
-                                backgroundColor: AppColors.success,
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          }
-                        : null,
-                    icon: const Icon(Icons.how_to_reg_rounded),
-                    label: const Text('ALLOW ENTRY'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.success,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                  )
+                else if (isValid && docId != null) ...[
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () async {
+                        final nav = Navigator.of(ctx);
+                        await _denyEntry(docId);
+                        nav.pop();
+                        setState(() => _isProcessing = false);
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                      ),
+                      child: const Text('Deny Entry'),
                     ),
                   ),
-                ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final nav = Navigator.of(ctx);
+                        final messenger = ScaffoldMessenger.of(context);
+                        await _allowEntry(docId);
+                        nav.pop();
+                        setState(() => _isProcessing = false);
+                        messenger.showSnackBar(
+                          const SnackBar(
+                            content: Text('✅ Visitor allowed entry at Gate!'),
+                            backgroundColor: AppColors.success,
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.how_to_reg_rounded),
+                      label: const Text('ALLOW ENTRY'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.success,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                      ),
+                    ),
+                  ),
+                ] else
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(ctx).pop();
+                        setState(() => _isProcessing = false);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.gray400,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                      ),
+                      child: const Text('CLOSE'),
+                    ),
+                  ),
               ],
             ),
           ],
         ),
       ),
-    ).then((_) => setState(() => _isProcessing = false));
+    ).then((_) {
+      if (mounted) setState(() => _isProcessing = false);
+    });
   }
 
   void _showManualEntryDialog() {
@@ -241,12 +309,12 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-        title: const Text('Enter Pass Code', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: const Text('Manual Pass Lookup', style: TextStyle(fontWeight: FontWeight.w700)),
         content: TextField(
           controller: _manualCodeController,
           autofocus: true,
           decoration: InputDecoration(
-            hintText: 'e.g. PASS-8921 or Firestore doc ID',
+            hintText: 'Enter Pass Code or Doc ID',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
           ),
         ),
@@ -258,14 +326,17 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
           ElevatedButton(
             onPressed: () {
               final code = _manualCodeController.text.trim();
-              Navigator.pop(ctx);
               if (code.isNotEmpty) {
+                Navigator.pop(ctx);
                 setState(() => _isProcessing = true);
-                _lookupAndShowModal(code);
+                _processQrCode(code);
               }
             },
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary, foregroundColor: Colors.white),
-            child: const Text('Verify'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.secondary,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Lookup Pass'),
           ),
         ],
       ),
@@ -277,134 +348,84 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        title: const Text('QR Code Scanner'),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: const Text(
-          'Scan Visitor QR Pass',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-        ),
+        elevation: 0,
         actions: [
           IconButton(
-            tooltip: 'Toggle Torch',
-            icon: Icon(
-              _torchOn ? Icons.flash_on_rounded : Icons.flash_off_rounded,
-              color: _torchOn ? Colors.yellow : Colors.white70,
-            ),
+            icon: Icon(_torchOn ? Icons.flash_on_rounded : Icons.flash_off_rounded),
             onPressed: _toggleTorch,
+            tooltip: 'Toggle Flashlight',
           ),
           IconButton(
-            tooltip: 'Flip Camera',
-            icon: const Icon(Icons.cameraswitch_rounded),
-            onPressed: () => _controller.switchCamera(),
+            icon: const Icon(Icons.flip_camera_android_rounded),
+            onPressed: _switchCamera,
+            tooltip: 'Switch Camera',
           ),
         ],
       ),
       body: Stack(
+        alignment: Alignment.center,
         children: [
-          // Full screen camera view
+          // Camera Scanner View
           MobileScanner(
             controller: _controller,
             onDetect: _onDetect,
           ),
 
-          // Dark gradient overlay at top
-          Container(
-            height: 120,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [Colors.black.withValues(alpha: 0.6), Colors.transparent],
-              ),
-            ),
-          ),
-
-          // Scanning Frame Target
-          Center(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: 260,
-                  height: 260,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: AppColors.primary, width: 2.5),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                ),
-                ..._buildCornerMarkers(),
-                if (_isProcessing)
-                  Container(
-                    width: 260,
-                    height: 260,
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Center(
-                      child: CircularProgressIndicator(color: AppColors.success),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-
-          // Instruction label
-          Positioned(
-            bottom: 120,
-            left: 0,
-            right: 0,
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(AppRadius.full),
-                  ),
-                  child: Text(
-                    _isProcessing ? 'QR Code detected! Verifying...' : 'Position visitor QR pass within the frame',
-                    style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Manual Entry Panel at bottom
-          Positioned(
-            bottom: 20,
-            left: 20,
-            right: 20,
+          // Scanner Overlay Frame
+          Positioned.fill(
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
               decoration: BoxDecoration(
-                color: AppColors.secondary.withValues(alpha: 0.9),
-                borderRadius: BorderRadius.circular(AppRadius.xl),
+                color: Colors.black.withValues(alpha: 0.45),
               ),
-              child: Row(
+              child: Stack(
                 children: [
-                  const Icon(Icons.keyboard_rounded, color: Colors.white70, size: 20),
-                  const SizedBox(width: 10),
-                  const Expanded(
-                    child: Text(
-                      "Can't scan? Enter pass code manually",
-                      style: TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                  Center(
+                    child: Container(
+                      width: 260,
+                      height: 260,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: AppColors.primary, width: 3),
+                        borderRadius: BorderRadius.circular(AppRadius.xl),
+                        color: Colors.transparent,
+                      ),
                     ),
-                  ),
-                  ElevatedButton(
-                    onPressed: _showManualEntryDialog,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(90, 32),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-                      textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-                    ),
-                    child: const Text('Enter Code'),
                   ),
                 ],
+              ),
+            ),
+          ),
+
+          // Header Text
+          Positioned(
+            top: 40,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.black70,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                'Align Visitor QR Code within frame',
+                style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+              ),
+            ),
+          ),
+
+          // Manual Entry Button
+          Positioned(
+            bottom: 40,
+            child: ElevatedButton.icon(
+              onPressed: _showManualEntryDialog,
+              icon: const Icon(Icons.keyboard_rounded),
+              label: const Text('Enter Pass Code Manually'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.secondary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.full)),
               ),
             ),
           ),
@@ -412,51 +433,22 @@ class _QrScannerScreenState extends State<QrScannerScreen> {
       ),
     );
   }
-
-  List<Widget> _buildCornerMarkers() {
-    const size = 24.0;
-    const thickness = 3.0;
-    const color = AppColors.primary;
-    const offset = 129.0;
-
-    return [
-      // Top-left
-      Positioned(top: offset - size, left: offset - size,
-        child: Container(width: size, height: thickness, color: color)),
-      Positioned(top: offset - size, left: offset - size,
-        child: Container(width: thickness, height: size, color: color)),
-      // Top-right
-      Positioned(top: offset - size, right: offset - size,
-        child: Container(width: size, height: thickness, color: color)),
-      Positioned(top: offset - size, right: offset - size,
-        child: Container(width: thickness, height: size, color: color)),
-      // Bottom-left
-      Positioned(bottom: offset - size, left: offset - size,
-        child: Container(width: size, height: thickness, color: color)),
-      Positioned(bottom: offset - size, left: offset - size,
-        child: Container(width: thickness, height: size, color: color)),
-      // Bottom-right
-      Positioned(bottom: offset - size, right: offset - size,
-        child: Container(width: size, height: thickness, color: color)),
-      Positioned(bottom: offset - size, right: offset - size,
-        child: Container(width: thickness, height: size, color: color)),
-    ];
-  }
 }
 
 class _ModalInfoRow extends StatelessWidget {
   final String label;
   final String value;
+
   const _ModalInfoRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: const EdgeInsets.only(bottom: 8),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-          const Spacer(),
           Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
         ],
       ),

@@ -157,13 +157,97 @@ class FirestoreService {
   }
 
   Future<void> markVisitorExit(String visitorId) async {
-    await _db
-        .collection('societies/$societyId/visitors')
-        .doc(visitorId)
-        .update({
-      'exitTime': DateTime.now().toIso8601String(),
+    final docRef = _db.collection('societies/$societyId/visitors').doc(visitorId);
+    final doc = await docRef.get();
+    final exitNow = DateTime.now();
+    final exitStr = exitNow.toIso8601String();
+
+    int durationMinutes = 0;
+    String durationString = 'Just left';
+
+    if (doc.exists) {
+      final data = doc.data();
+      final entryStr = data?['entryTime'] as String?;
+      if (entryStr != null && entryStr.isNotEmpty) {
+        try {
+          final entryTime = DateTime.parse(entryStr);
+          final diff = exitNow.difference(entryTime);
+          durationMinutes = diff.inMinutes;
+          final hours = durationMinutes ~/ 60;
+          final mins = durationMinutes % 60;
+          if (hours > 0) {
+            durationString = '$hours Hr${hours > 1 ? "s" : ""} $mins Min${mins != 1 ? "s" : ""}';
+          } else {
+            durationString = '$mins Min${mins != 1 ? "s" : ""}';
+          }
+        } catch (_) {}
+      }
+    }
+
+    await docRef.update({
+      'exitTime': exitStr,
       'status': 'checked_out',
+      'durationMinutes': durationMinutes,
+      'durationString': durationString,
+      'updatedAt': exitStr,
     });
+  }
+
+  /// Processes QR code scan with duplicate prevention, expiration check, and validation
+  Future<Map<String, dynamic>> validateAndProcessQrScan(String code) async {
+    final cleanCode = code.trim();
+    // 1. Look up visitor by qrCode field or docId
+    QuerySnapshot query = await _db
+        .collection('societies/$societyId/visitors')
+        .where('qrCode', isEqualTo: cleanCode)
+        .limit(1)
+        .get();
+
+    DocumentSnapshot? targetDoc;
+    if (query.docs.isNotEmpty) {
+      targetDoc = query.docs.first;
+    } else {
+      final doc = await _db.doc('societies/$societyId/visitors/$cleanCode').get();
+      if (doc.exists) targetDoc = doc;
+    }
+
+    if (targetDoc == null || !targetDoc.exists) {
+      return {'valid': false, 'reason': 'invalid', 'error': 'Invalid QR Code'};
+    }
+
+    final data = targetDoc.data() as Map<String, dynamic>;
+    final status = data['status'] as String? ?? 'pending';
+    final expiresAtStr = data['expiresAt'] as String?;
+
+    // 2. Expiration Check
+    if (expiresAtStr != null && expiresAtStr.isNotEmpty) {
+      try {
+        final exp = DateTime.parse(expiresAtStr);
+        if (DateTime.now().isAfter(exp)) {
+          return {'valid': false, 'reason': 'expired', 'docId': targetDoc.id, 'data': data, 'error': 'QR Code Expired'};
+        }
+      } catch (_) {}
+    }
+
+    // 3. Duplicate Prevention Check
+    if (status == 'inside') {
+      return {'valid': false, 'reason': 'already_used', 'docId': targetDoc.id, 'data': data, 'error': 'Pass Already Used'};
+    }
+
+    if (status == 'denied' || status == 'rejected') {
+      return {'valid': false, 'reason': 'denied', 'docId': targetDoc.id, 'data': data, 'error': 'Visitor Denied Entry'};
+    }
+
+    if (status == 'checked_out' || status == 'left') {
+      return {'valid': false, 'reason': 'checked_out', 'docId': targetDoc.id, 'data': data, 'error': 'Visitor Already Checked Out'};
+    }
+
+    return {
+      'valid': true,
+      'reason': 'verified',
+      'docId': targetDoc.id,
+      'data': data,
+    };
   }
 
   Future<void> updateVisitorStatus(String visitorId, String status) async {

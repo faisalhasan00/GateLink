@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/providers/firebase_providers.dart';
+import '../../../../core/services/firestore_service.dart';
 
 class VehicleLogScreen extends StatefulWidget {
   const VehicleLogScreen({super.key});
@@ -23,10 +25,8 @@ class _VehicleLogScreenState extends State<VehicleLogScreen> {
 
   Future<void> _markVehicleExited(String docId) async {
     try {
-      await FirebaseFirestore.instance.doc('societies/SOC-001/visitors/$docId').update({
-        'status': 'left',
-        'exitTime': DateTime.now().toIso8601String(),
-      });
+      final firestoreService = FirestoreService(societyId: 'SOC-001');
+      await firestoreService.markVisitorExit(docId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -34,7 +34,7 @@ class _VehicleLogScreenState extends State<VehicleLogScreen> {
               children: [
                 Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
                 SizedBox(width: 8),
-                Text('Vehicle marked as exited from gate!'),
+                Text('Visitor / Vehicle marked as checked out from gate!'),
               ],
             ),
             backgroundColor: AppColors.success,
