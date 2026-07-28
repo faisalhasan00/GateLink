@@ -197,6 +197,13 @@ class FirestoreService {
         .snapshots();
   }
 
+  Stream<DocumentSnapshot> complaintDetailStream(String complaintId) {
+    return _db
+        .collection('societies/$societyId/complaints')
+        .doc(complaintId)
+        .snapshots();
+  }
+
   Future<String> raiseComplaint({
     required String title,
     required String description,
@@ -207,17 +214,20 @@ class FirestoreService {
     String? priority,
     String? photoUrl,
   }) async {
+    final ticketNum = 'CMP-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
     final docRef = await _db.collection('societies/$societyId/complaints').add({
+      'ticketNumber': ticketNum,
       'title': title,
       'description': description,
       'category': category,
       'status': 'Open',
       'raisedBy': uid,
-      'block': block,
-      'floor': floor,
+      'block': block ?? '',
+      'floor': floor ?? '',
       'priority': priority ?? 'medium',
       'photoUrl': photoUrl,
       'createdAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
     });
     return docRef.id;
   }
@@ -382,6 +392,49 @@ class FirestoreService {
     return _db
         .collection('societies/$societyId/documents')
         .snapshots();
+  }
+
+  Future<void> seedDocumentsIfEmpty() async {
+    final snap = await _db.collection('societies/$societyId/documents').limit(1).get();
+    if (snap.docs.isEmpty) {
+      final batch = _db.batch();
+      final docs = [
+        {
+          'title': 'Society By-Laws 2026',
+          'category': 'Rules',
+          'size': '2.4 MB',
+          'url': 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+          'uploadedAt': DateTime.now().toIso8601String(),
+        },
+        {
+          'title': 'Financial Audit Report FY25-26',
+          'category': 'Financial',
+          'size': '4.1 MB',
+          'url': 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+          'uploadedAt': DateTime.now().toIso8601String(),
+        },
+        {
+          'title': 'AGM Minutes - July 2026',
+          'category': 'Compliance',
+          'size': '1.8 MB',
+          'url': 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+          'uploadedAt': DateTime.now().toIso8601String(),
+        },
+        {
+          'title': 'Fire Safety & Evacuation Plan',
+          'category': 'Rules',
+          'size': '3.2 MB',
+          'url': 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+          'uploadedAt': DateTime.now().toIso8601String(),
+        },
+      ];
+
+      for (final d in docs) {
+        final ref = _db.collection('societies/$societyId/documents').doc();
+        batch.set(ref, d);
+      }
+      await batch.commit();
+    }
   }
 
   // ── VISITOR INVITES ──────────────────────────────────────────────────────

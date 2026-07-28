@@ -242,3 +242,66 @@ exports.notifyResidentOnPaymentSuccess = onDocumentUpdated(
     }
   }
 );
+
+/**
+ * Triggers when a complaint document is updated (e.g. status changed, comment added, staff assigned).
+ * Notifies the resident via FCM push and in-app notification.
+ */
+exports.notifyResidentOnComplaintUpdate = onDocumentUpdated(
+  "societies/{societyId}/complaints/{complaintId}",
+  async (event) => {
+    const beforeData = event.data.before.data();
+    const afterData = event.data.after.data();
+    const { societyId, complaintId } = event.params;
+
+    if (beforeData.status === afterData.status && beforeData.assignedTo === afterData.assignedTo) return;
+
+    console.log(`Complaint ${complaintId} updated: status ${beforeData.status} -> ${afterData.status}`);
+
+    const db = getFirestore();
+    const uid = afterData.raisedBy;
+    const title = afterData.title || "Complaint";
+    const newStatus = afterData.status || "Updated";
+
+    // 1. Audit Log Entry
+    await db.collection(`societies/${societyId}/audit_logs`).add({
+      action: `COMPLAINT_${newStatus.toUpperCase()}`,
+      targetType: "complaint",
+      targetId: complaintId,
+      oldStatus: beforeData.status,
+      newStatus: newStatus,
+      timestamp: FieldValue.serverTimestamp(),
+    });
+
+    if (!uid) return;
+
+    // 2. In-App Notification
+    const notifRef = db.collection(`societies/${societyId}/users/${uid}/notifications`).doc();
+    await notifRef.set({
+      title: `🛠️ Complaint ${newStatus}`,
+      body: `Your complaint "${title}" status has been updated to ${newStatus}.`,
+      type: "complaint_update",
+      complaintId: complaintId,
+      createdAt: FieldValue.serverTimestamp(),
+      read: false,
+    });
+
+    // 3. FCM Push Notification
+    const userDoc = await db.doc(`societies/${societyId}/users/${uid}`).get();
+    if (userDoc.exists && userDoc.data().fcmToken) {
+      const fcmToken = userDoc.data().fcmToken;
+      const messaging = getMessaging();
+      await messaging.send({
+        token: fcmToken,
+        notification: {
+          title: `🛠️ Complaint ${newStatus}`,
+          body: `"${title}" is now ${newStatus}`,
+        },
+        data: {
+          type: "complaint_update",
+          complaintId: complaintId,
+        },
+      }).catch((err) => console.error("FCM Error:", err));
+    }
+  }
+);

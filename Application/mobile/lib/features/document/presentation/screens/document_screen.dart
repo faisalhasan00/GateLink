@@ -94,13 +94,24 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                       }).toList();
 
                 if (filtered.isEmpty) {
-                  return const Center(
+                  return Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.folder_off_rounded, size: 48, color: AppColors.gray300),
-                        SizedBox(height: 12),
-                        Text('No documents in this category', style: TextStyle(color: AppColors.textSecondary)),
+                        const Icon(Icons.folder_off_rounded, size: 48, color: AppColors.gray300),
+                        const SizedBox(height: 12),
+                        const Text('No documents found', style: TextStyle(color: AppColors.textSecondary)),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: () async {
+                            final svc = ref.read(firestoreServiceProvider);
+                            if (svc != null) {
+                              await svc.seedDocumentsIfEmpty();
+                            }
+                          },
+                          icon: const Icon(Icons.download_rounded),
+                          label: const Text('Load Society Documents'),
+                        ),
                       ],
                     ),
                   );
