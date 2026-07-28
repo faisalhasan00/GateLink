@@ -15,12 +15,14 @@ import Documents from './pages/Documents'
 import Parking from './pages/Parking'
 import Notices from './pages/Notices'
 import AdminLogin from './pages/AdminLogin'
+import AdminProfile from './pages/AdminProfile'
 
 import SuperAdminLayout from './components/SuperAdminLayout'
 import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard'
 import SocietyManagement from './pages/superadmin/SocietyManagement'
 import CrmLeads from './pages/superadmin/CrmLeads'
 import AdCampaigns from './pages/superadmin/AdCampaigns'
+import SuperAdminProfile from './pages/superadmin/SuperAdminProfile'
 import SuperAdminLogin from './pages/superadmin/SuperAdminLogin'
 
 import './index.css'
@@ -68,6 +70,7 @@ function App() {
           <Route path="documents" element={<Documents />} />
           <Route path="parking" element={<Parking />} />
           <Route path="notices" element={<Notices />} />
+          <Route path="profile" element={<AdminProfile />} />
         </Route>
 
         {/* Super Admin Routes (Protected) */}
@@ -80,6 +83,7 @@ function App() {
           <Route path="societies" element={<SocietyManagement />} />
           <Route path="crm" element={<CrmLeads />} />
           <Route path="ads" element={<AdCampaigns />} />
+          <Route path="profile" element={<SuperAdminProfile />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

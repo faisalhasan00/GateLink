@@ -133,7 +133,31 @@ class GuardProfileScreen extends ConsumerWidget {
                 _DetailRow(label: 'Joining Date', value: joiningDate),
               ],
             ),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.md),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
+                      title: const Text('Change Password'),
+                      content: const Text('Security Guards must contact the Society Admin or use your registered email reset link to change passwords.'),
+                      actions: [
+                        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
+                      ],
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.lock_reset_rounded),
+                label: const Text('Change Guard Account Password', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
 
             // Shift Handover Button
             SizedBox(

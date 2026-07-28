@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../../../../core/providers/auth_providers.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/providers/auth_providers.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -14,144 +16,96 @@ class EditProfileScreen extends ConsumerStatefulWidget {
 
 class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
-  final _flatController = TextEditingController();
-  final _towerController = TextEditingController();
-  bool _isLoading = false;
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
+  late TextEditingController _dobController;
+  String _selectedGender = 'Male';
+  bool _saving = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadData());
-  }
-
-  void _loadData() {
     final profile = ref.read(userProfileProvider).value;
-    if (profile != null) {
-      _nameController.text = profile['name'] ?? '';
-      _emailController.text = profile['email'] ?? '';
-      _phoneController.text = profile['phone'] ?? '';
-      _flatController.text = profile['flatNumber'] ?? '';
-      _towerController.text = profile['tower'] ?? 'Tower A';
-      setState(() {});
-    }
+    _nameController = TextEditingController(text: profile?['name'] ?? '');
+    _emailController = TextEditingController(text: profile?['email'] ?? '');
+    _dobController = TextEditingController(text: profile?['dob'] ?? '12 Oct 1992');
+    _selectedGender = profile?['gender'] ?? 'Male';
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
-    _phoneController.dispose();
-    _flatController.dispose();
-    _towerController.dispose();
+    _dobController.dispose();
     super.dispose();
   }
 
-  Future<void> _save() async {
+  Future<void> _handleSave() async {
     if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
 
+    setState(() => _saving = true);
     try {
-      final user = ref.read(currentUserProvider);
+      final user = FirebaseAuth.instance.currentUser;
+      final profile = ref.read(userProfileProvider).value;
+      final societyId = profile?['societyId'] ?? 'SOC-001';
+
       if (user != null) {
         await FirebaseFirestore.instance
-            .doc('societies/SOC-001/users/${user.uid}')
-            .update({
+            .collection('societies/$societyId/users')
+            .doc(user.uid)
+            .set({
           'name': _nameController.text.trim(),
           'email': _emailController.text.trim(),
+          'gender': _selectedGender,
+          'dob': _dobController.text.trim(),
+          'updatedAt': DateTime.now().toIso8601String(),
+        }, SetOptions(merge: true));
+
+        // Add Activity Log
+        await FirebaseFirestore.instance
+            .collection('societies/$societyId/users/${user.uid}/activity_logs')
+            .add({
+          'action': 'Profile Updated',
+          'description': 'Updated name, email, gender, and date of birth details.',
+          'timestamp': DateTime.now().toIso8601String(),
         });
-        
-        // Refresh the provider so the ProfileScreen gets the updated data
-        ref.invalidate(userProfileProvider);
       }
 
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Row(children: [
-            Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
-            SizedBox(width: 8),
-            Text('Profile updated successfully!'),
-          ]),
-          backgroundColor: AppColors.success,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        ),
-      );
-      Navigator.pop(context);
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating profile: $e'), backgroundColor: AppColors.error),
-      );
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Widget _field({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    bool enabled = true,
-    TextInputType keyboardType = TextInputType.text,
-    String? helperText,
-    String? Function(String?)? validator,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-        const SizedBox(height: 6),
-        TextFormField(
-          controller: controller,
-          enabled: enabled,
-          keyboardType: keyboardType,
-          textInputAction: TextInputAction.next,
-          validator: validator,
-          decoration: InputDecoration(
-            hintText: label,
-            helperText: helperText,
-            prefixIcon: Icon(icon, size: 20),
-            filled: true,
-            fillColor: enabled ? Colors.white : AppColors.gray100,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              borderSide: const BorderSide(color: AppColors.border),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              borderSide: const BorderSide(color: AppColors.border),
-            ),
-            disabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppRadius.lg),
-              borderSide: const BorderSide(color: AppColors.border),
-            ),
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Profile updated successfully!'),
+            backgroundColor: AppColors.success,
           ),
-        ),
-      ],
-    );
+        );
+        context.pop();
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error updating profile: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final profile = ref.watch(userProfileProvider).value;
+    final phone = profile?['phone'] ?? 'No Phone';
+    final societyName = profile?['societyName'] ?? 'Greenwood Heights';
+    final flatNumber = profile?['flatNumber'] ?? 'A-402';
+
     return Scaffold(
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Edit Profile'),
-        backgroundColor: Colors.white,
-        foregroundColor: AppColors.textPrimary,
-        elevation: 0,
-        surfaceTintColor: Colors.white,
-        actions: [
-          TextButton(
-            onPressed: _isLoading ? null : _save,
-            child: const Text('Save', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
-          ),
-        ],
       ),
-      backgroundColor: AppColors.background,
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.pagePadding),
         child: Form(
@@ -159,150 +113,175 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Avatar Section
-              Center(
-                child: Column(
-                  children: [
-                    Stack(
-                      children: [
-                        Container(
-                          width: 96,
-                          height: 96,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [AppColors.primary, AppColors.primaryDark],
-                            ),
-                          ),
-                          child: Center(
-                            child: Text(
-                              _nameController.text.isNotEmpty ? _nameController.text[0].toUpperCase() : '?',
-                              style: const TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            width: 32,
-                            height: 32,
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              shape: BoxShape.circle,
-                              border: Border.all(color: Colors.white, width: 2),
-                            ),
-                            child: const Icon(Icons.camera_alt_rounded, size: 16, color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    const Text('Tap camera to change photo', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-
-              // Personal Info Section
-              const Text('PERSONAL INFO', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary, letterSpacing: 1.2)),
-              const SizedBox(height: AppSpacing.sm),
+              // Read-Only Banner Notice
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppRadius.xl),
-                  border: Border.all(color: AppColors.border),
+                  color: AppColors.primarySurface,
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
                 ),
-                child: Column(
+                child: const Row(
                   children: [
-                    _field(
-                      controller: _nameController,
-                      label: 'Full Name',
-                      icon: Icons.person_outline_rounded,
-                      validator: (v) => v == null || v.isEmpty ? 'Name is required' : null,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    _field(
-                      controller: _emailController,
-                      label: 'Email Address',
-                      icon: Icons.email_outlined,
-                      keyboardType: TextInputType.emailAddress,
-                      validator: (v) => v == null || !v.contains('@') ? 'Enter a valid email' : null,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    _field(
-                      controller: _phoneController,
-                      label: 'Mobile Number',
-                      icon: Icons.phone_outlined,
-                      enabled: false,
-                      keyboardType: TextInputType.phone,
-                      helperText: 'Contact admin to change mobile number',
+                    Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 20),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        'Mobile number, society, and flat assignment are read-only and verified by society administration.',
+                        style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.3),
+                      ),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Residence Section
-              const Text('RESIDENCE DETAILS', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary, letterSpacing: 1.2)),
-              const SizedBox(height: AppSpacing.sm),
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppRadius.xl),
-                  border: Border.all(color: AppColors.border),
+              // Full Name
+              const Text('Full Name *', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(
+                  hintText: 'Enter full name',
+                  prefixIcon: const Icon(Icons.person_outline_rounded),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                 ),
-                child: Column(
-                  children: [
-                    _field(
-                      controller: _towerController,
-                      label: 'Tower / Block',
-                      icon: Icons.apartment_rounded,
-                      enabled: false,
-                      helperText: 'Contact admin to change flat details',
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    _field(
-                      controller: _flatController,
-                      label: 'Flat Number',
-                      icon: Icons.door_front_door_outlined,
-                      enabled: false,
-                    ),
-                  ],
-                ),
+                validator: (v) => v == null || v.trim().isEmpty ? 'Full name is required' : null,
               ),
+              const SizedBox(height: AppSpacing.md),
+
+              // Email Address
+              const Text('Email Address *', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 6),
+              TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                decoration: InputDecoration(
+                  hintText: 'Enter email address',
+                  prefixIcon: const Icon(Icons.email_outlined),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                ),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) return 'Email is required';
+                  if (!v.contains('@')) return 'Enter a valid email address';
+                  return null;
+                },
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              // Gender & DOB Row
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Gender', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 6),
+                        DropdownButtonFormField<String>(
+                          value: _selectedGender,
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                          ),
+                          items: ['Male', 'Female', 'Other']
+                              .map((g) => DropdownMenuItem(value: g, child: Text(g)))
+                              .toList(),
+                          onChanged: (v) => setState(() => _selectedGender = v ?? 'Male'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Date of Birth', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          controller: _dobController,
+                          decoration: InputDecoration(
+                            hintText: 'DD MMM YYYY',
+                            prefixIcon: const Icon(Icons.calendar_today_rounded, size: 18),
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
+              const Divider(),
+              const SizedBox(height: AppSpacing.md),
+
+              // Read Only Details Section
+              const Text('READ-ONLY SYSTEM DETAILS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
+              const SizedBox(height: AppSpacing.md),
+
+              _ReadOnlyField(label: 'Registered Mobile Number', value: phone, icon: Icons.phone_android_rounded),
+              const SizedBox(height: AppSpacing.sm),
+              _ReadOnlyField(label: 'Assigned Society', value: societyName, icon: Icons.location_city_rounded),
+              const SizedBox(height: AppSpacing.sm),
+              _ReadOnlyField(label: 'Assigned Flat', value: 'Flat $flatNumber', icon: Icons.home_work_rounded),
+
               const SizedBox(height: AppSpacing.xl),
 
               // Save Button
               SizedBox(
                 width: double.infinity,
-                height: 52,
+                height: 50,
                 child: ElevatedButton(
-                  onPressed: _isLoading ? null : _save,
+                  onPressed: _saving ? null : _handleSave,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
                   ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 22,
-                          width: 22,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                        )
-                      : const Text('Save Changes', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                  child: _saving
+                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
+                      : const Text('Save Profile Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ReadOnlyField extends StatelessWidget {
+  final String label;
+  final String value;
+  final IconData icon;
+
+  const _ReadOnlyField({required this.label, required this.value, required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: AppColors.border.withValues(alpha: 0.3),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: AppColors.textSecondary),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+              Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+            ],
+          ),
+          const Spacer(),
+          const Icon(Icons.lock_rounded, size: 16, color: AppColors.textSecondary),
+        ],
       ),
     );
   }
