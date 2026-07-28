@@ -16,6 +16,7 @@ import Parking from './pages/Parking'
 import Notices from './pages/Notices'
 import Staff from './pages/Staff'
 import HelpersDeliveries from './pages/HelpersDeliveries'
+import EmergencySos from './pages/EmergencySos'
 import AdminLogin from './pages/AdminLogin'
 import AdminProfile from './pages/AdminProfile'
 
@@ -74,6 +75,7 @@ function App() {
           <Route path="notices" element={<Notices />} />
           <Route path="staff" element={<Staff />} />
           <Route path="helpers" element={<HelpersDeliveries />} />
+          <Route path="sos" element={<EmergencySos />} />
           <Route path="profile" element={<AdminProfile />} />
         </Route>
 
