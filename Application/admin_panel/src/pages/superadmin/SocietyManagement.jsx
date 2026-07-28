@@ -1,25 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, CheckCircle, XCircle, Copy, Check, Trash2 } from 'lucide-react';
-import { collection, onSnapshot, query, doc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { Plus, CheckCircle, XCircle, Copy, Check, Trash2, Building2 } from 'lucide-react';
+import { collection, onSnapshot, query, doc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
+import SocietyOnboardingWizard from '../../components/superadmin/SocietyOnboardingWizard';
 
 export default function SocietyManagement() {
   const [societies, setSocieties] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
+  const [showWizard, setShowWizard] = useState(false);
   const [createdCredentials, setCreatedCredentials] = useState(null);
   const [copied, setCopied] = useState(false);
-  
-  const [formData, setFormData] = useState({ 
-    name: '', 
-    city: '', 
-    flats: '', 
-    president: '', 
-    phone: '', 
-    email: '',
-    password: '',
-    mrr: '10000' 
-  });
 
   useEffect(() => {
     const q = query(collection(db, 'societies'));
@@ -42,40 +32,9 @@ export default function SocietyManagement() {
     }
   };
 
-  const handleOnboard = async (e) => {
-    e.preventDefault();
-    try {
-      const count = societies.length + 1;
-      const id = `SOC-00${count}`;
-      const code = `${formData.name.substring(0, 2).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
-      const cleanName = formData.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const adminEmail = formData.email ? formData.email.trim().toLowerCase() : `admin@${cleanName}.com`;
-      const tempPassword = formData.password ? formData.password : `${formData.name.substring(0, 3).toUpperCase()}#${Math.floor(1000 + Math.random() * 9000)}`;
-
-      await setDoc(doc(db, 'societies', id), {
-        id,
-        ...formData,
-        code,
-        adminEmail,
-        status: 'Active',
-        flats: Number(formData.flats),
-        mrr: Number(formData.mrr),
-        createdAt: new Date().toISOString()
-      });
-
-      setCreatedCredentials({
-        societyName: formData.name,
-        societyId: id,
-        accessCode: code,
-        adminEmail,
-        tempPassword
-      });
-
-      setShowModal(false);
-      setFormData({ name: '', city: '', flats: '', president: '', phone: '', email: '', password: '', mrr: '10000' });
-    } catch (err) {
-      alert("Error onboarding society: " + err.message);
-    }
+  const handleWizardSuccess = (credentials) => {
+    setShowWizard(false);
+    setCreatedCredentials(credentials);
   };
 
   const handleCopyCredentials = () => {
@@ -100,9 +59,9 @@ Portal Link: http://localhost:3000/login`;
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div>
           <h2>Manage Onboarded Societies</h2>
-          <p>Generate access codes and control software licenses.</p>
+          <p>Generate access codes, manage structure, and control software licenses.</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+        <button className="btn btn-primary" onClick={() => setShowWizard(true)}>
           <Plus size={18} /> Onboard New Society
         </button>
       </div>
@@ -124,14 +83,14 @@ Portal Link: http://localhost:3000/login`;
             </thead>
             <tbody>
               {societies.length === 0 ? (
-                <tr><td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-secondary)' }}>No societies onboarded. Click "Onboard New Society".</td></tr>
+                <tr><td colSpan={8} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-secondary)' }}>No societies onboarded yet. Click "Onboard New Society".</td></tr>
               ) : (
                 societies.map((soc) => (
                   <tr key={soc.id}>
                     <td><code>{soc.id}</code></td>
                     <td>
                       <strong>{soc.name}</strong>
-                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{soc.city}</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{soc.city} {soc.type ? `• ${soc.type}` : ''}</div>
                     </td>
                     <td>
                       <div>{soc.president}</div>
@@ -176,55 +135,13 @@ Portal Link: http://localhost:3000/login`;
         </div>
       </div>
 
-      {/* Modal: Onboard New Society */}
-      {showModal && (
-        <div className="modal-overlay" onClick={() => setShowModal(false)}>
-          <div className="modal-content" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>Onboard New Society</h3>
-              <button className="btn-icon" onClick={() => setShowModal(false)}><XCircle size={20} /></button>
-            </div>
-            <form onSubmit={handleOnboard}>
-              <div className="form-group">
-                <label>Society Name</label>
-                <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} placeholder="e.g. Skyline Towers" />
-              </div>
-              <div className="form-group">
-                <label>City</label>
-                <input required type="text" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} placeholder="e.g. Mumbai" />
-              </div>
-              <div className="form-group">
-                <label>Total Number of Flats</label>
-                <input required type="number" value={formData.flats} onChange={e => setFormData({...formData, flats: e.target.value})} placeholder="200" />
-              </div>
-              <div className="form-group">
-                <label>President / Manager Name</label>
-                <input required type="text" value={formData.president} onChange={e => setFormData({...formData, president: e.target.value})} placeholder="e.g. Rajesh Malhotra" />
-              </div>
-              <div className="form-group">
-                <label>Admin Login Email</label>
-                <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="admin@skylinetowers.com" />
-              </div>
-              <div className="form-group">
-                <label>Admin Password (Optional - auto-generated if empty)</label>
-                <input type="text" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} placeholder="e.g. Skyline#2026" />
-              </div>
-              <div className="form-group">
-                <label>Phone Number</label>
-                <input required type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} placeholder="+91 98201 12345" />
-              </div>
-              <div className="form-group">
-                <label>Monthly Subscription Fee (₹)</label>
-                <input required type="number" value={formData.mrr} onChange={e => setFormData({...formData, mrr: e.target.value})} placeholder="10000" />
-              </div>
-              <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-                <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setShowModal(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Generate Credentials & Onboard</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Production-Grade Multi-Step Onboarding Wizard */}
+      <SocietyOnboardingWizard
+        isOpen={showWizard}
+        onClose={() => setShowWizard(false)}
+        existingSocieties={societies}
+        onSuccess={handleWizardSuccess}
+      />
 
       {/* Modal: Credentials Receipt Card */}
       {createdCredentials && (
