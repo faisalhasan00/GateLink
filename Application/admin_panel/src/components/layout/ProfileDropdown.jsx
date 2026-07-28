@@ -1,10 +1,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function ProfileDropdown({ userEmail = 'admin@skyline.com', role = 'Society Admin', societyCode = 'SOC-001', isSuperAdmin = false }) {
+export default function ProfileDropdown({ userEmail, role = 'Society Admin', societyCode = 'SOC-001', isSuperAdmin = false }) {
   const navigate = useNavigate();
-  const initial = userEmail ? userEmail.charAt(0).toUpperCase() : 'A';
-  const name = userEmail ? userEmail.split('@')[0].replace('.', ' ') : 'Administrator';
+  const effectiveEmail = userEmail || (isSuperAdmin ? 'superadmin@societysphere.com' : 'admin@societysphere.com');
+  const initial = effectiveEmail ? effectiveEmail.charAt(0).toUpperCase() : 'A';
+  const name = effectiveEmail ? effectiveEmail.split('@')[0].replace('.', ' ') : 'Administrator';
 
   const handleClick = () => {
     navigate(isSuperAdmin ? '/super-admin/profile' : '/profile');
@@ -54,7 +55,7 @@ export default function ProfileDropdown({ userEmail = 'admin@skyline.com', role 
           {name}
         </div>
         <div 
-          title={userEmail}
+          title={effectiveEmail}
           style={{
             fontSize: '12px',
             color: 'var(--text-secondary)',
@@ -65,7 +66,7 @@ export default function ProfileDropdown({ userEmail = 'admin@skyline.com', role 
             marginTop: '2px'
           }}
         >
-          {userEmail}
+          {effectiveEmail}
         </div>
         <div style={{ fontSize: '11px', color: 'var(--primary)', fontWeight: 700, marginTop: '2px', display: 'flex', gap: '4px' }}>
           <span>{role}</span>

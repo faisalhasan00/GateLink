@@ -8,17 +8,24 @@ import NotificationMenu from './NotificationMenu';
 import ProfileDropdown from './ProfileDropdown';
 import Breadcrumb from './Breadcrumb';
 
+import { onAuthStateChanged } from 'firebase/auth';
+
 export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSuperAdmin = false }) {
-  const [userEmail, setUserEmail] = useState('admin@skyline.com');
-  const [societyInfo, setSocietyInfo] = useState({ code: 'SOC-001', plan: 'ENTERPRISE' });
+  const defaultEmail = isSuperAdmin ? 'superadmin@societysphere.com' : 'admin@societysphere.com';
+  const [userEmail, setUserEmail] = useState(auth.currentUser?.email || defaultEmail);
+  const [societyInfo, setSocietyInfo] = useState({ code: isSuperAdmin ? 'HQ-GLOBAL' : 'SOC-001', plan: 'ENTERPRISE' });
 
   useEffect(() => {
-    const user = auth.currentUser;
-    if (user && user.email) {
-      setUserEmail(user.email);
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user && user.email) {
+        setUserEmail(user.email);
+      } else {
+        setUserEmail(defaultEmail);
+      }
+    });
 
     const fetchSociety = async () => {
+      if (isSuperAdmin) return;
       try {
         const docRef = doc(db, 'societies', 'SOC-001');
         const docSnap = await getDoc(docRef);
@@ -34,7 +41,9 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
       }
     };
     fetchSociety();
-  }, []);
+
+    return () => unsubscribe();
+  }, [isSuperAdmin, defaultEmail]);
 
   return (
     <header 
