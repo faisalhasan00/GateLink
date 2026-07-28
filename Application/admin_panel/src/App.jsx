@@ -1,0 +1,91 @@
+import React from 'react'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { onAuthStateChanged } from 'firebase/auth'
+import { useState, useEffect } from 'react'
+import { auth } from './firebase'
+
+import Layout from './components/Layout'
+import Dashboard from './pages/Dashboard'
+import Residents from './pages/Residents'
+import Visitors from './pages/Visitors'
+import Complaints from './pages/Complaints'
+import Amenities from './pages/Amenities'
+import Maintenance from './pages/Maintenance'
+import Documents from './pages/Documents'
+import Parking from './pages/Parking'
+import Notices from './pages/Notices'
+import AdminLogin from './pages/AdminLogin'
+
+import SuperAdminLayout from './components/SuperAdminLayout'
+import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard'
+import SocietyManagement from './pages/superadmin/SocietyManagement'
+import CrmLeads from './pages/superadmin/CrmLeads'
+import AdCampaigns from './pages/superadmin/AdCampaigns'
+import SuperAdminLogin from './pages/superadmin/SuperAdminLogin'
+
+import './index.css'
+
+// Protected Route: Redirect to /login if not authenticated
+function ProtectedRoute({ user, children, loginPath = '/login' }) {
+  if (user === undefined) {
+    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontSize: '16px', color: '#6B7280' }}>Loading...</div>;
+  }
+  if (!user) {
+    return <Navigate to={loginPath} replace />;
+  }
+  return children;
+}
+
+function App() {
+  const [user, setUser] = useState(undefined); // undefined = loading
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser || null);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  return (
+    <BrowserRouter>
+      <Routes>
+        {/* Public Login Pages */}
+        <Route path="/login" element={<AdminLogin />} />
+        <Route path="/super-admin/login" element={<SuperAdminLogin />} />
+
+        {/* Society Admin Routes (Protected) */}
+        <Route path="/" element={
+          <ProtectedRoute user={user}>
+            <Layout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Dashboard />} />
+          <Route path="residents" element={<Residents />} />
+          <Route path="visitors" element={<Visitors />} />
+          <Route path="complaints" element={<Complaints />} />
+          <Route path="amenities" element={<Amenities />} />
+          <Route path="maintenance" element={<Maintenance />} />
+          <Route path="documents" element={<Documents />} />
+          <Route path="parking" element={<Parking />} />
+          <Route path="notices" element={<Notices />} />
+        </Route>
+
+        {/* Super Admin Routes (Protected) */}
+        <Route path="/super-admin" element={
+          <ProtectedRoute user={user} loginPath="/super-admin/login">
+            <SuperAdminLayout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<SuperAdminDashboard />} />
+          <Route path="societies" element={<SocietyManagement />} />
+          <Route path="crm" element={<CrmLeads />} />
+          <Route path="ads" element={<AdCampaigns />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  )
+}
+
+export default App

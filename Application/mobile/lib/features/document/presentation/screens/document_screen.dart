@@ -1,0 +1,210 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/providers/firebase_providers.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+class DocumentScreen extends ConsumerStatefulWidget {
+  const DocumentScreen({super.key});
+
+  @override
+  ConsumerState<DocumentScreen> createState() => _DocumentScreenState();
+}
+
+class _DocumentScreenState extends ConsumerState<DocumentScreen> {
+  String _selectedCategory = 'All';
+
+  static const Map<String, Color> _categoryColors = {
+    'Rules': AppColors.primary,
+    'Financial': AppColors.success,
+    'Compliance': AppColors.warning,
+    'Directory': AppColors.info,
+  };
+
+  static const Map<String, IconData> _categoryIcons = {
+    'Rules': Icons.gavel_rounded,
+    'Financial': Icons.bar_chart_rounded,
+    'Compliance': Icons.verified_rounded,
+    'Directory': Icons.contacts_rounded,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final docsAsync = ref.watch(documentsStreamProvider);
+    final categories = ['All', 'Rules', 'Financial', 'Compliance', 'Directory'];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Society Documents'),
+        backgroundColor: Colors.white,
+        foregroundColor: AppColors.textPrimary,
+        elevation: 0,
+        surfaceTintColor: Colors.white,
+      ),
+      backgroundColor: AppColors.background,
+      body: Column(
+        children: [
+          // Filter Row
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.fromLTRB(AppSpacing.pagePadding, 0, AppSpacing.pagePadding, AppSpacing.md),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: categories.map((cat) {
+                  final isSelected = _selectedCategory == cat;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: GestureDetector(
+                      onTap: () => setState(() => _selectedCategory = cat),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+                        decoration: BoxDecoration(
+                          color: isSelected ? AppColors.primary : AppColors.gray100,
+                          borderRadius: BorderRadius.circular(AppRadius.full),
+                        ),
+                        child: Text(
+                          cat,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color: isSelected ? Colors.white : AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
+              ),
+            ),
+          ),
+
+          // Document List
+          Expanded(
+            child: docsAsync.when(
+              data: (snapshot) {
+                final allDocs = snapshot.docs;
+                final filtered = _selectedCategory == 'All' 
+                    ? allDocs 
+                    : allDocs.where((doc) {
+                        final data = doc.data() as Map<String, dynamic>;
+                        return data['category'] == _selectedCategory;
+                      }).toList();
+
+                if (filtered.isEmpty) {
+                  return const Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.folder_off_rounded, size: 48, color: AppColors.gray300),
+                        SizedBox(height: 12),
+                        Text('No documents in this category', style: TextStyle(color: AppColors.textSecondary)),
+                      ],
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.all(AppSpacing.pagePadding),
+                  itemCount: filtered.length,
+                  itemBuilder: (context, index) {
+                    final data = filtered[index].data() as Map<String, dynamic>;
+                    final title = data['title'] ?? 'Document';
+                    final category = data['category'] ?? 'Rules';
+                    final size = data['size'] ?? '0 KB';
+                    final date = data['date'] ?? '';
+                    final downloadUrl = data['downloadUrl'] as String?;
+                    
+                    final color = _categoryColors[category] ?? AppColors.primary;
+                    final icon = _categoryIcons[category] ?? Icons.insert_drive_file_rounded;
+
+                    return Material(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        leading: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: color.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(AppRadius.lg),
+                          ),
+                          child: Icon(icon, color: color, size: 24),
+                        ),
+                        title: Text(
+                          title,
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                        ),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: color.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(AppRadius.full),
+                                ),
+                                child: Text(
+                                  category,
+                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '$size • $date',
+                                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                              ),
+                            ],
+                          ),
+                        ),
+                        trailing: GestureDetector(
+                          onTap: () async {
+                            if (downloadUrl != null && downloadUrl.isNotEmpty) {
+                              final uri = Uri.parse(downloadUrl);
+                              if (await canLaunchUrl(uri)) {
+                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                              } else {
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Could not open document URL')),
+                                  );
+                                }
+                              }
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Downloading $title...'),
+                                  behavior: SnackBarBehavior.floating,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                ),
+                              );
+                            }
+                          },
+                          child: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: AppColors.primarySurface,
+                              borderRadius: BorderRadius.circular(AppRadius.md),
+                            ),
+                            child: const Icon(Icons.download_rounded, color: AppColors.primary, size: 20),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (e, st) => Center(child: Text('Error: $e')),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
