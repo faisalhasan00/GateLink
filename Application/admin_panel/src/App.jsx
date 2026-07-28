@@ -14,6 +14,7 @@ import Maintenance from './pages/Maintenance'
 import Documents from './pages/Documents'
 import Parking from './pages/Parking'
 import Notices from './pages/Notices'
+import Staff from './pages/Staff'
 import AdminLogin from './pages/AdminLogin'
 import AdminProfile from './pages/AdminProfile'
 
@@ -70,6 +71,7 @@ function App() {
           <Route path="documents" element={<Documents />} />
           <Route path="parking" element={<Parking />} />
           <Route path="notices" element={<Notices />} />
+          <Route path="staff" element={<Staff />} />
           <Route path="profile" element={<AdminProfile />} />
         </Route>
 
