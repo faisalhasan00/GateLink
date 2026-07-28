@@ -22,6 +22,8 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
         foregroundColor: Colors.white,
       ),
       body: visitorsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, st) => Center(child: Text('Error: $e')),
         data: (snapshot) {
           final matchingDocs = snapshot.docs.where((d) => d.id == visitorId).toList();
           if (matchingDocs.isEmpty) {
@@ -52,7 +54,6 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
           final isPending = status == 'pending';
           final isApproved = status == 'approved';
           final isRejected = status == 'rejected' || status == 'denied';
-          final isCheckedOut = status == 'checked_out' || status == 'left';
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
@@ -206,11 +207,9 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                 ),
               ],
             ),
-          ),
-        );
-      },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, st) => Center(child: Text('Error: $e')),
+          );
+        },
+      ),
     );
   }
 }

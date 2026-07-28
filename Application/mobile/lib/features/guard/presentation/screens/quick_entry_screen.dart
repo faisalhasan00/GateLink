@@ -241,8 +241,10 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
                   final model = GateEntryModel(
                     id: '',
                     visitorName: '',
-                    visitorPhone: '',
+                    phone: '',
                     flatNumber: '',
+                    tower: '',
+                    status: EntryStatus.inside,
                     entryTime: DateTime.now(),
                     type: type,
                   );
@@ -253,7 +255,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
                         onTap: () => setState(() => _selectedType = type),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.vertical(12),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
                             color: isSelected ? AppColors.secondary : Colors.white,
                             borderRadius: BorderRadius.circular(AppRadius.md),
@@ -441,7 +443,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
                       Expanded(
                         child: Text(
                           _flatValidationResult!.isValid
-                              ? 'Resident: ${_flatValidationResult!.residentName}'
+                              ? 'Resident: ${_flatValidationResult!.residentName ?? ""}'
                               : _flatValidationResult!.error,
                           style: TextStyle(
                             fontSize: 12,
