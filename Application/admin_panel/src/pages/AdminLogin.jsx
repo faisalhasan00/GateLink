@@ -3,6 +3,7 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'fire
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
+import { setSocietyAdminSession } from '../services/sessionManager';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -15,22 +16,25 @@ export default function AdminLogin() {
     e.preventDefault();
     setError('');
     setLoading(true);
+    const cleanEmail = email.trim().toLowerCase();
 
     try {
       // 1. Attempt standard login
-      await signInWithEmailAndPassword(auth, email, password);
+      const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
+      setSocietyAdminSession({ email: cleanEmail, token: res.user?.uid });
       navigate('/');
     } catch (err) {
       // 2. If Auth account doesn't exist yet, check if society was onboarded with these credentials
       try {
-        const q = query(collection(db, 'societies'), where('adminEmail', '==', email.trim().toLowerCase()));
+        const q = query(collection(db, 'societies'), where('adminEmail', '==', cleanEmail));
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
           const socData = snapshot.docs[0].data();
           if (socData.tempPassword === password || password.length >= 6) {
             // Auto-register in Firebase Auth
-            await createUserWithEmailAndPassword(auth, email, password);
+            const newRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
+            setSocietyAdminSession({ email: cleanEmail, token: newRes.user?.uid });
             navigate('/');
             return;
           }

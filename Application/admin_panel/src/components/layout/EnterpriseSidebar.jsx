@@ -3,6 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { LogOut, ChevronLeft, ChevronRight, Shield, Building2 } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
+import { clearSocietyAdminSession, clearSuperAdminSession } from '../../services/sessionManager';
 
 export default function EnterpriseSidebar({ 
   isCollapsed = false, 
@@ -17,6 +18,11 @@ export default function EnterpriseSidebar({
 
   const handleLogout = async () => {
     try {
+      if (isSuperAdmin) {
+        clearSuperAdminSession();
+      } else {
+        clearSocietyAdminSession();
+      }
       await signOut(auth);
       navigate(isSuperAdmin ? '/super-admin/login' : '/login');
     } catch (err) {

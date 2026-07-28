@@ -9,19 +9,36 @@ import ProfileDropdown from './ProfileDropdown';
 import Breadcrumb from './Breadcrumb';
 
 import { onAuthStateChanged } from 'firebase/auth';
+import { getSocietyAdminSession, getSuperAdminSession } from '../../services/sessionManager';
 
 export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSuperAdmin = false }) {
-  const defaultEmail = isSuperAdmin ? 'mohammedfaisalhasan@gmail.com' : 'admin@society.com';
-  const [userEmail, setUserEmail] = useState(auth.currentUser?.email || defaultEmail);
+  const getRoleEmail = () => {
+    if (isSuperAdmin) {
+      const session = getSuperAdminSession();
+      return session?.email || (auth.currentUser?.email === 'mohammedfaisalhasan@gmail.com' ? auth.currentUser.email : 'mohammedfaisalhasan@gmail.com');
+    } else {
+      const session = getSocietyAdminSession();
+      if (session?.email) return session.email;
+      if (auth.currentUser && auth.currentUser.email !== 'mohammedfaisalhasan@gmail.com') {
+        return auth.currentUser.email;
+      }
+      return 'admin@society.com';
+    }
+  };
+
+  const [userEmail, setUserEmail] = useState(getRoleEmail);
   const [societyInfo, setSocietyInfo] = useState({ code: isSuperAdmin ? 'HQ-GLOBAL' : 'SOC-001', plan: 'ENTERPRISE' });
 
   useEffect(() => {
+    setUserEmail(getRoleEmail());
+
+    const handleStorageChange = () => {
+      setUserEmail(getRoleEmail());
+    };
+    window.addEventListener('storage', handleStorageChange);
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user && user.email) {
-        setUserEmail(user.email);
-      } else {
-        setUserEmail(defaultEmail);
-      }
+      setUserEmail(getRoleEmail());
     });
 
     const fetchSociety = async () => {
@@ -42,8 +59,11 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
     };
     fetchSociety();
 
-    return () => unsubscribe();
-  }, [isSuperAdmin, defaultEmail]);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      unsubscribe();
+    };
+  }, [isSuperAdmin]);
 
   return (
     <header 

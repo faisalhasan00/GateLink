@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { useNavigate } from 'react-router-dom';
+import { setSuperAdminSession } from '../../services/sessionManager';
 
 const SUPER_ADMIN_EMAIL = 'mohammedfaisalhasan@gmail.com';
 const SUPER_ADMIN_PASS = 'Raj786f@';
@@ -29,12 +30,14 @@ export default function SuperAdminLogin() {
 
     try {
       // 1. Try standard Firebase Auth login
-      await signInWithEmailAndPassword(auth, cleanEmail, password);
+      const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
+      setSuperAdminSession({ email: cleanEmail, token: res.user?.uid });
       navigate('/super-admin');
     } catch (err) {
       // 2. Auto-create account in Firebase Auth on first login
       try {
-        await createUserWithEmailAndPassword(auth, cleanEmail, password);
+        const newRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
+        setSuperAdminSession({ email: cleanEmail, token: newRes.user?.uid });
         navigate('/super-admin');
         return;
       } catch (innerErr) {

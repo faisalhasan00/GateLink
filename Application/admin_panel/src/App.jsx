@@ -30,18 +30,23 @@ import AdCampaigns from './pages/superadmin/AdCampaigns'
 import SuperAdminProfile from './pages/superadmin/SuperAdminProfile'
 import SuperAdminLogin from './pages/superadmin/SuperAdminLogin'
 
+import { getSocietyAdminSession, getSuperAdminSession } from './services/sessionManager'
+
 import './index.css'
 
-// Protected Route: Redirect to login if not authenticated or lacks required role
+// Protected Route: Redirect to login if not authenticated in role-isolated session namespace
 function ProtectedRoute({ user, children, loginPath = '/login', requireSuperAdmin = false }) {
-  if (user === undefined) {
-    return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontSize: '16px', color: '#6B7280' }}>Loading...</div>;
-  }
-  if (!user) {
-    return <Navigate to={loginPath} replace />;
-  }
-  if (requireSuperAdmin && user.email?.toLowerCase() !== 'mohammedfaisalhasan@gmail.com') {
-    return <Navigate to="/super-admin/login" replace />;
+  if (requireSuperAdmin) {
+    const superSession = getSuperAdminSession();
+    const isFirebaseSuperUser = user && user.email?.toLowerCase() === 'mohammedfaisalhasan@gmail.com';
+    if (!superSession && !isFirebaseSuperUser) {
+      return <Navigate to="/super-admin/login" replace />;
+    }
+  } else {
+    const socSession = getSocietyAdminSession();
+    if (!socSession && !user) {
+      return <Navigate to={loginPath} replace />;
+    }
   }
   return children;
 }
