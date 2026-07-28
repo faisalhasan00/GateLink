@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:intl/intl.dart';
 import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/router/app_router.dart';
@@ -9,26 +11,26 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/ad_banner_carousel.dart';
 import '../../../advertisement/models/ad_model.dart';
 
-class DashboardScreen extends StatelessWidget {
+class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
         slivers: [
-          _DashboardAppBar(),
+          const _DashboardAppBar(),
           SliverPadding(
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // Maintenance Alert Banner
-                const _MaintenanceDueBanner(),
+                // Maintenance Alert Banner (Dynamic)
+                const _DynamicMaintenanceBanner(),
                 const SizedBox(height: AppSpacing.lg),
 
                 // Quick Actions Grid
-                _SectionTitle(title: 'Quick Actions'),
+                const _SectionTitle(title: 'Quick Actions'),
                 const SizedBox(height: AppSpacing.md),
                 const _QuickActionsGrid(),
                 const SizedBox(height: AppSpacing.lg),
@@ -49,6 +51,18 @@ class DashboardScreen extends StatelessWidget {
                 const _PendingVisitorsList(),
                 const SizedBox(height: AppSpacing.lg),
 
+                // Recent Complaints Summary
+                _SectionTitle(
+                  title: 'My Complaints',
+                  action: TextButton(
+                    onPressed: () => context.go(AppRoutes.raiseComplaint),
+                    child: const Text('View All'),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                const _RecentComplaintsWidget(),
+                const SizedBox(height: AppSpacing.lg),
+
                 // Recent Notices
                 _SectionTitle(
                   title: 'Recent Notices',
@@ -59,6 +73,12 @@ class DashboardScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.md),
                 const _RecentNoticesList(),
+                const SizedBox(height: AppSpacing.lg),
+
+                // Emergency Contacts
+                const _SectionTitle(title: 'Emergency Contacts'),
+                const SizedBox(height: AppSpacing.md),
+                const _EmergencyContactsWidget(),
                 const SizedBox(height: AppSpacing.lg),
 
                 // Society Info Card
@@ -73,9 +93,40 @@ class DashboardScreen extends StatelessWidget {
   }
 }
 
-class _DashboardAppBar extends StatelessWidget {
+// ── DYNAMIC APP BAR & GREETING ───────────────────────────────────────────────
+
+class _DashboardAppBar extends ConsumerWidget {
+  const _DashboardAppBar();
+
+  String _getTimeBasedGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour >= 5 && hour < 12) {
+      return '🌅 Good Morning';
+    } else if (hour >= 12 && hour < 17) {
+      return '☀️ Good Afternoon';
+    } else if (hour >= 17 && hour < 21) {
+      return '🌆 Good Evening';
+    } else {
+      return '🌙 Good Night';
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profileAsync = ref.watch(userProfileProvider);
+    final user = ref.watch(currentUserProvider);
+
+    final String residentName = profileAsync.value?['name'] ?? 
+                                profileAsync.value?['displayName'] ?? 
+                                user?.displayName ?? 
+                                (user?.email?.split('@').first ?? 'Resident');
+
+    final String societyName = profileAsync.value?['societyName'] ?? 
+                               profileAsync.value?['societyId'] ?? 
+                               'SocietySphere Residency';
+
+    final String greeting = _getTimeBasedGreeting();
+
     return SliverAppBar(
       floating: true,
       snap: true,
@@ -84,24 +135,37 @@ class _DashboardAppBar extends StatelessWidget {
       titleSpacing: AppSpacing.pagePadding,
       title: Row(
         children: [
-          const CircleAvatar(
-            radius: 18,
+          CircleAvatar(
+            radius: 20,
             backgroundColor: AppColors.primarySurface,
-            child: Icon(Icons.person_rounded, size: 20, color: AppColors.primary),
+            child: Text(
+              residentName.isNotEmpty ? residentName[0].toUpperCase() : 'R',
+              style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.primary, fontSize: 16),
+            ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Good Morning 👋',
-                style: TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w400),
-              ),
-              const Text(
-                'Mohammed Faisal',
-                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-              ),
-            ],
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$greeting 👋',
+                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w400),
+                ),
+                Text(
+                  residentName,
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  societyName,
+                  style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -110,7 +174,7 @@ class _DashboardAppBar extends StatelessWidget {
           onPressed: () => context.go(AppRoutes.notifications),
           icon: Stack(
             children: [
-              const Icon(Icons.notifications_outlined, color: AppColors.textPrimary),
+              const Icon(Icons.notifications_outlined, color: AppColors.textPrimary, size: 24),
               Positioned(
                 right: 0,
                 top: 0,
@@ -133,60 +197,115 @@ class _DashboardAppBar extends StatelessWidget {
   }
 }
 
-class _MaintenanceDueBanner extends StatelessWidget {
-  const _MaintenanceDueBanner();
+// ── DYNAMIC MAINTENANCE BANNER ──────────────────────────────────────────────
+
+class _DynamicMaintenanceBanner extends ConsumerWidget {
+  const _DynamicMaintenanceBanner();
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF2563EB), Color(0xFF3B82F6)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.receipt_long_rounded, color: Colors.white, size: 36),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final billsAsync = ref.watch(maintenanceBillsStreamProvider);
+
+    return billsAsync.when(
+      data: (snapshot) {
+        final pendingDocs = snapshot.docs.where((doc) {
+          final data = doc.data() as Map<String, dynamic>;
+          return data['status'] == 'pending';
+        }).toList();
+
+        if (pendingDocs.isEmpty) {
+          // No pending dues state
+          return Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              color: const Color(0xFFECFDF5),
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              border: Border.all(color: const Color(0xFFA7F3D0)),
+            ),
+            child: Row(
               children: [
-                const Text(
-                  'Maintenance Due',
-                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF10B981),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.check_circle_rounded, color: Colors.white, size: 24),
                 ),
-                const Text(
-                  '₹ 3,500',
-                  style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700),
-                ),
-                const Text(
-                  'Due by 10 Aug 2026',
-                  style: TextStyle(color: Colors.white70, fontSize: 12),
+                const SizedBox(width: AppSpacing.md),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('No Pending Dues', style: TextStyle(color: Color(0xFF065F46), fontSize: 15, fontWeight: FontWeight.w700)),
+                      Text('All maintenance bills are paid up to date!', style: TextStyle(color: Color(0xFF047857), fontSize: 12)),
+                    ],
+                  ),
                 ),
               ],
             ),
-          ),
-          ElevatedButton(
-            onPressed: () => context.go(AppRoutes.payMaintenance),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: AppColors.primary,
-              minimumSize: const Size(80, 36),
-              textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+          );
+        }
+
+        final firstBillData = pendingDocs.first.data() as Map<String, dynamic>;
+        final amount = firstBillData['amount'] ?? 0;
+        final dueDateStr = firstBillData['dueDate'] ?? firstBillData['month'] ?? 'Due Soon';
+
+        return Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF1E40AF), Color(0xFF3B82F6)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            child: const Text('Pay Now'),
+            borderRadius: BorderRadius.circular(AppRadius.xl),
           ),
-        ],
-      ),
+          child: Row(
+            children: [
+              const Icon(Icons.receipt_long_rounded, color: Colors.white, size: 36),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Pending Maintenance',
+                      style: TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                    Text(
+                      '₹ ${amount.toString()}',
+                      style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700),
+                    ),
+                    Text(
+                      'Due: $dueDateStr',
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              ElevatedButton(
+                onPressed: () => context.go(AppRoutes.payMaintenance),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: AppColors.primary,
+                  minimumSize: const Size(80, 36),
+                  textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                ),
+                child: const Text('Pay Now'),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const _SkeletonBanner(),
+      error: (err, stack) => const SizedBox.shrink(),
     );
   }
 }
+
+// ── QUICK ACTIONS ────────────────────────────────────────────────────────────
 
 class _QuickActionsGrid extends StatelessWidget {
   const _QuickActionsGrid();
@@ -244,7 +363,7 @@ class _QuickActionCard extends StatelessWidget {
             Text(
               action.label,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: AppColors.textPrimary, height: 1.3),
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textPrimary, height: 1.3),
             ),
           ],
         ),
@@ -252,6 +371,8 @@ class _QuickActionCard extends StatelessWidget {
     );
   }
 }
+
+// ── PENDING VISITORS ─────────────────────────────────────────────────────────
 
 class _PendingVisitorsList extends ConsumerWidget {
   const _PendingVisitorsList();
@@ -265,22 +386,21 @@ class _PendingVisitorsList extends ConsumerWidget {
         final visitors = snapshot.docs.where((doc) => doc['status'] == 'pending').take(3).toList();
         
         if (visitors.isEmpty) {
-          return const _EmptyStateSmall(message: 'No pending visitor approvals');
+          return const _EmptyStateSmall(message: 'No pending visitor approvals 👋');
         }
 
         return Column(
           children: visitors.map((doc) {
             final data = doc.data() as Map<String, dynamic>;
-            final name = data['name'] ?? 'Unknown';
+            final name = data['name'] ?? 'Unknown Visitor';
             final initials = name.isNotEmpty ? name[0].toUpperCase() : '?';
-            final purpose = data['type'] ?? 'Visit';
+            final purpose = data['type'] ?? 'Guest';
             
-            // Format time safely
             String timeStr = 'Just now';
             if (data['entryTime'] != null) {
               try {
                 final dt = DateTime.parse(data['entryTime']);
-                timeStr = '${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+                timeStr = DateFormat('h:mm a').format(dt);
               } catch (_) {}
             }
 
@@ -299,8 +419,8 @@ class _PendingVisitorsList extends ConsumerWidget {
           }).toList(),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, st) => Text('Error: $e'),
+      loading: () => const _SkeletonCardList(),
+      error: (e, st) => const _EmptyStateSmall(message: 'Unable to load visitor logs'),
     );
   }
 }
@@ -386,6 +506,85 @@ class _ApproveButton extends StatelessWidget {
   }
 }
 
+// ── RECENT COMPLAINTS WIDGET ─────────────────────────────────────────────────
+
+class _RecentComplaintsWidget extends ConsumerWidget {
+  const _RecentComplaintsWidget();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final complaintsAsync = ref.watch(complaintsStreamProvider);
+
+    return complaintsAsync.when(
+      data: (snapshot) {
+        if (snapshot.docs.isEmpty) {
+          return const _EmptyStateSmall(message: 'No active complaints 🛠️');
+        }
+
+        final doc = snapshot.docs.first;
+        final data = doc.data() as Map<String, dynamic>;
+        final title = data['title'] ?? 'Complaint';
+        final status = data['status'] ?? 'Pending';
+        final category = data['category'] ?? 'General';
+
+        Color statusColor = AppColors.warning;
+        if (status.toString().toLowerCase() == 'resolved') {
+          statusColor = AppColors.success;
+        } else if (status.toString().toLowerCase() == 'in progress') {
+          statusColor = AppColors.primary;
+        }
+
+        return Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: AppColors.complaint.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppRadius.md),
+                ),
+                child: const Icon(Icons.support_agent_rounded, color: AppColors.complaint, size: 22),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                    Text('Category: $category', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: statusColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                ),
+                child: Text(
+                  status.toUpperCase(),
+                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: statusColor),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      loading: () => const _SkeletonCardList(),
+      error: (e, st) => const SizedBox.shrink(),
+    );
+  }
+}
+
+// ── RECENT NOTICES ───────────────────────────────────────────────────────────
+
 class _RecentNoticesList extends ConsumerWidget {
   const _RecentNoticesList();
 
@@ -398,7 +597,7 @@ class _RecentNoticesList extends ConsumerWidget {
         final notices = snapshot.docs.take(3).toList();
         
         if (notices.isEmpty) {
-          return const _EmptyStateSmall(message: 'No recent notices');
+          return const _EmptyStateSmall(message: 'No recent notices 📢');
         }
 
         return Column(
@@ -406,65 +605,125 @@ class _RecentNoticesList extends ConsumerWidget {
             final data = doc.data() as Map<String, dynamic>;
             final title = data['title'] ?? 'Notice';
             
-            String dateStr = '';
+            String dateStr = 'Today';
             if (data['createdAt'] != null) {
               try {
                 final dt = DateTime.parse(data['createdAt']);
-                dateStr = '${dt.day}/${dt.month}/${dt.year}';
+                dateStr = DateFormat('dd MMM yyyy').format(dt);
               } catch (_) {}
             }
 
             return Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: AppColors.notice.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                      ),
-                      child: const Icon(Icons.campaign_rounded, color: AppColors.notice, size: 20),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textPrimary), maxLines: 2, overflow: TextOverflow.ellipsis),
-                          Text(dateStr, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                        ],
-                      ),
-                    ),
-                    if (data['isNew'] == true)
+              child: InkWell(
+                onTap: () => context.go(AppRoutes.notices),
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        width: 40,
+                        height: 40,
                         decoration: BoxDecoration(
-                          color: AppColors.primarySurface,
-                          borderRadius: BorderRadius.circular(AppRadius.full),
+                          color: AppColors.notice.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(AppRadius.md),
                         ),
-                        child: const Text('NEW', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                        child: const Icon(Icons.campaign_rounded, color: AppColors.notice, size: 20),
                       ),
-                  ],
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 2, overflow: TextOverflow.ellipsis),
+                            Text(dateStr, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             );
           }).toList(),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, st) => Text('Error: $e'),
+      loading: () => const _SkeletonCardList(),
+      error: (e, st) => const _EmptyStateSmall(message: 'Unable to load notices'),
     );
   }
 }
+
+// ── EMERGENCY CONTACTS ──────────────────────────────────────────────────────
+
+class _EmergencyContactsWidget extends StatelessWidget {
+  const _EmergencyContactsWidget();
+
+  void _callNumber(String phone) async {
+    final Uri uri = Uri.parse('tel:$phone');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final contacts = [
+      {'name': 'Security Desk', 'phone': '+91 98201 11111', 'icon': Icons.security_rounded, 'color': AppColors.primary},
+      {'name': 'Society Office', 'phone': '+91 98201 22222', 'icon': Icons.business_rounded, 'color': AppColors.secondary},
+      {'name': 'Plumber & Electrician', 'phone': '+91 98201 33333', 'icon': Icons.build_rounded, 'color': AppColors.warning},
+      {'name': 'Emergency Ambulance', 'phone': '108', 'icon': Icons.local_hospital_rounded, 'color': AppColors.error},
+    ];
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        children: contacts.map((c) {
+          final icon = c['icon'] as IconData;
+          final color = c['color'] as Color;
+          final name = c['name'] as String;
+          final phone = c['phone'] as String;
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 16,
+                  backgroundColor: color.withOpacity(0.1),
+                  child: Icon(icon, size: 16, color: color),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Text(name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                ),
+                IconButton(
+                  onPressed: () => _callNumber(phone),
+                  icon: const Icon(Icons.phone_in_talk_rounded, color: AppColors.success, size: 20),
+                  constraints: const BoxConstraints(),
+                  padding: EdgeInsets.zero,
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
+
+// ── MY SOCIETY INFO CARD ─────────────────────────────────────────────────────
 
 class _SocietyInfoCard extends ConsumerWidget {
   const _SocietyInfoCard();
@@ -473,6 +732,7 @@ class _SocietyInfoCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(userProfileProvider).value;
     final societyId = profile?['societyId'] ?? 'SOC-001';
+    final societyName = profile?['societyName'] ?? 'SocietySphere Residency';
     final tower = profile?['tower'] ?? 'Tower A';
     final flat = profile?['flatNumber'] ?? 'Unknown';
 
@@ -486,14 +746,15 @@ class _SocietyInfoCard extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('My Society', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+          const Text('My Resident Profile', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
           const SizedBox(height: AppSpacing.sm),
           const Divider(),
           const SizedBox(height: AppSpacing.sm),
-          _InfoRow(icon: Icons.apartment_rounded, label: 'Society ID', value: societyId),
+          _InfoRow(icon: Icons.apartment_rounded, label: 'Society', value: societyName),
+          _InfoRow(icon: Icons.tag_rounded, label: 'Society ID', value: societyId),
           _InfoRow(icon: Icons.layers_rounded, label: 'Tower', value: tower),
-          _InfoRow(icon: Icons.door_front_door_rounded, label: 'Flat', value: flat),
-          const _InfoRow(icon: Icons.person_rounded, label: 'Status', value: 'Active', valueColor: AppColors.success),
+          _InfoRow(icon: Icons.door_front_door_rounded, label: 'Flat Number', value: flat),
+          const _InfoRow(icon: Icons.verified_user_rounded, label: 'Account Status', value: 'Active Resident', valueColor: AppColors.success),
         ],
       ),
     );
@@ -533,7 +794,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(child: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary))),
+        Expanded(child: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary))),
         if (action != null) action!,
       ],
     );
@@ -554,7 +815,37 @@ class _EmptyStateSmall extends StatelessWidget {
         border: Border.all(color: AppColors.border),
       ),
       child: Center(
-        child: Text(message, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13)),
+        child: Text(message, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500)),
+      ),
+    );
+  }
+}
+
+class _SkeletonBanner extends StatelessWidget {
+  const _SkeletonBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 80,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(AppRadius.xl),
+      ),
+    );
+  }
+}
+
+class _SkeletonCardList extends StatelessWidget {
+  const _SkeletonCardList();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 60,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
     );
   }
@@ -571,12 +862,6 @@ class _QuickAction {
 class _VisitorPreview {
   final String id, name, purpose, time, initials;
   const _VisitorPreview({required this.id, required this.name, required this.purpose, required this.time, required this.initials});
-}
-
-class _NoticePreview {
-  final String title, date;
-  final bool isNew;
-  const _NoticePreview({required this.title, required this.date, required this.isNew});
 }
 
 /// Advertisement banner section shown on the dashboard.
@@ -608,7 +893,6 @@ class _AdsBannerSection extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Section header with label
             Row(
               children: [
                 const Expanded(
@@ -616,7 +900,7 @@ class _AdsBannerSection extends ConsumerWidget {
                     'Local Offers & Services',
                     style: TextStyle(
                       fontSize: 16,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
                     ),
                   ),
@@ -644,7 +928,7 @@ class _AdsBannerSection extends ConsumerWidget {
           ],
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const _SkeletonCardList(),
       error: (e, st) => const SizedBox.shrink(),
     );
   }
