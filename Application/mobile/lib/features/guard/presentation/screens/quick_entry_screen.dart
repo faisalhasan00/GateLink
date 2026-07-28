@@ -444,7 +444,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
                         child: Text(
                           _flatValidationResult!.isValid
                               ? 'Resident: ${_flatValidationResult!.residentName ?? ""}'
-                              : _flatValidationResult!.error,
+                              : (_flatValidationResult!.error ?? 'Invalid Flat'),
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
