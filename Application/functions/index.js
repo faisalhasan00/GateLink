@@ -123,3 +123,56 @@ exports.notifyGuardOnVisitorDecision = onDocumentUpdated(
     });
   }
 );
+
+/**
+ * Triggers when a new amenity booking is created.
+ * Dispatches confirmation push & in-app notification to the resident.
+ */
+exports.notifyResidentOnAmenityBooking = onDocumentCreated(
+  "societies/{societyId}/amenity_bookings/{bookingId}",
+  async (event) => {
+    const snapshot = event.data;
+    if (!snapshot) return;
+
+    const booking = snapshot.data();
+    const { societyId, bookingId } = event.params;
+
+    const uid = booking.uid;
+    const amenityName = booking.amenityName || "Amenity";
+    const date = booking.date || "";
+    const timeSlot = booking.timeSlot || "";
+
+    if (!uid) return;
+
+    const db = getFirestore();
+
+    // In-App Notification
+    const notifRef = db.collection(`societies/${societyId}/users/${uid}/notifications`).doc();
+    await notifRef.set({
+      title: "🎉 Amenity Booking Confirmed",
+      body: `Your booking for ${amenityName} on ${date} (${timeSlot}) is confirmed!`,
+      type: "amenity_booking",
+      bookingId: bookingId,
+      createdAt: FieldValue.serverTimestamp(),
+      read: false,
+    });
+
+    // FCM Push Notification if token exists
+    const userDoc = await db.doc(`societies/${societyId}/users/${uid}`).get();
+    if (userDoc.exists && userDoc.data().fcmToken) {
+      const fcmToken = userDoc.data().fcmToken;
+      const messaging = getMessaging();
+      await messaging.send({
+        token: fcmToken,
+        notification: {
+          title: "🎉 Booking Confirmed",
+          body: `${amenityName} on ${date} at ${timeSlot}`,
+        },
+        data: {
+          type: "amenity_booking",
+          bookingId: bookingId,
+        },
+      }).catch((err) => console.error("FCM Error:", err));
+    }
+  }
+);

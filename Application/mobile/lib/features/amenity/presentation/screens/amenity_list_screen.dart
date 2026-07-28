@@ -74,23 +74,20 @@ class _AmenityListScreenState extends ConsumerState<AmenityListScreen> {
                         final db = FirebaseFirestore.instance;
                         final batch = db.batch();
                         
-                        final poolRef = db.collection('societies/SOC-001/amenities').doc();
-                        batch.set(poolRef, {
-                          'name': 'Swimming Pool',
-                          'iconKey': 'pool',
-                          'timing': '6:00 AM - 9:00 PM',
-                          'available': true,
-                          'availableSlots': 15,
-                        });
+                        final items = [
+                          {'name': 'Swimming Pool', 'iconKey': 'pool', 'timing': '6:00 AM - 9:00 PM', 'available': true, 'availableSlots': 15, 'fee': 'Free', 'location': 'Clubhouse Level 1'},
+                          {'name': 'Fitness Center', 'iconKey': 'gym', 'timing': '5:00 AM - 11:00 PM', 'available': true, 'availableSlots': 30, 'fee': 'Free', 'location': 'Block A Ground'},
+                          {'name': 'Clubhouse Main Hall', 'iconKey': 'clubhouse', 'timing': '8:00 AM - 10:00 PM', 'available': true, 'availableSlots': 5, 'fee': '₹1,500/slot', 'location': 'Main Clubhouse'},
+                          {'name': 'Tennis Court', 'iconKey': 'tennis', 'timing': '6:00 AM - 8:00 PM', 'available': true, 'availableSlots': 8, 'fee': 'Free', 'location': 'Sports Complex'},
+                          {'name': 'Badminton Court', 'iconKey': 'badminton', 'timing': '6:00 AM - 10:00 PM', 'available': true, 'availableSlots': 10, 'fee': 'Free', 'location': 'Indoor Arena'},
+                          {'name': 'Kids Play Zone', 'iconKey': 'kids', 'timing': '7:00 AM - 8:00 PM', 'available': true, 'availableSlots': 20, 'fee': 'Free', 'location': 'Central Park'},
+                          {'name': 'Community Garden', 'iconKey': 'garden', 'timing': '6:00 AM - 7:00 PM', 'available': true, 'availableSlots': 50, 'fee': 'Free', 'location': 'East Lawn'},
+                        ];
 
-                        final gymRef = db.collection('societies/SOC-001/amenities').doc();
-                        batch.set(gymRef, {
-                          'name': 'Fitness Center',
-                          'iconKey': 'gym',
-                          'timing': '5:00 AM - 11:00 PM',
-                          'available': true,
-                          'availableSlots': 30,
-                        });
+                        for (final item in items) {
+                          final docRef = db.collection('societies/SOC-001/amenities').doc();
+                          batch.set(docRef, item);
+                        }
 
                         await batch.commit();
                       } catch (e) {
@@ -100,7 +97,7 @@ class _AmenityListScreenState extends ConsumerState<AmenityListScreen> {
                       }
                     },
                     icon: const Icon(Icons.add_rounded),
-                    label: const Text('Seed Amenities (Test)'),
+                    label: const Text('Seed Full Society Amenities'),
                   ),
               ]),
             );

@@ -288,16 +288,47 @@ class FirestoreService {
     required String userName,
     required String date,
     required String timeSlot,
+    int guests = 1,
+    String? specialNotes,
   }) async {
+    // 1. Race Condition / Duplicate Check
+    final existingSnapshot = await _db
+        .collection('societies/$societyId/amenity_bookings')
+        .where('amenityId', isEqualTo: amenityId)
+        .where('date', isEqualTo: date)
+        .where('timeSlot', isEqualTo: timeSlot)
+        .where('status', isEqualTo: 'confirmed')
+        .get();
+
+    if (existingSnapshot.docs.isNotEmpty) {
+      throw Exception('This time slot ($timeSlot) on $date is no longer available.');
+    }
+
+    // 2. Add Booking
     await _db.collection('societies/$societyId/amenity_bookings').add({
       'amenityId': amenityId,
       'amenityName': amenityName,
       'bookedBy': uid,
       'userName': userName,
+      'uid': uid,
       'date': date,
       'timeSlot': timeSlot,
+      'guests': guests,
+      'specialNotes': specialNotes ?? '',
       'status': 'confirmed',
+      'societyId': societyId,
       'createdAt': DateTime.now().toIso8601String(),
+    });
+  }
+
+  Future<void> cancelAmenityBooking(String bookingId, String userUid) async {
+    await _db
+        .collection('societies/$societyId/amenity_bookings')
+        .doc(bookingId)
+        .update({
+      'status': 'cancelled',
+      'cancelledBy': userUid,
+      'cancelledAt': DateTime.now().toIso8601String(),
     });
   }
 

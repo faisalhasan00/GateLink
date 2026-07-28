@@ -145,12 +145,12 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
               ),
               child: Row(children: [
                 Container(width: 52, height: 52,
-                  decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), shape: BoxShape.circle),
+                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
                   child: const Icon(Icons.pool_rounded, color: Colors.white, size: 28)),
                 const SizedBox(width: AppSpacing.md),
                 const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Swimming Pool', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-                  Text('Open: 6:00 AM - 9:00 PM', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                  Text('Society Amenity', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                  Text('Open Daily: 6:00 AM - 10:00 PM', style: TextStyle(color: Colors.white70, fontSize: 13)),
                 ]),
               ]),
             ),

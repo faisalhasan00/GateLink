@@ -1,53 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/providers/firebase_providers.dart';
+import '../../../../core/providers/auth_providers.dart';
 
-class MyBookingsScreen extends StatelessWidget {
+class MyBookingsScreen extends ConsumerWidget {
   const MyBookingsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final upcomingBookings = [
-      _Booking(
-        amenity: 'Swimming Pool',
-        date: 'Today, 24 Jul 2026',
-        time: '6:00 PM – 7:00 PM',
-        status: 'confirmed',
-        guests: 2,
-        icon: Icons.pool_rounded,
-        color: AppColors.info,
-      ),
-      _Booking(
-        amenity: 'Tennis Court',
-        date: 'Tomorrow, 25 Jul 2026',
-        time: '7:00 AM – 8:00 AM',
-        status: 'confirmed',
-        guests: 1,
-        icon: Icons.sports_tennis_rounded,
-        color: AppColors.success,
-      ),
-    ];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(currentUserProvider);
+    final firestoreService = ref.watch(firestoreServiceProvider);
 
-    final pastBookings = [
-      _Booking(
-        amenity: 'Clubhouse Hall',
-        date: '15 Jul 2026',
-        time: '4:00 PM – 8:00 PM',
-        status: 'completed',
-        guests: 15,
-        icon: Icons.celebration_rounded,
-        color: AppColors.amenity,
-      ),
-      _Booking(
-        amenity: 'Badminton Court',
-        date: '10 Jul 2026',
-        time: '8:00 AM – 9:00 AM',
-        status: 'completed',
-        guests: 2,
-        icon: Icons.sports_rounded,
-        color: AppColors.visitor,
-      ),
-    ];
+    if (user == null || firestoreService == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('My Amenity Bookings')),
+        body: const Center(child: Text('Please log in to view your bookings.')),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -58,32 +29,197 @@ class MyBookingsScreen extends StatelessWidget {
         surfaceTintColor: Colors.white,
       ),
       backgroundColor: AppColors.background,
-      body: ListView(
-        padding: const EdgeInsets.all(AppSpacing.pagePadding),
+      body: StreamBuilder(
+        stream: firestoreService.myBookingsStream(user.uid),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(child: Text('Error loading bookings: ${snapshot.error}'));
+          }
+
+          final docs = snapshot.data?.docs ?? [];
+          if (docs.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.event_busy_rounded, size: 56, color: AppColors.textDisabled),
+                  const SizedBox(height: AppSpacing.md),
+                  const Text('No bookings found', style: TextStyle(color: AppColors.textSecondary)),
+                ],
+              ),
+            );
+          }
+
+          final upcomingDocs = docs.where((d) {
+            final data = d.data() as Map<String, dynamic>;
+            final status = data['status'] ?? '';
+            return status == 'confirmed';
+          }).toList();
+
+          final historyDocs = docs.where((d) {
+            final data = d.data() as Map<String, dynamic>;
+            final status = data['status'] ?? '';
+            return status != 'confirmed';
+          }).toList();
+
+          return ListView(
+            padding: const EdgeInsets.all(AppSpacing.pagePadding),
+            children: [
+              // Summary Strip
+              Row(
+                children: [
+                  _SummaryChip(label: '${upcomingDocs.length} Active', color: AppColors.primary),
+                  const SizedBox(width: AppSpacing.sm),
+                  _SummaryChip(label: '${historyDocs.length} Past/Cancelled', color: AppColors.textSecondary),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+
+              // Upcoming Section
+              if (upcomingDocs.isNotEmpty) ...[
+                const _SectionHeader(title: 'ACTIVE BOOKINGS', icon: Icons.event_available_rounded, color: AppColors.primary),
+                const SizedBox(height: AppSpacing.sm),
+                ...upcomingDocs.map((doc) => _LiveBookingCard(doc: doc, ref: ref, context: context)),
+                const SizedBox(height: AppSpacing.lg),
+              ],
+
+              // Past Section
+              if (historyDocs.isNotEmpty) ...[
+                const _SectionHeader(title: 'PAST & CANCELLED', icon: Icons.history_rounded, color: AppColors.textSecondary),
+                const SizedBox(height: AppSpacing.sm),
+                ...historyDocs.map((doc) => _LiveBookingCard(doc: doc, ref: ref, context: context)),
+              ],
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _LiveBookingCard extends StatelessWidget {
+  final dynamic doc;
+  final WidgetRef ref;
+  final BuildContext context;
+
+  const _LiveBookingCard({required this.doc, required this.ref, required this.context});
+
+  @override
+  Widget build(BuildContext context) {
+    final data = doc.data() as Map<String, dynamic>;
+    final amenityName = data['amenityName'] ?? 'Amenity';
+    final date = data['date'] ?? '';
+    final timeSlot = data['timeSlot'] ?? '';
+    final status = data['status'] ?? 'confirmed';
+    final guests = data['guests'] ?? 1;
+
+    final isConfirmed = status == 'confirmed';
+    final isCancelled = status == 'cancelled';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.md),
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Summary Strip
           Row(
             children: [
-              _SummaryChip(label: '${upcomingBookings.length} Upcoming', color: AppColors.primary),
-              const SizedBox(width: AppSpacing.sm),
-              _SummaryChip(label: '${pastBookings.length} Completed', color: AppColors.textSecondary),
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: isCancelled
+                    ? AppColors.error.withValues(alpha: 0.1)
+                    : AppColors.primary.withValues(alpha: 0.1),
+                child: Icon(
+                  Icons.pool_rounded,
+                  size: 20,
+                  color: isCancelled ? AppColors.error : AppColors.primary,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(amenityName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                    const SizedBox(height: 2),
+                    Text('$date  •  $timeSlot', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: isCancelled
+                      ? AppColors.error.withValues(alpha: 0.1)
+                      : AppColors.success.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+                child: Text(
+                  status.toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: isCancelled ? AppColors.error : AppColors.success,
+                  ),
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
+          if (isConfirmed) ...[
+            const SizedBox(height: AppSpacing.md),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text('$guests Guest(s)', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                OutlinedButton(
+                  onPressed: () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Cancel Booking?'),
+                        content: Text('Are you sure you want to cancel your booking for $amenityName on $date ($timeSlot)?'),
+                        actions: [
+                          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Keep Booking')),
+                          ElevatedButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+                            child: const Text('Cancel Booking'),
+                          ),
+                        ],
+                      ),
+                    );
 
-          // Upcoming Section
-          if (upcomingBookings.isNotEmpty) ...[
-            const _SectionHeader(title: 'UPCOMING', icon: Icons.event_available_rounded, color: AppColors.primary),
-            const SizedBox(height: AppSpacing.sm),
-            ...upcomingBookings.map((b) => _BookingCard(booking: b, context: context)),
-            const SizedBox(height: AppSpacing.lg),
-          ],
-
-          // Past Section
-          if (pastBookings.isNotEmpty) ...[
-            const _SectionHeader(title: 'PAST BOOKINGS', icon: Icons.history_rounded, color: AppColors.textSecondary),
-            const SizedBox(height: AppSpacing.sm),
-            ...pastBookings.map((b) => _BookingCard(booking: b, context: context)),
+                    if (confirm == true) {
+                      final svc = ref.read(firestoreServiceProvider);
+                      final user = ref.read(currentUserProvider);
+                      if (svc != null && user != null) {
+                        await svc.cancelAmenityBooking(doc.id, user.uid);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Booking cancelled successfully.'), backgroundColor: AppColors.error),
+                          );
+                        }
+                      }
+                    }
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.error,
+                    side: const BorderSide(color: AppColors.error),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  ),
+                  child: const Text('Cancel Booking', style: TextStyle(fontSize: 12)),
+                ),
+              ],
+            ),
           ],
         ],
       ),
@@ -113,180 +249,17 @@ class _SectionHeader extends StatelessWidget {
   final String title;
   final IconData icon;
   final Color color;
+
   const _SectionHeader({required this.title, required this.icon, required this.color});
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, size: 14, color: color),
+        Icon(icon, size: 16, color: color),
         const SizedBox(width: 6),
-        Text(title, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: color, letterSpacing: 1.0)),
+        Text(title, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: color, letterSpacing: 0.8)),
       ],
     );
   }
-}
-
-class _BookingCard extends StatelessWidget {
-  final _Booking booking;
-  final BuildContext context;
-  const _BookingCard({required this.booking, required this.context});
-
-  @override
-  Widget build(BuildContext ctx) {
-    final isCompleted = booking.status == 'completed';
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Row(
-              children: [
-                // Amenity Icon
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: (isCompleted ? AppColors.gray400 : booking.color).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                  ),
-                  child: Icon(
-                    booking.icon,
-                    color: isCompleted ? AppColors.gray400 : booking.color,
-                    size: 24,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              booking.amenity,
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                                color: isCompleted ? AppColors.textSecondary : AppColors.textPrimary,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                            decoration: BoxDecoration(
-                              color: isCompleted ? AppColors.gray100 : AppColors.successSurface,
-                              borderRadius: BorderRadius.circular(AppRadius.full),
-                            ),
-                            child: Text(
-                              isCompleted ? 'DONE' : 'CONFIRMED',
-                              style: TextStyle(
-                                fontSize: 9,
-                                fontWeight: FontWeight.w800,
-                                color: isCompleted ? AppColors.gray600 : AppColors.success,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Row(
-                        children: [
-                          const Icon(Icons.calendar_today_rounded, size: 12, color: AppColors.textSecondary),
-                          const SizedBox(width: 4),
-                          Text(booking.date, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Row(
-                        children: [
-                          const Icon(Icons.access_time_rounded, size: 12, color: AppColors.textSecondary),
-                          const SizedBox(width: 4),
-                          Text(booking.time, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                          const Spacer(),
-                          const Icon(Icons.people_rounded, size: 12, color: AppColors.textSecondary),
-                          const SizedBox(width: 3),
-                          Text(
-                            '${booking.guests} guest${booking.guests > 1 ? 's' : ''}',
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Cancel button for upcoming
-          if (!isCompleted) ...[
-            const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 8),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline_rounded, size: 13, color: AppColors.textSecondary),
-                  const SizedBox(width: 4),
-                  const Expanded(
-                    child: Text(
-                      'Free cancellation up to 2 hours before slot',
-                      style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(ctx).showSnackBar(
-                        const SnackBar(
-                          content: Text('Booking cancelled'),
-                          behavior: SnackBarBehavior.floating,
-                        ),
-                      );
-                    },
-                    style: TextButton.styleFrom(
-                      foregroundColor: AppColors.error,
-                      minimumSize: const Size(80, 30),
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      textStyle: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-                    ),
-                    child: const Text('Cancel'),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _Booking {
-  final String amenity, date, time, status;
-  final int guests;
-  final IconData icon;
-  final Color color;
-  const _Booking({
-    required this.amenity,
-    required this.date,
-    required this.time,
-    required this.status,
-    required this.guests,
-    required this.icon,
-    required this.color,
-  });
 }
