@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/firebase_providers.dart';
+import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/services/firestore_service.dart';
 
 class GuardDashboardScreen extends ConsumerStatefulWidget {
