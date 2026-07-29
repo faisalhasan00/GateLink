@@ -34,7 +34,6 @@ export default function LandingPage() {
         <SolutionsSection onOpenDemo={handleOpenDemo} />
         <ClientLogosSection />
         <TrustedSection />
-        <StatsSection />
         <FeaturesSection />
         <ComparisonSection />
         <ProposalSection onOpenDemo={handleOpenDemo} />
