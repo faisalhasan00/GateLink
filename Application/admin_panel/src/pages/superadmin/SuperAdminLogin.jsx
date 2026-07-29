@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../firebase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { setSuperAdminSession } from '../../services/sessionManager';
+import HomeHniHoodLogo from '../../components/ui/HomeHniHoodLogo';
+import SeoHead from '../../components/seo/SeoHead';
+import { Lock, Mail, ArrowRight, AlertCircle, ShieldAlert } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 const SUPER_ADMIN_EMAIL = 'mohammedfaisalhasan@gmail.com';
 const SUPER_ADMIN_PASS = 'Raj786f@';
 
 export default function SuperAdminLogin() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -50,90 +56,99 @@ export default function SuperAdminLogin() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #3730A3 0%, #4F46E5 100%)',
-    }}>
+    <div style={{ backgroundColor: isDark ? '#0F172A' : '#F8FAFC', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '24px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <SeoHead title="Platform Owner Login - HomeHni Hood" description="Super Admin Portal Login for HomeHni Hood Platform Owner." canonicalUrl="https://societysphere.com/super-admin/login" />
+
+      {/* Top Header Logo */}
+      <div style={{ marginBottom: '32px' }}>
+        <Link to="/landing" style={{ textDecoration: 'none' }}>
+          <HomeHniHoodLogo isDark={isDark} size="large" />
+        </Link>
+      </div>
+
+      {/* Login Form Container */}
       <div style={{
-        background: 'white',
-        padding: '48px',
-        borderRadius: '20px',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+        background: isDark ? '#1E293B' : '#FFFFFF',
+        borderRadius: '4px',
+        border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E5E7EB',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
         width: '100%',
         maxWidth: '420px',
+        padding: '36px'
       }}>
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-          <div style={{ width: '48px', height: '48px', background: '#EEF2FF', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '24px' }}>👑</span>
-          </div>
-          <div>
-            <h1 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>Owner Portal</h1>
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>SocietySphere Platform Admin</p>
-          </div>
+        <div style={{ marginBottom: '24px', textAlign: 'center' }}>
+          <span style={{ fontSize: '11px', fontWeight: 900, background: '#FEF2F2', color: '#EF4444', padding: '4px 10px', borderRadius: '2px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+            PLATFORM SUPER ADMIN
+          </span>
+          <h2 style={{ fontSize: '24px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: '12px 0 6px 0' }}>
+            Owner Control Console
+          </h2>
+          <p style={{ fontSize: '13px', color: isDark ? '#94A3B8' : '#666666', margin: 0 }}>
+            Restricted access for system administrators & licensing managers
+          </p>
         </div>
 
-        <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>Platform Login</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '28px', fontSize: '14px' }}>Restricted access — Super Admins only</p>
-
         {error && (
-          <div style={{ background: 'var(--danger-light)', color: 'var(--danger)', padding: '12px 16px', borderRadius: '10px', fontSize: '14px', marginBottom: '20px' }}>
-            {error}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#DC2626', padding: '12px 14px', borderRadius: '4px', fontSize: '13px', fontWeight: 600, marginBottom: '20px' }}>
+            <ShieldAlert size={16} />
+            <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Email Address</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="mohammedfaisalhasan@gmail.com"
-              required
-              style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
-            />
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#CBD5E1' : '#444444', display: 'block', marginBottom: '6px' }}>Super Admin Email</label>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <Mail size={16} color={isDark ? '#94A3B8' : '#666666'} style={{ position: 'absolute', left: '12px' }} />
+              <input
+                type="email"
+                required
+                placeholder="mohammedfaisalhasan@gmail.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                style={{ width: '100%', padding: '12px 12px 12px 38px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '14px', outline: 'none' }}
+              />
+            </div>
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
-              style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
-            />
+          <div>
+            <label style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#CBD5E1' : '#444444', display: 'block', marginBottom: '6px' }}>Super Admin Password</label>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <Lock size={16} color={isDark ? '#94A3B8' : '#666666'} style={{ position: 'absolute', left: '12px' }} />
+              <input
+                type="password"
+                required
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                style={{ width: '100%', padding: '12px 12px 12px 38px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '14px', outline: 'none' }}
+              />
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
             style={{
-              width: '100%',
-              height: '48px',
-              fontSize: '15px',
+              padding: '12px',
+              borderRadius: '2px',
+              backgroundColor: '#00B589',
+              color: '#FFFFFF',
               fontWeight: 700,
-              background: 'linear-gradient(135deg, #3730A3, #4F46E5)',
-              color: 'white',
+              fontSize: '14px',
               border: 'none',
-              borderRadius: '10px',
-              cursor: loading ? 'not-allowed' : 'pointer',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              marginTop: '8px'
             }}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            <span>{loading ? 'Verifying Credentials...' : 'Sign In as Super Admin'}</span>
+            <ArrowRight size={16} />
           </button>
         </form>
-
-        <div style={{ textAlign: 'center', marginTop: '24px' }}>
-          <a href="/login" style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
-            ← Back to Society Admin Login
-          </a>
-        </div>
       </div>
     </div>
   );

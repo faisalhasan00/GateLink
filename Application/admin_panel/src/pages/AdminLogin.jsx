@@ -2,10 +2,16 @@ import React, { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { auth, db } from '../firebase';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { setSocietyAdminSession } from '../services/sessionManager';
+import HomeHniHoodLogo from '../components/ui/HomeHniHoodLogo';
+import SeoHead from '../components/seo/SeoHead';
+import { Lock, Mail, ArrowRight, AlertCircle, Building2 } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
 
 export default function AdminLogin() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -22,7 +28,7 @@ export default function AdminLogin() {
       // 1. Attempt standard login
       const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
       setSocietyAdminSession({ email: cleanEmail, token: res.user?.uid });
-      navigate('/');
+      navigate('/app');
     } catch (err) {
       // 2. If Auth account doesn't exist yet, check if society was onboarded with these credentials
       try {
@@ -35,13 +41,13 @@ export default function AdminLogin() {
             // Auto-register in Firebase Auth
             const newRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
             setSocietyAdminSession({ email: cleanEmail, token: newRes.user?.uid });
-            navigate('/');
+            navigate('/app');
             return;
           }
         }
       } catch (fallbackError) {
         if (fallbackError.code === 'auth/email-already-in-use') {
-          setError('This email is already registered in Firebase. Please enter the password associated with this email address.');
+          setError('This email is already registered. Please enter your account password.');
           return;
         }
         console.error("Onboarding auth fallback error:", fallbackError);
@@ -54,80 +60,103 @@ export default function AdminLogin() {
   };
 
   return (
-    <div style={{
-      minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      background: 'linear-gradient(135deg, #EEF2FF 0%, #F3F4F6 100%)',
-    }}>
+    <div style={{ backgroundColor: isDark ? '#0F172A' : '#F8FAFC', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '24px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <SeoHead title="Society Admin Login - HomeHni Hood" description="Login to HomeHni Hood Society Management Committee Console." canonicalUrl="https://societysphere.com/login" />
+
+      {/* Top Header Logo */}
+      <div style={{ marginBottom: '32px' }}>
+        <Link to="/landing" style={{ textDecoration: 'none' }}>
+          <HomeHniHoodLogo isDark={isDark} size="large" />
+        </Link>
+      </div>
+
+      {/* Login Form Container */}
       <div style={{
-        background: 'white',
-        padding: '48px',
-        borderRadius: '20px',
-        boxShadow: '0 20px 60px rgba(79,70,229,0.12)',
+        background: isDark ? '#1E293B' : '#FFFFFF',
+        borderRadius: '4px',
+        border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E5E7EB',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
         width: '100%',
         maxWidth: '420px',
+        padding: '36px'
       }}>
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '32px' }}>
-          <div style={{ width: '48px', height: '48px', background: 'var(--primary-light)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '24px' }}>🏢</span>
-          </div>
-          <div>
-            <h1 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', margin: 0 }}>SocietySphere</h1>
-            <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: 0 }}>Society Admin Portal</p>
-          </div>
+        <div style={{ marginBottom: '24px', textAlign: 'center' }}>
+          <span style={{ fontSize: '11px', fontWeight: 900, background: '#ECFDF5', color: '#00B589', padding: '4px 10px', borderRadius: '2px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+            RWA COMMITTEE PORTAL
+          </span>
+          <h2 style={{ fontSize: '24px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: '12px 0 6px 0' }}>
+            Society Admin Login
+          </h2>
+          <p style={{ fontSize: '13px', color: isDark ? '#94A3B8' : '#666666', margin: 0 }}>
+            Sign in to manage your residents, security gates, and ledgers
+          </p>
         </div>
 
-        <h2 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '8px' }}>Welcome back</h2>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '28px', fontSize: '14px' }}>Sign in to manage your society</p>
-
         {error && (
-          <div style={{ background: 'var(--danger-light)', color: 'var(--danger)', padding: '12px 16px', borderRadius: '10px', fontSize: '14px', marginBottom: '20px' }}>
-            {error}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#DC2626', padding: '12px 14px', borderRadius: '4px', fontSize: '13px', fontWeight: 600, marginBottom: '20px' }}>
+            <AlertCircle size={16} />
+            <span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleLogin}>
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Email Address</label>
-            <input
-              type="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="admin@greenwood.com"
-              required
-              style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
-            />
+        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#CBD5E1' : '#444444', display: 'block', marginBottom: '6px' }}>Admin Email Address</label>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <Mail size={16} color={isDark ? '#94A3B8' : '#666666'} style={{ position: 'absolute', left: '12px' }} />
+              <input
+                type="email"
+                required
+                placeholder="admin@greenwood.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                style={{ width: '100%', padding: '12px 12px 12px 38px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '14px', outline: 'none' }}
+              />
+            </div>
           </div>
 
-          <div style={{ marginBottom: '24px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 600, display: 'block', marginBottom: '6px' }}>Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
-              style={{ width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--border-color)', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
-            />
+          <div>
+            <label style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#CBD5E1' : '#444444', display: 'block', marginBottom: '6px' }}>Password</label>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+              <Lock size={16} color={isDark ? '#94A3B8' : '#666666'} style={{ position: 'absolute', left: '12px' }} />
+              <input
+                type="password"
+                required
+                placeholder="••••••••"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                style={{ width: '100%', padding: '12px 12px 12px 38px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '14px', outline: 'none' }}
+              />
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="btn btn-primary"
-            style={{ width: '100%', justifyContent: 'center', height: '48px', fontSize: '15px' }}
+            style={{
+              padding: '12px',
+              borderRadius: '2px',
+              backgroundColor: '#00B589',
+              color: '#FFFFFF',
+              fontWeight: 700,
+              fontSize: '14px',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              marginTop: '8px'
+            }}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            <span>{loading ? 'Authenticating...' : 'Sign In to Dashboard'}</span>
+            <ArrowRight size={16} />
           </button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: '24px' }}>
-          <a href="/super-admin/login" style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
-            Platform Super Admin? →
-          </a>
+        <div style={{ borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #F1F5F9', marginTop: '24px', paddingTop: '16px', textAlign: 'center', fontSize: '13px', color: isDark ? '#94A3B8' : '#666666' }}>
+          <span>Need to register your society? </span>
+          <Link to="/contact" style={{ color: '#00B589', textDecoration: 'none', fontWeight: 700 }}>Enroll Your Society</Link>
         </div>
       </div>
     </div>
