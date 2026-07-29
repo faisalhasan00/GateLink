@@ -88,16 +88,6 @@ export default function HeroSection({ onOpenDemo }) {
             A world-class technology to make your daily life more convenient and safe.
           </p>
 
-          {/* Red Highlight Stat */}
-          <p style={{
-            fontSize: '16px',
-            color: isDark ? '#CBD5E1' : '#444444',
-            fontWeight: 700,
-            marginBottom: '28px'
-          }}>
-            Now securing <span style={{ color: '#FF385C', fontWeight: 900 }}>25,000+</span> societies under our hood.
-          </p>
-
           {/* Quick Enrollment Form */}
           {submitted ? (
             <div style={{
