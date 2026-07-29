@@ -191,7 +191,7 @@ export default function EcosystemPage() {
             </div>
 
             {/* Linear Animated Node Chain */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '12px', alignItems: 'center', position: 'relative' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '12px', alignItems: 'center', position: 'relative' }}>
               
               {/* Background Connecting Glow Line */}
               <div style={{

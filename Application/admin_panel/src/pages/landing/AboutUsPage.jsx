@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import Navbar from './Navbar';
 import FooterSection from './FooterSection';
 import DemoModal from './DemoModal';
-import { ShieldCheck, Globe, Users, Building, CheckCircle2, Award, HeartHandshake, ArrowRight } from 'lucide-react';
+import SeoHead from '../../components/seo/SeoHead';
+import { ShieldCheck, Globe, Building, Award, HeartHandshake, ArrowRight } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 export default function AboutUsPage() {
@@ -30,6 +31,12 @@ export default function AboutUsPage() {
 
   return (
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <SeoHead
+        title="About Us - HomeHni Hood Society OS"
+        description="Learn about HomeHni Hood's mission to digitize gatekeeper security, resident management, and accounting for housing societies across India and UAE."
+        canonicalUrl="https://societysphere.com/about"
+      />
+
       {/* Sticky Header */}
       <Navbar onOpenDemo={() => setIsDemoModalOpen(true)} />
 
@@ -40,18 +47,18 @@ export default function AboutUsPage() {
           {/* Header Banner */}
           <div style={{ textAlign: 'center', maxWidth: '850px', margin: '0 auto 60px auto' }}>
             <span style={{ fontSize: '12px', fontWeight: 900, color: '#00B589', letterSpacing: '1px', textTransform: 'uppercase' }}>
-              ABOUT SOCIETYYSPHERE
+              ABOUT HOMEHNI HOOD
             </span>
             <h1 style={{ fontSize: '42px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-1px', margin: '12px 0 16px 0', lineHeight: 1.15 }}>
               Pioneering Gated Community & Gatekeeper Security OS
             </h1>
             <p style={{ fontSize: '16px', color: isDark ? '#94A3B8' : '#555555', lineHeight: 1.6, margin: 0 }}>
-              SocietySphere is designed to simplify daily apartment living, replace paper gate registers, eliminate payment chasing, and protect housing societies across India and UAE.
+              HomeHni Hood is designed to simplify daily apartment living, replace paper gate registers, eliminate payment chasing, and protect housing societies across India and UAE.
             </p>
           </div>
 
           {/* Mission & Vision Grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginBottom: '70px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', marginBottom: '70px' }}>
             <div style={{
               background: isDark ? '#1E293B' : '#FFFFFF',
               borderRadius: '4px',
@@ -66,7 +73,7 @@ export default function AboutUsPage() {
                 <h2 style={{ fontSize: '22px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: 0 }}>Our Mission</h2>
               </div>
               <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#666666', lineHeight: 1.65, margin: 0 }}>
-                To empower residents, security guards, and society management committees with simple, intelligent, and affordable digital tools that guarantee safety, transparency, and effortless daily operations.
+                To empower residents, security guards, and management committees with simple, intelligent, and affordable digital tools that guarantee safety, transparency, and effortless daily operations.
               </p>
             </div>
 
@@ -92,10 +99,10 @@ export default function AboutUsPage() {
           {/* Three Company Pillars Grid */}
           <div style={{ marginBottom: '70px' }}>
             <h2 style={{ fontSize: '28px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', textAlign: 'center', marginBottom: '40px' }}>
-              Why Housing Societies Trust SocietySphere
+              Why Housing Societies Trust HomeHni Hood
             </h2>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '30px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px' }}>
               {pillars.map((p) => (
                 <div key={p.title} style={{
                   background: isDark ? '#1E293B' : '#FFFFFF',
@@ -122,11 +129,11 @@ export default function AboutUsPage() {
             maxWidth: '900px',
             margin: '0 auto'
           }}>
-            <h3 style={{ fontSize: '26px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '12px' }}>
-              Ready to Enroll Your Housing Society?
-            </h3>
+            <h2 style={{ fontSize: '26px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '12px' }}>
+              Ready to Upgrade Your Society’s Security & Billing?
+            </h2>
             <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#666666', marginBottom: '24px' }}>
-              Get a customized onboarding proposal, 14-day free trial, and full data migration support.
+              Join hundreds of committee presidents who simplified their society operations in under 24 hours.
             </p>
             <button
               onClick={() => setIsDemoModalOpen(true)}
@@ -135,16 +142,16 @@ export default function AboutUsPage() {
                 borderRadius: '2px',
                 backgroundColor: '#00B589',
                 color: '#FFFFFF',
-                border: 'none',
-                fontSize: '15px',
+                fontSize: '14px',
                 fontWeight: 700,
+                border: 'none',
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px'
               }}
             >
-              <span>Enroll your society</span>
+              <span>Enroll Your Society Now</span>
               <ArrowRight size={16} />
             </button>
           </div>
@@ -155,7 +162,7 @@ export default function AboutUsPage() {
       {/* Footer */}
       <FooterSection />
 
-      {/* Demo Modal */}
+      {/* Demo Booking Modal */}
       <DemoModal isOpen={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />
     </div>
   );

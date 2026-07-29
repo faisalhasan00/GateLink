@@ -193,7 +193,7 @@ export default function PricingPage() {
       <section style={{ padding: '40px 0 80px 0', background: '#020617' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
           
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '32px', alignItems: 'stretch' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px', alignItems: 'stretch' }}>
             {plans.map((p, idx) => (
               <motion.div
                 key={p.name}
