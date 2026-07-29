@@ -31,12 +31,12 @@ export default function LandingPage() {
       {/* Main Sections */}
       <main>
         <HeroSection onOpenDemo={handleOpenDemo} />
+        <SolutionsSection onOpenDemo={handleOpenDemo} />
         <ClientLogosSection />
         <TrustedSection />
         <StatsSection />
         <FeaturesSection />
         <ComparisonSection />
-        <SolutionsSection onOpenDemo={handleOpenDemo} />
         <ProposalSection onOpenDemo={handleOpenDemo} />
         <ContactSection />
       </main>
