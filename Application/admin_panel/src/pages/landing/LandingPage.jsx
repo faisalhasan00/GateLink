@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import Navbar from './Navbar';
 import HeroSection from './HeroSection';
+import ClientLogosSection from './ClientLogosSection';
 import TrustedSection from './TrustedSection';
 import StatsSection from './StatsSection';
 import FeaturesSection from './FeaturesSection';
+import ComparisonSection from './ComparisonSection';
 import SolutionsSection from './SolutionsSection';
 import ProposalSection from './ProposalSection';
 import ContactSection from './ContactSection';
@@ -22,16 +24,18 @@ export default function LandingPage() {
   };
 
   return (
-    <div style={{ backgroundColor: '#020617', color: '#F8FAFC', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
-      {/* Sticky Glassmorphic Navbar */}
+    <div style={{ backgroundColor: '#0F172A', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      {/* Sticky Enterprise Navbar */}
       <Navbar onOpenDemo={handleOpenDemo} />
 
       {/* Main Sections */}
       <main>
         <HeroSection onOpenDemo={handleOpenDemo} />
+        <ClientLogosSection />
         <TrustedSection />
         <StatsSection />
         <FeaturesSection />
+        <ComparisonSection />
         <SolutionsSection onOpenDemo={handleOpenDemo} />
         <ProposalSection onOpenDemo={handleOpenDemo} />
         <ContactSection />

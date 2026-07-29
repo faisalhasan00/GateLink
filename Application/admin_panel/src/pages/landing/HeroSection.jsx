@@ -179,105 +179,74 @@ export default function HeroSection({ onOpenDemo }) {
             background: isDark ? '#1E293B' : '#FFFFFF',
             borderRadius: '20px',
             border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #CBD5E1',
-            padding: '24px',
+            padding: '16px',
             boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.1)',
-            minHeight: '360px',
+            minHeight: '380px',
             display: 'flex',
             flexDirection: 'column',
-            justifyContent: 'center'
+            justifyContent: 'center',
+            overflow: 'hidden'
           }}>
             {activeTab === 'resident' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Resident Mobile Companion</h3>
+                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Resident Mobile Companion</h3>
                     <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>Flat 402 • Skyline Heights</p>
                   </div>
                   <span style={{ padding: '4px 10px', borderRadius: '20px', background: '#ECFDF5', color: '#059669', fontSize: '11px', fontWeight: 800 }}>LIVE GATE LINK</span>
                 </div>
 
-                <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', borderRadius: '16px', padding: '16px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div style={{ width: '42px', height: '42px', borderRadius: '12px', backgroundColor: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-                    <Bell size={20} />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '14px', fontWeight: 800, color: isDark ? '#FFFFFF' : '#0F172A' }}>Visitor at Main Gate</div>
-                    <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>Amazon Delivery Agent • OTP: 8492</div>
-                  </div>
-                  <button style={{ padding: '8px 14px', borderRadius: '8px', background: '#059669', color: 'white', fontWeight: 800, border: 'none', cursor: 'pointer', fontSize: '12px' }}>
-                    Allow
-                  </button>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '14px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E2E8F0' }}>
-                    <div style={{ fontSize: '11px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 700 }}>MAINTENANCE DUE</div>
-                    <div style={{ fontSize: '16px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', marginTop: '2px' }}>₹4,500</div>
-                    <div style={{ fontSize: '11px', color: '#059669', fontWeight: 800, marginTop: '2px' }}>Paid via Razorpay</div>
-                  </div>
-
-                  <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '14px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E2E8F0' }}>
-                    <div style={{ fontSize: '11px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 700 }}>AMENITY BOOKED</div>
-                    <div style={{ fontSize: '14px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', marginTop: '2px' }}>Tennis Court</div>
-                    <div style={{ fontSize: '11px', color: '#2563EB', fontWeight: 800, marginTop: '2px' }}>Today 6:00 PM</div>
-                  </div>
+                <div style={{ borderRadius: '14px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0', maxHeight: '280px' }}>
+                  <img src="/assets/resident_app_mockup.png" alt="Resident App UI Mockup" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 </div>
               </div>
             )}
 
             {activeTab === 'guard' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Gatekeeper Duty Console</h3>
+                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Gatekeeper Duty Console</h3>
                     <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>Main Entry Gate 01</p>
                   </div>
                   <span style={{ padding: '4px 10px', borderRadius: '20px', background: '#ECFDF5', color: '#059669', fontSize: '11px', fontWeight: 800 }}>GUARD ON DUTY</span>
                 </div>
 
-                <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '14px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 800, color: isDark ? '#FFFFFF' : '#0F172A', marginBottom: '8px' }}>Pre-Approved Entry Pass</div>
-                  <div style={{ fontSize: '13px', color: isDark ? '#94A3B8' : '#475569' }}>Guest Passcode: <strong style={{ color: '#2563EB' }}>#9012</strong> → Flat 201</div>
+                <div style={{ borderRadius: '14px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0', maxHeight: '280px' }}>
+                  <img src="/assets/guard_app_mockup.png" alt="Guard App UI Mockup" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 </div>
               </div>
             )}
 
             {activeTab === 'admin' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Society Admin Dashboard</h3>
-                    <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>July 2026 Financial Overview</p>
+                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Society Admin Dashboard</h3>
+                    <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>Financial Accounting & Visitor Log</p>
                   </div>
                   <span style={{ padding: '4px 10px', borderRadius: '20px', background: '#EFF6FF', color: '#2563EB', fontSize: '11px', fontWeight: 800 }}>98.4% COLLECTED</span>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '14px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0' }}>
-                    <div style={{ fontSize: '11px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 700 }}>COLLECTED REVENUE</div>
-                    <div style={{ fontSize: '20px', fontWeight: 900, color: '#059669', marginTop: '4px' }}>₹8,45,000</div>
-                  </div>
-                  <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '14px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0' }}>
-                    <div style={{ fontSize: '11px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 700 }}>SLA HELP TICKETS</div>
-                    <div style={{ fontSize: '20px', fontWeight: 900, color: '#2563EB', marginTop: '4px' }}>12 Resolved</div>
-                  </div>
+                <div style={{ borderRadius: '14px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0', maxHeight: '280px' }}>
+                  <img src="/assets/admin_dashboard_mockup.png" alt="Society Admin Dashboard Mockup" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 </div>
               </div>
             )}
 
             {activeTab === 'superadmin' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Super Admin Multi-Tenant Portal</h3>
+                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Super Admin Multi-Tenant Portal</h3>
                     <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>Global Township CRM</p>
                   </div>
                   <span style={{ padding: '4px 10px', borderRadius: '20px', background: '#F3E8FF', color: '#7C3AED', fontSize: '11px', fontWeight: 800 }}>HQ CONTROL</span>
                 </div>
 
-                <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '14px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 800, color: isDark ? '#FFFFFF' : '#0F172A' }}>500+ Societies Onboarded</div>
-                  <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B', marginTop: '2px' }}>Active SaaS Subscriptions Across Bengaluru, Mumbai, Delhi</div>
+                <div style={{ borderRadius: '14px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0', maxHeight: '280px' }}>
+                  <img src="/assets/admin_dashboard_mockup.png" alt="Super Admin Dashboard Mockup" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                 </div>
               </div>
             )}

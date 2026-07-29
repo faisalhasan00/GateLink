@@ -9,7 +9,8 @@ import {
   Waves, 
   Users, 
   FileText,
-  Sparkles
+  Sparkles,
+  ArrowRight
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -17,122 +18,117 @@ export default function FeaturesSection() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const features = [
-    {
-      icon: <UserCheck size={26} color="#2563EB" />,
-      title: 'Instant Visitor Approval',
-      desc: 'Residents receive real-time push notifications when visitors arrive at gate. Approve cab entries, deliveries, and guests with 1 tap.',
-      tag: 'RESIDENT APP'
-    },
-    {
-      icon: <ShieldCheck size={26} color="#059669" />,
-      title: 'Guard Gatekeeper & QR Passes',
-      desc: 'Streamlined gate check-in with OTP verification, digital passcode scanning, and instant gatekeeper logs.',
-      tag: 'GUARD APP'
-    },
-    {
-      icon: <CreditCard size={26} color="#D97706" />,
-      title: 'Maintenance & Razorpay Billing',
-      desc: 'Automated monthly maintenance generation, online UPI/Card payments, GST invoicing, and instant PDF receipts.',
-      tag: 'FINANCIAL MANAGEMENT'
-    },
-    {
-      icon: <ShieldAlert size={26} color="#DC2626" />,
-      title: 'Real-Time Emergency SOS',
-      desc: '1-tap emergency panic button for residents. Instant loud sirens on guard devices and committee broadcast.',
-      tag: 'CRITICAL SECURITY'
-    },
-    {
-      icon: <Car size={26} color="#7C3AED" />,
-      title: 'Smart Parking Allocation',
-      desc: 'Manage resident parking slots, registered vehicles, visitor parking authorizations, and prevent unauthorized parking.',
-      tag: 'OPERATIONS'
-    },
-    {
-      icon: <Waves size={26} color="#0284C7" />,
-      title: 'Clubhouse & Amenity Bookings',
-      desc: 'Reserve party halls, tennis courts, swimming pool slots, and gym times with conflict-free scheduling and fee collection.',
-      tag: 'COMMUNITY LIVING'
-    },
-    {
-      icon: <Users size={26} color="#059669" />,
-      title: 'Domestic Helper Management',
-      desc: 'Register maids, cooks, drivers, and tutors. Live attendance logs and resident approval workflows.',
-      tag: 'DAILY HELP'
-    },
-    {
-      icon: <FileText size={26} color="#DB2777" />,
-      title: 'Staff RBAC & Audit Trails',
-      desc: 'Granular role-based permissions for society committee members, treasurers, and security supervisors.',
-      tag: 'GOVERNANCE'
-    },
-  ];
-
   return (
     <section id="features" style={{ padding: '90px 0', background: isDark ? '#0F172A' : '#F8FAFC', position: 'relative' }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
         
         <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 60px auto' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', borderRadius: '20px', background: isDark ? 'rgba(37, 99, 235, 0.15)' : '#EFF6FF', color: '#2563EB', fontSize: '12px', fontWeight: 800, marginBottom: '12px' }}>
-            <Sparkles size={14} /> INTELLIGENT MODULES
+            <Sparkles size={14} /> ENTERPRISE CAPABILITIES
           </div>
           <h2 style={{ fontSize: '40px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', letterSpacing: '-1px', margin: '0 0 16px 0' }}>
-            Everything Your Housing Society Needs
+            Everything Your Society Needs to Run Digitally
           </h2>
           <p style={{ fontSize: '16px', color: isDark ? '#94A3B8' : '#475569', margin: 0, lineHeight: 1.6 }}>
-            Eliminate fragmented registers, manual WhatsApp groups, and paper bills. Upgrade to enterprise digital governance.
+            Eliminate paper registers, manual WhatsApp payment chasing, and security loopholes.
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
-          {features.map((item, idx) => (
-            <motion.div
-              key={item.title}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: idx * 0.08 }}
-              viewport={{ once: true }}
-              className="hover-card-elevate"
-              style={{
-                background: isDark ? '#1E293B' : '#FFFFFF',
-                borderRadius: '20px',
-                padding: '28px 24px',
-                border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E2E8F0',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)'
-              }}
-            >
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                  <div style={{
-                    width: '50px',
-                    height: '50px',
-                    borderRadius: '12px',
-                    background: isDark ? 'rgba(255, 255, 255, 0.05)' : '#F8FAFC',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E2E8F0'
-                  }}>
-                    {item.icon}
-                  </div>
-                  <span style={{ fontSize: '10px', fontWeight: 800, padding: '4px 10px', borderRadius: '12px', background: isDark ? 'rgba(255, 255, 255, 0.05)' : '#F1F5F9', color: isDark ? '#CBD5E1' : '#475569', letterSpacing: '0.5px' }}>
-                    {item.tag}
-                  </span>
-                </div>
-
-                <h3 style={{ fontSize: '18px', fontWeight: 800, color: isDark ? '#FFFFFF' : '#0F172A', margin: '0 0 10px 0' }}>
-                  {item.title}
-                </h3>
-
-                <p style={{ fontSize: '13px', color: isDark ? '#94A3B8' : '#475569', lineHeight: 1.6, margin: 0 }}>
-                  {item.desc}
-                </p>
+        {/* Bento Grid Layout */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
+          
+          {/* Bento Item 1: Large Featured Card with Screenshot (Span 7) */}
+          <div className="hover-card-elevate" style={{
+            gridColumn: 'span 7',
+            background: isDark ? '#1E293B' : '#FFFFFF',
+            borderRadius: '24px',
+            padding: '36px',
+            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
+          }}>
+            <div>
+              <div style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '12px', background: '#EFF6FF', color: '#2563EB', fontSize: '11px', fontWeight: 900, marginBottom: '16px' }}>
+                VISITOR SECURITY & PASSES
               </div>
-            </motion.div>
-          ))}
+              <h3 style={{ fontSize: '24px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', marginBottom: '12px' }}>
+                1-Tap Lock Screen Approvals & QR Visitor Passes
+              </h3>
+              <p style={{ fontSize: '14px', color: isDark ? '#94A3B8' : '#475569', lineHeight: 1.6, marginBottom: '24px' }}>
+                Residents receive instant push notifications with photo & details when cabs, delivery agents, or guests arrive at the main gate. Approve or deny in 1 tap.
+              </p>
+            </div>
+
+            <div style={{ borderRadius: '16px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0' }}>
+              <img src="/assets/resident_app_mockup.png" alt="Resident Approval UI" style={{ width: '100%', height: '200px', objectFit: 'cover' }} />
+            </div>
+          </div>
+
+          {/* Bento Item 2: Medium Card (Span 5) */}
+          <div className="hover-card-elevate" style={{
+            gridColumn: 'span 5',
+            background: isDark ? '#1E293B' : '#FFFFFF',
+            borderRadius: '24px',
+            padding: '36px',
+            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
+          }}>
+            <div>
+              <div style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '12px', background: '#ECFDF5', color: '#059669', fontSize: '11px', fontWeight: 900, marginBottom: '16px' }}>
+                GATEKEEPER APP
+              </div>
+              <h3 style={{ fontSize: '24px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', marginBottom: '12px' }}>
+                5-Second Fast Gate Verification
+              </h3>
+              <p style={{ fontSize: '14px', color: isDark ? '#94A3B8' : '#475569', lineHeight: 1.6, marginBottom: '24px' }}>
+                Multilingual app for gatekeepers. Verify pre-approved resident passcodes, log domestic help attendance, and scan delivery barcodes.
+              </p>
+            </div>
+
+            <div style={{ borderRadius: '16px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0' }}>
+              <img src="/assets/guard_app_mockup.png" alt="Guard App UI" style={{ width: '100%', height: '180px', objectFit: 'cover' }} />
+            </div>
+          </div>
+
+          {/* Bento Item 3: Wide Financial Card (Span 12) */}
+          <div className="hover-card-elevate" style={{
+            gridColumn: 'span 12',
+            background: isDark ? '#1E293B' : '#FFFFFF',
+            borderRadius: '24px',
+            padding: '36px',
+            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
+            display: 'grid',
+            gridTemplateColumns: '1.2fr 0.8fr',
+            gap: '32px',
+            alignItems: 'center'
+          }}>
+            <div>
+              <div style={{ display: 'inline-block', padding: '4px 12px', borderRadius: '12px', background: '#FEF3C7', color: '#D97706', fontSize: '11px', fontWeight: 900, marginBottom: '16px' }}>
+                AUTOMATED FINANCES & RAZORPAY BILLING
+              </div>
+              <h3 style={{ fontSize: '26px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', marginBottom: '12px' }}>
+                Automated Monthly Maintenance Invoicing & Online Collection
+              </h3>
+              <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#475569', lineHeight: 1.6, marginBottom: '20px' }}>
+                Generate monthly maintenance bills automatically, accept instant payments via Razorpay UPI & Cards, issue GST receipts, and track overdue payment ledgers in real time.
+              </p>
+              <div style={{ display: 'flex', gap: '16px', fontSize: '13px', fontWeight: 800, color: '#059669' }}>
+                <span>✓ 98.4% On-Time Maintenance Collection Rate</span>
+                <span>✓ Instant PDF Receipts</span>
+              </div>
+            </div>
+
+            <div style={{ borderRadius: '16px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0' }}>
+              <img src="/assets/admin_dashboard_mockup.png" alt="Maintenance Accounting Dashboard" style={{ width: '100%', height: '220px', objectFit: 'cover' }} />
+            </div>
+          </div>
+
         </div>
 
       </div>
