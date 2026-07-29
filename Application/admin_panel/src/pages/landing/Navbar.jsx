@@ -16,11 +16,11 @@ export default function Navbar({ onOpenDemo }) {
   }, []);
 
   const navLinks = [
-    { name: 'Home', href: '#home' },
-    { name: 'Features', href: '#features' },
-    { name: 'Solutions', href: '#solutions' },
-    { name: 'Pricing', href: '#pricing' },
-    { name: 'Contact', href: '#contact' },
+    { name: 'Home', href: '/landing' },
+    { name: 'Features', href: '/features' },
+    { name: 'Solutions', href: '/landing#solutions' },
+    { name: 'Pricing', href: '/landing#pricing' },
+    { name: 'Contact', href: '/landing#contact' },
   ];
 
   return (
@@ -42,7 +42,7 @@ export default function Navbar({ onOpenDemo }) {
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         
         {/* Brand Logo */}
-        <a href="#home" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+        <Link to="/landing" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
           <div style={{
             width: '42px',
             height: '42px',
@@ -64,14 +64,14 @@ export default function Navbar({ onOpenDemo }) {
               ENTERPRISE OS
             </span>
           </div>
-        </a>
+        </Link>
 
         {/* Desktop Navigation Links */}
         <nav className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
           {navLinks.map((link) => (
-            <a
+            <Link
               key={link.name}
-              href={link.href}
+              to={link.href}
               style={{
                 color: '#CBD5E1',
                 textDecoration: 'none',
@@ -84,7 +84,7 @@ export default function Navbar({ onOpenDemo }) {
               onMouseLeave={(e) => e.currentTarget.style.color = '#CBD5E1'}
             >
               {link.name}
-            </a>
+            </Link>
           ))}
         </nav>
 
