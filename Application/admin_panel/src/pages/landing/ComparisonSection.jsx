@@ -18,48 +18,49 @@ export default function ComparisonSection() {
   const societySphereSolutions = [
     '5-Second digital QR passcode verification on guard app',
     '1-Tap lock screen visitor approval & photo logging',
-    'Automated Razorpay invoices with instant PDF receipts & GST',
+    'Automated maintenance invoices with instant PDF receipts & GST',
     'Digital package tracking with barcode scanning at gate',
     'Instant loud Emergency SOS siren broadcast to guards & family'
   ];
 
   return (
-    <section style={{ padding: '90px 0', background: isDark ? '#0F172A' : '#F8FAFC', borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E2E8F0' }}>
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
+    <section style={{ padding: '80px 0', background: isDark ? '#0F172A' : '#FFFFFF', borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB' }}>
+      <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
         
-        <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 60px auto' }}>
-          <span style={{ fontSize: '12px', fontWeight: 800, color: '#2563EB', letterSpacing: '1px', textTransform: 'uppercase' }}>THE TRANSFORMATION</span>
-          <h2 style={{ fontSize: '38px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', letterSpacing: '-1px', marginTop: '8px' }}>
+        {/* Section Header */}
+        <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 50px auto' }}>
+          <h2 style={{ fontSize: '36px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-0.5px', marginBottom: '12px' }}>
             Traditional Paper Registers vs. SocietySphere OS
           </h2>
-          <p style={{ fontSize: '16px', color: isDark ? '#94A3B8' : '#475569', marginTop: '8px', lineHeight: 1.6 }}>
+          <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#555555', lineHeight: 1.6, margin: 0 }}>
             See why over 500+ forward-thinking housing societies upgraded to automated digital security.
           </p>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+        {/* Side-by-Side Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
           
           {/* Traditional Way */}
           <div style={{
             background: isDark ? '#1E293B' : '#FFFFFF',
-            borderRadius: '24px',
-            padding: '36px',
+            borderRadius: '4px',
+            padding: '32px',
             border: isDark ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid #FCA5A5',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.04)'
+            boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px', paddingBottom: '16px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #FEE2E2' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <AlertTriangle size={22} color="#DC2626" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', paddingBottom: '16px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #FEE2E2' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '4px', backgroundColor: '#FEF2F2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <AlertTriangle size={20} color="#DC2626" />
               </div>
               <div>
-                <h3 style={{ fontSize: '20px', fontWeight: 900, color: '#DC2626', margin: 0 }}>Traditional Manual Gate</h3>
-                <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>Unsafe, Slow & Error-Prone</div>
+                <h3 style={{ fontSize: '19px', fontWeight: 900, color: '#DC2626', margin: 0 }}>Traditional Manual Gate</h3>
+                <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#666666' }}>Unsafe, Slow & Error-Prone</div>
               </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {traditionalIssues.map((issue) => (
-                <div key={issue} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: isDark ? '#CBD5E1' : '#475569', lineHeight: 1.5 }}>
+                <div key={issue} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', color: isDark ? '#CBD5E1' : '#555555', lineHeight: 1.5 }}>
                   <XCircle size={18} color="#EF4444" style={{ flexShrink: 0, marginTop: '2px' }} />
                   <span>{issue}</span>
                 </div>
@@ -67,28 +68,28 @@ export default function ComparisonSection() {
             </div>
           </div>
 
-          {/* SocietySphere Way */}
+          {/* SocietySphere OS Way */}
           <div style={{
             background: isDark ? '#1E293B' : '#FFFFFF',
-            borderRadius: '24px',
-            padding: '36px',
-            border: '2px solid #2563EB',
-            boxShadow: '0 10px 30px rgba(37, 99, 235, 0.15)'
+            borderRadius: '4px',
+            padding: '32px',
+            border: '2px solid #00B589',
+            boxShadow: '0 4px 20px rgba(0, 181, 137, 0.08)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px', paddingBottom: '16px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #EFF6FF' }}>
-              <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ShieldCheck size={22} color="#2563EB" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', paddingBottom: '16px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #ECFDF5' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '4px', backgroundColor: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldCheck size={20} color="#00B589" />
               </div>
               <div>
-                <h3 style={{ fontSize: '20px', fontWeight: 900, color: '#2563EB', margin: 0 }}>SocietySphere OS</h3>
-                <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>100% Verified, Automated & Instant</div>
+                <h3 style={{ fontSize: '19px', fontWeight: 900, color: '#00B589', margin: 0 }}>SocietySphere OS</h3>
+                <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#666666' }}>100% Verified, Automated & Instant</div>
               </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {societySphereSolutions.map((sol) => (
-                <div key={sol} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', fontWeight: 700, color: isDark ? '#FFFFFF' : '#0F172A', lineHeight: 1.5 }}>
-                  <CheckCircle2 size={18} color="#059669" style={{ flexShrink: 0, marginTop: '2px' }} />
+                <div key={sol} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', fontWeight: 700, color: isDark ? '#FFFFFF' : '#2C2C2C', lineHeight: 1.5 }}>
+                  <CheckCircle2 size={18} color="#00B589" style={{ flexShrink: 0, marginTop: '2px' }} />
                   <span>{sol}</span>
                 </div>
               ))}
