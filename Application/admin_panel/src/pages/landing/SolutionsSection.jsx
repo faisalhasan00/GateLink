@@ -168,7 +168,7 @@ export default function SolutionsSection({ onOpenDemo }) {
         </div>
 
         {/* Tab Navigation Row */}
-        <div style={{ display: 'flex', gap: '40px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB', marginBottom: '45px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '20px 40px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB', marginBottom: '45px' }}>
           {tabs.map((t) => {
             const isActive = activeTab === t.id;
             return (
@@ -212,7 +212,7 @@ export default function SolutionsSection({ onOpenDemo }) {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '40px 60px' }}
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px 60px' }}
         >
           {getCurrentFeatures().map((item) => (
             <div 

@@ -34,7 +34,7 @@ export default function FeaturesSection() {
         </div>
 
         {/* Feature Cards Grid (NoBrokerHood Style) */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '30px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
           
           {/* Card 1: Visitor Security */}
           <div style={{

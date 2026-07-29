@@ -168,23 +168,46 @@ export default function Navbar({ onOpenDemo }) {
             </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Mobile "Enroll your society" Button */}
+            <button
+              onClick={handleEnrollClick}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '6px 12px',
+                borderRadius: '2px',
+                backgroundColor: '#00B589',
+                color: '#FFFFFF',
+                border: 'none',
+                fontSize: '12px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                height: '34px',
+                boxSizing: 'border-box',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              Enroll your society
+            </button>
+
             {/* Theme Toggle on Mobile */}
             <button
               onClick={toggleTheme}
               aria-label="Toggle Theme"
-              style={{ width: '36px', height: '36px', borderRadius: '4px', background: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9', border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #E2E8F0', color: isDark ? '#FFFFFF' : '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+              style={{ width: '34px', height: '34px', borderRadius: '4px', background: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9', border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #E2E8F0', color: isDark ? '#FFFFFF' : '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
             >
-              {isDark ? <Sun size={18} color="#FBBF24" /> : <Moon size={18} color="#2563EB" />}
+              {isDark ? <Sun size={16} color="#FBBF24" /> : <Moon size={16} color="#2563EB" />}
             </button>
 
             {/* Mobile Hamburger Menu Toggle Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle Menu"
-              style={{ width: '40px', height: '40px', borderRadius: '4px', background: isDark ? '#1E293B' : '#F8FAFC', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB', color: isDark ? '#FFFFFF' : '#333333', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+              style={{ width: '34px', height: '34px', borderRadius: '4px', background: isDark ? '#1E293B' : '#F8FAFC', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB', color: isDark ? '#FFFFFF' : '#333333', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
             >
-              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         )}

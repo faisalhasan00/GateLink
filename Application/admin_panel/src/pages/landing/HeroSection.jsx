@@ -47,24 +47,44 @@ export default function HeroSection({ onOpenDemo }) {
     }
   };
 
+  const [isMobileScreen, setIsMobileScreen] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
+
+  React.useEffect(() => {
+    const handleResize = () => setIsMobileScreen(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <section 
       id="home"
       style={{
-        paddingTop: '110px',
+        paddingTop: '80px',
         paddingBottom: '60px',
         background: isDark ? '#0F172A' : '#FFFFFF',
         position: 'relative',
         borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB'
       }}
     >
-      <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '50px', alignItems: 'center' }}>
+      <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px', display: 'flex', flexDirection: isMobileScreen ? 'column' : 'row', gap: '40px', alignItems: 'center' }}>
         
+        {/* Mobile Top Illustration (Rendered first on Mobile) */}
+        {isMobileScreen && (
+          <div style={{ width: '100%', maxWidth: '380px', margin: '0 auto 10px auto', textAlign: 'center' }}>
+            <img 
+              src="/assets/hero_illustration.png" 
+              alt="SocietySphere Management App Illustration" 
+              style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '12px' }} 
+            />
+          </div>
+        )}
+
         {/* Left Side: Copy + Form + Badges */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
+          style={{ flex: 1, width: '100%' }}
         >
           {/* Main Headline */}
           <h1 style={{
@@ -254,13 +274,14 @@ export default function HeroSection({ onOpenDemo }) {
 
         </motion.div>
 
-        {/* Right Side: Hero Vector Illustration + App Download Buttons */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
-        >
+        {/* Right Side: Hero Vector Illustration (Desktop Only) */}
+        {!isMobileScreen && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
+          >
           {/* Main Hero Vector Artwork */}
           <div style={{ width: '100%', maxWidth: '540px', marginBottom: '24px' }}>
             <img 
@@ -317,6 +338,7 @@ export default function HeroSection({ onOpenDemo }) {
             </Link>
           </div>
         </motion.div>
+        )}
 
       </div>
     </section>

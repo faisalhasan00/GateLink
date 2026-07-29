@@ -38,7 +38,7 @@ export default function ComparisonSection() {
         </div>
 
         {/* Side-by-Side Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '30px' }}>
           
           {/* Traditional Way */}
           <div style={{
