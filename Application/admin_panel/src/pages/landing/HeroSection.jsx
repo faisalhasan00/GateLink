@@ -130,9 +130,22 @@ export default function HeroSection({ onOpenDemo }) {
                 />
 
                 <div style={{ display: 'flex', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', borderRadius: '4px', background: isDark ? '#1E293B' : '#FFFFFF', overflow: 'hidden' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0 10px', background: isDark ? 'rgba(255,255,255,0.05)' : '#F5F5F5', borderRight: '1px solid #E0E0E0', fontSize: '13px', fontWeight: 700, color: isDark ? '#FFFFFF' : '#333333' }}>
-                    <span>🇮🇳</span>
-                    <span>+91 ▾</span>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px',
+                    padding: '0 12px',
+                    background: isDark ? 'rgba(255,255,255,0.05)' : '#F5F5F5',
+                    borderRight: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E0E0E0',
+                    color: isDark ? '#FFFFFF' : '#2C2C2C',
+                    userSelect: 'none'
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1 }}>
+                      <span style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>IN</span>
+                      <span style={{ fontSize: '7px', marginTop: '2px' }}>▼</span>
+                    </div>
+                    <span style={{ fontSize: '15px', fontWeight: 900 }}>+91</span>
                   </div>
                   <input
                     required
