@@ -107,7 +107,7 @@ export default function HeroSection({ onOpenDemo }) {
               </div>
             </div>
           ) : (
-            <form onSubmit={handleSubmit} style={{ marginBottom: '28px', display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '520px' }}>
+            <form id="hero-enrollment-form" onSubmit={handleSubmit} style={{ marginBottom: '28px', display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '520px' }}>
               
               {/* Row 1: Name & Phone */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>

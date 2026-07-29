@@ -208,7 +208,14 @@ export default function Navbar({ onOpenDemo }) {
 
           {/* Solid Emerald Green "Enroll your society" Button */}
           <button
-            onClick={onOpenDemo}
+            onClick={() => {
+              const formEl = document.getElementById('hero-enrollment-form');
+              if (formEl) {
+                formEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              } else if (onOpenDemo) {
+                onOpenDemo();
+              }
+            }}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
