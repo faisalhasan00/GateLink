@@ -108,131 +108,156 @@ export default function HeroSection({ onOpenDemo }) {
             A world-class technology to make your daily life more convenient and safe.
           </p>
 
-          {/* Quick Enrollment Form */}
-          {submitted ? (
-            <div style={{
-              background: '#ECFDF5',
-              border: '1px solid #A7F3D0',
-              borderRadius: '8px',
-              padding: '20px',
-              marginBottom: '28px',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '14px'
-            }}>
-              <CheckCircle2 size={32} color="#059669" />
-              <div>
-                <div style={{ fontSize: '16px', fontWeight: 900, color: '#065F46' }}>Enrollment Request Received!</div>
-                <div style={{ fontSize: '13px', color: '#047857', marginTop: '2px' }}>Our onboarding team will call +91 {formData.phone} shortly.</div>
+          {/* Quick Enrollment Form (Desktop: 4-Input Form | Mobile: Full-Width CTA Button) */}
+          {!isMobileScreen ? (
+            submitted ? (
+              <div style={{
+                background: '#ECFDF5',
+                border: '1px solid #A7F3D0',
+                borderRadius: '8px',
+                padding: '20px',
+                marginBottom: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '14px'
+              }}>
+                <CheckCircle2 size={32} color="#059669" />
+                <div>
+                  <div style={{ fontSize: '16px', fontWeight: 900, color: '#065F46' }}>Enrollment Request Received!</div>
+                  <div style={{ fontSize: '13px', color: '#047857', marginTop: '2px' }}>Our onboarding team will call +91 {formData.phone} shortly.</div>
+                </div>
               </div>
-            </div>
-          ) : (
-            <form id="hero-enrollment-form" onSubmit={handleSubmit} style={{ marginBottom: '28px', display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '520px' }}>
-              
-              {/* Row 1: Name & Phone */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <input
-                  required
-                  type="text"
-                  placeholder="Name"
-                  value={formData.name}
-                  onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '12px 14px',
-                    borderRadius: '4px',
-                    border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC',
-                    background: isDark ? '#1E293B' : '#FFFFFF',
-                    color: isDark ? '#FFFFFF' : '#333333',
-                    fontSize: '14px',
-                    outline: 'none'
-                  }}
-                />
-
-                <div style={{ display: 'flex', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', borderRadius: '4px', background: isDark ? '#1E293B' : '#FFFFFF', overflow: 'hidden' }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px',
-                    padding: '0 12px',
-                    background: isDark ? 'rgba(255,255,255,0.05)' : '#F5F5F5',
-                    borderRight: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E0E0E0',
-                    color: isDark ? '#FFFFFF' : '#2C2C2C',
-                    userSelect: 'none'
-                  }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1 }}>
-                      <span style={{ fontSize: '15px' }}>🇮🇳</span>
-                      <span style={{ fontSize: '7px', marginTop: '2px' }}>▼</span>
-                    </div>
-                    <span style={{ fontSize: '15px', fontWeight: 900 }}>+91</span>
-                  </div>
+            ) : (
+              <form id="hero-enrollment-form" onSubmit={handleSubmit} style={{ marginBottom: '28px', display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '520px' }}>
+                
+                {/* Row 1: Name & Phone */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <input
                     required
-                    type="tel"
-                    placeholder="Enter Phone No."
-                    value={formData.phone}
-                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                    type="text"
+                    placeholder="Name"
+                    value={formData.name}
+                    onChange={e => setFormData({ ...formData, name: e.target.value })}
                     style={{
                       width: '100%',
-                      padding: '12px 10px',
-                      border: 'none',
-                      background: 'transparent',
+                      padding: '12px 14px',
+                      borderRadius: '4px',
+                      border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC',
+                      background: isDark ? '#1E293B' : '#FFFFFF',
                       color: isDark ? '#FFFFFF' : '#333333',
                       fontSize: '14px',
                       outline: 'none'
                     }}
                   />
+
+                  <div style={{ display: 'flex', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', borderRadius: '4px', background: isDark ? '#1E293B' : '#FFFFFF', overflow: 'hidden' }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      padding: '0 12px',
+                      background: isDark ? 'rgba(255,255,255,0.05)' : '#F5F5F5',
+                      borderRight: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E0E0E0',
+                      color: isDark ? '#FFFFFF' : '#2C2C2C',
+                      userSelect: 'none'
+                    }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1 }}>
+                        <span style={{ fontSize: '15px' }}>🇮🇳</span>
+                        <span style={{ fontSize: '7px', marginTop: '2px' }}>▼</span>
+                      </div>
+                      <span style={{ fontSize: '15px', fontWeight: 900 }}>+91</span>
+                    </div>
+                    <input
+                      required
+                      type="tel"
+                      placeholder="Enter Phone No."
+                      value={formData.phone}
+                      onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '12px 10px',
+                        border: 'none',
+                        background: 'transparent',
+                        color: isDark ? '#FFFFFF' : '#333333',
+                        fontSize: '14px',
+                        outline: 'none'
+                      }}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* Row 2: Select Reason Dropdown & Button */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <select
-                  value={formData.reason}
-                  onChange={e => setFormData({ ...formData, reason: e.target.value })}
-                  style={{
-                    width: '100%',
-                    padding: '12px 14px',
-                    borderRadius: '4px',
-                    border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC',
-                    background: isDark ? '#1E293B' : '#FFFFFF',
-                    color: isDark ? '#FFFFFF' : '#333333',
-                    fontSize: '14px',
-                    outline: 'none'
-                  }}
-                >
-                  <option value="Interested for demo">Interested for demo</option>
-                  <option value="Existing user of HomeHniHood">Existing user of HomeHniHood</option>
-                </select>
+                {/* Row 2: Select Reason Dropdown & Button */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <select
+                    value={formData.reason}
+                    onChange={e => setFormData({ ...formData, reason: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '12px 14px',
+                      borderRadius: '4px',
+                      border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC',
+                      background: isDark ? '#1E293B' : '#FFFFFF',
+                      color: isDark ? '#FFFFFF' : '#333333',
+                      fontSize: '14px',
+                      outline: 'none'
+                    }}
+                  >
+                    <option value="Interested for demo">Interested for demo</option>
+                    <option value="Existing user of HomeHniHood">Existing user of HomeHniHood</option>
+                  </select>
 
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  style={{
-                    width: '100%',
-                    padding: '12px 18px',
-                    borderRadius: '4px',
-                    backgroundColor: '#00B589',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    fontSize: '14px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    transition: 'background-color 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#009E77'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#00B589'}
-                >
-                  <span>{submitting ? 'Submitting...' : 'Enroll your society'}</span>
-                  <ArrowRight size={16} />
-                </button>
-              </div>
-            </form>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    style={{
+                      width: '100%',
+                      padding: '12px 18px',
+                      borderRadius: '4px',
+                      backgroundColor: '#00B589',
+                      color: '#FFFFFF',
+                      border: 'none',
+                      fontSize: '14px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      transition: 'background-color 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#009E77'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#00B589'}
+                  >
+                    <span>{submitting ? 'Submitting...' : 'Enroll your society'}</span>
+                    <ArrowRight size={16} />
+                  </button>
+                </div>
+              </form>
+            )
+          ) : (
+            <button
+              onClick={onOpenDemo}
+              style={{
+                width: '100%',
+                padding: '14px 24px',
+                borderRadius: '4px',
+                backgroundColor: '#00B589',
+                color: '#FFFFFF',
+                border: 'none',
+                fontSize: '15px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '10px',
+                marginBottom: '28px'
+              }}
+            >
+              <span>Enroll your society</span>
+              <ArrowRight size={18} />
+            </button>
           )}
 
           {/* Security Certification Badges (ISO 27001 & PCI DSS) */}
