@@ -32,6 +32,7 @@ import SuperAdminLogin from './pages/superadmin/SuperAdminLogin'
 
 import LandingPage from './pages/landing/LandingPage'
 import FeaturesPage from './pages/landing/FeaturesPage'
+import SolutionsPage from './pages/landing/SolutionsPage'
 import { getSocietyAdminSession, getSuperAdminSession } from './services/sessionManager'
 
 import './index.css'
@@ -66,10 +67,11 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public SaaS Landing & Features Pages */}
+        {/* Public SaaS Landing, Features & Solutions Pages */}
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/website" element={<LandingPage />} />
         <Route path="/features" element={<FeaturesPage />} />
+        <Route path="/solutions" element={<SolutionsPage />} />
 
         {/* Public Login Pages */}
         <Route path="/login" element={<AdminLogin />} />

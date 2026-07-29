@@ -18,7 +18,7 @@ export default function Navbar({ onOpenDemo }) {
   const navLinks = [
     { name: 'Home', href: '/landing' },
     { name: 'Features', href: '/features' },
-    { name: 'Solutions', href: '/landing#solutions' },
+    { name: 'Solutions', href: '/solutions' },
     { name: 'Pricing', href: '/landing#pricing' },
     { name: 'Contact', href: '/landing#contact' },
   ];
