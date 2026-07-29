@@ -7,7 +7,7 @@ export default function FooterSection() {
     <footer style={{ background: '#020617', borderTop: '1px solid rgba(255, 255, 255, 0.1)', color: '#94A3B8', paddingTop: '60px', paddingBottom: '30px' }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
         
-        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.5fr', gap: '40px', marginBottom: '50px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 1.2fr', gap: '32px', marginBottom: '50px' }}>
           
           {/* Brand Info */}
           <div>
@@ -24,42 +24,53 @@ export default function FooterSection() {
               </span>
             </div>
 
-            <p style={{ fontSize: '13px', lineHeight: 1.6, maxWidth: '320px', color: '#64748B' }}>
+            <p style={{ fontSize: '13px', lineHeight: 1.6, maxWidth: '280px', color: '#64748B' }}>
               The complete enterprise operating system for modern housing societies, apartment complexes, and gated communities across India.
             </p>
           </div>
 
-          {/* Product Links */}
+          {/* Platform Pages */}
           <div>
-            <h4 style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 800, marginBottom: '16px' }}>Product</h4>
+            <h4 style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 800, marginBottom: '16px' }}>Platform</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
-              <a href="#features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Visitor Approval Pass</a>
-              <a href="#features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Guard Gatekeeper App</a>
-              <a href="#features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Maintenance & Razorpay</a>
-              <a href="#features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Emergency SOS Alert</a>
-              <a href="#features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Amenity Slot Booking</a>
+              <Link to="/features" style={{ color: '#94A3B8', textDecoration: 'none' }}>12 Core Features</Link>
+              <Link to="/solutions" style={{ color: '#94A3B8', textDecoration: 'none' }}>User Personas</Link>
+              <Link to="/ecosystem" style={{ color: '#94A3B8', textDecoration: 'none' }}>Data Ecosystem</Link>
+              <Link to="/pricing" style={{ color: '#94A3B8', textDecoration: 'none' }}>SaaS Pricing</Link>
             </div>
           </div>
 
-          {/* Portals */}
+          {/* Resources & Knowledge */}
           <div>
-            <h4 style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 800, marginBottom: '16px' }}>Portals & Login</h4>
+            <h4 style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 800, marginBottom: '16px' }}>Resources</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
+              <Link to="/blog" style={{ color: '#818CF8', textDecoration: 'none', fontWeight: 700 }}>Blog & Insights</Link>
+              <Link to="/faq" style={{ color: '#94A3B8', textDecoration: 'none' }}>FAQ Directory</Link>
+              <Link to="/help" style={{ color: '#94A3B8', textDecoration: 'none' }}>Help Center</Link>
+              <Link to="/docs" style={{ color: '#94A3B8', textDecoration: 'none' }}>API Documentation</Link>
+            </div>
+          </div>
+
+          {/* Legal & Compliance */}
+          <div>
+            <h4 style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 800, marginBottom: '16px' }}>Legal</h4>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
+              <Link to="/privacy" style={{ color: '#94A3B8', textDecoration: 'none' }}>Privacy Policy</Link>
+              <Link to="/terms" style={{ color: '#94A3B8', textDecoration: 'none' }}>Terms of Service</Link>
+              <Link to="/cookies" style={{ color: '#94A3B8', textDecoration: 'none' }}>Cookie Policy</Link>
+              <Link to="/contact" style={{ color: '#34D399', textDecoration: 'none', fontWeight: 700 }}>Book Demo</Link>
+            </div>
+          </div>
+
+          {/* Portals & Security */}
+          <div>
+            <h4 style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 800, marginBottom: '16px' }}>Portals</h4>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
               <Link to="/login" style={{ color: '#818CF8', textDecoration: 'none', fontWeight: 700 }}>Society Admin Login</Link>
               <Link to="/super-admin/login" style={{ color: '#34D399', textDecoration: 'none', fontWeight: 700 }}>Super Admin Portal</Link>
-              <a href="#pricing" style={{ color: '#94A3B8', textDecoration: 'none' }}>Pricing Tiers</a>
-              <a href="#contact" style={{ color: '#94A3B8', textDecoration: 'none' }}>Request Live Demo</a>
             </div>
-          </div>
-
-          {/* Compliance & Security */}
-          <div>
-            <h4 style={{ color: '#FFFFFF', fontSize: '14px', fontWeight: 800, marginBottom: '16px' }}>Security & Compliance</h4>
-            <p style={{ fontSize: '12px', color: '#64748B', lineHeight: 1.6 }}>
-              Enterprise-grade 256-Bit SSL Data Encryption, AWS Cloud hosting, and ISO-compliant RBAC governance.
-            </p>
-            <div style={{ marginTop: '12px', fontSize: '12px', color: '#34D399', fontWeight: 700 }}>
-              ✓ 99.9% Platform SLA Active
+            <div style={{ marginTop: '16px', fontSize: '11px', color: '#34D399', fontWeight: 700 }}>
+              ✓ 256-Bit SSL Encrypted Uptime
             </div>
           </div>
 

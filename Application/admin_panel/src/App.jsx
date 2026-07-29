@@ -36,6 +36,14 @@ import SolutionsPage from './pages/landing/SolutionsPage'
 import EcosystemPage from './pages/landing/EcosystemPage'
 import PricingPage from './pages/landing/PricingPage'
 import LeadGenerationPage from './pages/landing/LeadGenerationPage'
+import BlogPage from './pages/landing/BlogPage'
+import FaqPage from './pages/landing/FaqPage'
+import HelpCenterPage from './pages/landing/HelpCenterPage'
+import DocsPage from './pages/landing/DocsPage'
+import PrivacyPolicyPage from './pages/landing/PrivacyPolicyPage'
+import TermsPage from './pages/landing/TermsPage'
+import CookiePolicyPage from './pages/landing/CookiePolicyPage'
+
 import { getSocietyAdminSession, getSuperAdminSession } from './services/sessionManager'
 
 import './index.css'
@@ -79,6 +87,15 @@ function App() {
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/contact" element={<LeadGenerationPage />} />
         <Route path="/book-demo" element={<LeadGenerationPage />} />
+
+        {/* SEO & Knowledge Base Pages */}
+        <Route path="/blog" element={<BlogPage />} />
+        <Route path="/faq" element={<FaqPage />} />
+        <Route path="/help" element={<HelpCenterPage />} />
+        <Route path="/docs" element={<DocsPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/cookies" element={<CookiePolicyPage />} />
 
         {/* Public Login Pages */}
         <Route path="/login" element={<AdminLogin />} />
