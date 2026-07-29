@@ -52,7 +52,7 @@ export default function SolutionsSection({ onOpenDemo }) {
     {
       img: '/assets/admin_dashboard_mockup.png',
       icon: <CreditCard size={24} color="#D97706" />,
-      title: 'Razorpay Maintenance Bill Payments',
+      title: 'Pay Maintenance Bill Online',
       desc: 'Pay monthly maintenance dues online via UPI, Credit/Debit Cards, or Net Banking and receive instant GST compliant PDF receipts.'
     },
     {

@@ -24,7 +24,7 @@ export default function ProposalSection({ onOpenDemo }) {
   const [selectedModules, setSelectedModules] = useState([
     'Visitor Approval Pass',
     'Guard Gatekeeper App',
-    'Razorpay Maintenance Billing',
+    'Pay Maintenance Bill Online',
     'Emergency SOS Alert'
   ]);
 
@@ -42,7 +42,7 @@ export default function ProposalSection({ onOpenDemo }) {
   const availableModules = [
     'Visitor Approval Pass',
     'Guard Gatekeeper App',
-    'Razorpay Maintenance Billing',
+    'Pay Maintenance Bill Online',
     'Emergency SOS Alert',
     'Amenity Slot Booking',
     'Smart Parking Allocation',
