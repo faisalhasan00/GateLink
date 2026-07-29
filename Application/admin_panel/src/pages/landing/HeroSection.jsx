@@ -1,256 +1,320 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Play, Shield, Smartphone, Monitor, ShieldCheck, CheckCircle2, Zap, Bell, CreditCard, UserCheck, KeyRound, Star, Building2, Users } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from '../../firebase';
+import { 
+  ArrowRight, 
+  Globe, 
+  CheckCircle2, 
+  Apple, 
+  Play, 
+  Check, 
+  ShieldCheck, 
+  PhoneCall
+} from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 export default function HeroSection({ onOpenDemo }) {
-  const [activeTab, setActiveTab] = useState('resident');
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const tabs = [
-    { id: 'resident', label: '📱 Resident App', icon: <Smartphone size={15} /> },
-    { id: 'guard', label: '👮 Guard App', icon: <Shield size={15} /> },
-    { id: 'admin', label: '📊 Admin Dashboard', icon: <Monitor size={15} /> },
-    { id: 'superadmin', label: '🛡️ Super Admin SaaS', icon: <ShieldCheck size={15} /> },
-  ];
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    reason: 'Society Enrollment'
+  });
+
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.phone) return;
+    setSubmitting(true);
+    try {
+      await addDoc(collection(db, 'leads'), {
+        ...formData,
+        source: 'Hero Quick Enrollment Form',
+        status: 'New',
+        createdAt: serverTimestamp()
+      });
+      setSubmitted(true);
+    } catch (err) {
+      console.error('Hero lead submit error:', err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <section 
       id="home"
       style={{
-        paddingTop: '150px',
-        paddingBottom: '80px',
+        paddingTop: '110px',
+        paddingBottom: '60px',
         background: isDark ? '#0F172A' : '#FFFFFF',
         position: 'relative',
-        borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E2E8F0'
+        borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB'
       }}
     >
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '50px', alignItems: 'center' }}>
+      <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '50px', alignItems: 'center' }}>
         
-        {/* Left Editorial Copy */}
+        {/* Left Side: Copy + Form + Badges */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5 }}
         >
-          {/* Rating Badge */}
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '6px 14px',
-            borderRadius: '20px',
-            background: isDark ? 'rgba(37, 99, 235, 0.15)' : '#EFF6FF',
-            border: isDark ? '1px solid rgba(37, 99, 235, 0.3)' : '1px solid #BFDBFE',
-            color: '#2563EB',
-            fontSize: '13px',
-            fontWeight: 800,
-            marginBottom: '20px'
-          }}>
-            <div style={{ display: 'flex', color: '#F59E0B' }}>
-              <Star size={14} fill="#F59E0B" />
-              <Star size={14} fill="#F59E0B" />
-              <Star size={14} fill="#F59E0B" />
-              <Star size={14} fill="#F59E0B" />
-              <Star size={14} fill="#F59E0B" />
-            </div>
-            <span>Trusted by 500+ Housing Societies</span>
-          </div>
-
-          {/* Heading */}
+          {/* Main Headline */}
           <h1 style={{
-            fontSize: '52px',
+            fontSize: '44px',
             fontWeight: 900,
-            color: isDark ? '#FFFFFF' : '#0F172A',
-            letterSpacing: '-1.8px',
-            lineHeight: 1.1,
-            marginBottom: '20px'
+            color: isDark ? '#FFFFFF' : '#2C2C2C',
+            letterSpacing: '-1px',
+            lineHeight: 1.15,
+            marginBottom: '16px'
           }}>
-            The Complete <span style={{ color: '#2563EB' }}>Society & Gate Security</span> Operating System
+            Visitor, Society and Accounting Management System
           </h1>
 
           {/* Subtitle */}
           <p style={{
-            fontSize: '18px',
-            color: isDark ? '#94A3B8' : '#475569',
-            lineHeight: 1.65,
-            marginBottom: '32px',
-            maxWidth: '560px'
+            fontSize: '16px',
+            color: isDark ? '#94A3B8' : '#555555',
+            lineHeight: 1.6,
+            marginBottom: '12px'
           }}>
-            Simplify Visitor Passes, Guard Verification, Maintenance Billing, Amenity Slot Bookings, and Emergency SOS from one unified enterprise cloud platform.
+            A world-class technology to make your daily life more convenient and safe.
           </p>
 
-          {/* Action CTAs */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', marginBottom: '36px' }}>
-            <button
-              onClick={onOpenDemo}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: '16px 32px',
-                borderRadius: '12px',
-                background: '#2563EB',
-                color: '#FFFFFF',
-                fontSize: '16px',
-                fontWeight: 900,
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 10px 25px rgba(37, 99, 235, 0.3)',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <span>Book Free Live Demo</span>
-              <ArrowRight size={18} />
-            </button>
+          {/* Red Highlight Stat */}
+          <p style={{
+            fontSize: '16px',
+            color: isDark ? '#CBD5E1' : '#444444',
+            fontWeight: 700,
+            marginBottom: '28px'
+          }}>
+            Now securing <span style={{ color: '#FF385C', fontWeight: 900 }}>25,000+</span> societies under our hood.
+          </p>
 
-            <a
-              href="#features"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: '16px 28px',
-                borderRadius: '12px',
-                background: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9',
-                color: isDark ? '#FFFFFF' : '#0F172A',
-                fontSize: '16px',
-                fontWeight: 700,
-                border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #CBD5E1',
-                textDecoration: 'none',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <Play size={16} fill={isDark ? '#FFFFFF' : '#0F172A'} />
-              <span>Watch 2-Min Tour</span>
-            </a>
+          {/* Quick Enrollment Form */}
+          {submitted ? (
+            <div style={{
+              background: '#ECFDF5',
+              border: '1px solid #A7F3D0',
+              borderRadius: '8px',
+              padding: '20px',
+              marginBottom: '28px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '14px'
+            }}>
+              <CheckCircle2 size={32} color="#059669" />
+              <div>
+                <div style={{ fontSize: '16px', fontWeight: 900, color: '#065F46' }}>Enrollment Request Received!</div>
+                <div style={{ fontSize: '13px', color: '#047857', marginTop: '2px' }}>Our onboarding team will call +91 {formData.phone} shortly.</div>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} style={{ marginBottom: '28px', display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '520px' }}>
+              
+              {/* Row 1: Name & Phone */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <input
+                  required
+                  type="text"
+                  placeholder="Name"
+                  value={formData.name}
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    borderRadius: '4px',
+                    border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC',
+                    background: isDark ? '#1E293B' : '#FFFFFF',
+                    color: isDark ? '#FFFFFF' : '#333333',
+                    fontSize: '14px',
+                    outline: 'none'
+                  }}
+                />
+
+                <div style={{ display: 'flex', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', borderRadius: '4px', background: isDark ? '#1E293B' : '#FFFFFF', overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0 10px', background: isDark ? 'rgba(255,255,255,0.05)' : '#F5F5F5', borderRight: '1px solid #E0E0E0', fontSize: '13px', fontWeight: 700, color: isDark ? '#FFFFFF' : '#333333' }}>
+                    <span>🇮🇳</span>
+                    <span>+91 ▾</span>
+                  </div>
+                  <input
+                    required
+                    type="tel"
+                    placeholder="Enter Phone No."
+                    value={formData.phone}
+                    onChange={e => setFormData({ ...formData, phone: e.target.value })}
+                    style={{
+                      width: '100%',
+                      padding: '12px 10px',
+                      border: 'none',
+                      background: 'transparent',
+                      color: isDark ? '#FFFFFF' : '#333333',
+                      fontSize: '14px',
+                      outline: 'none'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Row 2: Select Reason Dropdown & Button */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <select
+                  value={formData.reason}
+                  onChange={e => setFormData({ ...formData, reason: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '12px 14px',
+                    borderRadius: '4px',
+                    border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC',
+                    background: isDark ? '#1E293B' : '#FFFFFF',
+                    color: isDark ? '#FFFFFF' : '#333333',
+                    fontSize: '14px',
+                    outline: 'none'
+                  }}
+                >
+                  <option value="Society Enrollment">Select Reason</option>
+                  <option value="Society Enrollment">Society Enrollment</option>
+                  <option value="Book Product Demo">Book Product Demo</option>
+                  <option value="Guard App Installation">Guard App Installation</option>
+                  <option value="Society Accounting Setup">Society Accounting Setup</option>
+                </select>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  style={{
+                    width: '100%',
+                    padding: '12px 18px',
+                    borderRadius: '4px',
+                    backgroundColor: '#00B589',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#009E77'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#00B589'}
+                >
+                  <span>{submitting ? 'Submitting...' : 'Enroll your society'}</span>
+                  <ArrowRight size={16} />
+                </button>
+              </div>
+            </form>
+          )}
+
+          {/* Security Certification Badges (ISO 27001 & PCI DSS) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            {/* ISO Badge */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '8px 16px',
+              borderRadius: '4px',
+              background: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC',
+              border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0'
+            }}>
+              <Globe size={20} color="#00B589" />
+              <div>
+                <div style={{ fontSize: '11px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', lineHeight: 1.1 }}>ISO 27001</div>
+                <div style={{ fontSize: '9px', color: isDark ? '#94A3B8' : '#666666', fontWeight: 700, textTransform: 'uppercase' }}>CERTIFIED</div>
+              </div>
+            </div>
+
+            {/* PCI DSS Badge */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              padding: '8px 16px',
+              borderRadius: '4px',
+              background: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC',
+              border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0'
+            }}>
+              <ShieldCheck size={20} color="#00B589" />
+              <div>
+                <div style={{ fontSize: '11px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', lineHeight: 1.1 }}>PCI DSS</div>
+                <div style={{ fontSize: '9px', color: isDark ? '#94A3B8' : '#666666', fontWeight: 700, textTransform: 'uppercase' }}>Level 1 CERTIFIED</div>
+              </div>
+            </div>
           </div>
 
-          {/* Key Metrics Row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', paddingTop: '24px', borderTop: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0' }}>
-            <div>
-              <div style={{ fontSize: '24px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>250k+</div>
-              <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 600 }}>Active Residents</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '24px', fontWeight: 900, color: '#059669' }}>99.9%</div>
-              <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 600 }}>Gate Uptime SLA</div>
-            </div>
-            <div>
-              <div style={{ fontSize: '24px', fontWeight: 900, color: '#2563EB' }}>10M+</div>
-              <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 600 }}>Check-ins Verified</div>
-            </div>
-          </div>
         </motion.div>
 
-        {/* Right Device Screen Viewport */}
+        {/* Right Side: Hero Vector Illustration + App Download Buttons */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
         >
-          {/* Tab Switcher */}
-          <div style={{ display: 'flex', gap: '6px', padding: '6px', background: isDark ? '#1E293B' : '#F1F5F9', borderRadius: '14px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0', marginBottom: '14px' }}>
-            {tabs.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => setActiveTab(t.id)}
-                style={{
-                  flex: 1,
-                  padding: '8px 12px',
-                  borderRadius: '8px',
-                  border: 'none',
-                  fontSize: '12px',
-                  fontWeight: 800,
-                  cursor: 'pointer',
-                  backgroundColor: activeTab === t.id ? '#2563EB' : 'transparent',
-                  color: activeTab === t.id ? '#FFFFFF' : (isDark ? '#94A3B8' : '#64748B'),
-                  transition: 'all 0.2s ease'
-                }}
-              >
-                {t.label}
-              </button>
-            ))}
+          {/* Main Hero Vector Artwork */}
+          <div style={{ width: '100%', maxWidth: '540px', marginBottom: '24px' }}>
+            <img 
+              src="/assets/hero_illustration.png" 
+              alt="SocietySphere Management App Illustration" 
+              style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '12px' }} 
+            />
           </div>
 
-          {/* Device Screen Preview Card */}
-          <div style={{
-            background: isDark ? '#1E293B' : '#FFFFFF',
-            borderRadius: '20px',
-            border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #CBD5E1',
-            padding: '16px',
-            boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.1)',
-            minHeight: '380px',
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            overflow: 'hidden'
-          }}>
-            {activeTab === 'resident' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Resident Mobile Companion</h3>
-                    <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>Flat 402 • Skyline Heights</p>
-                  </div>
-                  <span style={{ padding: '4px 10px', borderRadius: '20px', background: '#ECFDF5', color: '#059669', fontSize: '11px', fontWeight: 800 }}>LIVE GATE LINK</span>
-                </div>
+          {/* App Download Subhead */}
+          <div style={{ fontSize: '13px', fontWeight: 700, color: isDark ? '#FFFFFF' : '#333333', marginBottom: '12px' }}>
+            Download SocietySphere<br />
+            <span style={{ color: isDark ? '#94A3B8' : '#666666', fontWeight: 500 }}>Your Society Management App for a Convenient Life</span>
+          </div>
 
-                <div style={{ borderRadius: '14px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0', maxHeight: '280px' }}>
-                  <img src="/assets/resident_app_mockup.png" alt="Resident App UI Mockup" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                </div>
-              </div>
-            )}
+          {/* iPhone & Android Buttons */}
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <Link
+              to="/download"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 20px',
+                borderRadius: '4px',
+                border: isDark ? '1px solid rgba(255,255,255,0.3)' : '1px solid #707070',
+                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
+                color: isDark ? '#FFFFFF' : '#333333',
+                textDecoration: 'none',
+                fontSize: '13px',
+                fontWeight: 700
+              }}
+            >
+              <Apple size={16} /> iPhone
+            </Link>
 
-            {activeTab === 'guard' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Gatekeeper Duty Console</h3>
-                    <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>Main Entry Gate 01</p>
-                  </div>
-                  <span style={{ padding: '4px 10px', borderRadius: '20px', background: '#ECFDF5', color: '#059669', fontSize: '11px', fontWeight: 800 }}>GUARD ON DUTY</span>
-                </div>
-
-                <div style={{ borderRadius: '14px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0', maxHeight: '280px' }}>
-                  <img src="/assets/guard_app_mockup.png" alt="Guard App UI Mockup" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'admin' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Society Admin Dashboard</h3>
-                    <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>Financial Accounting & Visitor Log</p>
-                  </div>
-                  <span style={{ padding: '4px 10px', borderRadius: '20px', background: '#EFF6FF', color: '#2563EB', fontSize: '11px', fontWeight: 800 }}>98.4% COLLECTED</span>
-                </div>
-
-                <div style={{ borderRadius: '14px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0', maxHeight: '280px' }}>
-                  <img src="/assets/admin_dashboard_mockup.png" alt="Society Admin Dashboard Mockup" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'superadmin' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Super Admin Multi-Tenant Portal</h3>
-                    <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>Global Township CRM</p>
-                  </div>
-                  <span style={{ padding: '4px 10px', borderRadius: '20px', background: '#F3E8FF', color: '#7C3AED', fontSize: '11px', fontWeight: 800 }}>HQ CONTROL</span>
-                </div>
-
-                <div style={{ borderRadius: '14px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0', maxHeight: '280px' }}>
-                  <img src="/assets/admin_dashboard_mockup.png" alt="Super Admin Dashboard Mockup" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                </div>
-              </div>
-            )}
-
+            <Link
+              to="/download"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '8px 20px',
+                borderRadius: '4px',
+                border: isDark ? '1px solid rgba(255,255,255,0.3)' : '1px solid #707070',
+                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
+                color: isDark ? '#FFFFFF' : '#333333',
+                textDecoration: 'none',
+                fontSize: '13px',
+                fontWeight: 700
+              }}
+            >
+              <Play size={15} fill={isDark ? '#FFFFFF' : '#333333'} /> Android
+            </Link>
           </div>
         </motion.div>
 
