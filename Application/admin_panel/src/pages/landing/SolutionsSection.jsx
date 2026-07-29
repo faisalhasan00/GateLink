@@ -1,185 +1,172 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  UserCheck, 
-  ShieldCheck, 
-  Building, 
-  CheckCircle2, 
-  ArrowRight,
-  User,
-  Wrench
-} from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 export default function SolutionsSection({ onOpenDemo }) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [activePersona, setActivePersona] = useState('residents');
+  const [activeTab, setActiveTab] = useState('residents');
 
-  const personas = [
-    {
-      id: 'residents',
-      name: 'Residents & Flat Owners',
-      icon: <UserCheck size={18} />,
-      badge: 'FOR RESIDENTS',
-      title: 'Effortless Living, Total Security & Convenience',
-      desc: 'Approve guests with 1 tap, pay monthly maintenance bills via Razorpay, track domestic helper attendance, and raise emergency SOS siren alerts.',
-      benefits: [
-        '1-Tap Visitor Lock Screen Approval & Pre-Approved Guest Passes',
-        'Instant Razorpay Maintenance Payments with Automated Receipts',
-        'Amenity & Clubhouse Slot Reservations in Seconds',
-        '1-Tap Emergency SOS Siren Broadcast to Security & Family'
-      ]
-    },
-    {
-      id: 'guards',
-      name: 'Security Guards',
-      icon: <ShieldCheck size={18} />,
-      badge: 'FOR SECURITY',
-      title: '5-Second Gate Verification & Incident Reporting',
-      desc: 'High-speed multilingual smartphone app for security guards. Verify visitors by OTP, log daily staff entries, and receive instant gate panic sirens.',
-      benefits: [
-        'Multilingual UI (English, Hindi, Kannada, Tamil, Telugu, Marathi)',
-        '5-Second Entry Authorization & QR Passcode Reader',
-        'Daily Maid, Cook & Delivery Driver Attendance Verification',
-        'Instant Gate Siren Alert Launcher for Emergency Situations'
-      ]
-    },
-    {
-      id: 'committee',
-      name: 'Management Committee',
-      icon: <Building size={18} />,
-      badge: 'FOR COMMITTEE',
-      title: 'Automated Accounting, Vendor RBAC & Digital Audits',
-      desc: 'Take complete control over society finances, track pending maintenance dues, issue digitally signed broadcast notices, and manage vendor SLAs.',
-      benefits: [
-        'Real-Time Collection Analytics & GST Compliant Accounting',
-        'Automated Overdue Reminders via WhatsApp & Mobile Push',
-        'Granular Role-Based Permissions for Treasurer & Secretary',
-        'Digital Notice Board & Resident Grievance Ticket Management'
-      ]
-    }
+  const tabs = [
+    { id: 'residents', label: 'Residents' },
+    { id: 'management', label: 'Management' },
+    { id: 'security', label: 'Security & Staff' }
   ];
 
-  const current = personas.find(p => p.id === activePersona);
-
   return (
-    <section id="solutions" style={{ padding: '90px 0', background: isDark ? '#0F172A' : '#FFFFFF', position: 'relative' }}>
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
+    <section id="solutions" style={{ padding: '80px 0', background: isDark ? '#0F172A' : '#FFFFFF', borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB' }}>
+      <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
         
-        <div style={{ textAlign: 'center', maxWidth: '700px', margin: '0 auto 50px auto' }}>
-          <span style={{ fontSize: '12px', fontWeight: 800, color: '#2563EB', letterSpacing: '1px', textTransform: 'uppercase' }}>TAILORED WORKFLOWS</span>
-          <h2 style={{ fontSize: '40px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', letterSpacing: '-1px', marginTop: '8px' }}>
-            Built Specifically for Every Stakeholder
+        {/* Section Header */}
+        <div style={{ marginBottom: '40px', maxWidth: '900px' }}>
+          <h2 style={{ fontSize: '36px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-0.5px', marginBottom: '12px' }}>
+            SocietySphere for Every Need
           </h2>
+          <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#555555', lineHeight: 1.6, margin: 0 }}>
+            Improve the security standards of your gated community with our technologically advanced and in-house engineered security and community management tool. We offer numerous innovative features that are sure to simplify your everyday chores.
+          </p>
         </div>
 
-        {/* Persona Selector Tabs */}
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', marginBottom: '40px' }}>
-          {personas.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => setActivePersona(p.id)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '12px 24px',
-                borderRadius: '12px',
-                border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
-                backgroundColor: activePersona === p.id ? '#2563EB' : (isDark ? '#1E293B' : '#F8FAFC'),
-                color: activePersona === p.id ? '#FFFFFF' : (isDark ? '#94A3B8' : '#475569'),
-                fontWeight: 800,
-                fontSize: '14px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              {p.icon}
-              <span>{p.name}</span>
-            </button>
-          ))}
+        {/* Tab Navigation Row */}
+        <div style={{ display: 'flex', gap: '40px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB', marginBottom: '50px' }}>
+          {tabs.map((t) => {
+            const isActive = activeTab === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id)}
+                style={{
+                  padding: '12px 0 16px 0',
+                  background: 'transparent',
+                  border: 'none',
+                  fontSize: '18px',
+                  fontWeight: isActive ? 800 : 500,
+                  color: isActive ? (isDark ? '#FFFFFF' : '#2C2C2C') : (isDark ? '#94A3B8' : '#666666'),
+                  cursor: 'pointer',
+                  position: 'relative',
+                  transition: 'color 0.2s ease'
+                }}
+              >
+                <span>{t.label}</span>
+                {isActive && (
+                  <motion.div
+                    layoutId="activeTabBorder"
+                    style={{
+                      position: 'absolute',
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      height: '3px',
+                      backgroundColor: '#FF385C'
+                    }}
+                  />
+                )}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Workspace Display Card */}
-        <motion.div
-          key={current.id}
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          style={{
-            background: isDark ? '#1E293B' : '#F8FAFC',
-            borderRadius: '24px',
-            padding: '40px',
-            border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E2E8F0',
-            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
-            display: 'grid',
-            gridTemplateColumns: '1.2fr 0.8fr',
-            gap: '40px',
-            alignItems: 'center'
-          }}
-        >
-          <div>
-            <span style={{ fontSize: '11px', fontWeight: 900, color: '#2563EB', letterSpacing: '1px', textTransform: 'uppercase' }}>
-              {current.badge}
-            </span>
-            <h3 style={{ fontSize: '32px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', margin: '8px 0 16px 0' }}>
-              {current.title}
-            </h3>
-            <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#475569', lineHeight: 1.65, marginBottom: '28px' }}>
-              {current.desc}
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
-              {current.benefits.map((b) => (
-                <div key={b} style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '14px', fontWeight: 700, color: isDark ? '#F1F5F9' : '#1E293B' }}>
-                  <CheckCircle2 size={18} color="#059669" />
-                  <span>{b}</span>
-                </div>
-              ))}
+        {/* Tab Content Display */}
+        {activeTab === 'residents' && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px' }}
+          >
+            {/* Visitor Management Card */}
+            <div>
+              <div style={{ width: '100%', maxWidth: '280px', height: '180px', marginBottom: '24px', display: 'flex', alignItems: 'center' }}>
+                <img src="/assets/visitor_management.png" alt="Visitor Management System" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '12px' }}>
+                Visitor Management System
+              </h3>
+              <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#666666', lineHeight: 1.65, margin: 0, maxWidth: '520px' }}>
+                Easy tracking of visitors, cabs, and even your deliveries! It's a one-stop solution to manage all your visitors whether you are inside the society or not.
+              </p>
             </div>
 
-            <button
-              onClick={onOpenDemo}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '14px 28px',
-                borderRadius: '12px',
-                background: '#2563EB',
-                color: 'white',
-                fontWeight: 900,
-                fontSize: '14px',
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)'
-              }}
-            >
-              <span>Schedule Live Walkthrough</span>
-              <ArrowRight size={16} />
-            </button>
-          </div>
+            {/* Domestic Staff Management Card */}
+            <div>
+              <div style={{ width: '100%', maxWidth: '280px', height: '180px', marginBottom: '24px', display: 'flex', alignItems: 'center' }}>
+                <img src="/assets/domestic_staff.png" alt="Domestic Staff Management" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '12px' }}>
+                Domestic Staff Management
+              </h3>
+              <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#666666', lineHeight: 1.65, margin: 0, maxWidth: '520px' }}>
+                Get notified the moment your staff enter the society premises. Maintain their attendance digitally and also choose the best-rated domestic help for your home.
+              </p>
+            </div>
+          </motion.div>
+        )}
 
-          {/* Right Visual Highlight Box */}
-          <div style={{
-            background: isDark ? '#0F172A' : '#FFFFFF',
-            borderRadius: '20px',
-            padding: '32px',
-            border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E2E8F0',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.04)'
-          }}>
-            <div style={{ fontSize: '12px', fontWeight: 800, color: '#2563EB', textTransform: 'uppercase', marginBottom: '12px' }}>
-              REAL-TIME WORKFLOW
+        {activeTab === 'management' && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px' }}
+          >
+            <div>
+              <div style={{ width: '100%', maxWidth: '280px', height: '180px', marginBottom: '24px', display: 'flex', alignItems: 'center' }}>
+                <img src="/assets/admin_dashboard_mockup.png" alt="Society Accounting" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '8px' }} />
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '12px' }}>
+                Society Accounting & Razorpay Billing
+              </h3>
+              <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#666666', lineHeight: 1.65, margin: 0, maxWidth: '520px' }}>
+                Automate monthly maintenance billing, send instant WhatsApp reminders, collect online UPI payments, and generate GST compliant accounting ledgers.
+              </p>
             </div>
-            <div style={{ fontSize: '18px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', marginBottom: '12px' }}>
-              Zero Friction Communication
+
+            <div>
+              <div style={{ width: '100%', maxWidth: '280px', height: '180px', marginBottom: '24px', display: 'flex', alignItems: 'center' }}>
+                <img src="/assets/hero_illustration.png" alt="Digital Notice Board" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '8px' }} />
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '12px' }}>
+                Digital Notice Board & Grievances
+              </h3>
+              <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#666666', lineHeight: 1.65, margin: 0, maxWidth: '520px' }}>
+                Broadcast urgent notices to all residents in 1 click and resolve flat complaint tickets with transparent SLA tracking.
+              </p>
             </div>
-            <p style={{ fontSize: '13px', color: isDark ? '#94A3B8' : '#64748B', lineHeight: 1.6, margin: 0 }}>
-              Connect Guard Gatekeepers, Society Residents, and Management Committee Treasurers instantly over encrypted Firebase websockets.
-            </p>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
+
+        {activeTab === 'security' && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px' }}
+          >
+            <div>
+              <div style={{ width: '100%', maxWidth: '280px', height: '180px', marginBottom: '24px', display: 'flex', alignItems: 'center' }}>
+                <img src="/assets/guard_app_mockup.png" alt="Guard Console" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '8px' }} />
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '12px' }}>
+                Guard Gatekeeper Console
+              </h3>
+              <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#666666', lineHeight: 1.65, margin: 0, maxWidth: '520px' }}>
+                5-Second entry verification with OTP passcode scanning, multilingual UI, and daily attendance logging for gate security staff.
+              </p>
+            </div>
+
+            <div>
+              <div style={{ width: '100%', maxWidth: '280px', height: '180px', marginBottom: '24px', display: 'flex', alignItems: 'center' }}>
+                <img src="/assets/resident_app_mockup.png" alt="Emergency SOS" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '8px' }} />
+              </div>
+              <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '12px' }}>
+                Emergency SOS Panic Siren
+              </h3>
+              <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#666666', lineHeight: 1.65, margin: 0, maxWidth: '520px' }}>
+                1-Tap emergency panic siren alert triggered from resident smartphones directly to gatekeeper tablets and committee members.
+              </p>
+            </div>
+          </motion.div>
+        )}
 
       </div>
     </section>
