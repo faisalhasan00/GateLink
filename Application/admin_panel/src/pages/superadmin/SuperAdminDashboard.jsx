@@ -102,17 +102,16 @@ export default function SuperAdminDashboard() {
             style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--danger)' }}
           >
             <Database size={16} />
-            Clear All Data
+            Wipe Dummy Societies
           </button>
-          <button
+          <Link
+            to="/super-admin/societies"
             className="btn btn-primary"
-            onClick={handleSeed}
-            disabled={isSeeding}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
           >
-            <Database size={16} />
-            {isSeeding ? 'Initializing...' : 'Initialize Demo Data'}
-          </button>
+            <Building2 size={16} />
+            + Onboard New Society
+          </Link>
         </div>
       </div>
 
