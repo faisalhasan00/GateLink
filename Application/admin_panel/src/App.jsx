@@ -30,6 +30,7 @@ import AdCampaigns from './pages/superadmin/AdCampaigns'
 import SuperAdminProfile from './pages/superadmin/SuperAdminProfile'
 import SuperAdminLogin from './pages/superadmin/SuperAdminLogin'
 
+import LandingPage from './pages/landing/LandingPage'
 import { getSocietyAdminSession, getSuperAdminSession } from './services/sessionManager'
 
 import './index.css'
@@ -64,6 +65,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public SaaS Landing Page */}
+        <Route path="/landing" element={<LandingPage />} />
+        <Route path="/website" element={<LandingPage />} />
+
         {/* Public Login Pages */}
         <Route path="/login" element={<AdminLogin />} />
         <Route path="/super-admin/login" element={<SuperAdminLogin />} />
