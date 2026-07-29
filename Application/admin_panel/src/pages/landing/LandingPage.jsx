@@ -36,7 +36,6 @@ export default function LandingPage() {
         <FeaturesSection />
         <ComparisonSection />
         <ProposalSection onOpenDemo={handleOpenDemo} />
-        <ContactSection />
       </main>
 
       {/* Footer */}
