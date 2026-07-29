@@ -40,20 +40,19 @@ export default function Navbar({ onOpenDemo }) {
         {/* Left Side: Brand Logo + Nav Items */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
           
-          {/* Stacked Red/Dark Brand Badge (NoBrokerHood Style) */}
+          {/* Stacked Red/Dark Brand Badge */}
           <Link to="/landing" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
             <div style={{
               background: '#FF385C',
               color: '#FFFFFF',
-              fontSize: '10px',
+              fontSize: '11px',
               fontWeight: 900,
               padding: '1px 6px',
               borderRadius: '2px',
-              letterSpacing: '0.8px',
-              lineHeight: '12px',
-              textTransform: 'uppercase'
+              letterSpacing: '0.5px',
+              lineHeight: '13px'
             }}>
-              SOCIETY
+              HomeHni
             </div>
             <div style={{
               color: isDark ? '#FFFFFF' : '#2C2C2C',
@@ -63,7 +62,7 @@ export default function Navbar({ onOpenDemo }) {
               lineHeight: '18px',
               marginTop: '1px'
             }}>
-              HOOD
+              Hood
             </div>
           </Link>
 

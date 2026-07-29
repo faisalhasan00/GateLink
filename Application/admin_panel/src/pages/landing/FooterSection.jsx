@@ -21,26 +21,42 @@ export default function FooterSection() {
           
           {/* Col 1: Brand Info */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-              <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Shield size={20} color="#FFFFFF" />
+            <Link to="/landing" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: '16px' }}>
+              <div style={{
+                background: '#FF385C',
+                color: '#FFFFFF',
+                fontSize: '11px',
+                fontWeight: 900,
+                padding: '1px 6px',
+                borderRadius: '2px',
+                letterSpacing: '0.5px',
+                lineHeight: '13px'
+              }}>
+                HomeHni
               </div>
-              <span style={{ fontSize: '20px', fontWeight: 900, color: '#FFFFFF' }}>
-                Society<span style={{ color: '#2563EB' }}>Sphere</span>
-              </span>
-            </div>
+              <div style={{
+                color: '#FFFFFF',
+                fontSize: '20px',
+                fontWeight: 900,
+                letterSpacing: '0.5px',
+                lineHeight: '20px',
+                marginTop: '1px'
+              }}>
+                Hood
+              </div>
+            </Link>
             <p style={{ fontSize: '14px', lineHeight: 1.65, color: '#94A3B8', marginBottom: '20px', maxWidth: '320px' }}>
               India’s intelligent society management operating system. Empowering gated communities, residents, and gate security staff with real-time digital automation.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#CBD5E1' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Phone size={14} color="#2563EB" /> +91 (800) 456-7890 (Toll Free)
+                <Phone size={14} color="#00B589" /> +91 (800) 456-7890 (Toll Free)
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Mail size={14} color="#2563EB" /> support@societysphere.com
+                <Mail size={14} color="#00B589" /> support@societysphere.com
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <MapPin size={14} color="#2563EB" /> HSR Layout, Bengaluru, Karnataka
+                <MapPin size={14} color="#00B589" /> HSR Layout, Bengaluru, Karnataka
               </div>
             </div>
           </div>
@@ -51,7 +67,7 @@ export default function FooterSection() {
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px' }}>
               <li><Link to="/features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Visitor Pass</Link></li>
               <li><Link to="/features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Guard Gatekeeper</Link></li>
-              <li><Link to="/features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Razorpay Billing</Link></li>
+              <li><Link to="/features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Pay Maintenance Bill Online</Link></li>
               <li><Link to="/features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Emergency SOS</Link></li>
               <li><Link to="/ecosystem" style={{ color: '#94A3B8', textDecoration: 'none' }}>Connected Ecosystem</Link></li>
             </ul>
