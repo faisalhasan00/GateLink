@@ -32,7 +32,6 @@ export default function LandingPage() {
       <main>
         <HeroSection onOpenDemo={handleOpenDemo} />
         <SolutionsSection onOpenDemo={handleOpenDemo} />
-        <ClientLogosSection />
         <TrustedSection />
         <FeaturesSection />
         <ComparisonSection />
