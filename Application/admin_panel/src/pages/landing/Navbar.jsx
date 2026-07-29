@@ -19,6 +19,7 @@ export default function Navbar({ onOpenDemo }) {
     { name: 'Home', href: '/landing' },
     { name: 'Features', href: '/features' },
     { name: 'Solutions', href: '/solutions' },
+    { name: 'Ecosystem', href: '/ecosystem' },
     { name: 'Pricing', href: '/landing#pricing' },
     { name: 'Contact', href: '/landing#contact' },
   ];
