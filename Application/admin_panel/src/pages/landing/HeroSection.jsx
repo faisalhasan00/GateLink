@@ -141,8 +141,8 @@ export default function HeroSection({ onOpenDemo }) {
                     color: isDark ? '#FFFFFF' : '#2C2C2C',
                     userSelect: 'none'
                   }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1 }}>
-                      <span style={{ fontSize: '10px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>IN</span>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1 }}>
+                      <span style={{ fontSize: '15px' }}>🇮🇳</span>
                       <span style={{ fontSize: '7px', marginTop: '2px' }}>▼</span>
                     </div>
                     <span style={{ fontSize: '15px', fontWeight: 900 }}>+91</span>
