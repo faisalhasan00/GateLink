@@ -1,87 +1,104 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Play, Shield, Smartphone, Monitor, ShieldCheck, CheckCircle2, Zap, Bell, CreditCard, UserCheck, KeyRound } from 'lucide-react';
+import { ArrowRight, Play, Shield, Smartphone, Monitor, ShieldCheck, CheckCircle2, Zap, Bell, CreditCard, UserCheck, KeyRound, Star, Building2, Users } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function HeroSection({ onOpenDemo }) {
   const [activeTab, setActiveTab] = useState('resident');
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   const tabs = [
-    { id: 'resident', label: '📱 Resident App', icon: <Smartphone size={16} /> },
-    { id: 'guard', label: '👮 Security Guard App', icon: <Shield size={16} /> },
-    { id: 'admin', label: '📊 Society Admin Panel', icon: <Monitor size={16} /> },
-    { id: 'superadmin', label: '🛡️ Super Admin SaaS', icon: <ShieldCheck size={16} /> },
+    { id: 'resident', label: '📱 Resident App', icon: <Smartphone size={15} /> },
+    { id: 'guard', label: '👮 Guard App', icon: <Shield size={15} /> },
+    { id: 'admin', label: '📊 Admin Dashboard', icon: <Monitor size={15} /> },
+    { id: 'superadmin', label: '🛡️ Super Admin SaaS', icon: <ShieldCheck size={15} /> },
   ];
 
   return (
     <section 
       id="home"
       style={{
-        paddingTop: '160px',
-        paddingBottom: '90px',
-        background: 'radial-gradient(circle at 50% 20%, #1E1B4B 0%, #0F172A 70%, #020617 100%)',
+        paddingTop: '150px',
+        paddingBottom: '80px',
+        background: isDark ? '#0F172A' : '#FFFFFF',
         position: 'relative',
-        overflow: 'hidden'
+        borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E2E8F0'
       }}
     >
-      {/* Decorative Gradient Orbs */}
-      <div style={{ position: 'absolute', top: '10%', left: '15%', width: '400px', height: '400px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(79, 70, 229, 0.25) 0%, rgba(0, 0, 0, 0) 70%)', filter: 'blur(60px)', pointerEvents: 'none' }} />
-      <div style={{ position: 'absolute', top: '30%', right: '10%', width: '500px', height: '500px', borderRadius: '50%', background: 'radial-gradient(circle, rgba(124, 58, 237, 0.2) 0%, rgba(0, 0, 0, 0) 70%)', filter: 'blur(80px)', pointerEvents: 'none' }} />
-
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px', alignItems: 'center', position: 'relative', zIndex: 10 }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px', display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '50px', alignItems: 'center' }}>
         
-        {/* Left Text Column */}
+        {/* Left Editorial Copy */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6 }}
         >
-          {/* Badge */}
-          <div className="hero-editorial-badge" style={{ marginBottom: '24px' }}>
-            <Zap size={14} color="#818CF8" />
-            <span>Enterprise OS Version 3.0 • Verified Security</span>
+          {/* Rating Badge */}
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '6px 14px',
+            borderRadius: '20px',
+            background: isDark ? 'rgba(37, 99, 235, 0.15)' : '#EFF6FF',
+            border: isDark ? '1px solid rgba(37, 99, 235, 0.3)' : '1px solid #BFDBFE',
+            color: '#2563EB',
+            fontSize: '13px',
+            fontWeight: 800,
+            marginBottom: '20px'
+          }}>
+            <div style={{ display: 'flex', color: '#F59E0B' }}>
+              <Star size={14} fill="#F59E0B" />
+              <Star size={14} fill="#F59E0B" />
+              <Star size={14} fill="#F59E0B" />
+              <Star size={14} fill="#F59E0B" />
+              <Star size={14} fill="#F59E0B" />
+            </div>
+            <span>Trusted by 500+ Housing Societies</span>
           </div>
 
           {/* Heading */}
           <h1 style={{
-            fontSize: '54px',
+            fontSize: '52px',
             fontWeight: 900,
-            color: '#FFFFFF',
+            color: isDark ? '#FFFFFF' : '#0F172A',
             letterSpacing: '-1.8px',
-            lineHeight: 1.08,
-            marginBottom: '24px'
+            lineHeight: 1.1,
+            marginBottom: '20px'
           }}>
-            The Complete <span style={{ background: 'linear-gradient(135deg, #818CF8 0%, #C084FC 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Operating System</span> for Modern Gated Communities
+            The Complete <span style={{ color: '#2563EB' }}>Society & Gate Security</span> Operating System
           </h1>
 
           {/* Subtitle */}
           <p style={{
             fontSize: '18px',
-            color: '#94A3B8',
+            color: isDark ? '#94A3B8' : '#475569',
             lineHeight: 1.65,
-            marginBottom: '36px',
+            marginBottom: '32px',
             maxWidth: '560px'
           }}>
-            Unify Visitor Approvals, Gatekeeper Verification, Maintenance Invoicing, Emergency SOS, and Community Living in one intelligent platform.
+            Simplify Visitor Passes, Guard Verification, Maintenance Billing, Amenity Slot Bookings, and Emergency SOS from one unified enterprise cloud platform.
           </p>
 
-          {/* CTA Buttons */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+          {/* Action CTAs */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap', marginBottom: '36px' }}>
             <button
               onClick={onOpenDemo}
-              className="hover-elevate"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
                 gap: '10px',
                 padding: '16px 32px',
-                borderRadius: '14px',
-                background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+                borderRadius: '12px',
+                background: '#2563EB',
                 color: '#FFFFFF',
                 fontSize: '16px',
-                fontWeight: 800,
+                fontWeight: 900,
                 border: 'none',
                 cursor: 'pointer',
-                boxShadow: '0 10px 30px rgba(79, 70, 229, 0.5)'
+                boxShadow: '0 10px 25px rgba(37, 99, 235, 0.3)',
+                transition: 'all 0.2s ease'
               }}
             >
               <span>Book Free Live Demo</span>
@@ -95,63 +112,61 @@ export default function HeroSection({ onOpenDemo }) {
                 alignItems: 'center',
                 gap: '10px',
                 padding: '16px 28px',
-                borderRadius: '14px',
-                background: 'rgba(255, 255, 255, 0.08)',
-                color: '#FFFFFF',
+                borderRadius: '12px',
+                background: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9',
+                color: isDark ? '#FFFFFF' : '#0F172A',
                 fontSize: '16px',
                 fontWeight: 700,
-                border: '1px solid rgba(255, 255, 255, 0.15)',
+                border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #CBD5E1',
                 textDecoration: 'none',
-                backdropFilter: 'blur(10px)',
                 transition: 'all 0.2s ease'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.15)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.08)'}
             >
-              <Play size={16} fill="#FFFFFF" />
-              <span>Explore Features</span>
+              <Play size={16} fill={isDark ? '#FFFFFF' : '#0F172A'} />
+              <span>Watch 2-Min Tour</span>
             </a>
           </div>
 
-          {/* Guarantee checklist */}
-          <div style={{ display: 'flex', gap: '20px', marginTop: '36px', color: '#64748B', fontSize: '13px', fontWeight: 600, flexWrap: 'wrap' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#CBD5E1' }}>
-              <CheckCircle2 size={16} color="#34D399" /> Free 14-Day Trial
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#CBD5E1' }}>
-              <CheckCircle2 size={16} color="#34D399" /> Zero Setup Fees
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#CBD5E1' }}>
-              <CheckCircle2 size={16} color="#34D399" /> 24/7 Onboarding Support
-            </span>
+          {/* Key Metrics Row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', paddingTop: '24px', borderTop: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0' }}>
+            <div>
+              <div style={{ fontSize: '24px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>250k+</div>
+              <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 600 }}>Active Residents</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '24px', fontWeight: 900, color: '#059669' }}>99.9%</div>
+              <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 600 }}>Gate Uptime SLA</div>
+            </div>
+            <div>
+              <div style={{ fontSize: '24px', fontWeight: 900, color: '#2563EB' }}>10M+</div>
+              <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 600 }}>Check-ins Verified</div>
+            </div>
           </div>
-
         </motion.div>
 
-        {/* Right Interactive Mockup Column */}
+        {/* Right Device Screen Viewport */}
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
         >
-          {/* Tab Selector */}
-          <div style={{ display: 'flex', gap: '8px', padding: '6px', background: 'rgba(15, 23, 42, 0.8)', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.1)', marginBottom: '16px', backdropFilter: 'blur(12px)', overflowX: 'auto' }}>
+          {/* Tab Switcher */}
+          <div style={{ display: 'flex', gap: '6px', padding: '6px', background: isDark ? '#1E293B' : '#F1F5F9', borderRadius: '14px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0', marginBottom: '14px' }}>
             {tabs.map((t) => (
               <button
                 key={t.id}
                 onClick={() => setActiveTab(t.id)}
                 style={{
                   flex: 1,
-                  padding: '10px 14px',
-                  borderRadius: '10px',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
                   border: 'none',
                   fontSize: '12px',
-                  fontWeight: 700,
+                  fontWeight: 800,
                   cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.2s ease',
-                  backgroundColor: activeTab === t.id ? '#4F46E5' : 'transparent',
-                  color: activeTab === t.id ? '#FFFFFF' : '#94A3B8'
+                  backgroundColor: activeTab === t.id ? '#2563EB' : 'transparent',
+                  color: activeTab === t.id ? '#FFFFFF' : (isDark ? '#94A3B8' : '#64748B'),
+                  transition: 'all 0.2s ease'
                 }}
               >
                 {t.label}
@@ -159,50 +174,52 @@ export default function HeroSection({ onOpenDemo }) {
             ))}
           </div>
 
-          {/* Interactive Screen Preview Container */}
+          {/* Device Screen Preview Card */}
           <div style={{
-            background: 'rgba(30, 41, 59, 0.6)',
-            borderRadius: '24px',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
+            background: isDark ? '#1E293B' : '#FFFFFF',
+            borderRadius: '20px',
+            border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #CBD5E1',
             padding: '24px',
-            backdropFilter: 'blur(20px)',
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
-            position: 'relative'
+            boxShadow: '0 20px 40px -10px rgba(0, 0, 0, 0.1)',
+            minHeight: '360px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center'
           }}>
-            {/* Screen Content Render */}
             {activeTab === 'resident' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>Resident Companion</h3>
-                    <p style={{ margin: 0, fontSize: '12px', color: '#94A3B8' }}>Flat 402 • Skyline Towers</p>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Resident Mobile Companion</h3>
+                    <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>Flat 402 • Skyline Heights</p>
                   </div>
-                  <span style={{ padding: '4px 10px', borderRadius: '20px', background: 'rgba(16, 185, 129, 0.2)', color: '#34D399', fontSize: '11px', fontWeight: 800 }}>LIVE CONNECTED</span>
+                  <span style={{ padding: '4px 10px', borderRadius: '20px', background: '#ECFDF5', color: '#059669', fontSize: '11px', fontWeight: 800 }}>LIVE GATE LINK</span>
                 </div>
 
-                {/* Floating Notification */}
-                <div style={{ background: 'rgba(15, 23, 42, 0.9)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(99, 102, 241, 0.3)', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div style={{ width: '42px', height: '42px', borderRadius: '50%', backgroundColor: '#4F46E5', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
+                <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', borderRadius: '16px', padding: '16px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                  <div style={{ width: '42px', height: '42px', borderRadius: '12px', backgroundColor: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                     <Bell size={20} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ color: 'white', fontWeight: 700, fontSize: '13px' }}>Delivery Gate Pre-Approval</div>
-                    <div style={{ color: '#94A3B8', fontSize: '11px' }}>Amazon Logistics • OTP: 8492</div>
+                    <div style={{ fontSize: '14px', fontWeight: 800, color: isDark ? '#FFFFFF' : '#0F172A' }}>Visitor at Main Gate</div>
+                    <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>Amazon Delivery Agent • OTP: 8492</div>
                   </div>
-                  <button style={{ background: '#10B981', border: 'none', color: 'white', padding: '6px 12px', borderRadius: '8px', fontWeight: 800, fontSize: '11px', cursor: 'pointer' }}>ALLOW</button>
+                  <button style={{ padding: '8px 14px', borderRadius: '8px', background: '#059669', color: 'white', fontWeight: 800, border: 'none', cursor: 'pointer', fontSize: '12px' }}>
+                    Allow
+                  </button>
                 </div>
 
-                {/* Resident Action Cards */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '14px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                    <CreditCard size={18} color="#818CF8" style={{ marginBottom: '6px' }} />
-                    <div style={{ color: 'white', fontWeight: 700, fontSize: '13px' }}>Maintenance</div>
-                    <div style={{ color: '#34D399', fontWeight: 800, fontSize: '12px' }}>Paid ₹4,500</div>
+                  <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '14px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E2E8F0' }}>
+                    <div style={{ fontSize: '11px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 700 }}>MAINTENANCE DUE</div>
+                    <div style={{ fontSize: '16px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', marginTop: '2px' }}>₹4,500</div>
+                    <div style={{ fontSize: '11px', color: '#059669', fontWeight: 800, marginTop: '2px' }}>Paid via Razorpay</div>
                   </div>
-                  <div style={{ background: 'rgba(15, 23, 42, 0.7)', padding: '14px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                    <KeyRound size={18} color="#C084FC" style={{ marginBottom: '6px' }} />
-                    <div style={{ color: 'white', fontWeight: 700, fontSize: '13px' }}>Visitor Passes</div>
-                    <div style={{ color: '#94A3B8', fontSize: '12px' }}>3 Active Passes</div>
+
+                  <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '14px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E2E8F0' }}>
+                    <div style={{ fontSize: '11px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 700 }}>AMENITY BOOKED</div>
+                    <div style={{ fontSize: '14px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', marginTop: '2px' }}>Tennis Court</div>
+                    <div style={{ fontSize: '11px', color: '#2563EB', fontWeight: 800, marginTop: '2px' }}>Today 6:00 PM</div>
                   </div>
                 </div>
               </div>
@@ -210,45 +227,39 @@ export default function HeroSection({ onOpenDemo }) {
 
             {activeTab === 'guard' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', color: 'white' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>Gate 1 Guard Duty</h3>
-                    <p style={{ margin: 0, fontSize: '12px', color: '#94A3B8' }}>Guard Ramesh • Gatekeeper App</p>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Gatekeeper Duty Console</h3>
+                    <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>Main Entry Gate 01</p>
                   </div>
-                  <span style={{ padding: '4px 10px', borderRadius: '20px', background: 'rgba(239, 68, 68, 0.2)', color: '#FCA5A5', fontSize: '11px', fontWeight: 800 }}>SECURE GATE</span>
+                  <span style={{ padding: '4px 10px', borderRadius: '20px', background: '#ECFDF5', color: '#059669', fontSize: '11px', fontWeight: 800 }}>GUARD ON DUTY</span>
                 </div>
 
-                <div style={{ background: 'rgba(15, 23, 42, 0.9)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(16, 185, 129, 0.3)', display: 'flex', alignItems: 'center', gap: '14px' }}>
-                  <div style={{ width: '42px', height: '42px', borderRadius: '50%', backgroundColor: '#10B981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
-                    <UserCheck size={20} />
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ color: 'white', fontWeight: 700, fontSize: '13px' }}>Cab Verification Successful</div>
-                    <div style={{ color: '#94A3B8', fontSize: '11px' }}>Uber MH 12 AB 9421 • Flat 201</div>
-                  </div>
-                  <span style={{ color: '#10B981', fontWeight: 800, fontSize: '12px' }}>PASSED ✓</span>
+                <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '14px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 800, color: isDark ? '#FFFFFF' : '#0F172A', marginBottom: '8px' }}>Pre-Approved Entry Pass</div>
+                  <div style={{ fontSize: '13px', color: isDark ? '#94A3B8' : '#475569' }}>Guest Passcode: <strong style={{ color: '#2563EB' }}>#9012</strong> → Flat 201</div>
                 </div>
               </div>
             )}
 
             {activeTab === 'admin' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ color: 'white' }}>
-                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>Society Committee Console</h3>
-                  <p style={{ margin: 0, fontSize: '12px', color: '#94A3B8' }}>Skyline Heights • 180 Flats</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Society Admin Dashboard</h3>
+                    <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>July 2026 Financial Overview</p>
+                  </div>
+                  <span style={{ padding: '4px 10px', borderRadius: '20px', background: '#EFF6FF', color: '#2563EB', fontSize: '11px', fontWeight: 800 }}>98.4% COLLECTED</span>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                  <div style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '12px', borderRadius: '12px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '11px', color: '#94A3B8' }}>COLLECTION</div>
-                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#34D399' }}>98.4%</div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '14px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0' }}>
+                    <div style={{ fontSize: '11px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 700 }}>COLLECTED REVENUE</div>
+                    <div style={{ fontSize: '20px', fontWeight: 900, color: '#059669', marginTop: '4px' }}>₹8,45,000</div>
                   </div>
-                  <div style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '12px', borderRadius: '12px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '11px', color: '#94A3B8' }}>VISITORS</div>
-                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#818CF8' }}>1,240</div>
-                  </div>
-                  <div style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '12px', borderRadius: '12px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '11px', color: '#94A3B8' }}>HELPDESK</div>
-                    <div style={{ fontSize: '16px', fontWeight: 800, color: '#FBBF24' }}>0 Pending</div>
+                  <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '14px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0' }}>
+                    <div style={{ fontSize: '11px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 700 }}>SLA HELP TICKETS</div>
+                    <div style={{ fontSize: '20px', fontWeight: 900, color: '#2563EB', marginTop: '4px' }}>12 Resolved</div>
                   </div>
                 </div>
               </div>
@@ -256,19 +267,17 @@ export default function HeroSection({ onOpenDemo }) {
 
             {activeTab === 'superadmin' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                <div style={{ color: 'white' }}>
-                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>Owner Command Center</h3>
-                  <p style={{ margin: 0, fontSize: '12px', color: '#94A3B8' }}>SocietySphere SaaS Global Directory</p>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>Super Admin Multi-Tenant Portal</h3>
+                    <p style={{ margin: 0, fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B' }}>Global Township CRM</p>
+                  </div>
+                  <span style={{ padding: '4px 10px', borderRadius: '20px', background: '#F3E8FF', color: '#7C3AED', fontSize: '11px', fontWeight: 800 }}>HQ CONTROL</span>
                 </div>
-                <div style={{ background: 'rgba(15, 23, 42, 0.8)', padding: '16px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: 'white', fontSize: '13px', fontWeight: 700, marginBottom: '8px' }}>
-                    <span>Active Societies</span>
-                    <span style={{ color: '#818CF8' }}>500+ Onboarded</span>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#94A3B8', fontSize: '12px' }}>
-                    <span>Monthly ARR Growth</span>
-                    <span style={{ color: '#34D399', fontWeight: 800 }}>+28% YoY</span>
-                  </div>
+
+                <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '14px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 800, color: isDark ? '#FFFFFF' : '#0F172A' }}>500+ Societies Onboarded</div>
+                  <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B', marginTop: '2px' }}>Active SaaS Subscriptions Across Bengaluru, Mumbai, Delhi</div>
                 </div>
               </div>
             )}

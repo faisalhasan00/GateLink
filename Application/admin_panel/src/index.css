@@ -1,21 +1,21 @@
 :root {
-  --primary: #4F46E5;
-  --primary-hover: #4338CA;
-  --primary-dark: #3730A3;
-  --primary-light: #EEF2FF;
-  --secondary: #10B981;
-  --secondary-light: #D1FAE5;
-  --warning: #F59E0B;
-  --warning-light: #FEF3C7;
-  --danger: #EF4444;
-  --danger-light: #FEE2E2;
+  --primary: #2563EB;
+  --primary-hover: #1D4ED8;
+  --primary-light: #EFF6FF;
+  --secondary: #059669;
+  --secondary-light: #ECFDF5;
+  --warning: #D97706;
+  --warning-light: #FFFBEB;
+  --danger: #DC2626;
+  --danger-light: #FEF2F2;
   
-  --bg-color: #F3F4F6;
+  --bg-color: #F8FAFC;
   --surface-color: #FFFFFF;
-  --border-color: #E5E7EB;
+  --border-color: #E2E8F0;
   
-  --text-primary: #111827;
-  --text-secondary: #6B7280;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
   
   --sidebar-width: 280px;
   --sidebar-width-collapsed: 80px;
@@ -31,29 +31,33 @@
 
   --radius-md: 12px;
   --radius-card: 16px;
-  --shadow-enterprise: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-enterprise: 0 4px 20px rgba(0, 0, 0, 0.05);
 
-  /* Landing Page Design Tokens */
-  --lp-bg-dark: #020617;
-  --lp-surface-dark: #0F172A;
-  --lp-card-dark: rgba(30, 41, 59, 0.7);
+  /* Clean Enterprise SaaS Tokens (MyGate / BuildingLink Aesthetic) */
+  --lp-bg-dark: #FFFFFF;
+  --lp-surface-dark: #F8FAFC;
+  --lp-card-dark: #FFFFFF;
+  --lp-border-dark: #E2E8F0;
+  --lp-text-heading: #0F172A;
+  --lp-text-body: #475569;
+  --lp-accent-blue: #2563EB;
+  --lp-accent-emerald: #059669;
+  --lp-accent-purple: #7C3AED;
+}
+
+/* Dark Mode Overrides */
+html.dark-theme {
+  --lp-bg-dark: #0F172A;
+  --lp-surface-dark: #1E293B;
+  --lp-card-dark: #1E293B;
   --lp-border-dark: rgba(255, 255, 255, 0.12);
   --lp-text-heading: #FFFFFF;
   --lp-text-body: #94A3B8;
-  --lp-accent-indigo: #6366F1;
-  --lp-accent-emerald: #34D399;
-  --lp-accent-purple: #C084FC;
-  --lp-accent-amber: #FBBF24;
-}
-
-/* Light Theme Variables Overrides */
-html.light-theme {
-  --lp-bg-dark: #F8FAFC;
-  --lp-surface-dark: #FFFFFF;
-  --lp-card-dark: rgba(255, 255, 255, 0.9);
-  --lp-border-dark: rgba(0, 0, 0, 0.1);
-  --lp-text-heading: #0F172A;
-  --lp-text-body: #475569;
+  --bg-color: #0F172A;
+  --surface-color: #1E293B;
+  --border-color: rgba(255, 255, 255, 0.12);
+  --text-primary: #FFFFFF;
+  --text-secondary: #94A3B8;
 }
 
 * {
@@ -64,8 +68,8 @@ html.light-theme {
 }
 
 body {
-  background-color: var(--bg-color);
-  color: var(--text-primary);
+  background-color: var(--lp-bg-dark);
+  color: var(--lp-text-heading);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -76,57 +80,30 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #020617;
+  background: #F1F5F9;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1E293B;
+  background: #CBD5E1;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #4F46E5;
+  background: #2563EB;
 }
 
-/* Focused Accessible Inputs */
+/* Accessible Focus Outlines */
 input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible {
-  outline: 2px solid #6366F1 !important;
+  outline: 2px solid #2563EB !important;
   outline-offset: 2px !important;
 }
 
-/* Handcrafted Section Styling Classes */
-.hero-editorial-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  border-radius: 30px;
-  background: rgba(99, 102, 241, 0.12);
-  border: 1px solid rgba(99, 102, 241, 0.3);
-  color: var(--lp-accent-indigo);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-
-.heading-gradient {
-  background: linear-gradient(135deg, #FFFFFF 0%, #CBD5E1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-html.light-theme .heading-gradient {
-  background: linear-gradient(135deg, #0F172A 0%, #334155 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Micro Interactions & Hover Elevate */
-.hover-elevate {
+/* Card Micro-Interactions */
+.hover-card-elevate {
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.hover-elevate:hover {
+.hover-card-elevate:hover {
   transform: translateY(-4px);
-  border-color: rgba(99, 102, 241, 0.4) !important;
-  box-shadow: 0 20px 40px -15px rgba(79, 70, 229, 0.25) !important;
+  border-color: #2563EB !important;
+  box-shadow: 0 12px 30px -10px rgba(37, 99, 235, 0.15) !important;
 }
 
 /* Dashboard Layout Rules from AGENTS.md */

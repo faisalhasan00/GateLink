@@ -1,18 +1,22 @@
 import React from 'react';
 import { Cloud, Activity, Smartphone, Lock, Flag } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function TrustedSection() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   const trustMarkers = [
-    { icon: <Cloud size={20} color="#818CF8" />, title: 'Secure Cloud', desc: 'AWS & Firebase Infrastructure' },
-    { icon: <Activity size={20} color="#34D399" />, title: '99.9% Uptime', desc: 'Guaranteed SLA Availability' },
-    { icon: <Smartphone size={20} color="#C084FC" />, title: 'Mobile Apps', desc: 'Native iOS & Android Apps' },
-    { icon: <Lock size={20} color="#FBBF24" />, title: 'Data Encryption', desc: '256-Bit SSL Bank Security' },
-    { icon: <Flag size={20} color="#F472B6" />, title: 'Made for India', desc: 'Built for Indian Societies' },
+    { icon: <Cloud size={20} color="#2563EB" />, title: 'AWS Cloud Secured', desc: 'Enterprise Cloud Infrastructure' },
+    { icon: <Activity size={20} color="#059669" />, title: '99.9% Uptime SLA', desc: 'Guaranteed Availability' },
+    { icon: <Smartphone size={20} color="#7C3AED" />, title: 'Native Mobile Apps', desc: 'iOS & Android Certified' },
+    { icon: <Lock size={20} color="#D97706" />, title: '256-Bit Encryption', desc: 'DPDP Privacy Compliant' },
+    { icon: <Flag size={20} color="#DC2626" />, title: 'Made for India', desc: 'Built for Indian Societies' },
   ];
 
   return (
-    <section style={{ padding: '24px 0', background: 'rgba(9, 13, 22, 0.95)', borderTop: '1px solid rgba(255, 255, 255, 0.08)', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+    <section style={{ padding: '24px 0', background: isDark ? '#0F172A' : '#F8FAFC', borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E2E8F0', borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E2E8F0' }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
           {trustMarkers.map((marker, index) => (
@@ -28,22 +32,23 @@ export default function TrustedSection() {
                   width: '38px',
                   height: '38px',
                   borderRadius: '10px',
-                  background: 'rgba(255, 255, 255, 0.05)',
+                  background: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FFFFFF',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E2E8F0',
+                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.04)',
                   flexShrink: 0
                 }}>
                   {marker.icon}
                 </div>
                 <div>
-                  <div style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 800 }}>{marker.title}</div>
-                  <div style={{ color: '#94A3B8', fontSize: '11px', fontWeight: 500 }}>{marker.desc}</div>
+                  <div style={{ color: isDark ? '#FFFFFF' : '#0F172A', fontSize: '13px', fontWeight: 800 }}>{marker.title}</div>
+                  <div style={{ color: isDark ? '#94A3B8' : '#64748B', fontSize: '11px', fontWeight: 600 }}>{marker.desc}</div>
                 </div>
               </motion.div>
               {index < trustMarkers.length - 1 && (
-                <div style={{ width: '1px', height: '24px', backgroundColor: 'rgba(255, 255, 255, 0.08)' }} />
+                <div style={{ width: '1px', height: '24px', backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0' }} />
               )}
             </React.Fragment>
           ))}

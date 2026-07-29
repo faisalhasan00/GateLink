@@ -11,11 +11,14 @@ import {
   Clock, 
   FileText, 
   ArrowRight,
-  Sliders,
   Check
 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function ProposalSection({ onOpenDemo }) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
   const [societyType, setSocietyType] = useState('Gated Apartment Complex');
   const [flatCount, setFlatCount] = useState('100-250');
   const [selectedModules, setSelectedModules] = useState([
@@ -77,29 +80,28 @@ export default function ProposalSection({ onOpenDemo }) {
   };
 
   return (
-    <section id="proposal" style={{ padding: '100px 0', background: '#0F172A', position: 'relative' }}>
+    <section id="proposal" style={{ padding: '90px 0', background: isDark ? '#0F172A' : '#F8FAFC', position: 'relative' }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
         
         <div style={{ textAlign: 'center', maxWidth: '750px', margin: '0 auto 50px auto' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', borderRadius: '30px', background: 'rgba(52, 211, 153, 0.15)', color: '#34D399', fontSize: '13px', fontWeight: 800, marginBottom: '12px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', borderRadius: '20px', background: isDark ? 'rgba(37, 99, 235, 0.15)' : '#EFF6FF', color: '#2563EB', fontSize: '13px', fontWeight: 800, marginBottom: '12px' }}>
             <FileText size={14} /> INSTANT SOCIETY ONBOARDING PROPOSAL
           </div>
-          <h2 style={{ fontSize: '40px', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-1px', margin: '0 0 12px 0' }}>
-            Get a Customized Proposal for Your Community
+          <h2 style={{ fontSize: '40px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', letterSpacing: '-1px', margin: '0 0 12px 0' }}>
+            Get a Customized Onboarding Proposal
           </h2>
-          <p style={{ fontSize: '16px', color: '#94A3B8', margin: 0, lineHeight: 1.6 }}>
-            Every housing society is unique. Select your requirements below to calculate your onboarding timeline, dedicated manager setup, and trial proposal.
+          <p style={{ fontSize: '16px', color: isDark ? '#94A3B8' : '#475569', margin: 0, lineHeight: 1.6 }}>
+            Select your society details below to generate a customized deployment plan, guard training schedule, and 14-day free trial setup.
           </p>
         </div>
 
         {/* Proposal Interactive Form Container */}
         <div style={{
-          background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.95) 100%)',
+          background: isDark ? '#1E293B' : '#FFFFFF',
           borderRadius: '24px',
           padding: '40px',
-          border: '1px solid rgba(255, 255, 255, 0.15)',
-          backdropFilter: 'blur(20px)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E2E8F0',
+          boxShadow: '0 10px 30px rgba(0, 0, 0, 0.05)',
           display: 'grid',
           gridTemplateColumns: '1.2fr 0.8fr',
           gap: '40px',
@@ -110,16 +112,16 @@ export default function ProposalSection({ onOpenDemo }) {
           <div>
             {submitted ? (
               <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-                <div style={{ width: '72px', height: '72px', borderRadius: '50%', backgroundColor: 'rgba(16, 185, 129, 0.2)', border: '2px solid #10B981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
-                  <CheckCircle2 size={40} color="#34D399" />
+                <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#ECFDF5', border: '2px solid #10B981', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
+                  <CheckCircle2 size={36} color="#059669" />
                 </div>
-                <h3 style={{ fontSize: '24px', fontWeight: 900, color: '#FFFFFF', margin: '0 0 10px 0' }}>Custom Proposal Generated!</h3>
-                <p style={{ color: '#94A3B8', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>
-                  Thank you! Your tailored onboarding proposal has been sent to our onboarding team. We will call you within 2 hours with full setup details.
+                <h3 style={{ fontSize: '24px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', margin: '0 0 10px 0' }}>Proposal Requested!</h3>
+                <p style={{ color: isDark ? '#94A3B8' : '#64748B', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>
+                  Thank you! Our onboarding specialist will contact you within 2 hours with full deployment details.
                 </p>
                 <button
                   onClick={() => setSubmitted(false)}
-                  style={{ marginTop: '24px', padding: '10px 20px', borderRadius: '10px', background: '#4F46E5', color: 'white', fontWeight: 800, border: 'none', cursor: 'pointer', fontSize: '13px' }}
+                  style={{ marginTop: '24px', padding: '10px 20px', borderRadius: '10px', background: '#2563EB', color: 'white', fontWeight: 800, border: 'none', cursor: 'pointer', fontSize: '13px' }}
                 >
                   Generate Another Proposal
                 </button>
@@ -130,11 +132,11 @@ export default function ProposalSection({ onOpenDemo }) {
                 {/* 1. Society Type & Flat Count */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div>
-                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#CBD5E1', display: 'block', marginBottom: '6px' }}>Society Category</label>
+                    <label style={{ fontSize: '12px', fontWeight: 800, color: isDark ? '#CBD5E1' : '#334155', display: 'block', marginBottom: '6px' }}>Society Category</label>
                     <select
                       value={societyType}
                       onChange={e => setSocietyType(e.target.value)}
-                      style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.15)', background: '#0F172A', color: 'white', fontSize: '14px', outline: 'none' }}
+                      style={{ width: '100%', padding: '12px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CBD5E1', background: isDark ? '#0F172A' : '#F8FAFC', color: isDark ? '#FFFFFF' : '#0F172A', fontSize: '13px', outline: 'none' }}
                     >
                       <option value="Gated Apartment Complex">Gated Apartment Complex</option>
                       <option value="Standalone Society Building">Standalone Society Building</option>
@@ -144,11 +146,11 @@ export default function ProposalSection({ onOpenDemo }) {
                   </div>
 
                   <div>
-                    <label style={{ fontSize: '12px', fontWeight: 700, color: '#CBD5E1', display: 'block', marginBottom: '6px' }}>Total Flat Count</label>
+                    <label style={{ fontSize: '12px', fontWeight: 800, color: isDark ? '#CBD5E1' : '#334155', display: 'block', marginBottom: '6px' }}>Total Flat Count</label>
                     <select
                       value={flatCount}
                       onChange={e => setFlatCount(e.target.value)}
-                      style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.15)', background: '#0F172A', color: 'white', fontSize: '14px', outline: 'none' }}
+                      style={{ width: '100%', padding: '12px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CBD5E1', background: isDark ? '#0F172A' : '#F8FAFC', color: isDark ? '#FFFFFF' : '#0F172A', fontSize: '13px', outline: 'none' }}
                     >
                       <option value="Under 50">Under 50 Flats</option>
                       <option value="50-100">50 - 100 Flats</option>
@@ -161,7 +163,7 @@ export default function ProposalSection({ onOpenDemo }) {
 
                 {/* 2. Select Desired Modules */}
                 <div>
-                  <label style={{ fontSize: '12px', fontWeight: 700, color: '#CBD5E1', display: 'block', marginBottom: '10px' }}>Select Required Modules</label>
+                  <label style={{ fontSize: '12px', fontWeight: 800, color: isDark ? '#CBD5E1' : '#334155', display: 'block', marginBottom: '10px' }}>Select Required Modules</label>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '10px' }}>
                     {availableModules.map((mod) => {
                       const isSelected = selectedModules.includes(mod);
@@ -173,9 +175,9 @@ export default function ProposalSection({ onOpenDemo }) {
                             padding: '10px 12px',
                             borderRadius: '10px',
                             border: '1px solid',
-                            borderColor: isSelected ? '#6366F1' : 'rgba(255,255,255,0.1)',
-                            background: isSelected ? 'rgba(79, 70, 229, 0.2)' : 'rgba(15, 23, 42, 0.6)',
-                            color: isSelected ? '#FFFFFF' : '#94A3B8',
+                            borderColor: isSelected ? '#2563EB' : (isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0'),
+                            background: isSelected ? (isDark ? 'rgba(37, 99, 235, 0.2)' : '#EFF6FF') : (isDark ? '#0F172A' : '#F8FAFC'),
+                            color: isSelected ? (isDark ? '#FFFFFF' : '#2563EB') : (isDark ? '#94A3B8' : '#475569'),
                             fontSize: '12px',
                             fontWeight: 700,
                             cursor: 'pointer',
@@ -184,7 +186,7 @@ export default function ProposalSection({ onOpenDemo }) {
                             gap: '8px'
                           }}
                         >
-                          <div style={{ width: '16px', height: '16px', borderRadius: '4px', border: '1px solid', borderColor: isSelected ? '#6366F1' : 'rgba(255,255,255,0.2)', background: isSelected ? '#4F46E5' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <div style={{ width: '16px', height: '16px', borderRadius: '4px', border: '1px solid', borderColor: isSelected ? '#2563EB' : '#CBD5E1', background: isSelected ? '#2563EB' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             {isSelected && <Check size={12} color="white" />}
                           </div>
                           <span>{mod}</span>
@@ -196,13 +198,13 @@ export default function ProposalSection({ onOpenDemo }) {
 
                 {/* 3. Contact Inputs */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <input required type="text" placeholder="Your Full Name *" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#0F172A', color: 'white', fontSize: '13px', outline: 'none' }} />
-                  <input required type="tel" placeholder="Mobile Phone *" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#0F172A', color: 'white', fontSize: '13px', outline: 'none' }} />
+                  <input required type="text" placeholder="Your Full Name *" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CBD5E1', background: isDark ? '#0F172A' : '#F8FAFC', color: isDark ? '#FFFFFF' : '#0F172A', fontSize: '13px', outline: 'none' }} />
+                  <input required type="tel" placeholder="Mobile Phone *" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} style={{ padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CBD5E1', background: isDark ? '#0F172A' : '#F8FAFC', color: isDark ? '#FFFFFF' : '#0F172A', fontSize: '13px', outline: 'none' }} />
                 </div>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <input required type="email" placeholder="Email Address *" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#0F172A', color: 'white', fontSize: '13px', outline: 'none' }} />
-                  <input required type="text" placeholder="Society Name & City *" value={formData.societyName} onChange={e => setFormData({...formData, societyName: e.target.value})} style={{ padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.15)', background: '#0F172A', color: 'white', fontSize: '13px', outline: 'none' }} />
+                  <input required type="email" placeholder="Email Address *" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{ padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CBD5E1', background: isDark ? '#0F172A' : '#F8FAFC', color: isDark ? '#FFFFFF' : '#0F172A', fontSize: '13px', outline: 'none' }} />
+                  <input required type="text" placeholder="Society Name & City *" value={formData.societyName} onChange={e => setFormData({...formData, societyName: e.target.value})} style={{ padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CBD5E1', background: isDark ? '#0F172A' : '#F8FAFC', color: isDark ? '#FFFFFF' : '#0F172A', fontSize: '13px', outline: 'none' }} />
                 </div>
 
                 <button
@@ -211,13 +213,13 @@ export default function ProposalSection({ onOpenDemo }) {
                   style={{
                     padding: '14px',
                     borderRadius: '12px',
-                    background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+                    background: '#2563EB',
                     color: 'white',
                     fontWeight: 900,
                     fontSize: '15px',
                     border: 'none',
                     cursor: 'pointer',
-                    boxShadow: '0 4px 20px rgba(79, 70, 229, 0.4)',
+                    boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -225,7 +227,7 @@ export default function ProposalSection({ onOpenDemo }) {
                   }}
                 >
                   <Send size={16} />
-                  <span>{submitting ? 'Generating Proposal...' : 'Request Custom Proposal'}</span>
+                  <span>{submitting ? 'Generating Proposal...' : 'Request Onboarding Proposal'}</span>
                 </button>
               </form>
             )}
@@ -233,45 +235,45 @@ export default function ProposalSection({ onOpenDemo }) {
 
           {/* Right Live Proposal Summary Card */}
           <div style={{
-            background: 'rgba(15, 23, 42, 0.95)',
+            background: isDark ? '#0F172A' : '#F8FAFC',
             borderRadius: '20px',
             padding: '32px',
-            border: '1px solid rgba(99, 102, 241, 0.3)',
-            boxShadow: '0 20px 40px -10px rgba(0,0,0,0.6)',
+            border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.04)',
             display: 'flex',
             flexDirection: 'column',
             gap: '20px'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0' }}>
               <div>
-                <div style={{ fontSize: '11px', fontWeight: 900, color: '#818CF8', letterSpacing: '1px' }}>PROPOSAL ESTIMATE</div>
-                <div style={{ fontSize: '20px', fontWeight: 900, color: '#FFFFFF' }}>{societyType}</div>
+                <div style={{ fontSize: '11px', fontWeight: 900, color: '#2563EB', letterSpacing: '1px' }}>PROPOSAL SUMMARY</div>
+                <div style={{ fontSize: '18px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A' }}>{societyType}</div>
               </div>
-              <span style={{ fontSize: '11px', fontWeight: 900, background: 'rgba(16, 185, 129, 0.2)', color: '#34D399', padding: '4px 10px', borderRadius: '10px' }}>
-                14-DAY TRIAL INCLUDED
+              <span style={{ fontSize: '11px', fontWeight: 900, background: '#ECFDF5', color: '#059669', padding: '4px 10px', borderRadius: '10px' }}>
+                14-DAY FREE TRIAL
               </span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: '#E2E8F0' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '13px', color: isDark ? '#E2E8F0' : '#334155' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#94A3B8' }}>Est. Setup Time:</span>
-                <strong style={{ color: '#34D399' }}>24 - 48 Hours</strong>
+                <span style={{ color: isDark ? '#94A3B8' : '#64748B' }}>Est. Deployment Time:</span>
+                <strong style={{ color: '#059669' }}>24 - 48 Hours</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#94A3B8' }}>Dedicated Manager:</span>
-                <strong style={{ color: '#FFFFFF' }}>Assigned Free</strong>
+                <span style={{ color: isDark ? '#94A3B8' : '#64748B' }}>Dedicated Onboarding Manager:</span>
+                <strong style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}>Included Free</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#94A3B8' }}>Guard Training:</span>
-                <strong style={{ color: '#FFFFFF' }}>Included (On-Site/Virtual)</strong>
+                <span style={{ color: isDark ? '#94A3B8' : '#64748B' }}>Guard On-Site Training:</span>
+                <strong style={{ color: isDark ? '#FFFFFF' : '#0F172A' }}>Included</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#94A3B8' }}>Selected Modules:</span>
-                <strong style={{ color: '#818CF8' }}>{selectedModules.length} Active</strong>
+                <span style={{ color: isDark ? '#94A3B8' : '#64748B' }}>Selected Modules:</span>
+                <strong style={{ color: '#2563EB' }}>{selectedModules.length} Active</strong>
               </div>
             </div>
 
-            <div style={{ background: 'rgba(30, 41, 59, 0.6)', padding: '14px', borderRadius: '12px', fontSize: '12px', color: '#94A3B8', lineHeight: 1.5 }}>
+            <div style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF', padding: '14px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E2E8F0', fontSize: '12px', color: isDark ? '#94A3B8' : '#64748B', lineHeight: 1.5 }}>
               🛡️ Zero setup fee guarantee. Full data migration from Excel/WhatsApp included.
             </div>
           </div>
