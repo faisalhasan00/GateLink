@@ -36,31 +36,18 @@ export default function HeroSection({ onOpenDemo }) {
           transition={{ duration: 0.8 }}
         >
           {/* Badge */}
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '6px 16px',
-            borderRadius: '30px',
-            background: 'rgba(99, 102, 241, 0.15)',
-            border: '1px solid rgba(99, 102, 241, 0.3)',
-            color: '#A5B4FC',
-            fontSize: '13px',
-            fontWeight: 700,
-            marginBottom: '24px',
-            backdropFilter: 'blur(10px)'
-          }}>
+          <div className="hero-editorial-badge" style={{ marginBottom: '24px' }}>
             <Zap size={14} color="#818CF8" />
-            <span>Enterprise SaaS Version 3.0 Live</span>
+            <span>Enterprise OS Version 3.0 • Verified Security</span>
           </div>
 
           {/* Heading */}
           <h1 style={{
-            fontSize: '52px',
+            fontSize: '54px',
             fontWeight: 900,
             color: '#FFFFFF',
-            letterSpacing: '-1.5px',
-            lineHeight: 1.1,
+            letterSpacing: '-1.8px',
+            lineHeight: 1.08,
             marginBottom: '24px'
           }}>
             The Complete <span style={{ background: 'linear-gradient(135deg, #818CF8 0%, #C084FC 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Operating System</span> for Modern Gated Communities
@@ -70,17 +57,18 @@ export default function HeroSection({ onOpenDemo }) {
           <p style={{
             fontSize: '18px',
             color: '#94A3B8',
-            lineHeight: 1.6,
+            lineHeight: 1.65,
             marginBottom: '36px',
             maxWidth: '560px'
           }}>
-            Manage Visitors, Residents, Security, Maintenance, Billing, Communication, Parking, and Amenities from one intelligent platform.
+            Unify Visitor Approvals, Gatekeeper Verification, Maintenance Invoicing, Emergency SOS, and Community Living in one intelligent platform.
           </p>
 
           {/* CTA Buttons */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
             <button
               onClick={onOpenDemo}
+              className="hover-elevate"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -93,13 +81,10 @@ export default function HeroSection({ onOpenDemo }) {
                 fontWeight: 800,
                 border: 'none',
                 cursor: 'pointer',
-                boxShadow: '0 10px 30px rgba(79, 70, 229, 0.5)',
-                transition: 'all 0.2s ease'
+                boxShadow: '0 10px 30px rgba(79, 70, 229, 0.5)'
               }}
-              onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
-              onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
             >
-              <span>Book Free Demo</span>
+              <span>Book Free Live Demo</span>
               <ArrowRight size={18} />
             </button>
 
@@ -129,15 +114,15 @@ export default function HeroSection({ onOpenDemo }) {
           </div>
 
           {/* Guarantee checklist */}
-          <div style={{ display: 'flex', gap: '20px', marginTop: '36px', color: '#64748B', fontSize: '13px', fontWeight: 600 }}>
+          <div style={{ display: 'flex', gap: '20px', marginTop: '36px', color: '#64748B', fontSize: '13px', fontWeight: 600, flexWrap: 'wrap' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#CBD5E1' }}>
-              <CheckCircle2 size={16} color="#10B981" /> Free 14-Day Trial
+              <CheckCircle2 size={16} color="#34D399" /> Free 14-Day Trial
             </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#CBD5E1' }}>
-              <CheckCircle2 size={16} color="#10B981" /> No Credit Card Required
+              <CheckCircle2 size={16} color="#34D399" /> Zero Setup Fees
             </span>
             <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#CBD5E1' }}>
-              <CheckCircle2 size={16} color="#10B981" /> 24/7 Priority Support
+              <CheckCircle2 size={16} color="#34D399" /> 24/7 Onboarding Support
             </span>
           </div>
 
