@@ -5,11 +5,13 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { clearSocietyAdminSession, clearSuperAdminSession } from '../../services/sessionManager';
 
+import HomeHniHoodLogo from '../ui/HomeHniHoodLogo';
+
 export default function EnterpriseSidebar({ 
   isCollapsed = false, 
   setIsCollapsed, 
   navItems = [], 
-  brandTitle = 'SocietySphere',
+  brandTitle = 'HomeHni Hood',
   isSuperAdmin = false,
   isOpen = false,
   setIsOpen 
@@ -37,7 +39,7 @@ export default function EnterpriseSidebar({
         width: isCollapsed ? '80px' : '280px',
         minWidth: isCollapsed ? '80px' : '280px',
         height: '100vh',
-        background: 'linear-gradient(180deg, #1E1B4B 0%, #312E81 100%)',
+        background: 'linear-gradient(180deg, #0F172A 0%, #1E293B 100%)',
         color: '#FFFFFF',
         display: 'flex',
         flexDirection: 'column',
@@ -51,7 +53,7 @@ export default function EnterpriseSidebar({
       <div 
         style={{
           height: '72px',
-          padding: '0 24px',
+          padding: '0 20px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: isCollapsed ? 'center' : 'space-between',
@@ -60,19 +62,7 @@ export default function EnterpriseSidebar({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', overflow: 'hidden' }}>
-          <div style={{
-            width: '36px', height: '36px', borderRadius: '10px',
-            background: 'linear-gradient(135deg, #6366F1 0%, #4F46E5 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)', flexShrink: 0
-          }}>
-            {isSuperAdmin ? <Building2 size={20} color="#FFFFFF" /> : <Shield size={20} color="#FFFFFF" />}
-          </div>
-          {!isCollapsed && (
-            <span style={{ fontSize: '18px', fontWeight: 800, color: '#FFFFFF', letterSpacing: '-0.4px', whiteSpace: 'nowrap' }}>
-              {brandTitle}
-            </span>
-          )}
+          <HomeHniHoodLogo isDark={true} size={isCollapsed ? 'small' : 'medium'} />
         </div>
 
         {!isCollapsed && setIsCollapsed && (
