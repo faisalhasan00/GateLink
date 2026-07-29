@@ -9,6 +9,7 @@ export default function Navbar({ onOpenDemo }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
   const [featuresDropdownOpen, setFeaturesDropdownOpen] = useState(false);
+  const [loginDropdownOpen, setLoginDropdownOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -184,27 +185,80 @@ export default function Navbar({ onOpenDemo }) {
             {isDark ? <Sun size={15} color="#FBBF24" /> : <Moon size={15} color="#2563EB" />}
           </button>
 
-          {/* Outlined "Society Login" Button */}
-          <Link
-            to="/login"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '8px 20px',
-              borderRadius: '2px',
-              border: isDark ? '1px solid rgba(255,255,255,0.3)' : '1px solid #707070',
-              backgroundColor: 'transparent',
-              color: isDark ? '#FFFFFF' : '#333333',
-              textDecoration: 'none',
-              fontSize: '14px',
-              fontWeight: 600,
-              height: '38px',
-              boxSizing: 'border-box'
-            }}
+          {/* Outlined "Society Login" Dropdown Button */}
+          <div 
+            style={{ position: 'relative', cursor: 'pointer' }}
+            onMouseEnter={() => setLoginDropdownOpen(true)}
+            onMouseLeave={() => setLoginDropdownOpen(false)}
           >
-            Society Login
-          </Link>
+            <Link
+              to="/login"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '8px 18px',
+                borderRadius: '2px',
+                border: isDark ? '1px solid rgba(255,255,255,0.3)' : '1px solid #707070',
+                backgroundColor: 'transparent',
+                color: isDark ? '#FFFFFF' : '#333333',
+                textDecoration: 'none',
+                fontSize: '14px',
+                fontWeight: 600,
+                height: '38px',
+                boxSizing: 'border-box'
+              }}
+            >
+              <span>Society Login</span>
+              <ChevronDown size={14} color={isDark ? '#FFFFFF' : '#333333'} />
+            </Link>
+
+            {/* Login Dropdown */}
+            {loginDropdownOpen && (
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  width: '200px',
+                  backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
+                  border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E5E7EB',
+                  borderRadius: '4px',
+                  padding: '8px 0',
+                  zIndex: 1100
+                }}
+              >
+                <Link
+                  to="/login"
+                  style={{
+                    display: 'block',
+                    padding: '10px 16px',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: isDark ? '#FFFFFF' : '#333333',
+                    textDecoration: 'none'
+                  }}
+                >
+                  🏢 Society Admin Login
+                </Link>
+                <div style={{ height: '1px', backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : '#F1F5F9', margin: '4px 0' }} />
+                <Link
+                  to="/super-admin/login"
+                  style={{
+                    display: 'block',
+                    padding: '10px 16px',
+                    fontSize: '13px',
+                    fontWeight: 700,
+                    color: isDark ? '#FFFFFF' : '#333333',
+                    textDecoration: 'none'
+                  }}
+                >
+                  🛡️ Super Admin Login
+                </Link>
+              </div>
+            )}
+          </div>
 
           {/* Solid Emerald Green "Enroll your society" Button */}
           <button

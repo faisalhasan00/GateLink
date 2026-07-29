@@ -115,6 +115,7 @@ export default function App() {
 
             {/* Public Login Pages */}
             <Route path="/login" element={<AdminLogin />} />
+            <Route path="/admin-login" element={<AdminLogin />} />
             <Route path="/super-admin/login" element={<SuperAdminLogin />} />
 
             {/* Society Admin Routes (Protected) */}
