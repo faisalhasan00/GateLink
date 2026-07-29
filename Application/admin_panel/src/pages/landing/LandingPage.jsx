@@ -5,7 +5,7 @@ import TrustedSection from './TrustedSection';
 import StatsSection from './StatsSection';
 import FeaturesSection from './FeaturesSection';
 import SolutionsSection from './SolutionsSection';
-import PricingSection from './PricingSection';
+import ProposalSection from './ProposalSection';
 import ContactSection from './ContactSection';
 import FooterSection from './FooterSection';
 import DemoModal from './DemoModal';
@@ -33,7 +33,7 @@ export default function LandingPage() {
         <StatsSection />
         <FeaturesSection />
         <SolutionsSection onOpenDemo={handleOpenDemo} />
-        <PricingSection onOpenDemo={handleOpenDemo} />
+        <ProposalSection onOpenDemo={handleOpenDemo} />
         <ContactSection />
       </main>
 

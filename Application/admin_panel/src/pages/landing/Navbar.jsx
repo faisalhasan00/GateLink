@@ -22,7 +22,7 @@ export default function Navbar({ onOpenDemo }) {
     { name: 'Features', href: '/features' },
     { name: 'Solutions', href: '/solutions' },
     { name: 'Ecosystem', href: '/ecosystem' },
-    { name: 'Pricing', href: '/pricing' },
+    { name: 'Proposal', href: '/landing#proposal' },
     { name: 'Contact', href: '/contact' },
   ];
 
