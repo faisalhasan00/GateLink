@@ -65,7 +65,7 @@ export default function Navbar({ onOpenDemo }) {
               Society<span style={{ color: '#2563EB' }}>Sphere</span>
             </span>
             <span style={{ fontSize: '10px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 700, letterSpacing: '1px' }}>
-              SOCIETY OS
+              HOME & HOOD SECURITY OS
             </span>
           </div>
         </Link>
