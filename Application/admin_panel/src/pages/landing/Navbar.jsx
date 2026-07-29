@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, Menu, X, ArrowRight, Sparkles, User, Lock } from 'lucide-react';
+import { Shield, Menu, X, ArrowRight, Sparkles, User, Lock, Sun, Moon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function Navbar({ onOpenDemo }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -89,8 +91,29 @@ export default function Navbar({ onOpenDemo }) {
           ))}
         </nav>
 
-        {/* Actions & Portal Access */}
+        {/* Actions & Theme Switcher */}
         <div className="desktop-actions" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {/* Theme Switcher Toggle */}
+          <button
+            onClick={toggleTheme}
+            aria-label="Toggle Theme"
+            style={{
+              width: '38px',
+              height: '38px',
+              borderRadius: '10px',
+              background: 'rgba(255, 255, 255, 0.08)',
+              border: '1px solid rgba(255, 255, 255, 0.15)',
+              color: '#FFFFFF',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            {theme === 'dark' ? <Sun size={18} color="#FBBF24" /> : <Moon size={18} color="#818CF8" />}
+          </button>
+
           <Link 
             to="/login"
             style={{
