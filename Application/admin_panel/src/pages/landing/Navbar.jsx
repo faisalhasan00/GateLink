@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, Menu, X, ArrowRight, Sparkles, User, Lock, Sun, Moon } from 'lucide-react';
+import { Shield, Menu, X, ArrowRight, Sparkles, User, Lock, Sun, Moon, Smartphone } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -113,6 +113,28 @@ export default function Navbar({ onOpenDemo }) {
           >
             {theme === 'dark' ? <Sun size={18} color="#FBBF24" /> : <Moon size={18} color="#818CF8" />}
           </button>
+
+          {/* Download App Button */}
+          <Link
+            to="/download"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              color: '#34D399',
+              textDecoration: 'none',
+              fontSize: '13px',
+              fontWeight: 800,
+              padding: '8px 16px',
+              borderRadius: '10px',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              backgroundColor: 'rgba(16, 185, 129, 0.1)',
+              backdropFilter: 'blur(8px)',
+              transition: 'all 0.2s ease'
+            }}
+          >
+            <Smartphone size={14} /> Download App
+          </Link>
 
           <Link 
             to="/login"

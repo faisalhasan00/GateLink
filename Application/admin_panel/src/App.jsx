@@ -45,6 +45,7 @@ const SolutionsPage = lazy(() => import('./pages/landing/SolutionsPage'))
 const EcosystemPage = lazy(() => import('./pages/landing/EcosystemPage'))
 const PricingPage = lazy(() => import('./pages/landing/PricingPage'))
 const LeadGenerationPage = lazy(() => import('./pages/landing/LeadGenerationPage'))
+const DownloadAppPage = lazy(() => import('./pages/landing/DownloadAppPage'))
 const BlogPage = lazy(() => import('./pages/landing/BlogPage'))
 const FaqPage = lazy(() => import('./pages/landing/FaqPage'))
 const HelpCenterPage = lazy(() => import('./pages/landing/HelpCenterPage'))
@@ -99,6 +100,7 @@ export default function App() {
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/contact" element={<LeadGenerationPage />} />
             <Route path="/book-demo" element={<LeadGenerationPage />} />
+            <Route path="/download" element={<DownloadAppPage />} />
 
             {/* SEO & Knowledge Base Pages */}
             <Route path="/blog" element={<BlogPage />} />
