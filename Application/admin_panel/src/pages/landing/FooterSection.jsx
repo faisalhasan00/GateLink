@@ -37,7 +37,7 @@ export default function FooterSection() {
                 <Mail size={14} color="#00B589" /> support@societysphere.com
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <MapPin size={14} color="#00B589" /> HSR Layout, Bengaluru, Karnataka
+                <MapPin size={14} color="#00B589" /> HITEC City, Hyderabad, Telangana
               </div>
             </div>
 
