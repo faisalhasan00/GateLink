@@ -1,18 +1,19 @@
 import React from 'react';
 
 export default function HomeHniHoodLogo({ isDark = false, size = 'medium' }) {
-  const iconHeight = size === 'small' ? '28px' : size === 'large' ? '44px' : '34px';
-  const fontSize = size === 'small' ? '18px' : size === 'large' ? '28px' : '22px';
+  const iconHeight = size === 'small' ? '24px' : size === 'large' ? '44px' : size === 'responsive' ? 'clamp(22px, 5vw, 32px)' : '32px';
+  const fontSize = size === 'small' ? '16px' : size === 'large' ? '28px' : size === 'responsive' ? 'clamp(14px, 4vw, 20px)' : '20px';
+  const gap = size === 'small' ? '4px' : '6px';
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', userSelect: 'none' }}>
-      {/* SVG House Icon replica matching reference image */}
+    <div style={{ display: 'flex', alignItems: 'center', gap: gap, userSelect: 'none', maxWidth: '100%' }}>
+      {/* SVG House Icon replica */}
       <svg 
         height={iconHeight} 
         viewBox="0 0 120 100" 
         fill="none" 
         xmlns="http://www.w3.org/2000/svg"
-        style={{ flexShrink: 0 }}
+        style={{ flexShrink: 0, height: iconHeight }}
       >
         {/* Orange Roof with Chimney */}
         <path d="M15 48L60 12L105 48H92V82H28V48H15Z" fill="#F97316" />
@@ -28,11 +29,11 @@ export default function HomeHniHoodLogo({ isDark = false, size = 'medium' }) {
         <path d="M5 88C35 72 85 72 115 88C85 82 35 82 5 88Z" fill="#0F2C59" />
       </svg>
 
-      {/* Typography: Home in Navy, HNI in Orange, Hood in Navy/Orange */}
-      <div style={{ display: 'flex', alignItems: 'center', fontSize: fontSize, fontWeight: 900, fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.5px' }}>
+      {/* Typography: Home in Navy, HNI in Orange, Hood in Navy */}
+      <div style={{ display: 'flex', alignItems: 'center', fontSize: fontSize, fontWeight: 900, fontFamily: "'Plus Jakarta Sans', sans-serif", letterSpacing: '-0.5px', whiteSpace: 'nowrap' }}>
         <span style={{ color: isDark ? '#FFFFFF' : '#0F2C59' }}>Home</span>
-        <span style={{ color: '#F97316', marginLeft: '3px' }}>Hni</span>
-        <span style={{ color: isDark ? '#38BDF8' : '#0F2C59', marginLeft: '3px' }}>Hood</span>
+        <span style={{ color: '#F97316', marginLeft: '2px' }}>Hni</span>
+        <span style={{ color: isDark ? '#38BDF8' : '#0F2C59', marginLeft: '2px' }}>Hood</span>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronDown, Phone, Sun, Moon, Menu, X } from 'lucide-react';
+import { ChevronDown, Phone, Menu, X } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import HomeHniHoodLogo from '../../components/ui/HomeHniHoodLogo';
 
@@ -10,7 +10,7 @@ export default function Navbar({ onOpenDemo }) {
   const [featuresDropdownOpen, setFeaturesDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 1024 : false);
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
   const isDark = theme === 'dark';
 
   useEffect(() => {
@@ -51,23 +51,23 @@ export default function Navbar({ onOpenDemo }) {
         backgroundColor: isDark ? '#0F172A' : '#FFFFFF',
         borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E5E7EB',
         boxShadow: isScrolled ? '0 2px 10px rgba(0, 0, 0, 0.06)' : 'none',
-        height: '64px',
+        height: '60px',
         display: 'flex',
         alignItems: 'center'
       }}
     >
-      <div style={{ maxWidth: '1320px', width: '100%', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ maxWidth: '1320px', width: '100%', margin: '0 auto', padding: isMobile ? '0 12px' : '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         
         {/* Left Side: Brand Logo + Desktop Nav Items */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
-          {/* HomeHniHood Brand Logo */}
-          <Link to="/landing" style={{ textDecoration: 'none' }}>
-            <HomeHniHoodLogo isDark={isDark} size="medium" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+          {/* HomeHniHood Brand Logo - Device Responsive */}
+          <Link to="/landing" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+            <HomeHniHoodLogo isDark={isDark} size={isMobile ? 'responsive' : 'medium'} />
           </Link>
 
           {/* Desktop Nav Items */}
           {!isMobile && (
-            <nav style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
+            <nav style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
               
               {/* About Us Dropdown */}
               <div 
@@ -128,7 +128,7 @@ export default function Navbar({ onOpenDemo }) {
 
         {/* Right Side Actions */}
         {!isMobile ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {/* Phone Call Launcher */}
             <a
               href="tel:+919119300000"
@@ -140,19 +140,10 @@ export default function Navbar({ onOpenDemo }) {
               <span>+91 91193 00000</span>
             </a>
 
-            {/* Theme Switcher */}
-            <button
-              onClick={toggleTheme}
-              aria-label="Toggle Theme"
-              style={{ width: '32px', height: '32px', borderRadius: '4px', background: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9', border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #E2E8F0', color: isDark ? '#FFFFFF' : '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-            >
-              {isDark ? <Sun size={15} color="#FBBF24" /> : <Moon size={15} color="#2563EB" />}
-            </button>
-
             {/* Outlined "Society Login" */}
             <Link
               to="/login"
-              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '8px 20px', borderRadius: '2px', border: isDark ? '1px solid rgba(255,255,255,0.3)' : '1px solid #707070', backgroundColor: 'transparent', color: isDark ? '#FFFFFF' : '#333333', textDecoration: 'none', fontSize: '14px', fontWeight: 600, height: '38px', boxSizing: 'border-box' }}
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '6px 16px', borderRadius: '2px', border: isDark ? '1px solid rgba(255,255,255,0.3)' : '1px solid #707070', backgroundColor: 'transparent', color: isDark ? '#FFFFFF' : '#333333', textDecoration: 'none', fontSize: '13px', fontWeight: 600, height: '36px', boxSizing: 'border-box' }}
             >
               Society Login
             </Link>
@@ -160,7 +151,7 @@ export default function Navbar({ onOpenDemo }) {
             {/* Solid Emerald Green "Enroll your society" */}
             <button
               onClick={handleEnrollClick}
-              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '8px 24px', borderRadius: '2px', backgroundColor: '#00B589', color: '#FFFFFF', border: 'none', fontSize: '14px', fontWeight: 700, cursor: 'pointer', height: '38px', boxSizing: 'border-box', transition: 'background-color 0.2s ease' }}
+              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '6px 20px', borderRadius: '2px', backgroundColor: '#00B589', color: '#FFFFFF', border: 'none', fontSize: '13px', fontWeight: 700, cursor: 'pointer', height: '36px', boxSizing: 'border-box', transition: 'background-color 0.2s ease' }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#009E77'}
               onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#00B589'}
             >
@@ -168,7 +159,7 @@ export default function Navbar({ onOpenDemo }) {
             </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             {/* Mobile "Enroll your society" Button */}
             <button
               onClick={handleEnrollClick}
@@ -176,15 +167,15 @@ export default function Navbar({ onOpenDemo }) {
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '6px 12px',
+                padding: '5px 10px',
                 borderRadius: '2px',
                 backgroundColor: '#00B589',
                 color: '#FFFFFF',
                 border: 'none',
-                fontSize: '12px',
+                fontSize: '11px',
                 fontWeight: 800,
                 cursor: 'pointer',
-                height: '34px',
+                height: '32px',
                 boxSizing: 'border-box',
                 whiteSpace: 'nowrap'
               }}
@@ -192,22 +183,13 @@ export default function Navbar({ onOpenDemo }) {
               Enroll your society
             </button>
 
-            {/* Theme Toggle on Mobile */}
-            <button
-              onClick={toggleTheme}
-              aria-label="Toggle Theme"
-              style={{ width: '34px', height: '34px', borderRadius: '4px', background: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9', border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #E2E8F0', color: isDark ? '#FFFFFF' : '#0F172A', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
-            >
-              {isDark ? <Sun size={16} color="#FBBF24" /> : <Moon size={16} color="#2563EB" />}
-            </button>
-
             {/* Mobile Hamburger Menu Toggle Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle Menu"
-              style={{ width: '34px', height: '34px', borderRadius: '4px', background: isDark ? '#1E293B' : '#F8FAFC', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB', color: isDark ? '#FFFFFF' : '#333333', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+              style={{ width: '32px', height: '32px', borderRadius: '4px', background: isDark ? '#1E293B' : '#F8FAFC', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB', color: isDark ? '#FFFFFF' : '#333333', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
             >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
         )}
@@ -218,13 +200,13 @@ export default function Navbar({ onOpenDemo }) {
       {isMobile && mobileMenuOpen && (
         <div style={{
           position: 'fixed',
-          top: '64px',
+          top: '60px',
           left: 0,
           right: 0,
           bottom: 0,
           backgroundColor: isDark ? '#0F172A' : '#FFFFFF',
           zIndex: 999,
-          padding: '24px',
+          padding: '20px 24px 32px 24px',
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
@@ -258,7 +240,7 @@ export default function Navbar({ onOpenDemo }) {
           </div>
 
           {/* Action CTAs */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '32px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '24px' }}>
             <Link
               to="/login"
               onClick={() => setMobileMenuOpen(false)}
