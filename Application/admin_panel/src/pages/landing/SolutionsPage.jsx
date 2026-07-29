@@ -3,27 +3,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './Navbar';
 import FooterSection from './FooterSection';
 import DemoModal from './DemoModal';
+import SeoHead from '../../components/seo/SeoHead';
 import { 
   User, 
   Shield, 
   Building, 
   Briefcase, 
   Wrench, 
-  CreditCard, 
   CheckCircle2, 
   AlertTriangle, 
   ArrowRight, 
-  Sparkles, 
   Clock, 
-  Layers, 
-  TrendingUp, 
-  ChevronRight,
-  ShieldCheck,
-  Smartphone,
-  Monitor
+  Layers
 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function SolutionsPage() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
   const [activePersona, setActivePersona] = useState('resident');
 
@@ -32,7 +29,7 @@ export default function SolutionsPage() {
       id: 'resident',
       title: 'Residents & Flat Owners',
       roleTag: 'RESIDENT MOBILE COMPANION',
-      icon: <User size={24} color="#818CF8" />,
+      icon: <User size={24} color="#00B589" />,
       tagline: '1-Tap Convenience, Seamless Approvals & Ultimate Peace of Mind',
       problems: [
         'Frequent disturbing intercom calls for routine deliveries and cabs',
@@ -42,7 +39,7 @@ export default function SolutionsPage() {
       ],
       solutions: [
         'Instant 1-tap visitor push notifications with pre-approval QR codes',
-        'Seamless Razorpay UPI payments with instant GST PDF receipts',
+        'Seamless online maintenance payments with instant GST PDF receipts',
         'Real-time amenity booking calendar with slot reservation passes',
         '1-Tap Emergency SOS alert broadcasting loud sirens to gate guards & family'
       ],
@@ -71,7 +68,7 @@ export default function SolutionsPage() {
       id: 'guard',
       title: 'Security Guards & Gatekeepers',
       roleTag: 'MULTILINGUAL GUARD GATEKEEPER',
-      icon: <Shield size={24} color="#34D399" />,
+      icon: <Shield size={24} color="#00B589" />,
       tagline: 'Fortress-Level Security Gate Operations Made 5x Faster',
       problems: [
         'Messy paper registers that get damaged, lost, or tampered with',
@@ -110,7 +107,7 @@ export default function SolutionsPage() {
       id: 'committee',
       title: 'Committee Members & Presidents',
       roleTag: 'SOCIETY COMMITTEE CONSOLE',
-      icon: <Building size={24} color="#C084FC" />,
+      icon: <Building size={24} color="#00B589" />,
       tagline: 'Complete Administrative Governance & 100% Financial Auditability',
       problems: [
         'Persistent maintenance fee defaulters and poor cash flow',
@@ -149,7 +146,7 @@ export default function SolutionsPage() {
       id: 'manager',
       title: 'Society Managers & Accountants',
       roleTag: 'FINANCIAL & ACCOUNTING SUITE',
-      icon: <Briefcase size={24} color="#FBBF24" />,
+      icon: <Briefcase size={24} color="#00B589" />,
       tagline: 'Automated Ledger Reconciliation & 80% Time Saved on Billing',
       problems: [
         'Manual Excel reconciliation taking days at the end of every month',
@@ -158,7 +155,7 @@ export default function SolutionsPage() {
         'Complicated vendor bill tracking and physical cheque management'
       ],
       solutions: [
-        'Automated Razorpay bank statement reconciliation engine',
+        'Automated payment gateway bank statement reconciliation engine',
         'Instant GST-compliant invoice generation with automated PDF receipts',
         'Real-time defaulter roster with 1-click WhatsApp/Email reminders',
         'Tally & Excel export integration for effortless tax filing'
@@ -169,14 +166,14 @@ export default function SolutionsPage() {
         'Instant Tally & GST export'
       ],
       workflow: [
-        { step: '01', title: 'Online Settlement', desc: 'Payments collected via Razorpay gateway.' },
+        { step: '01', title: 'Online Settlement', desc: 'Payments collected via online payment gateway.' },
         { step: '02', title: 'Auto-Matching', desc: 'System matches transaction IDs with flat ledger.' },
         { step: '03', title: 'GST Invoice Issued', desc: 'Automated GST invoice and receipt emailed to resident.' },
         { step: '04', title: 'Tally Export', desc: 'Export sanitized ledger data directly into Tally ERP.' }
       ],
       screenPreview: {
         title: 'Accountant Reconciliation Desk',
-        badge: 'RAZORPAY LINKED',
+        badge: 'GATEWAY LINKED',
         items: [
           { icon: '✅', label: 'Auto-Reconciled', sub: '142 Flat Payments matched in 2 seconds' },
           { icon: '📄', label: 'GST Receipts Sent', sub: '142 PDF receipts emailed automatically' },
@@ -188,7 +185,7 @@ export default function SolutionsPage() {
       id: 'builder',
       title: 'Builders & Real Estate Developers',
       roleTag: 'BUILDER HANDOVER & MULTI-TOWNSHIP',
-      icon: <Layers size={24} color="#38BDF8" />,
+      icon: <Layers size={24} color="#00B589" />,
       tagline: 'Seamless Possession Handovers & Multi-Project Portfolio Management',
       problems: [
         'Chaos and disorganization during multi-flat possession handovers',
@@ -227,7 +224,7 @@ export default function SolutionsPage() {
       id: 'facility',
       title: 'Facility Managers & Maintenance Teams',
       roleTag: 'WORK-ORDER & ASSET MANAGEMENT',
-      icon: <Wrench size={24} color="#F472B6" />,
+      icon: <Wrench size={24} color="#00B589" />,
       tagline: 'Zero SLA Breaches, Verified Vendors & Proactive Asset Maintenance',
       problems: [
         'Untracked work orders causing delayed maintenance repairs',
@@ -248,244 +245,160 @@ export default function SolutionsPage() {
       ],
       workflow: [
         { step: '01', title: 'Ticket Logged', desc: 'Resident reports plumbing/electrical issue on app.' },
-        { step: '02', title: 'Technician Assigned', desc: 'Ticket auto-assigned to technician with SLA timer.' },
-        { step: '03', title: 'Vendor Gate Verification', desc: 'Vendor scans QR code badge at security gate.' },
-        { step: '04', title: 'Work Resolved', desc: 'Resident inspects work and rates service 5 stars.' }
+        { step: '02', title: 'Tech Assigned', desc: 'System assigns ticket to duty technician with SLA timer.' },
+        { step: '03', title: 'Vendor Check-In', desc: 'Technician scans QR pass at security gate.' },
+        { step: '04', title: 'Closure Rating', desc: 'Resident confirms completion and rates service on app.' }
       ],
       screenPreview: {
-        title: 'Facility Operations Console',
-        badge: 'WORK-ORDER ENGINE',
+        title: 'Facility Work-Order Center',
+        badge: 'SLA COMPLIANT',
         items: [
-          { icon: '⚡', label: 'DG Set Servicing', sub: 'Preventive Servicing Completed (Log #491)' },
-          { icon: '🚰', label: 'Plumbing SLA', sub: 'Resolved in 24 mins • Resident Rating 5★' },
-          { icon: '🏷️', label: 'Vendor QR Check', sub: 'Otis Elevator Engineer Verified at Gate' }
+          { icon: '🚰', label: 'Plumbing Repair #104', sub: 'Tech Assigned • SLA: 45 Mins Remaining' },
+          { icon: '🛗', label: 'Elevator Maintenance', sub: 'Preventive Servicing Scheduled for 3 PM' },
+          { icon: '🚗', label: 'Parking Slot Scan', sub: 'Slot B-402 Verified for Flat 402' }
         ]
       }
     }
   ];
 
-  const current = personas.find(p => p.id === activePersona);
+  const currentPersona = personas.find(p => p.id === activePersona) || personas[0];
 
   return (
-    <div style={{ backgroundColor: '#020617', color: '#F8FAFC', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      {/* Dynamic SEO Head */}
+      <SeoHead
+        title="Solutions by Role - HomeHni Hood"
+        description="Tailored society management solutions for residents, security guards, RWA committee members, accountants, developers, and facility managers."
+        canonicalUrl="https://societysphere.com/solutions"
+      />
+
       {/* Navbar */}
       <Navbar onOpenDemo={() => setIsDemoModalOpen(true)} />
 
       {/* Header Banner */}
       <section style={{
-        paddingTop: '160px',
-        paddingBottom: '60px',
-        background: 'radial-gradient(circle at 50% 20%, #1E1B4B 0%, #0F172A 70%, #020617 100%)',
-        textAlign: 'center',
-        position: 'relative'
+        paddingTop: '120px',
+        paddingBottom: '40px',
+        background: isDark ? '#0F172A' : '#FFFFFF',
+        borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB',
+        textAlign: 'center'
       }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', borderRadius: '30px', background: 'rgba(99, 102, 241, 0.15)', color: '#818CF8', fontSize: '13px', fontWeight: 800, marginBottom: '16px' }}>
-              <Sparkles size={14} /> PERSONA-BASED SOLUTIONS
-            </div>
-            <h1 style={{ fontSize: '48px', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-1.5px', margin: '0 0 16px 0' }}>
-              How SocietySphere Serves Every User Role
-            </h1>
-            <p style={{ fontSize: '18px', color: '#94A3B8', maxWidth: '720px', margin: '0 auto 40px auto', lineHeight: 1.6 }}>
-              Select a user role below to see how SocietySphere solves specific daily pain points with automated workflows, live screens, and measurable outcomes.
-            </p>
+        <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
+          <span style={{ fontSize: '12px', fontWeight: 900, color: '#00B589', textTransform: 'uppercase', letterSpacing: '1px' }}>
+            TAILORED SOLUTIONS BY ROLE
+          </span>
+          <h1 style={{ fontSize: '40px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-1px', margin: '10px 0 16px 0' }}>
+            HomeHni Hood for Every Stakeholder
+          </h1>
+          <p style={{ fontSize: '16px', color: isDark ? '#94A3B8' : '#555555', maxWidth: '750px', margin: '0 auto 30px auto', lineHeight: 1.6 }}>
+            Select your role below to explore tailored workflows, features, and operational benefits built for your needs.
+          </p>
 
-            {/* Persona Selector Tabs */}
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
-              {personas.map((p) => (
+          {/* Role Switcher Tabs */}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {personas.map((p) => {
+              const isSelected = activePersona === p.id;
+              return (
                 <button
                   key={p.id}
                   onClick={() => setActivePersona(p.id)}
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    padding: '12px 20px',
-                    borderRadius: '14px',
-                    border: '1px solid',
-                    borderColor: activePersona === p.id ? '#6366F1' : 'rgba(255, 255, 255, 0.1)',
-                    backgroundColor: activePersona === p.id ? '#4F46E5' : 'rgba(255, 255, 255, 0.05)',
-                    color: activePersona === p.id ? '#FFFFFF' : '#94A3B8',
-                    fontSize: '14px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    boxShadow: activePersona === p.id ? '0 8px 20px rgba(79, 70, 229, 0.4)' : 'none'
+                    display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '2px', border: '1px solid',
+                    borderColor: isSelected ? '#00B589' : (isDark ? 'rgba(255,255,255,0.1)' : '#CCCCCC'),
+                    backgroundColor: isSelected ? '#00B589' : 'transparent',
+                    color: isSelected ? '#FFFFFF' : (isDark ? '#94A3B8' : '#444444'), fontSize: '13px', fontWeight: 700, cursor: 'pointer'
                   }}
                 >
-                  {p.icon}
-                  <span>{p.title}</span>
+                  {p.icon} {p.title}
                 </button>
-              ))}
-            </div>
-
-          </motion.div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
       {/* Main Persona Detail Workspace */}
-      <section style={{ padding: '60px 0 100px 0', background: '#020617' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
+      <section style={{ padding: '60px 0 100px 0' }}>
+        <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
           
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={current.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -30 }}
-              transition={{ duration: 0.4 }}
-              style={{ display: 'flex', flexDirection: 'column', gap: '48px' }}
-            >
+          <div style={{
+            background: isDark ? '#1E293B' : '#FFFFFF',
+            borderRadius: '4px',
+            padding: '40px',
+            border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E5E7EB',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
+          }}>
+            <div style={{ fontSize: '12px', fontWeight: 900, color: '#00B589', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
+              {currentPersona.roleTag}
+            </div>
+            <h2 style={{ fontSize: '28px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: '0 0 12px 0' }}>
+              {currentPersona.title}
+            </h2>
+            <p style={{ fontSize: '16px', color: isDark ? '#94A3B8' : '#555555', marginBottom: '36px', lineHeight: 1.6 }}>
+              {currentPersona.tagline}
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '40px' }}>
               
-              {/* Top Summary Card & Interactive Screen Preview */}
-              <div style={{
-                background: 'linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.95) 100%)',
-                borderRadius: '24px',
-                padding: '40px',
-                border: '1px solid rgba(255, 255, 255, 0.15)',
-                backdropFilter: 'blur(20px)',
-                display: 'grid',
-                gridTemplateColumns: '1.2fr 0.8fr',
-                gap: '40px',
-                alignItems: 'center'
-              }}>
-                <div>
-                  <span style={{ fontSize: '11px', fontWeight: 900, color: '#818CF8', letterSpacing: '1.5px', textTransform: 'uppercase' }}>
-                    {current.roleTag}
-                  </span>
-                  <h2 style={{ fontSize: '36px', fontWeight: 900, color: '#FFFFFF', margin: '8px 0 16px 0', lineHeight: 1.1 }}>
-                    {current.title}
-                  </h2>
-                  <p style={{ fontSize: '16px', color: '#CBD5E1', lineHeight: 1.6, marginBottom: '28px', fontWeight: 600 }}>
-                    "{current.tagline}"
-                  </p>
-
-                  <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                    <button
-                      onClick={() => setIsDemoModalOpen(true)}
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '14px 28px',
-                        borderRadius: '12px',
-                        background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-                        color: 'white',
-                        fontWeight: 800,
-                        fontSize: '14px',
-                        border: 'none',
-                        cursor: 'pointer',
-                        boxShadow: '0 4px 20px rgba(79, 70, 229, 0.4)'
-                      }}
-                    >
-                      <span>Book Free Live Demo</span>
-                      <ArrowRight size={16} />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Glassmorphic UI Screen Preview */}
-                <div style={{
-                  background: 'rgba(15, 23, 42, 0.9)',
-                  borderRadius: '20px',
-                  padding: '24px',
-                  border: '1px solid rgba(255, 255, 255, 0.12)',
-                  boxShadow: '0 20px 40px -10px rgba(0,0,0,0.6)'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', paddingBottom: '12px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                    <div style={{ color: 'white', fontWeight: 800, fontSize: '14px' }}>{current.screenPreview.title}</div>
-                    <span style={{ fontSize: '10px', fontWeight: 900, background: 'rgba(16, 185, 129, 0.2)', color: '#34D399', padding: '3px 8px', borderRadius: '10px' }}>
-                      {current.screenPreview.badge}
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    {current.screenPreview.items.map((item, idx) => (
-                      <div key={idx} style={{ background: 'rgba(30, 41, 59, 0.6)', padding: '12px 16px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <span style={{ fontSize: '20px' }}>{item.icon}</span>
-                        <div>
-                          <div style={{ color: 'white', fontWeight: 700, fontSize: '13px' }}>{item.label}</div>
-                          <div style={{ color: '#94A3B8', fontSize: '11px' }}>{item.sub}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Problems vs Solutions Comparison Grid */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                {/* Problems Card */}
-                <div style={{ background: 'rgba(239, 68, 68, 0.05)', borderRadius: '20px', padding: '32px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 800, color: '#FCA5A5', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>PAIN POINTS BEFORE SOCIETASPHERE</div>
-                  <h3 style={{ fontSize: '22px', fontWeight: 900, color: '#FFFFFF', marginBottom: '20px' }}>Legacy Friction & Frustration</h3>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {current.problems.map((prob) => (
-                      <div key={prob} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#CBD5E1', fontSize: '13px', lineHeight: 1.5 }}>
-                        <span style={{ color: '#EF4444', fontWeight: 900, fontSize: '16px' }}>✕</span>
-                        <span>{prob}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Solutions Card */}
-                <div style={{ background: 'rgba(16, 185, 129, 0.05)', borderRadius: '20px', padding: '32px', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                  <div style={{ fontSize: '12px', fontWeight: 800, color: '#34D399', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>TRANSFORMATION WITH SOCIETASPHERE</div>
-                  <h3 style={{ fontSize: '22px', fontWeight: 900, color: '#FFFFFF', marginBottom: '20px' }}>Automated Intelligent Workflows</h3>
-                  
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                    {current.solutions.map((sol) => (
-                      <div key={sol} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: '#E2E8F0', fontSize: '13px', lineHeight: 1.5, fontWeight: 600 }}>
-                        <CheckCircle2 size={18} color="#34D399" style={{ flexShrink: 0, marginTop: '2px' }} />
-                        <span>{sol}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Measurable Outcomes & Benefits */}
-              <div style={{ background: 'rgba(30, 41, 59, 0.5)', borderRadius: '20px', padding: '28px 32px', border: '1px solid rgba(255, 255, 255, 0.1)', display: 'flex', justifyContent: 'space-around', alignItems: 'center' }}>
-                {current.benefits.map((b, idx) => (
-                  <div key={b} style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '12px', color: '#818CF8', fontWeight: 800, textTransform: 'uppercase', marginBottom: '4px' }}>KEY METRIC OUTCOME #{idx + 1}</div>
-                    <div style={{ fontSize: '18px', fontWeight: 900, color: '#FFFFFF' }}>{b}</div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Step-by-Step Workflow Timeline */}
-              <div style={{ background: 'rgba(15, 23, 42, 0.6)', borderRadius: '24px', padding: '36px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
-                <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-                  <span style={{ fontSize: '12px', fontWeight: 800, color: '#38BDF8', letterSpacing: '1px', textTransform: 'uppercase' }}>DAILY USAGE TIMELINE</span>
-                  <h3 style={{ fontSize: '26px', fontWeight: 900, color: '#FFFFFF', marginTop: '6px' }}>Step-by-Step {current.title} Workflow</h3>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
-                  {current.workflow.map((w, idx) => (
-                    <motion.div
-                      key={w.step}
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.4, delay: idx * 0.1 }}
-                      viewport={{ once: true }}
-                      style={{ background: 'rgba(30, 41, 59, 0.6)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(255, 255, 255, 0.08)', position: 'relative' }}
-                    >
-                      <div style={{ fontSize: '12px', fontWeight: 900, color: '#818CF8', background: 'rgba(99, 102, 241, 0.2)', width: '28px', height: '28px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '12px' }}>
-                        {w.step}
-                      </div>
-                      <h4 style={{ fontSize: '15px', fontWeight: 800, color: '#FFFFFF', margin: '0 0 6px 0' }}>{w.title}</h4>
-                      <p style={{ fontSize: '12px', color: '#94A3B8', margin: 0, lineHeight: 1.5 }}>{w.desc}</p>
-                    </motion.div>
+              {/* Problems Column */}
+              <div style={{ background: isDark ? '#0F172A' : '#FEF2F2', padding: '24px', borderRadius: '4px', border: isDark ? '1px solid rgba(239, 68, 68, 0.2)' : '1px solid #FCA5A5' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 900, color: '#EF4444', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <AlertTriangle size={18} /> Traditional Pain Points
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {currentPersona.problems.map((prob, idx) => (
+                    <div key={idx} style={{ fontSize: '14px', color: isDark ? '#E2E8F0' : '#444444', lineHeight: 1.5, display: 'flex', gap: '10px' }}>
+                      <span style={{ color: '#EF4444', fontWeight: 900 }}>✕</span>
+                      <span>{prob}</span>
+                    </div>
                   ))}
                 </div>
               </div>
 
-            </motion.div>
-          </AnimatePresence>
+              {/* Solutions Column */}
+              <div style={{ background: isDark ? '#0F172A' : '#ECFDF5', padding: '24px', borderRadius: '4px', border: isDark ? '1px solid rgba(0, 181, 137, 0.2)' : '1px solid #6EE7B7' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 900, color: '#00B589', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle2 size={18} /> HomeHni Hood Solution
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {currentPersona.solutions.map((sol, idx) => (
+                    <div key={idx} style={{ fontSize: '14px', color: isDark ? '#E2E8F0' : '#444444', lineHeight: 1.5, display: 'flex', gap: '10px' }}>
+                      <CheckCircle2 size={16} color="#00B589" style={{ flexShrink: 0, marginTop: '2px' }} />
+                      <span>{sol}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+
+            {/* Workflow Steps */}
+            <div style={{ borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB', paddingTop: '32px', marginBottom: '32px' }}>
+              <h3 style={{ fontSize: '18px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '20px' }}>
+                4-Step Operational Workflow
+              </h3>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
+                {currentPersona.workflow.map((wf) => (
+                  <div key={wf.step} style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '20px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 900, color: '#00B589', marginBottom: '6px' }}>STEP {wf.step}</div>
+                    <div style={{ fontSize: '15px', fontWeight: 800, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '6px' }}>{wf.title}</div>
+                    <div style={{ fontSize: '13px', color: isDark ? '#94A3B8' : '#666666', lineHeight: 1.45 }}>{wf.desc}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* CTA Button */}
+            <div style={{ textAlign: 'center', paddingTop: '16px' }}>
+              <button
+                onClick={() => setIsDemoModalOpen(true)}
+                style={{ padding: '12px 32px', borderRadius: '2px', backgroundColor: '#00B589', color: '#FFFFFF', border: 'none', fontSize: '15px', fontWeight: 700, cursor: 'pointer' }}
+              >
+                Schedule Onboarding Proposal for {currentPersona.title}
+              </button>
+            </div>
+
+          </div>
 
         </div>
       </section>
