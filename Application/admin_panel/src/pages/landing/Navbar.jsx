@@ -76,9 +76,12 @@ export default function Navbar({ onOpenDemo }) {
               onMouseEnter={() => setAboutDropdownOpen(true)}
               onMouseLeave={() => setAboutDropdownOpen(false)}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '14px', fontWeight: 600, color: isDark ? '#E2E8F0' : '#444444' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '14px', fontWeight: 600, color: isDark ? '#E2E8F0' : '#444444', position: 'relative', paddingBottom: '4px' }}>
                 <span>About Us</span>
                 <ChevronDown size={15} color={isDark ? '#94A3B8' : '#666666'} />
+                {aboutDropdownOpen && (
+                  <div style={{ position: 'absolute', bottom: '-4px', left: 0, right: 0, height: '2px', backgroundColor: '#FF385C' }} />
+                )}
               </div>
 
               {aboutDropdownOpen && (
@@ -86,20 +89,20 @@ export default function Navbar({ onOpenDemo }) {
                   position: 'absolute',
                   top: '100%',
                   left: 0,
-                  paddingTop: '10px',
+                  paddingTop: '8px',
                   zIndex: 100
                 }}>
                   <div style={{
                     background: isDark ? '#1E293B' : '#FFFFFF',
-                    borderRadius: '4px',
-                    boxShadow: '0 10px 25px rgba(0,0,0,0.12)',
+                    borderRadius: '2px',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
                     border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB',
-                    padding: '8px 0',
-                    minWidth: '180px'
+                    minWidth: '170px'
                   }}>
-                    <Link to="/solutions" style={{ display: 'block', padding: '8px 16px', color: isDark ? '#E2E8F0' : '#333333', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>Our Solutions</Link>
-                    <Link to="/ecosystem" style={{ display: 'block', padding: '8px 16px', color: isDark ? '#E2E8F0' : '#333333', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>Ecosystem</Link>
-                    <Link to="/landing#proposal" style={{ display: 'block', padding: '8px 16px', color: isDark ? '#E2E8F0' : '#333333', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>Society Proposal</Link>
+                    <Link to="/solutions" style={{ display: 'block', padding: '12px 18px', color: isDark ? '#E2E8F0' : '#444444', textDecoration: 'none', fontSize: '14px', fontWeight: 500, borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #EAEAEA' }}>About Us</Link>
+                    <Link to="/ecosystem" style={{ display: 'block', padding: '12px 18px', color: isDark ? '#E2E8F0' : '#444444', textDecoration: 'none', fontSize: '14px', fontWeight: 500, borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #EAEAEA' }}>UAE</Link>
+                    <Link to="/blog" style={{ display: 'block', padding: '12px 18px', color: isDark ? '#E2E8F0' : '#444444', textDecoration: 'none', fontSize: '14px', fontWeight: 500, borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #EAEAEA' }}>Blog</Link>
+                    <Link to="/privacy" style={{ display: 'block', padding: '12px 18px', color: isDark ? '#E2E8F0' : '#444444', textDecoration: 'none', fontSize: '14px', fontWeight: 500 }}>Privacy Policy</Link>
                   </div>
                 </div>
               )}
