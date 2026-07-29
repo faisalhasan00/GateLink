@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 export default function LiveChatWidget() {
+  const location = useLocation();
+  const isDashboard = location.pathname.startsWith('/app') || location.pathname.startsWith('/super-admin');
+
   const whatsappNumber = '918004567890';
   const message = 'Hello HomeHni Hood Team, I want to know more about your society management OS and book a live demo.';
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
@@ -15,6 +19,9 @@ export default function LiveChatWidget() {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Do not render WhatsApp floating icon inside Society Admin or Super Admin dashboards
+  if (isDashboard) return null;
 
   return (
     <div style={{
