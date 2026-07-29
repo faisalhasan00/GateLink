@@ -34,6 +34,7 @@ import LandingPage from './pages/landing/LandingPage'
 import FeaturesPage from './pages/landing/FeaturesPage'
 import SolutionsPage from './pages/landing/SolutionsPage'
 import EcosystemPage from './pages/landing/EcosystemPage'
+import PricingPage from './pages/landing/PricingPage'
 import { getSocietyAdminSession, getSuperAdminSession } from './services/sessionManager'
 
 import './index.css'
@@ -68,12 +69,13 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public SaaS Landing, Features, Solutions & Ecosystem Pages */}
+        {/* Public SaaS Landing, Features, Solutions, Ecosystem & Pricing Pages */}
         <Route path="/landing" element={<LandingPage />} />
         <Route path="/website" element={<LandingPage />} />
         <Route path="/features" element={<FeaturesPage />} />
         <Route path="/solutions" element={<SolutionsPage />} />
         <Route path="/ecosystem" element={<EcosystemPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
 
         {/* Public Login Pages */}
         <Route path="/login" element={<AdminLogin />} />
