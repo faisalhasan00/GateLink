@@ -141,9 +141,9 @@ export default function Navbar({ onOpenDemo }) {
               )}
             </div>
 
-            {/* Direct Link */}
+            {/* Direct Link: Contact Us */}
             <Link to="/contact" style={{ textDecoration: 'none', fontSize: '14px', fontWeight: 600, color: isDark ? '#E2E8F0' : '#444444' }}>
-              Advertise with Us
+              Contact Us
             </Link>
 
           </nav>
