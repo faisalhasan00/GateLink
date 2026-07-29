@@ -21,7 +21,7 @@ export default function Navbar({ onOpenDemo }) {
     { name: 'Solutions', href: '/solutions' },
     { name: 'Ecosystem', href: '/ecosystem' },
     { name: 'Pricing', href: '/pricing' },
-    { name: 'Contact', href: '/landing#contact' },
+    { name: 'Contact', href: '/contact' },
   ];
 
   return (
