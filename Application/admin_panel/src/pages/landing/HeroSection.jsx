@@ -22,7 +22,7 @@ export default function HeroSection({ onOpenDemo }) {
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
-    reason: 'Society Enrollment'
+    reason: 'Interested for demo'
   });
 
   const [submitting, setSubmitting] = useState(false);
@@ -169,11 +169,8 @@ export default function HeroSection({ onOpenDemo }) {
                     outline: 'none'
                   }}
                 >
-                  <option value="Society Enrollment">Select Reason</option>
-                  <option value="Society Enrollment">Society Enrollment</option>
-                  <option value="Book Product Demo">Book Product Demo</option>
-                  <option value="Guard App Installation">Guard App Installation</option>
-                  <option value="Society Accounting Setup">Society Accounting Setup</option>
+                  <option value="Interested for demo">Interested for demo</option>
+                  <option value="Existing user of HomeHniHood">Existing user of HomeHniHood</option>
                 </select>
 
                 <button
