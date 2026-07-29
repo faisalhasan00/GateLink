@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import Navbar from './Navbar';
 import HeroSection from './HeroSection';
-import ClientLogosSection from './ClientLogosSection';
+import SolutionsSection from './SolutionsSection';
 import TrustedSection from './TrustedSection';
-import StatsSection from './StatsSection';
 import FeaturesSection from './FeaturesSection';
 import ComparisonSection from './ComparisonSection';
-import SolutionsSection from './SolutionsSection';
+import FaqSection from './FaqSection';
 import ProposalSection from './ProposalSection';
-import ContactSection from './ContactSection';
 import FooterSection from './FooterSection';
 import DemoModal from './DemoModal';
 
@@ -35,6 +33,7 @@ export default function LandingPage() {
         <TrustedSection />
         <FeaturesSection />
         <ComparisonSection />
+        <FaqSection />
         <ProposalSection onOpenDemo={handleOpenDemo} />
       </main>
 
