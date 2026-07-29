@@ -1,32 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Shield, Menu, X, ArrowRight, User, Sun, Moon, Smartphone } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronDown, Phone, Shield, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 export default function Navbar({ onOpenDemo }) {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
+  const [featuresDropdownOpen, setFeaturesDropdownOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      setIsScrolled(window.scrollY > 10);
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const navLinks = [
-    { name: 'Home', href: '/landing' },
-    { name: 'Features', href: '/features' },
-    { name: 'Solutions', href: '/solutions' },
-    { name: 'Ecosystem', href: '/ecosystem' },
-    { name: 'Proposal', href: '/landing#proposal' },
-    { name: 'Contact', href: '/contact' },
-  ];
-
-  const isDark = theme === 'dark';
 
   return (
     <header 
@@ -36,149 +26,228 @@ export default function Navbar({ onOpenDemo }) {
         left: 0,
         right: 0,
         zIndex: 1000,
-        transition: 'all 0.25s ease',
-        backgroundColor: isScrolled ? (isDark ? 'rgba(15, 23, 42, 0.95)' : 'rgba(255, 255, 255, 0.95)') : (isDark ? '#0F172A' : '#FFFFFF'),
-        backdropFilter: isScrolled ? 'blur(16px)' : 'none',
-        borderBottom: isScrolled ? (isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E2E8F0') : '1px solid transparent',
-        boxShadow: isScrolled ? '0 4px 20px rgba(0, 0, 0, 0.05)' : 'none',
-        padding: '16px 0'
+        transition: 'all 0.2s ease',
+        backgroundColor: isDark ? '#0F172A' : '#FFFFFF',
+        borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E5E7EB',
+        boxShadow: isScrolled ? '0 2px 10px rgba(0, 0, 0, 0.06)' : 'none',
+        height: '64px',
+        display: 'flex',
+        alignItems: 'center'
       }}
     >
-      <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ maxWidth: '1320px', width: '100%', margin: '0 auto', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         
-        {/* Brand Logo */}
-        <Link to="/landing" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-          <div style={{
-            width: '40px',
-            height: '40px',
-            borderRadius: '10px',
-            background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)'
-          }}>
-            <Shield size={22} color="#FFFFFF" />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <span style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', letterSpacing: '-0.5px', lineHeight: 1.1 }}>
-              Society<span style={{ color: '#2563EB' }}>Sphere</span>
-            </span>
-            <span style={{ fontSize: '10px', color: isDark ? '#94A3B8' : '#64748B', fontWeight: 700, letterSpacing: '1px' }}>
-              HOME & HOOD SECURITY OS
-            </span>
-          </div>
-        </Link>
+        {/* Left Side: Brand Logo + Nav Items */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
+          
+          {/* Stacked Red/Dark Brand Badge (NoBrokerHood Style) */}
+          <Link to="/landing" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            <div style={{
+              background: '#FF385C',
+              color: '#FFFFFF',
+              fontSize: '10px',
+              fontWeight: 900,
+              padding: '1px 6px',
+              borderRadius: '2px',
+              letterSpacing: '0.8px',
+              lineHeight: '12px',
+              textTransform: 'uppercase'
+            }}>
+              SOCIETY
+            </div>
+            <div style={{
+              color: isDark ? '#FFFFFF' : '#2C2C2C',
+              fontSize: '18px',
+              fontWeight: 900,
+              letterSpacing: '0.5px',
+              lineHeight: '18px',
+              marginTop: '1px'
+            }}>
+              HOOD
+            </div>
+          </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="desktop-nav" style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-          {navLinks.map((link) => (
-            <Link
-              key={link.name}
-              to={link.href}
-              style={{
-                color: isDark ? '#CBD5E1' : '#475569',
-                textDecoration: 'none',
-                fontSize: '14px',
-                fontWeight: 700,
-                transition: 'color 0.2s ease',
-                position: 'relative'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#2563EB'}
-              onMouseLeave={(e) => e.currentTarget.style.color = isDark ? '#CBD5E1' : '#475569'}
+          {/* Nav Items Center */}
+          <nav style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
+            
+            {/* About Us Dropdown */}
+            <div 
+              style={{ position: 'relative', cursor: 'pointer' }}
+              onMouseEnter={() => setAboutDropdownOpen(true)}
+              onMouseLeave={() => setAboutDropdownOpen(false)}
             >
-              {link.name}
-            </Link>
-          ))}
-        </nav>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '14px', fontWeight: 600, color: isDark ? '#E2E8F0' : '#444444' }}>
+                <span>About Us</span>
+                <ChevronDown size={15} color={isDark ? '#94A3B8' : '#666666'} />
+              </div>
 
-        {/* Actions & Theme Switcher */}
-        <div className="desktop-actions" style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              {aboutDropdownOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  paddingTop: '10px',
+                  zIndex: 100
+                }}>
+                  <div style={{
+                    background: isDark ? '#1E293B' : '#FFFFFF',
+                    borderRadius: '4px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.12)',
+                    border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB',
+                    padding: '8px 0',
+                    minWidth: '180px'
+                  }}>
+                    <Link to="/solutions" style={{ display: 'block', padding: '8px 16px', color: isDark ? '#E2E8F0' : '#333333', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>Our Solutions</Link>
+                    <Link to="/ecosystem" style={{ display: 'block', padding: '8px 16px', color: isDark ? '#E2E8F0' : '#333333', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>Ecosystem</Link>
+                    <Link to="/landing#proposal" style={{ display: 'block', padding: '8px 16px', color: isDark ? '#E2E8F0' : '#333333', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>Society Proposal</Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Features Dropdown */}
+            <div 
+              style={{ position: 'relative', cursor: 'pointer' }}
+              onMouseEnter={() => setFeaturesDropdownOpen(true)}
+              onMouseLeave={() => setFeaturesDropdownOpen(false)}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '14px', fontWeight: 600, color: isDark ? '#E2E8F0' : '#444444' }}>
+                <span>Features</span>
+                <ChevronDown size={15} color={isDark ? '#94A3B8' : '#666666'} />
+              </div>
+
+              {featuresDropdownOpen && (
+                <div style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  paddingTop: '10px',
+                  zIndex: 100
+                }}>
+                  <div style={{
+                    background: isDark ? '#1E293B' : '#FFFFFF',
+                    borderRadius: '4px',
+                    boxShadow: '0 10px 25px rgba(0,0,0,0.12)',
+                    border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB',
+                    padding: '8px 0',
+                    minWidth: '200px'
+                  }}>
+                    <Link to="/features" style={{ display: 'block', padding: '8px 16px', color: isDark ? '#E2E8F0' : '#333333', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>Visitor Gatekeeper Pass</Link>
+                    <Link to="/features" style={{ display: 'block', padding: '8px 16px', color: isDark ? '#E2E8F0' : '#333333', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>Guard Gatekeeper App</Link>
+                    <Link to="/features" style={{ display: 'block', padding: '8px 16px', color: isDark ? '#E2E8F0' : '#333333', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>Razorpay Billing</Link>
+                    <Link to="/download" style={{ display: 'block', padding: '8px 16px', color: isDark ? '#E2E8F0' : '#333333', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>Download Apps</Link>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Direct Link */}
+            <Link to="/contact" style={{ textDecoration: 'none', fontSize: '14px', fontWeight: 600, color: isDark ? '#E2E8F0' : '#444444' }}>
+              Advertise with Us
+            </Link>
+
+          </nav>
+
+        </div>
+
+        {/* Right Side: Phone Number + Society Login + Enroll your society */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+          
+          {/* Phone Call Launcher */}
+          <a
+            href="tel:+919119300000"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              textDecoration: 'none',
+              color: isDark ? '#E2E8F0' : '#333333',
+              fontSize: '14px',
+              fontWeight: 700
+            }}
+          >
+            <div style={{
+              width: '26px',
+              height: '26px',
+              borderRadius: '50%',
+              backgroundColor: isDark ? '#334155' : '#4A4A4A',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'white'
+            }}>
+              <Phone size={13} fill="white" />
+            </div>
+            <span>+91 91193 00000</span>
+          </a>
+
           {/* Theme Switcher Toggle */}
           <button
             onClick={toggleTheme}
             aria-label="Toggle Theme"
             style={{
-              width: '38px',
-              height: '38px',
-              borderRadius: '10px',
+              width: '32px',
+              height: '32px',
+              borderRadius: '4px',
               background: isDark ? 'rgba(255, 255, 255, 0.08)' : '#F1F5F9',
               border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #E2E8F0',
               color: isDark ? '#FFFFFF' : '#0F172A',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
+              cursor: 'pointer'
             }}
           >
-            {isDark ? <Sun size={18} color="#FBBF24" /> : <Moon size={18} color="#2563EB" />}
+            {isDark ? <Sun size={15} color="#FBBF24" /> : <Moon size={15} color="#2563EB" />}
           </button>
 
-          {/* Download App Button */}
+          {/* Outlined "Society Login" Button */}
           <Link
-            to="/download"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              color: isDark ? '#34D399' : '#059669',
-              textDecoration: 'none',
-              fontSize: '13px',
-              fontWeight: 800,
-              padding: '8px 16px',
-              borderRadius: '10px',
-              border: isDark ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid #A7F3D0',
-              backgroundColor: isDark ? 'rgba(16, 185, 129, 0.1)' : '#ECFDF5',
-              transition: 'all 0.2s ease'
-            }}
-          >
-            <Smartphone size={14} /> Mobile Apps
-          </Link>
-
-          {/* Admin Portal Button */}
-          <Link 
             to="/login"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              color: isDark ? '#FFFFFF' : '#0F172A',
+              justifyContent: 'center',
+              padding: '8px 20px',
+              borderRadius: '2px',
+              border: isDark ? '1px solid rgba(255,255,255,0.3)' : '1px solid #707070',
+              backgroundColor: 'transparent',
+              color: isDark ? '#FFFFFF' : '#333333',
               textDecoration: 'none',
-              fontSize: '13px',
-              fontWeight: 700,
-              padding: '8px 16px',
-              borderRadius: '10px',
-              border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #CBD5E1',
-              backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : '#FFFFFF',
-              transition: 'all 0.2s ease'
+              fontSize: '14px',
+              fontWeight: 600,
+              height: '38px',
+              boxSizing: 'border-box'
             }}
           >
-            <User size={14} /> Admin Portal
+            Society Login
           </Link>
 
-          {/* Book Demo Button */}
+          {/* Solid Emerald Green "Enroll your society" Button */}
           <button
             onClick={onOpenDemo}
             style={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: '6px',
-              padding: '9px 18px',
-              borderRadius: '10px',
-              background: '#2563EB',
+              justifyContent: 'center',
+              padding: '8px 24px',
+              borderRadius: '2px',
+              backgroundColor: '#00B589',
               color: '#FFFFFF',
-              fontSize: '13px',
-              fontWeight: 800,
               border: 'none',
+              fontSize: '14px',
+              fontWeight: 700,
               cursor: 'pointer',
-              boxShadow: '0 4px 14px rgba(37, 99, 235, 0.3)',
-              transition: 'all 0.2s ease'
+              height: '38px',
+              boxSizing: 'border-box',
+              transition: 'background-color 0.2s ease'
             }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#009E77'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#00B589'}
           >
-            <span>Book Demo</span>
-            <ArrowRight size={14} />
+            Enroll your society
           </button>
+
         </div>
 
       </div>
