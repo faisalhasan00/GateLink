@@ -1,155 +1,39 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MessageSquare, X, Send, Bot, Phone, Calendar, Sparkles, CheckCircle2 } from 'lucide-react';
+import React from 'react';
+import { motion } from 'framer-motion';
 
-export default function LiveChatWidget({ onOpenDemo }) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { sender: 'bot', text: 'Hello! 👋 Welcome to SocietySphere. How can I help you today?' }
-  ]);
-  const [inputText, setInputText] = useState('');
-
-  const handleSend = (e) => {
-    e.preventDefault();
-    if (!inputText.trim()) return;
-
-    const userMsg = inputText;
-    setMessages(prev => [...prev, { sender: 'user', text: userMsg }]);
-    setInputText('');
-
-    setTimeout(() => {
-      setMessages(prev => [
-        ...prev,
-        { sender: 'bot', text: 'Thanks for reaching out! Our society onboarding team is online. Tap "Book Live Demo" below or call +91 98765 43210 for immediate assistance.' }
-      ]);
-    }, 800);
-  };
+export default function LiveChatWidget() {
+  const whatsappNumber = '918004567890';
+  const message = 'Hello HomeHni Hood Team, I want to know more about your society management OS and book a live demo.';
+  const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
   return (
-    <>
-      {/* Floating Trigger Button */}
-      <motion.button
-        onClick={() => setIsOpen(!isOpen)}
-        aria-label="Live Chat Concierge"
+    <div style={{ position: 'fixed', bottom: '32px', right: '32px', zIndex: 9000, display: 'flex', alignItems: 'center', gap: '10px' }}>
+      {/* Floating WhatsApp Button */}
+      <motion.a
+        href={whatsappUrl}
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Chat on WhatsApp"
         style={{
-          position: 'fixed',
-          bottom: '32px',
-          right: '90px',
-          height: '48px',
-          padding: '0 20px',
-          borderRadius: '24px',
-          background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
-          color: 'white',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          boxShadow: '0 10px 25px -5px rgba(16, 185, 129, 0.6)',
+          width: '56px',
+          height: '56px',
+          borderRadius: '50%',
+          backgroundColor: '#25D366',
+          color: '#FFFFFF',
+          boxShadow: '0 8px 24px rgba(37, 211, 102, 0.4)',
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
-          cursor: 'pointer',
-          zIndex: 9000,
-          fontWeight: 800,
-          fontSize: '13px'
+          justifyContent: 'center',
+          textDecoration: 'none',
+          cursor: 'pointer'
         }}
-        whileHover={{ scale: 1.05 }}
+        whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
       >
-        <MessageSquare size={20} />
-        <span>Live Support</span>
-      </motion.button>
-
-      {/* Floating Chat Drawer */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            style={{
-              position: 'fixed',
-              bottom: '90px',
-              right: '32px',
-              width: '360px',
-              height: '480px',
-              background: 'linear-gradient(135deg, #1E293B 0%, #0F172A 100%)',
-              borderRadius: '20px',
-              border: '1px solid rgba(255, 255, 255, 0.15)',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.8)',
-              zIndex: 9500,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden'
-            }}
-          >
-            {/* Header */}
-            <div style={{ padding: '16px 20px', background: 'rgba(15, 23, 42, 0.8)', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#10B981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Bot size={18} color="white" />
-                </div>
-                <div>
-                  <div style={{ color: 'white', fontWeight: 800, fontSize: '14px' }}>SocietySphere Support</div>
-                  <div style={{ color: '#34D399', fontSize: '11px', fontWeight: 700 }}>● Online Now</div>
-                </div>
-              </div>
-              <button onClick={() => setIsOpen(false)} aria-label="Close Live Chat" style={{ background: 'transparent', border: 'none', color: '#94A3B8', cursor: 'pointer' }}>
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Chat Body */}
-            <div style={{ flex: 1, padding: '16px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {messages.map((m, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    alignSelf: m.sender === 'user' ? 'flex-end' : 'flex-start',
-                    maxWidth: '85%',
-                    background: m.sender === 'user' ? '#4F46E5' : 'rgba(30, 41, 59, 0.8)',
-                    color: 'white',
-                    padding: '10px 14px',
-                    borderRadius: m.sender === 'user' ? '16px 16px 2px 16px' : '16px 16px 16px 2px',
-                    fontSize: '13px',
-                    lineHeight: 1.5,
-                    border: '1px solid rgba(255,255,255,0.08)'
-                  }}
-                >
-                  {m.text}
-                </div>
-              ))}
-            </div>
-
-            {/* Quick Actions Bar */}
-            <div style={{ padding: '8px 16px', background: 'rgba(15, 23, 42, 0.6)', borderTop: '1px solid rgba(255,255,255,0.08)', display: 'flex', gap: '8px' }}>
-              <button
-                onClick={() => { setIsOpen(false); window.location.href = '/book-demo'; }}
-                style={{ flex: 1, padding: '6px 10px', borderRadius: '8px', background: 'rgba(99, 102, 241, 0.2)', color: '#818CF8', border: '1px solid rgba(99, 102, 241, 0.4)', fontSize: '11px', fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
-              >
-                <Calendar size={12} /> Book Demo
-              </button>
-              <a
-                href="tel:+919876543210"
-                style={{ flex: 1, padding: '6px 10px', borderRadius: '8px', background: 'rgba(52, 211, 153, 0.2)', color: '#34D399', border: '1px solid rgba(52, 211, 153, 0.4)', fontSize: '11px', fontWeight: 800, textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
-              >
-                <Phone size={12} /> Call Sales
-              </a>
-            </div>
-
-            {/* Input Form */}
-            <form onSubmit={handleSend} style={{ padding: '12px 16px', background: '#0F172A', display: 'flex', gap: '8px' }}>
-              <input
-                type="text"
-                placeholder="Type your question..."
-                value={inputText}
-                onChange={e => setInputText(e.target.value)}
-                style={{ flex: 1, padding: '10px 12px', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(30, 41, 59, 0.8)', color: 'white', fontSize: '13px', outline: 'none' }}
-              />
-              <button type="submit" aria-label="Send Message" style={{ padding: '10px', borderRadius: '10px', background: '#4F46E5', color: 'white', border: 'none', cursor: 'pointer' }}>
-                <Send size={16} />
-              </button>
-            </form>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+        <svg width="30" height="30" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z" />
+        </svg>
+      </motion.a>
+    </div>
   );
 }
