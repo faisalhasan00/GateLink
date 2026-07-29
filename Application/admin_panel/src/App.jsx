@@ -40,6 +40,7 @@ const SuperAdminProfile = lazy(() => import('./pages/superadmin/SuperAdminProfil
 const SuperAdminLogin = lazy(() => import('./pages/superadmin/SuperAdminLogin'))
 
 const LandingPage = lazy(() => import('./pages/landing/LandingPage'))
+const AboutUsPage = lazy(() => import('./pages/landing/AboutUsPage'))
 const FeaturesPage = lazy(() => import('./pages/landing/FeaturesPage'))
 const SolutionsPage = lazy(() => import('./pages/landing/SolutionsPage'))
 const EcosystemPage = lazy(() => import('./pages/landing/EcosystemPage'))
@@ -94,6 +95,7 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/landing" element={<LandingPage />} />
             <Route path="/website" element={<LandingPage />} />
+            <Route path="/about" element={<AboutUsPage />} />
             <Route path="/features" element={<FeaturesPage />} />
             <Route path="/solutions" element={<SolutionsPage />} />
             <Route path="/ecosystem" element={<EcosystemPage />} />

@@ -99,7 +99,7 @@ export default function Navbar({ onOpenDemo }) {
                     border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB',
                     minWidth: '170px'
                   }}>
-                    <Link to="/solutions" style={{ display: 'block', padding: '12px 18px', color: isDark ? '#E2E8F0' : '#444444', textDecoration: 'none', fontSize: '14px', fontWeight: 500, borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #EAEAEA' }}>About Us</Link>
+                    <Link to="/about" style={{ display: 'block', padding: '12px 18px', color: isDark ? '#E2E8F0' : '#444444', textDecoration: 'none', fontSize: '14px', fontWeight: 500, borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #EAEAEA' }}>About Us</Link>
                     <Link to="/ecosystem" style={{ display: 'block', padding: '12px 18px', color: isDark ? '#E2E8F0' : '#444444', textDecoration: 'none', fontSize: '14px', fontWeight: 500, borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #EAEAEA' }}>UAE</Link>
                     <Link to="/blog" style={{ display: 'block', padding: '12px 18px', color: isDark ? '#E2E8F0' : '#444444', textDecoration: 'none', fontSize: '14px', fontWeight: 500, borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #EAEAEA' }}>Blog</Link>
                     <Link to="/privacy" style={{ display: 'block', padding: '12px 18px', color: isDark ? '#E2E8F0' : '#444444', textDecoration: 'none', fontSize: '14px', fontWeight: 500 }}>Privacy Policy</Link>
