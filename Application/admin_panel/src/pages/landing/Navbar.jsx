@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { ChevronDown, Phone, Shield, Sun, Moon } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
+import HomeHniHoodLogo from '../../components/ui/HomeHniHoodLogo';
+
 export default function Navbar({ onOpenDemo }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [aboutDropdownOpen, setAboutDropdownOpen] = useState(false);
@@ -40,30 +42,9 @@ export default function Navbar({ onOpenDemo }) {
         {/* Left Side: Brand Logo + Nav Items */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '40px' }}>
           
-          {/* Stacked Red/Dark Brand Badge */}
-          <Link to="/landing" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-            <div style={{
-              background: '#FF385C',
-              color: '#FFFFFF',
-              fontSize: '11px',
-              fontWeight: 900,
-              padding: '1px 6px',
-              borderRadius: '2px',
-              letterSpacing: '0.5px',
-              lineHeight: '13px'
-            }}>
-              HomeHni
-            </div>
-            <div style={{
-              color: isDark ? '#FFFFFF' : '#2C2C2C',
-              fontSize: '18px',
-              fontWeight: 900,
-              letterSpacing: '0.5px',
-              lineHeight: '18px',
-              marginTop: '1px'
-            }}>
-              Hood
-            </div>
+          {/* HomeHniHood Brand Logo */}
+          <Link to="/landing" style={{ textDecoration: 'none' }}>
+            <HomeHniHoodLogo isDark={isDark} size="medium" />
           </Link>
 
           {/* Nav Items Center */}

@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Shield, Phone, Mail, MapPin, Apple, Play, Heart } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
+import HomeHniHoodLogo from '../../components/ui/HomeHniHoodLogo';
+
 export default function FooterSection() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -21,29 +23,8 @@ export default function FooterSection() {
           
           {/* Col 1: Brand Info */}
           <div>
-            <Link to="/landing" style={{ textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', marginBottom: '16px' }}>
-              <div style={{
-                background: '#FF385C',
-                color: '#FFFFFF',
-                fontSize: '11px',
-                fontWeight: 900,
-                padding: '1px 6px',
-                borderRadius: '2px',
-                letterSpacing: '0.5px',
-                lineHeight: '13px'
-              }}>
-                HomeHni
-              </div>
-              <div style={{
-                color: '#FFFFFF',
-                fontSize: '20px',
-                fontWeight: 900,
-                letterSpacing: '0.5px',
-                lineHeight: '20px',
-                marginTop: '1px'
-              }}>
-                Hood
-              </div>
+            <Link to="/landing" style={{ textDecoration: 'none', display: 'inline-block', marginBottom: '16px' }}>
+              <HomeHniHoodLogo isDark={true} size="large" />
             </Link>
             <p style={{ fontSize: '14px', lineHeight: 1.65, color: '#94A3B8', marginBottom: '20px', maxWidth: '320px' }}>
               India’s intelligent society management operating system. Empowering gated communities, residents, and gate security staff with real-time digital automation.

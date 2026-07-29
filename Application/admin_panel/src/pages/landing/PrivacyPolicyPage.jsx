@@ -1,37 +1,107 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Navbar from './Navbar';
 import FooterSection from './FooterSection';
+import DemoModal from './DemoModal';
 import SeoHead from '../../components/seo/SeoHead';
-import { Shield } from 'lucide-react';
+import { ShieldCheck, Lock, Eye, FileText, CheckCircle2 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function PrivacyPolicyPage() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+
   return (
-    <div style={{ backgroundColor: '#020617', color: '#F8FAFC', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
+    <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      {/* Dynamic SEO Head */}
       <SeoHead
-        title="Privacy Policy - SocietySphere Platform"
-        description="SocietySphere Privacy Policy detailing data protection, DPDP compliance, and 256-Bit SSL encryption."
+        title="Privacy Policy & DPDP Compliance - HomeHni Hood"
+        description="HomeHni Hood Privacy Policy detailing ISO 27001 security, DPDP compliance, resident data protection, and 256-Bit SSL encryption."
         canonicalUrl="https://societysphere.com/privacy"
       />
-      <Navbar onOpenDemo={() => {}} />
 
-      <section style={{ paddingTop: '160px', paddingBottom: '60px', background: '#020617' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 24px', lineHeight: 1.8, color: '#CBD5E1' }}>
-          <h1 style={{ fontSize: '38px', fontWeight: 900, color: '#FFFFFF', marginBottom: '24px' }}>Privacy Policy</h1>
-          <p>Last updated: July 2026</p>
-          <p>SocietySphere Inc. ("SocietySphere", "we", "our") is committed to protecting your privacy. This policy outlines how we collect, process, and safeguard personal data when housing societies, flat owners, security guards, and visitors use our platform.</p>
+      {/* Navbar */}
+      <Navbar onOpenDemo={() => setIsDemoModalOpen(true)} />
 
-          <h3 style={{ color: '#FFFFFF', marginTop: '28px' }}>1. Information We Collect</h3>
-          <p>We collect information provided directly by users, including names, flat numbers, contact details, vehicle numbers, visitor entry records, and digital payment receipts.</p>
+      {/* Main Privacy Policy Container */}
+      <main style={{ paddingTop: '120px', paddingBottom: '80px' }}>
+        <div style={{ maxWidth: '960px', margin: '0 auto', padding: '0 24px' }}>
+          
+          {/* Header */}
+          <div style={{ marginBottom: '40px', textAlign: 'center' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, color: '#00B589', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>
+              <ShieldCheck size={16} /> DATA PROTECTION & TRUST
+            </div>
+            <h1 style={{ fontSize: '38px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-0.5px', marginBottom: '12px' }}>
+              Privacy Policy & Data Security Standards
+            </h1>
+            <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#666666', margin: 0 }}>
+              Last updated: July 2026 • DPDP Act 2023 & ISO 27001 Certified
+            </p>
+          </div>
 
-          <h3 style={{ color: '#FFFFFF', marginTop: '28px' }}>2. Data Encryption & Security</h3>
-          <p>All data transmitted to and from SocietySphere servers is encrypted using 256-Bit SSL TLS v1.3 encryption and stored on secure cloud infrastructure located within India.</p>
+          {/* Privacy Content Card */}
+          <div style={{
+            background: isDark ? '#1E293B' : '#FFFFFF',
+            borderRadius: '4px',
+            padding: '40px',
+            border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E5E7EB',
+            boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
+            lineHeight: 1.7,
+            fontSize: '15px',
+            color: isDark ? '#E2E8F0' : '#444444'
+          }}>
+            <p style={{ marginTop: 0 }}>
+              <strong>HomeHni Hood</strong> ("we", "our", "us") is dedicated to safeguarding the personal information of housing society management committees, flat owners, residents, security guards, and visitors. This Privacy Policy details our data collection practices, encryption standards, and your rights under India’s Digital Personal Data Protection (DPDP) Act 2023.
+            </p>
 
-          <h3 style={{ color: '#FFFFFF', marginTop: '28px' }}>3. Data Rights & DPDP Compliance</h3>
-          <p>Under the Digital Personal Data Protection Act (DPDP), residents have full rights to request access, correction, or erasure of their personal profile records.</p>
+            <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginTop: '32px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Lock size={18} color="#00B589" /> 1. Information We Collect
+            </h3>
+            <p>
+              To operate our gated community security and society management system, we collect:
+            </p>
+            <ul style={{ paddingLeft: '24px', margin: '10px 0' }}>
+              <li><strong>Resident & Flat Data:</strong> Name, phone number, email address, flat number, and vehicle registration numbers.</li>
+              <li><strong>Gatekeeper Entry Logs:</strong> Visitor entry timestamp, OTP passcodes, photo verification logs, and delivery courier details.</li>
+              <li><strong>Maintenance Billing Data:</strong> Payment transaction history, UPI transaction IDs, and GST tax invoice details.</li>
+            </ul>
+
+            <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginTop: '32px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ShieldCheck size={18} color="#00B589" /> 2. Data Encryption & Storage Security
+            </h3>
+            <p>
+              All personal data transmitted between resident mobile apps, guard tablets, and society admin web consoles is protected using <strong>256-Bit SSL TLS v1.3 encryption</strong> in transit and AES-256 encryption at rest. All database servers are hosted in secure MeitY-empaneled tier-4 data centers within India.
+            </p>
+
+            <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginTop: '32px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Eye size={18} color="#00B589" /> 3. Data Protection Rights & Erasure
+            </h3>
+            <p>
+              Under DPDP regulations, flat owners and residents retain full control over their personal profile records. You may request profile data correction, access export logs, or submit erasure requests upon moving out of the housing society by contacting your RWA admin or emailing our Data Officer at <a href="mailto:privacy@societysphere.com" style={{ color: '#00B589', textDecoration: 'none', fontWeight: 700 }}>privacy@societysphere.com</a>.
+            </p>
+
+            <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginTop: '32px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FileText size={18} color="#00B589" /> 4. Third-Party Sharing Restrictions
+            </h3>
+            <p>
+              We maintain a strict zero-selling policy. HomeHni Hood <strong>never sells, rents, or monetizes resident personal contact information</strong> or gate traffic logs to third-party telemarketers or advertisers.
+            </p>
+
+            <div style={{ marginTop: '36px', paddingTop: '24px', borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: isDark ? '#94A3B8' : '#666666' }}>
+              <CheckCircle2 size={16} color="#00B589" />
+              <span>For questions regarding our privacy practices, contact Data Protection Officer at privacy@societysphere.com</span>
+            </div>
+          </div>
+
         </div>
-      </section>
+      </main>
 
+      {/* Footer */}
       <FooterSection />
+
+      {/* Demo Modal */}
+      <DemoModal isOpen={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />
     </div>
   );
 }
