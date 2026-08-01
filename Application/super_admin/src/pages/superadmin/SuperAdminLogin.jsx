@@ -18,7 +18,7 @@ export default function SuperAdminLogin() {
   const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 
     (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
       ? 'http://localhost:5173'
-      : 'https://societysphere.com');
+      : 'https://society-sphere-two.vercel.app');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
