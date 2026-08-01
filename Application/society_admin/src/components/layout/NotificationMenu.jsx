@@ -13,7 +13,7 @@ export default function NotificationMenu() {
         height: '40px',
         borderRadius: '12px',
         border: '1px solid var(--border-color)',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: 'var(--surface-color)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -28,7 +28,7 @@ export default function NotificationMenu() {
         e.currentTarget.style.borderColor = 'var(--primary)';
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = '#FFFFFF';
+        e.currentTarget.style.backgroundColor = 'var(--surface-color)';
         e.currentTarget.style.borderColor = 'var(--border-color)';
       }}
     >

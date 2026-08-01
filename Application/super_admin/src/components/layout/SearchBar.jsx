@@ -26,7 +26,7 @@ export default function SearchBar() {
           cursor: 'pointer',
           height: '42px',
           borderRadius: '12px',
-          backgroundColor: '#F3F4F6',
+          backgroundColor: 'var(--search-bg, var(--bg-color))',
           border: '1px solid var(--border-color)',
           transition: 'all 0.2s ease',
           paddingLeft: '14px',
@@ -39,7 +39,7 @@ export default function SearchBar() {
         </span>
 
         <kbd style={{
-          backgroundColor: '#FFFFFF',
+          backgroundColor: 'var(--surface-color)',
           border: '1px solid var(--border-color)',
           borderRadius: '6px',
           padding: '2px 6px',

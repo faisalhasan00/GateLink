@@ -74,7 +74,7 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
       style={{
         height: '72px',
         padding: '0 24px',
-        backgroundColor: 'var(--header-bg, #FFFFFF)',
+        backgroundColor: 'var(--surface-color)',
         borderBottom: '1px solid var(--border-color)',
         display: 'flex',
         justifyContent: 'space-between',
