@@ -13,6 +13,12 @@ export default function Navbar({ onOpenDemo }) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
+  const societyAdminUrl = import.meta.env.VITE_SOCIETY_ADMIN_URL || 
+    (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://localhost:5174/login' 
+      : 'https://app.societysphere.com/login');
+
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -141,12 +147,12 @@ export default function Navbar({ onOpenDemo }) {
             </a>
 
             {/* Outlined "Society Login" */}
-            <Link
-              to="/login"
+            <a
+              href={societyAdminUrl}
               style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '6px 16px', borderRadius: '2px', border: isDark ? '1px solid rgba(255,255,255,0.3)' : '1px solid #707070', backgroundColor: 'transparent', color: isDark ? '#FFFFFF' : '#333333', textDecoration: 'none', fontSize: '13px', fontWeight: 600, height: '36px', boxSizing: 'border-box' }}
             >
               Society Login
-            </Link>
+            </a>
 
             {/* Solid Emerald Green "Enroll your society" */}
             <button
@@ -241,13 +247,13 @@ export default function Navbar({ onOpenDemo }) {
 
           {/* Action CTAs */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '24px' }}>
-            <Link
-              to="/login"
+            <a
+              href={societyAdminUrl}
               onClick={() => setMobileMenuOpen(false)}
               style={{ width: '100%', padding: '12px', borderRadius: '2px', border: isDark ? '1px solid rgba(255,255,255,0.3)' : '1px solid #707070', backgroundColor: 'transparent', color: isDark ? '#FFFFFF' : '#333333', textAlign: 'center', textDecoration: 'none', fontSize: '15px', fontWeight: 700, boxSizing: 'border-box' }}
             >
               Society Login
-            </Link>
+            </a>
 
             <button
               onClick={handleEnrollClick}
