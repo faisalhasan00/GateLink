@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu } from 'lucide-react';
+import { Menu, Sun, Moon } from 'lucide-react';
 import { auth, db } from '../../firebase';
 import { doc, getDoc } from 'firebase/firestore';
 import SearchBar from './SearchBar';
@@ -7,6 +7,7 @@ import SubscriptionBadge from './SubscriptionBadge';
 import NotificationMenu from './NotificationMenu';
 import ProfileDropdown from './ProfileDropdown';
 import Breadcrumb from './Breadcrumb';
+import { useTheme } from '../../context/ThemeContext';
 
 import { onAuthStateChanged } from 'firebase/auth';
 import { getSocietyAdminSession, getSuperAdminSession } from '../../services/sessionManager';
@@ -65,13 +66,15 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
     };
   }, [isSuperAdmin]);
 
+  const { theme, toggleTheme } = useTheme();
+
   return (
     <header 
       className="enterprise-header"
       style={{
         height: '72px',
         padding: '0 24px',
-        backgroundColor: '#FFFFFF',
+        backgroundColor: 'var(--header-bg, #FFFFFF)',
         borderBottom: '1px solid var(--border-color)',
         display: 'flex',
         justifyContent: 'space-between',
@@ -108,15 +111,37 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
         <SearchBar />
       </div>
 
-      {/* Right Section: Subscription Badge + Notification + Profile */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
-        <div style={{ marginRight: '8px' }}>
+      {/* Right Section: Subscription Badge + Notification + Theme Toggle + Profile */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+        <div style={{ marginRight: '4px' }}>
           <SubscriptionBadge plan={isSuperAdmin ? 'SUPER ADMIN' : societyInfo.plan} />
         </div>
 
+        {/* Dark / Light Mode Toggle Button */}
+        <button
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+          title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
+          style={{
+            background: 'var(--bg-color)',
+            border: '1px solid var(--border-color)',
+            borderRadius: '10px',
+            padding: '8px',
+            cursor: 'pointer',
+            color: 'var(--text-primary)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.2s ease',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
+          }}
+        >
+          {theme === 'dark' ? <Sun size={18} color="#F59E0B" /> : <Moon size={18} color="#4F46E5" />}
+        </button>
+
         <NotificationMenu />
 
-        <div style={{ height: '28px', width: '1px', backgroundColor: 'var(--border-color)', margin: '0 4px' }} />
+        <div style={{ height: '28px', width: '1px', backgroundColor: 'var(--border-color)', margin: '0 2px' }} />
 
         <ProfileDropdown 
           userEmail={userEmail} 
