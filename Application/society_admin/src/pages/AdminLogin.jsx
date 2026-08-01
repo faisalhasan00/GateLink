@@ -12,6 +12,12 @@ import { useTheme } from '../context/ThemeContext';
 export default function AdminLogin() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+
+  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 
+    (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://localhost:5173'
+      : 'https://societysphere.com');
+  const websiteContactUrl = `${websiteUrl}/contact`;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -65,9 +71,9 @@ export default function AdminLogin() {
 
       {/* Top Header Logo */}
       <div style={{ marginBottom: '32px' }}>
-        <Link to="/landing" style={{ textDecoration: 'none' }}>
+        <a href={websiteUrl} style={{ textDecoration: 'none' }}>
           <HomeHniHoodLogo isDark={isDark} size="large" />
-        </Link>
+        </a>
       </div>
 
       {/* Login Form Container */}
@@ -156,7 +162,7 @@ export default function AdminLogin() {
 
         <div style={{ borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #F1F5F9', marginTop: '24px', paddingTop: '16px', textAlign: 'center', fontSize: '13px', color: isDark ? '#94A3B8' : '#666666' }}>
           <span>Need to register your society? </span>
-          <Link to="/contact" style={{ color: '#00B589', textDecoration: 'none', fontWeight: 700 }}>Enroll Your Society</Link>
+          <a href={websiteContactUrl} style={{ color: '#00B589', textDecoration: 'none', fontWeight: 700 }}>Enroll Your Society</a>
         </div>
       </div>
     </div>

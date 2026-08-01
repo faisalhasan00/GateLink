@@ -14,6 +14,11 @@ const SUPER_ADMIN_PASS = 'Raj786f@';
 export default function SuperAdminLogin() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+
+  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 
+    (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? 'http://localhost:5173'
+      : 'https://societysphere.com');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -61,9 +66,9 @@ export default function SuperAdminLogin() {
 
       {/* Top Header Logo */}
       <div style={{ marginBottom: '32px' }}>
-        <Link to="/landing" style={{ textDecoration: 'none' }}>
+        <a href={websiteUrl} style={{ textDecoration: 'none' }}>
           <HomeHniHoodLogo isDark={isDark} size="large" />
-        </Link>
+        </a>
       </div>
 
       {/* Login Form Container */}
