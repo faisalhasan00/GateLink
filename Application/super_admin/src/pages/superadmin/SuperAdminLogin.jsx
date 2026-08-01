@@ -43,13 +43,13 @@ export default function SuperAdminLogin() {
       // 1. Try standard Firebase Auth login
       const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
       setSuperAdminSession({ email: cleanEmail, token: res.user?.uid });
-      navigate('/super-admin');
+      navigate('/');
     } catch (err) {
       // 2. Auto-create account in Firebase Auth on first login
       try {
         const newRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
         setSuperAdminSession({ email: cleanEmail, token: newRes.user?.uid });
-        navigate('/super-admin');
+        navigate('/');
         return;
       } catch (innerErr) {
         console.error("Super Admin auth setup error:", innerErr);

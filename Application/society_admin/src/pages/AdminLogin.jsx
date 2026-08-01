@@ -34,7 +34,7 @@ export default function AdminLogin() {
       // 1. Attempt standard login
       const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
       setSocietyAdminSession({ email: cleanEmail, token: res.user?.uid });
-      navigate('/app');
+      navigate('/');
     } catch (err) {
       // 2. If Auth account doesn't exist yet, check if society was onboarded with these credentials
       try {
@@ -47,7 +47,7 @@ export default function AdminLogin() {
             // Auto-register in Firebase Auth
             const newRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
             setSocietyAdminSession({ email: cleanEmail, token: newRes.user?.uid });
-            navigate('/app');
+            navigate('/');
             return;
           }
         }
