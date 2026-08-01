@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronUp } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function BackToTopButton() {
   const [isVisible, setIsVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
 
   useEffect(() => {
     const handleScroll = () => {
@@ -13,8 +17,15 @@ export default function BackToTopButton() {
         setIsVisible(false);
       }
     };
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   const scrollToTop = () => {
@@ -32,26 +43,26 @@ export default function BackToTopButton() {
           aria-label="Back to Top"
           style={{
             position: 'fixed',
-            bottom: '32px',
-            right: '32px',
-            width: '48px',
-            height: '48px',
-            borderRadius: '16px',
-            background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-            color: 'white',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 10px 25px -5px rgba(79, 70, 229, 0.6)',
+            bottom: isMobile ? '140px' : '98px',
+            right: isMobile ? '16px' : '36px',
+            width: isMobile ? '44px' : '48px',
+            height: isMobile ? '44px' : '48px',
+            borderRadius: '50%',
+            backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
+            color: isDark ? '#38BDF8' : '#0284C7',
+            border: isDark ? '1px solid rgba(255, 255, 255, 0.15)' : '1px solid #E2E8F0',
+            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.12)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            zIndex: 9000,
-            transition: 'transform 0.2s ease'
+            zIndex: 8999,
+            transition: 'transform 0.2s ease, background-color 0.2s ease'
           }}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
-          <ChevronUp size={24} />
+          <ChevronUp size={isMobile ? 20 : 24} />
         </motion.button>
       )}
     </AnimatePresence>
