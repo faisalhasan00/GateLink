@@ -21,57 +21,41 @@ import EnterpriseSidebar from './EnterpriseSidebar';
 
 // 1. Navigation Configuration for Society Admin
 const SOCIETY_ADMIN_NAV = [
-  { name: 'Dashboard', path: '/app', icon: <LayoutDashboard size={20} /> },
-  { name: 'Residents', path: '/app/residents', icon: <Users size={20} /> },
-  { name: 'Visitor Logs', path: '/app/visitors', icon: <UserCheck size={20} /> },
-  { name: 'Amenities', path: '/app/amenities', icon: <Waves size={20} /> },
-  { name: 'Maintenance', path: '/app/maintenance', icon: <Wrench size={20} /> },
-  { name: 'Documents', path: '/app/documents', icon: <FileText size={20} /> },
-  { name: 'Parking', path: '/app/parking', icon: <CarFront size={20} /> },
-  { name: 'Complaints', path: '/app/complaints', icon: <ShieldAlert size={20} /> },
-  { name: 'Notices', path: '/app/notices', icon: <Megaphone size={20} /> },
-  { name: 'Staff Management', path: '/app/staff', icon: <UserCheck size={20} /> },
-  { name: 'Helpers & Deliveries', path: '/app/helpers', icon: <Truck size={20} /> },
-  { name: 'Emergency SOS', path: '/app/sos', icon: <ShieldAlert size={20} /> },
-  { name: 'Reports & Analytics', path: '/app/reports', icon: <BarChart2 size={20} /> },
-  { name: 'Terms & Legal', path: '/app/legal', icon: <FileText size={20} /> },
-  { name: 'Profile & Settings', path: '/app/profile', icon: <Settings size={20} /> },
+  { name: 'Dashboard', path: '/', icon: <LayoutDashboard size={20} /> },
+  { name: 'Residents', path: '/residents', icon: <Users size={20} /> },
+  { name: 'Visitor Logs', path: '/visitors', icon: <UserCheck size={20} /> },
+  { name: 'Amenities', path: '/amenities', icon: <Waves size={20} /> },
+  { name: 'Maintenance', path: '/maintenance', icon: <Wrench size={20} /> },
+  { name: 'Documents', path: '/documents', icon: <FileText size={20} /> },
+  { name: 'Parking', path: '/parking', icon: <CarFront size={20} /> },
+  { name: 'Complaints', path: '/complaints', icon: <ShieldAlert size={20} /> },
+  { name: 'Notices', path: '/notices', icon: <Megaphone size={20} /> },
+  { name: 'Staff Management', path: '/staff', icon: <UserCheck size={20} /> },
+  { name: 'Helpers & Deliveries', path: '/helpers', icon: <Truck size={20} /> },
+  { name: 'Emergency SOS', path: '/sos', icon: <ShieldAlert size={20} /> },
+  { name: 'Reports & Analytics', path: '/reports', icon: <BarChart2 size={20} /> },
+  { name: 'Terms & Legal', path: '/legal', icon: <FileText size={20} /> },
+  { name: 'Profile & Settings', path: '/profile', icon: <Settings size={20} /> },
 ];
 
-// 2. Navigation Configuration for Super Admin
-const SUPER_ADMIN_NAV = [
-  { name: 'SaaS Overview', path: '/super-admin', icon: <LayoutDashboard size={20} /> },
-  { name: 'Societies & Licenses', path: '/super-admin/societies', icon: <Building2 size={20} /> },
-  { name: 'CRM & Sales Leads', path: '/super-admin/crm', icon: <Contact size={20} /> },
-  { name: 'Ad & Campaigns', path: '/super-admin/ads', icon: <Megaphone size={20} /> },
-  { name: 'System Settings', path: '/super-admin/profile', icon: <Settings size={20} /> },
-];
-
-// 3. Page Title & Subtitle Configuration
+// 2. Page Title & Subtitle Configuration
 const PAGE_TITLES = {
-  '/app': { title: 'Dashboard Overview', subtitle: 'Real-time society analytics & operational metrics' },
-  '/app/residents': { title: 'Resident Directory', subtitle: 'Manage society residents, owners, tenants and flat rosters' },
-  '/app/visitors': { title: 'Visitor Gate Logs', subtitle: 'Track gate entries, visitor approvals, and security passes' },
-  '/app/amenities': { title: 'Amenity Bookings', subtitle: 'Manage clubhouse, gym, pool, and hall reservations' },
-  '/app/maintenance': { title: 'Maintenance & Billing', subtitle: 'Generate monthly maintenance bills and Razorpay receipts' },
-  '/app/documents': { title: 'Document Repository', subtitle: 'Store society bylaws, meeting minutes, and financial reports' },
-  '/app/parking': { title: 'Parking Allocation', subtitle: 'Manage parking slots, resident vehicles, and visitor parking' },
-  '/app/complaints': { title: 'Helpdesk Complaints', subtitle: 'Track resident complaints, ticketing workflow, and staff assignment' },
-  '/app/notices': { title: 'Notice Board', subtitle: 'Publish community announcements and official notices' },
-  '/app/staff': { title: 'Staff Management', subtitle: 'Onboard society personnel and configure RBAC roles' },
-  '/app/helpers': { title: 'Helpers & Deliveries', subtitle: 'Track domestic helpers, maids, cooks, and delivery entries' },
-  '/app/sos': { title: 'Emergency SOS Command', subtitle: 'Real-time emergency SOS broadcast and response tracking' },
-  '/app/reports': { title: 'Reports & Analytics', subtitle: 'Executive society reports, financial trends, and CSV/PDF export' },
-  '/app/legal': { title: 'Terms & Compliance', subtitle: 'Privacy policies, terms of service, and 24x7 support details' },
-  '/app/profile': { title: 'Admin Profile', subtitle: 'Manage personal account details and credentials' },
-  '/app/settings': { title: 'Society Settings', subtitle: 'Configure society metadata, gates, and operational rules' },
-  
-  // Super Admin Routes
-  '/super-admin': { title: 'SaaS Platform Overview', subtitle: 'Global analytics, total societies, revenue, and active subscriptions' },
-  '/super-admin/societies': { title: 'Society Onboarding & Licensing', subtitle: 'Onboard new societies and manage subscription tiers' },
-  '/super-admin/crm': { title: 'Sales CRM & Lead Pipeline', subtitle: 'Track society onboarding leads, inquiries, and demo requests' },
-  '/super-admin/ads': { title: 'Ad Banners & Broadcast Manager', subtitle: 'Manage promotional banners and cross-society announcements' },
-  '/super-admin/profile': { title: 'Super Admin Profile', subtitle: 'System administrator credentials and security settings' },
+  '/': { title: 'Dashboard Overview', subtitle: 'Real-time society analytics & operational metrics' },
+  '/residents': { title: 'Resident Directory', subtitle: 'Manage society residents, owners, tenants and flat rosters' },
+  '/visitors': { title: 'Visitor Gate Logs', subtitle: 'Track gate entries, visitor approvals, and security passes' },
+  '/amenities': { title: 'Amenity Bookings', subtitle: 'Manage clubhouse, gym, pool, and hall reservations' },
+  '/maintenance': { title: 'Maintenance & Billing', subtitle: 'Generate monthly maintenance bills and Razorpay receipts' },
+  '/documents': { title: 'Document Repository', subtitle: 'Store society bylaws, meeting minutes, and financial reports' },
+  '/parking': { title: 'Parking Allocation', subtitle: 'Manage parking slots, resident vehicles, and visitor parking' },
+  '/complaints': { title: 'Helpdesk Complaints', subtitle: 'Track resident complaints, ticketing workflow, and staff assignment' },
+  '/notices': { title: 'Notice Board', subtitle: 'Publish community announcements and official notices' },
+  '/staff': { title: 'Staff Management', subtitle: 'Onboard society personnel and configure RBAC roles' },
+  '/helpers': { title: 'Helpers & Deliveries', subtitle: 'Track domestic helpers, maids, cooks, and delivery entries' },
+  '/sos': { title: 'Emergency SOS Command', subtitle: 'Real-time emergency SOS broadcast and response tracking' },
+  '/reports': { title: 'Reports & Analytics', subtitle: 'Executive society reports, financial trends, and CSV/PDF export' },
+  '/legal': { title: 'Terms & Compliance', subtitle: 'Privacy policies, terms of service, and 24x7 support details' },
+  '/profile': { title: 'Admin Profile', subtitle: 'Manage personal account details and credentials' },
+  '/settings': { title: 'Society Settings', subtitle: 'Configure society metadata, gates, and operational rules' },
 };
 
 export default function EnterpriseLayout({ isSuperAdmin = false }) {
@@ -80,12 +64,12 @@ export default function EnterpriseLayout({ isSuperAdmin = false }) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const currentRouteMeta = PAGE_TITLES[location.pathname] || {
-    title: isSuperAdmin ? 'Super Admin Portal' : 'Society Admin Panel',
+    title: 'Society Admin Panel',
     subtitle: 'Enterprise Management System'
   };
 
-  const navItems = isSuperAdmin ? SUPER_ADMIN_NAV : SOCIETY_ADMIN_NAV;
-  const brandTitle = isSuperAdmin ? 'HomeHni Hood' : 'HomeHni Hood';
+  const navItems = SOCIETY_ADMIN_NAV;
+  const brandTitle = 'HomeHni Hood';
 
   return (
     <div className="app-container" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', backgroundColor: 'var(--bg-color)' }}>

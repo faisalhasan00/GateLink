@@ -26,7 +26,7 @@ export default function EnterpriseSidebar({
         clearSocietyAdminSession();
       }
       await signOut(auth);
-      navigate(isSuperAdmin ? '/super-admin/login' : '/login');
+      navigate('/login');
     } catch (err) {
       console.error('Logout error:', err);
     }
