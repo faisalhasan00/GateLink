@@ -1,12 +1,72 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/constants/app_constants.dart';
 
-class PendingApprovalScreen extends StatelessWidget {
+class PendingApprovalScreen extends ConsumerStatefulWidget {
   const PendingApprovalScreen({super.key});
+
+  @override
+  ConsumerState<PendingApprovalScreen> createState() => _PendingApprovalScreenState();
+}
+
+class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
+  bool _isChecking = false;
+
+  Future<void> _checkStatus() async {
+    setState(() => _isChecking = true);
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      if (mounted) context.go(AppRoutes.login);
+      return;
+    }
+
+    try {
+      final socSnap = await FirebaseFirestore.instance.collection('societies').get();
+      for (final soc in socSnap.docs) {
+        final userDoc = await FirebaseFirestore.instance
+            .doc('societies/${soc.id}/users/${user.uid}')
+            .get();
+        if (userDoc.exists) {
+          final status = userDoc.data()?['status'] ?? 'pending_approval';
+          if (status == 'active' || status == 'approved') {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('🎉 Your account is approved! Welcome to SocietySphere.'),
+                  backgroundColor: AppColors.success,
+                ),
+              );
+              context.go(AppRoutes.dashboard);
+            }
+            return;
+          }
+        }
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Account still pending RWA Admin approval. Please check back shortly.'),
+            backgroundColor: AppColors.warning,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error checking status: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isChecking = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,23 +79,23 @@ class PendingApprovalScreen extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                width: 120,
-                height: 120,
+                width: 100,
+                height: 100,
                 decoration: const BoxDecoration(
                   color: AppColors.warningSurface,
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(
-                  Icons.hourglass_top_rounded,
-                  size: 56,
+                  Icons.shield_outlined,
+                  size: 48,
                   color: AppColors.warning,
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
               const Text(
-                'Registration Submitted!',
+                'Registration Under Verification',
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 22,
                   fontWeight: FontWeight.w700,
                   color: AppColors.textPrimary,
                 ),
@@ -43,31 +103,33 @@ class PendingApprovalScreen extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.md),
               const Text(
-                'Your registration is pending approval from the society admin. You will receive a notification once your account is activated.',
+                'Your account has been submitted to your society RWA Committee for verification. Access will be unlocked once approved.',
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 14,
                   color: AppColors.textSecondary,
-                  height: 1.6,
+                  height: 1.5,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: AppSpacing.xxl),
-              _StepItem(step: 1, title: 'Registration Submitted', subtitle: 'Just completed', isDone: true),
-              const SizedBox(height: AppSpacing.md),
-              _StepItem(step: 2, title: 'Admin Review', subtitle: 'Usually within 24 hours', isDone: false),
-              const SizedBox(height: AppSpacing.md),
-              _StepItem(step: 3, title: 'Account Activated', subtitle: 'You\'ll get a notification', isDone: false),
               const SizedBox(height: AppSpacing.xl),
+              _StepItem(step: 1, title: 'Identity & Flat Submitted', subtitle: 'Completed', isDone: true),
+              const SizedBox(height: AppSpacing.md),
+              _StepItem(step: 2, title: 'RWA Admin Verification', subtitle: 'In Progress by Committee', isDone: false),
+              const SizedBox(height: AppSpacing.md),
+              _StepItem(step: 3, title: 'Gate & App Access Activated', subtitle: 'Pending Approval', isDone: false),
+              const SizedBox(height: AppSpacing.xxl),
               SizedBox(
                 width: double.infinity,
+                height: 48,
                 child: ElevatedButton.icon(
-                  onPressed: () => context.go(AppRoutes.dashboard),
-                  icon: const Icon(Icons.arrow_forward_rounded),
-                  label: const Text('Proceed to Dashboard'),
+                  onPressed: _isChecking ? null : _checkStatus,
+                  icon: _isChecking
+                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      : const Icon(Icons.refresh_rounded),
+                  label: const Text('Check Approval Status'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppRadius.md),
                     ),
@@ -75,33 +137,16 @@ class PendingApprovalScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: AppColors.gray100,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
+              OutlinedButton(
+                onPressed: () async {
+                  await ref.read(authServiceProvider).signOut();
+                  if (context.mounted) context.go(AppRoutes.login);
+                },
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(double.infinity, 44),
+                  side: const BorderSide(color: AppColors.gray300),
                 ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.contact_support_outlined, color: AppColors.textSecondary, size: 18),
-                    const SizedBox(width: AppSpacing.sm),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Need help?',
-                            style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-                          ),
-                          Text(
-                            AppConstants.supportEmail,
-                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                child: const Text('Sign Out & Back to Login'),
               ),
             ],
           ),
@@ -128,43 +173,22 @@ class _StepItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          width: 36,
-          height: 36,
-          decoration: BoxDecoration(
-            color: isDone ? AppColors.success : AppColors.gray100,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: isDone
-                ? const Icon(Icons.check_rounded, color: Colors.white, size: 18)
-                : Text(
-                    '$step',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-          ),
+        CircleAvatar(
+          radius: 14,
+          backgroundColor: isDone ? AppColors.success : AppColors.gray200,
+          child: isDone
+              ? const Icon(Icons.check, size: 16, color: Colors.white)
+              : Text('$step', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
         ),
-        const SizedBox(width: AppSpacing.md),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isDone ? AppColors.textPrimary : AppColors.textSecondary,
-              ),
-            ),
-            Text(
-              subtitle,
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-            ),
-          ],
+        const SizedBox(width: 14),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isDone ? AppColors.textPrimary : AppColors.textSecondary)),
+              Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+            ],
+          ),
         ),
       ],
     );
