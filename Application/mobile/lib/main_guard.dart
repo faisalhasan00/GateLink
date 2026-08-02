@@ -22,7 +22,7 @@ class SocietySphereGuardApp extends ConsumerWidget {
     final router = ref.watch(guardRouterProvider);
 
     return MaterialApp.router(
-      title: 'SocietySphere Guard',
+      title: 'HomeHni Guard',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,

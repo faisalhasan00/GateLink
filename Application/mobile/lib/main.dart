@@ -98,7 +98,7 @@ class SocietySphereApp extends ConsumerWidget {
     ref.watch(visitorNotificationWatcherProvider);
 
     return MaterialApp.router(
-      title: 'SocietySphere',
+      title: 'HomeHni Residency',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

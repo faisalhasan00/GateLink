@@ -23,10 +23,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.societysphere"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
         targetSdk = 36
         versionCode = flutter.versionCode
@@ -35,8 +32,6 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -46,12 +41,12 @@ android {
         create("resident") {
             dimension = "app"
             applicationId = "com.example.societysphere"
-            resValue("string", "app_name", "SocietySphere")
+            resValue("string", "app_name", "HomeHni Residency")
         }
         create("guard") {
             dimension = "app"
             applicationId = "com.example.societysphere.guard"
-            resValue("string", "app_name", "SS Guard")
+            resValue("string", "app_name", "HomeHni Guard")
         }
     }
 }

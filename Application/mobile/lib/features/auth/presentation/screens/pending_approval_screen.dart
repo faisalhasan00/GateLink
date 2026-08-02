@@ -186,7 +186,7 @@ class _StepItem extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isDone ? AppColors.textPrimary : AppColors.textSecondary)),
-              Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textMuted)),
+              Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
             ],
           ),
         ),
