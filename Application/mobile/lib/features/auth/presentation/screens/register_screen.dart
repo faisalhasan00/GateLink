@@ -399,48 +399,70 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           const SizedBox(height: AppSpacing.md),
 
-          // Society Dynamic Database Dropdown
+          // Society Dynamic Database Dropdown / Empty state
           _buildDropdownLabel('Society (Fetched from Database)'),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(color: AppColors.gray300),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<SocietyModel>(
-                value: _selectedSocietyModel,
-                isExpanded: true,
-                hint: const Text('Select Society from Database'),
-                items: _dbSocieties.map((soc) => DropdownMenuItem(
-                  value: soc,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          _dbSocieties.isEmpty
+              ? Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.warningSurface,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: AppColors.warning),
+                  ),
+                  child: const Row(
                     children: [
-                      Text(soc.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(4),
+                      Icon(Icons.info_outline_rounded, color: AppColors.warning),
+                      SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'No societies onboarded in database yet. Onboard your society via Super Admin panel!',
+                          style: TextStyle(fontSize: 13, color: AppColors.textPrimary, fontWeight: FontWeight.w500),
                         ),
-                        child: Text(soc.code, style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
-                )).toList(),
-                onChanged: (val) {
-                  if (val != null) {
-                    setState(() {
-                      _selectedSocietyModel = val;
-                      _updateBuildingAndFlats(val);
-                    });
-                  }
-                },
-              ),
-            ),
-          ),
+                )
+              : Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: AppColors.gray300),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<SocietyModel>(
+                      value: _selectedSocietyModel,
+                      isExpanded: true,
+                      hint: const Text('Select Society from Database'),
+                      items: _dbSocieties.map((soc) => DropdownMenuItem(
+                        value: soc,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(soc.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(soc.code, style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                      )).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            _selectedSocietyModel = val;
+                            _updateBuildingAndFlats(val);
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ),
           const SizedBox(height: AppSpacing.md),
 
           // Building Block Dynamic Selector

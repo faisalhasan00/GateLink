@@ -125,39 +125,8 @@ class SocietyService {
     return flats;
   }
 
-  /// Default fallback societies seeded in Firestore for immediate initial boot if DB is empty
+  /// Return empty list when no societies exist in database
   List<SocietyModel> _getFallbackDatabaseSocieties() {
-    return [
-      SocietyModel(
-        id: 'SOC-001',
-        name: 'My Home Bhooja',
-        code: 'SOC-001',
-        country: 'India',
-        city: 'Hyderabad',
-        blocks: ['A', 'B', 'C', 'COMMON AREA', 'Common Area Vendor', 'D', 'E', 'F'],
-        totalFlats: 500,
-        floors: 14,
-      ),
-      SocietyModel(
-        id: 'SOC-002',
-        name: 'HITEC City Towers',
-        code: 'SOC-002',
-        country: 'India',
-        city: 'Hyderabad',
-        blocks: ['Block 1', 'Block 2', 'Block 3', 'COMMON AREA'],
-        totalFlats: 300,
-        floors: 12,
-      ),
-      SocietyModel(
-        id: 'SOC-003',
-        name: 'Marina Palms Residences',
-        code: 'SOC-003',
-        country: 'UAE',
-        city: 'Dubai',
-        blocks: ['Tower A', 'Tower B', 'Penthouse Suite', 'COMMON AREA'],
-        totalFlats: 400,
-        floors: 25,
-      ),
-    ];
+    return [];
   }
 }
