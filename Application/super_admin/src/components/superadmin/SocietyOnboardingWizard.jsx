@@ -374,7 +374,7 @@ export default function SocietyOnboardingWizard({ isOpen, onClose, existingSocie
                   type="text"
                   value={formData.name}
                   onChange={handleNameChange}
-                  placeholder="e.g. Greenwood Apartments"
+                  placeholder="e.g. HomeHni Residency"
                   style={{ borderColor: errors.name ? 'var(--danger)' : undefined }}
                 />
                 {errors.name && <span style={{ fontSize: '12px', color: 'var(--danger)', marginTop: '4px' }}>{errors.name}</span>}
@@ -743,7 +743,7 @@ export default function SocietyOnboardingWizard({ isOpen, onClose, existingSocie
                     type="email"
                     value={formData.email}
                     onChange={e => handleInputChange('email', e.target.value)}
-                    placeholder="admin@greenwood.com"
+                    placeholder="admin@society.com"
                     style={{ borderColor: errors.email ? 'var(--danger)' : undefined }}
                   />
                   {errors.email && <span style={{ fontSize: '12px', color: 'var(--danger)', marginTop: '4px' }}>{errors.email}</span>}

@@ -690,8 +690,8 @@ export default function Maintenance() {
               {/* Header Info */}
               <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #E2E8F0', paddingBottom: '16px', marginBottom: '20px' }}>
                 <div>
-                  <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#0F172A' }}>Greenwood Heights</h2>
-                  <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#64748B' }}>124 Palm Avenue, Bandra West, Mumbai - 400050</p>
+                  <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: '#0F172A' }}>Housing Society</h2>
+                  <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#64748B' }}>124 Palm Avenue, Hyderabad - 500081</p>
                   <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#94A3B8', fontWeight: 700 }}>SOCIETY CODE: SOC-001</p>
                 </div>
                 <div style={{ textAlign: 'right' }}>

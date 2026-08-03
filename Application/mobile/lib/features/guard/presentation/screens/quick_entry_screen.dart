@@ -183,7 +183,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
   Widget build(BuildContext context) {
     final profile = ref.watch(userProfileProvider).value;
     final user = FirebaseAuth.instance.currentUser;
-    final societyName = profile?['societyName'] ?? 'Greenwood Heights';
+    final societyName = profile?['societyName'] ?? 'Housing Society';
     final gateName = profile?['gateName'] ?? 'Gate 1 — Main Entry';
     final guardName = profile?['name'] ?? user?.displayName ?? 'Security Guard';
 

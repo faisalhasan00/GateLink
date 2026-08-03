@@ -18,7 +18,7 @@ class GuardProfileScreen extends ConsumerWidget {
     final email = profile?['email'] ?? authUser?.email ?? 'guard@societysphere.com';
     final phone = profile?['phone'] ?? '+91 98765 43210';
     final employeeId = profile?['employeeId'] ?? 'EMP-GRD-042';
-    final societyName = profile?['societyName'] ?? 'Greenwood Heights Society';
+    final societyName = profile?['societyName'] ?? 'Housing Society';
     final societyCode = profile?['societyId'] ?? 'SOC-001';
     final gateName = profile?['gateName'] ?? 'Gate 1 — Main Entry';
     final shiftTiming = profile?['shiftTiming'] ?? '08:00 AM - 08:00 PM (Day Shift)';

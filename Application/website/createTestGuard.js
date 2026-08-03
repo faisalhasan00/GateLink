@@ -14,13 +14,13 @@ const db = admin.firestore();
 const auth = admin.auth();
 
 async function createTestGuard() {
-  const email = 'guard@greenwood.com';
+  const email = 'guard@society.com';
   const password = 'password123';
   const name = 'Main Gate Guard';
 
   try {
-    console.log('1. Looking for Greenwood Society...');
-    const societyQuery = await db.collection('societies').where('code', '==', 'GW-8492').limit(1).get();
+    console.log('1. Looking for Society...');
+    const societyQuery = await db.collection('societies').where('code', '==', 'SOC-001').limit(1).get();
     if (societyQuery.empty) {
       console.log('Society not found! Run seedDatabase.js first.');
       process.exit(1);

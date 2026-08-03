@@ -124,7 +124,7 @@ export default function AdminLogin() {
               <input
                 type="email"
                 required
-                placeholder="admin@greenwood.com"
+                placeholder="admin@society.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 style={{ width: '100%', padding: '12px 12px 12px 38px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '14px', outline: 'none' }}

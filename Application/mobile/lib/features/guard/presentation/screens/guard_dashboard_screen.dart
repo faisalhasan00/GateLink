@@ -174,7 +174,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
     final profile = ref.watch(userProfileProvider).value;
     
     final guardName = profile?['name'] ?? user?.displayName ?? user?.email ?? 'Security Guard';
-    final societyName = profile?['societyName'] ?? 'Greenwood Heights';
+    final societyName = profile?['societyName'] ?? 'Housing Society';
     final gateName = profile?['gateName'] ?? 'Gate 1 — Main Entry';
 
     return visitorsAsync.when(

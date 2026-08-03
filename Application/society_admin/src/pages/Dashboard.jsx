@@ -38,12 +38,12 @@ export default function Dashboard() {
 
   // Society Metadata State
   const [society, setSociety] = useState({
-    name: 'Greenwood Heights',
+    name: 'Housing Society',
     code: 'SOC-001',
-    address: '124 Palm Avenue, Bandra West',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    pin: '400050',
+    address: '124 Palm Avenue',
+    city: 'Hyderabad',
+    state: 'Telangana',
+    pin: '500081',
     plan: 'ENTERPRISE'
   });
 

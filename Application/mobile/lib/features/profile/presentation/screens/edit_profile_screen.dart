@@ -98,7 +98,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Widget build(BuildContext context) {
     final profile = ref.watch(userProfileProvider).value;
     final phone = profile?['phone'] ?? 'No Phone';
-    final societyName = profile?['societyName'] ?? 'Greenwood Heights';
+    final societyName = profile?['societyName'] ?? 'Housing Society';
     final flatNumber = profile?['flatNumber'] ?? 'A-402';
 
     return Scaffold(

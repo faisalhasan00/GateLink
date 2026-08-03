@@ -24,10 +24,10 @@ export default function Topbar({ title, toggleSidebar }) {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setSociety({
-            name: data.name || 'Greenwood Heights',
+            name: data.name || 'Housing Society',
             code: data.code || 'SOC-001',
             plan: data.plan || 'ENTERPRISE',
-            city: data.city || 'Mumbai',
+            city: data.city || 'Hyderabad',
           });
         }
       } catch (e) {

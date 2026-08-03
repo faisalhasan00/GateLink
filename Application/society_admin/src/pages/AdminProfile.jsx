@@ -23,7 +23,7 @@ export default function AdminProfile() {
     name: 'Society Administrator',
     email: auth.currentUser?.email || 'admin@society.com',
     phone: '+91 98765 43210',
-    societyName: 'Greenwood Heights',
+    societyName: 'Housing Society',
     societyId: 'SOC-001',
     role: 'Society Administrator',
     memberSince: 'January 2025'

@@ -557,7 +557,7 @@ export default function Complaints() {
                     <div><strong>Name:</strong> {selectedComplaint.residentName || 'Resident'}</div>
                     <div><strong>Flat:</strong> Flat {selectedComplaint.flatNumber || selectedComplaint.hostFlat || 'N/A'}</div>
                     <div><strong>Mobile:</strong> {selectedComplaint.phone || 'N/A'}</div>
-                    <div><strong>Society:</strong> Greenwood Heights</div>
+                    <div><strong>Society:</strong> {selectedComplaint.societyName || 'Housing Society'}</div>
                   </div>
                 </div>
 

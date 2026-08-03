@@ -127,8 +127,7 @@ export default function AdCampaigns() {
                   style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px' }}
                 >
                   <option>All Societies</option>
-                  <option>Only Greenwood Apartments</option>
-                  <option>Only Sunrise Heights</option>
+                  <option>Specific Society Only</option>
                 </select>
               </div>
 
