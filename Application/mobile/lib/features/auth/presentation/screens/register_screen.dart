@@ -1,265 +1,696 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/router/app_router.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
-class RegisterScreen extends StatefulWidget {
+class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
   @override
-  State<RegisterScreen> createState() => _RegisterScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _RegisterScreenState extends State<RegisterScreen> {
-  final _formKey = GlobalKey<FormState>();
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+  int _currentLayer = 1;
+  bool _isLoading = false;
+  final _picker = ImagePicker();
+  File? _documentFile;
+
+  // ── Layer 1: Account Info ──
+  final _formKeyLayer1 = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
-  String? _selectedSociety;
-  String? _selectedTower;
-  String? _selectedFlat;
-  String _selectedResidentType = 'owner';
-  bool _isLoading = false;
+  final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  bool _obscurePassword = true;
 
-  // Mock data — will come from API
-  final List<String> _societies = ['Green Valley Society', 'Sunrise Heights', 'Blue Bell Apartments'];
-  final List<String> _towers = ['Tower A', 'Tower B', 'Tower C'];
-  final List<String> _flats = ['101', '102', '103', '201', '202', '301'];
+  // ── Layer 2: Location & Society ──
+  final _formKeyLayer2 = GlobalKey<FormState>();
+  String _selectedCountry = 'India';
+  String _selectedCity = 'Hyderabad';
+  String _selectedSociety = 'My Home Bhooja';
+  String _societyCode = 'SOC-001';
+  String _selectedBuilding = 'A';
+  String _selectedFlatNo = '001';
+  final _flatSearchController = TextEditingController();
+
+  final List<String> _countries = ['India', 'UAE'];
+  final Map<String, List<String>> _cityMap = {
+    'India': ['Hyderabad', 'Mumbai', 'Bengaluru', 'Delhi NCR', 'Chennai', 'Pune'],
+    'UAE': ['Dubai', 'Abu Dhabi', 'Sharjah'],
+  };
+
+  final List<String> _societies = [
+    'My Home Bhooja',
+    'HITEC City Towers',
+    'Greenwood Estate',
+    'Sunshine Heights',
+    'SOC-001'
+  ];
+
+  final List<String> _buildings = [
+    'A',
+    'B',
+    'C',
+    'COMMON AREA',
+    'Common Area Vendor',
+    'D',
+    'E',
+    'F'
+  ];
+
+  final List<String> _flats = [
+    '001', '101', '201', '301', '401', '501', '601', '701',
+    '801', '901', '1001', '1101', '1201', '1301', '1401'
+  ];
+
+  // ── Layer 3: Residency, Occupancy & Proof ──
+  String _selectedYouAre = 'Flat Owner'; // 'Flat Owner', 'Renting with family', 'Renting with other flatmates'
+  String _selectedOccupancy = 'Currently residing'; // 'Currently residing', 'Flat is let out', 'Flat is empty'
+  String _documentType = 'Rent Agreement / Electricity Bill';
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    _flatSearchController.dispose();
     super.dispose();
   }
 
-  Future<void> _submitRegistration() async {
-    if (!_formKey.currentState!.validate()) return;
-    if (_selectedSociety == null || _selectedTower == null || _selectedFlat == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select your society, tower, and flat')),
-      );
-      return;
+  Future<void> _pickDocument() async {
+    final picked = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 75);
+    if (picked != null) {
+      setState(() {
+        _documentFile = File(picked.path);
+      });
     }
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+    );
+  }
+
+  Future<void> _submitRegistration() async {
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isLoading = false);
-    if (!mounted) return;
-    context.go(AppRoutes.pendingApproval);
+    try {
+      await ref.read(authServiceProvider).registerWithEmail(
+        email: _emailController.text,
+        password: _passwordController.text,
+        name: _nameController.text,
+        phone: _phoneController.text,
+        country: _selectedCountry,
+        city: _selectedCity,
+        societyCode: _societyCode,
+        buildingBlock: _selectedBuilding,
+        flatNumber: _selectedFlatNo,
+        role: 'resident',
+        residentRoleType: _selectedYouAre,
+        occupancyStatus: _selectedOccupancy,
+        documentProofUrl: _documentFile?.path,
+        documentType: _documentType,
+      );
+
+      if (mounted) {
+        context.go('/pending-approval');
+      }
+    } catch (e) {
+      _showError(e.toString().replaceAll('Exception: ', ''));
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Complete Registration'),
+        title: Text(_currentLayer == 1 ? 'Add Home' : _currentLayer == 2 ? 'Select Home' : 'Residency Proof'),
         leading: IconButton(
-          onPressed: () => context.pop(),
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () {
+            if (_currentLayer > 1) {
+              setState(() => _currentLayer--);
+            } else {
+              context.pop();
+            }
+          },
         ),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.pagePadding),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const _SectionHeader(title: 'Personal Information'),
-                const SizedBox(height: AppSpacing.md),
-                _LabeledField(
-                  label: 'Full Name',
-                  child: TextFormField(
-                    controller: _nameController,
-                    decoration: const InputDecoration(hintText: 'Enter your full name'),
-                    validator: (v) => v == null || v.isEmpty ? 'Name is required' : null,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _LabeledField(
-                  label: 'Email (Optional)',
-                  child: TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: const InputDecoration(hintText: 'your@email.com'),
-                    validator: (v) {
-                      if (v == null || v.isEmpty) return null;
-                      if (!v.contains('@')) return 'Enter a valid email';
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _LabeledField(
-                  label: 'Resident Type',
-                  child: Row(
-                    children: [
-                      _ResidentTypeChip(
-                        label: 'Owner',
-                        icon: Icons.home_rounded,
-                        isSelected: _selectedResidentType == 'owner',
-                        onTap: () => setState(() => _selectedResidentType = 'owner'),
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      _ResidentTypeChip(
-                        label: 'Tenant',
-                        icon: Icons.person_rounded,
-                        isSelected: _selectedResidentType == 'tenant',
-                        onTap: () => setState(() => _selectedResidentType = 'tenant'),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                const _SectionHeader(title: 'Society & Flat Details'),
-                const SizedBox(height: AppSpacing.md),
-                _LabeledField(
-                  label: 'Society',
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedSociety,
-                    decoration: const InputDecoration(hintText: 'Select your society'),
-                    items: _societies.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
-                    onChanged: (v) => setState(() { _selectedSociety = v; _selectedTower = null; _selectedFlat = null; }),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _LabeledField(
-                  label: 'Tower / Block',
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedTower,
-                    decoration: const InputDecoration(hintText: 'Select your tower'),
-                    items: _towers.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
-                    onChanged: (v) => setState(() { _selectedTower = v; _selectedFlat = null; }),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-                _LabeledField(
-                  label: 'Flat Number',
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedFlat,
-                    decoration: const InputDecoration(hintText: 'Select your flat'),
-                    items: _flats.map((s) => DropdownMenuItem(value: s, child: Text('Flat $s'))).toList(),
-                    onChanged: (v) => setState(() => _selectedFlat = v),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: AppColors.infoSurface,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                    border: Border.all(color: AppColors.info.withOpacity(0.3)),
-                  ),
-                  child: const Row(
-                    children: [
-                      Icon(Icons.info_outline_rounded, color: AppColors.info, size: 18),
-                      SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: Text(
-                          'Your registration will be reviewed by the society admin. You\'ll be notified once approved.',
-                          style: TextStyle(fontSize: 13, color: AppColors.info, height: 1.5),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _submitRegistration,
-                  child: _isLoading
-                      ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text('Submit Registration'),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  const _SectionHeader({required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      title,
-      style: const TextStyle(
-        fontSize: 16,
-        fontWeight: FontWeight.w600,
-        color: AppColors.textPrimary,
-      ),
-    );
-  }
-}
-
-class _LabeledField extends StatelessWidget {
-  final String label;
-  final Widget child;
-  const _LabeledField({required this.label, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-        const SizedBox(height: 6),
-        child,
-      ],
-    );
-  }
-}
-
-class _ResidentTypeChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _ResidentTypeChip({
-    required this.label,
-    required this.icon,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primarySurface : AppColors.gray100,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.border,
-            width: isSelected ? 1.5 : 1,
-          ),
-        ),
-        child: Row(
+        child: Column(
           children: [
-            Icon(icon, size: 16, color: isSelected ? AppColors.primary : AppColors.textSecondary),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+            // Progress Layer Stepper Bar
+            _buildLayerProgressHeader(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(AppSpacing.pagePadding),
+                child: _currentLayer == 1
+                    ? _buildLayer1AccountInfo()
+                    : _currentLayer == 2
+                        ? _buildLayer2LocationSociety()
+                        : _buildLayer3ResidencyProof(),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  // ── Layer Progress Header Bar ──
+  Widget _buildLayerProgressHeader() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('Step $_currentLayer of 3', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.primary)),
+              Text(_currentLayer == 1 ? 'Personal Info' : _currentLayer == 2 ? 'Location & Flat' : 'Verification Proof', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: List.generate(3, (index) {
+              final stepNum = index + 1;
+              return Expanded(
+                child: Container(
+                  height: 4,
+                  margin: EdgeInsets.only(right: index < 2 ? 6 : 0),
+                  decoration: BoxDecoration(
+                    color: stepNum <= _currentLayer ? AppColors.primary : AppColors.gray200,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              );
+            }),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Layer 1: Personal Info & Contact ──
+  Widget _buildLayer1AccountInfo() {
+    return Form(
+      key: _formKeyLayer1,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Create Account', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+          const SizedBox(height: 4),
+          const Text('Enter your details to get started with SocietySphere', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+          const SizedBox(height: AppSpacing.xl),
+
+          // Full Name
+          _buildTextField(
+            label: 'Full Name',
+            controller: _nameController,
+            hint: 'e.g. Faisal Hasan',
+            icon: Icons.person_outline_rounded,
+            validator: (v) => v == null || v.isEmpty ? 'Full name is required' : null,
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Email
+          _buildTextField(
+            label: 'Email Address',
+            controller: _emailController,
+            hint: 'name@example.com',
+            keyboardType: TextInputType.emailAddress,
+            icon: Icons.email_outlined,
+            validator: (v) {
+              if (v == null || v.isEmpty) return 'Email is required';
+              if (!v.contains('@')) return 'Enter a valid email address';
+              return null;
+            },
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Phone Number
+          _buildTextField(
+            label: 'Mobile Number',
+            controller: _phoneController,
+            hint: '+91 99999 99999',
+            keyboardType: TextInputType.phone,
+            icon: Icons.phone_outlined,
+            validator: (v) => v == null || v.isEmpty ? 'Phone number is required' : null,
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Password
+          _buildPasswordField('Password', _passwordController, _obscurePassword, () {
+            setState(() => _obscurePassword = !_obscurePassword);
+          }),
+          const SizedBox(height: AppSpacing.md),
+
+          // Confirm Password
+          _buildPasswordField('Confirm Password', _confirmPasswordController, _obscurePassword, () {
+            setState(() => _obscurePassword = !_obscurePassword);
+          }, validator: (v) {
+            if (v != _passwordController.text) return 'Passwords do not match';
+            return null;
+          }),
+
+          const SizedBox(height: AppSpacing.xxl),
+
+          // Next Button
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: () {
+                if (_formKeyLayer1.currentState!.validate()) {
+                  setState(() => _currentLayer = 2);
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+              ),
+              child: const Text('Next: Select Location & Society ➔', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Layer 2: Country, City, Society, Building & Flat Selection ──
+  Widget _buildLayer2LocationSociety() {
+    final availableCities = _cityMap[_selectedCountry] ?? ['Hyderabad'];
+    final filteredFlats = _flats.where((f) {
+      if (_flatSearchController.text.isEmpty) return true;
+      return f.contains(_flatSearchController.text);
+    }).toList();
+
+    return Form(
+      key: _formKeyLayer2,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Select Your Home', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+          const SizedBox(height: 4),
+          const Text('Locate your society, block, and flat unit number', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+          const SizedBox(height: AppSpacing.xl),
+
+          // Country Dropdown
+          _buildDropdownLabel('Country'),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: AppColors.gray300),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _selectedCountry,
+                isExpanded: true,
+                items: _countries.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                onChanged: (val) {
+                  if (val != null) {
+                    setState(() {
+                      _selectedCountry = val;
+                      _selectedCity = _cityMap[val]!.first;
+                    });
+                  }
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // City Dropdown
+          _buildDropdownLabel('City'),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: AppColors.gray300),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _selectedCity,
+                isExpanded: true,
+                items: availableCities.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                onChanged: (val) {
+                  if (val != null) setState(() => _selectedCity = val);
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Society Dropdown / Input
+          _buildDropdownLabel('Society'),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: AppColors.gray300),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                value: _societies.contains(_selectedSociety) ? _selectedSociety : _societies.first,
+                isExpanded: true,
+                items: _societies.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                onChanged: (val) {
+                  if (val != null) setState(() => _selectedSociety = val);
+                },
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Building Block Selector
+          _buildDropdownLabel('SELECT BUILDING / BLOCK'),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: AppColors.gray300),
+            ),
+            child: Column(
+              children: _buildings.map((b) {
+                final isSelected = _selectedBuilding == b;
+                return ListTile(
+                  dense: true,
+                  leading: Icon(Icons.apartment_rounded, color: isSelected ? AppColors.primary : AppColors.textSecondary),
+                  title: Text(b, style: TextStyle(fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500, color: isSelected ? AppColors.primary : AppColors.textPrimary)),
+                  trailing: Icon(isSelected ? Icons.check_circle_rounded : Icons.chevron_right_rounded, color: isSelected ? AppColors.primary : AppColors.gray400),
+                  onTap: () => setState(() => _selectedBuilding = b),
+                );
+              }).toList(),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Flat Search & Selection
+          _buildDropdownLabel('Flat No.'),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: Border.all(color: AppColors.gray300),
+            ),
+            padding: const EdgeInsets.all(8),
+            child: Column(
+              children: [
+                TextFormField(
+                  controller: _flatSearchController,
+                  decoration: const InputDecoration(
+                    hintText: 'Enter Flat to Search (e.g. 001, 101)',
+                    prefixIcon: Icon(Icons.search_rounded),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                  onChanged: (_) => setState(() {}),
+                ),
+                const Divider(),
+                SizedBox(
+                  height: 180,
+                  child: ListView.builder(
+                    itemCount: filteredFlats.length,
+                    itemBuilder: (ctx, i) {
+                      final f = filteredFlats[i];
+                      final isSelected = _selectedFlatNo == f;
+                      return ListTile(
+                        dense: true,
+                        leading: Icon(Icons.home_outlined, color: isSelected ? AppColors.primary : AppColors.textSecondary),
+                        title: Text(f, style: TextStyle(fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500, color: isSelected ? AppColors.primary : AppColors.textPrimary)),
+                        trailing: Icon(isSelected ? Icons.check_circle_rounded : Icons.chevron_right_rounded, color: isSelected ? AppColors.primary : AppColors.gray400),
+                        onTap: () => setState(() => _selectedFlatNo = f),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: AppSpacing.xxl),
+
+          // Next Button
+          SizedBox(
+            width: double.infinity,
+            height: 52,
+            child: ElevatedButton(
+              onPressed: () => setState(() => _currentLayer = 3),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+              ),
+              child: const Text('Next: Residency & Proof ➔', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Layer 3: Occupancy Status, Resident Type & Document Verification Proof ──
+  Widget _buildLayer3ResidencyProof() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Residency & Verification', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+        const SizedBox(height: 4),
+        const Text('Specify occupancy status and upload document proof for RWA review', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+        const SizedBox(height: AppSpacing.xl),
+
+        // Selected Flat Summary Box
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.home_work_rounded, color: AppColors.primary, size: 36),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('$_selectedSociety (${_selectedBuilding}-$_selectedFlatNo)', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.textPrimary)),
+                    Text('$_selectedCity, $_selectedCountry', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+
+        // You Are (Ownership & Family Status)
+        _buildDropdownLabel('You are'),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(color: AppColors.gray300),
+          ),
+          child: Column(
+            children: [
+              _buildRadioOption('Flat Owner', _selectedYouAre, (val) => setState(() => _selectedYouAre = val)),
+              const Divider(height: 1),
+              _buildRadioOption('Renting with family', _selectedYouAre, (val) => setState(() => _selectedYouAre = val)),
+              const Divider(height: 1),
+              _buildRadioOption('Renting with other flatmates', _selectedYouAre, (val) => setState(() => _selectedYouAre = val)),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+
+        // Occupancy Status
+        _buildDropdownLabel('Occupancy Status'),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(color: AppColors.gray300),
+          ),
+          child: Column(
+            children: [
+              _buildRadioOption('Currently residing', _selectedOccupancy, (val) => setState(() => _selectedOccupancy = val)),
+              const Divider(height: 1),
+              _buildRadioOption('Flat is let out', _selectedOccupancy, (val) => setState(() => _selectedOccupancy = val)),
+              const Divider(height: 1),
+              _buildRadioOption('Flat is empty', _selectedOccupancy, (val) => setState(() => _selectedOccupancy = val)),
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xl),
+
+        // Document Upload Box
+        _buildDropdownLabel('Upload Document Proof for RWA Review'),
+        GestureDetector(
+          onTap: _pickDocument,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              border: Border.all(color: _documentFile != null ? AppColors.success : AppColors.gray300, width: 1.5),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  _documentFile != null ? Icons.check_circle_rounded : Icons.cloud_upload_outlined,
+                  color: _documentFile != null ? AppColors.success : AppColors.primary,
+                  size: 32,
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _documentFile != null ? 'Document Selected' : 'Upload Proof (Rent Agreement / Utility Bill)',
+                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: _documentFile != null ? AppColors.success : AppColors.textPrimary),
+                      ),
+                      Text(
+                        _documentFile != null ? _documentFile!.path.split('/').last : 'Tap to attach address proof for RWA Admin review',
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.add_photo_alternate_outlined, color: AppColors.primary),
+              ],
+            ),
+          ),
+        ),
+
+        const SizedBox(height: AppSpacing.xxl),
+
+        // Final Submit Button
+        SizedBox(
+          width: double.infinity,
+          height: 54,
+          child: ElevatedButton(
+            onPressed: _isLoading ? null : _submitRegistration,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+            ),
+            child: _isLoading
+                ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                : const Text('Add Flat/Villa & Submit ➔', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Helper UI Widgets ──
+  Widget _buildDropdownLabel(String label) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+    );
+  }
+
+  Widget _buildRadioOption(String value, String groupValue, ValueChanged<String> onChanged) {
+    final isSelected = value == groupValue;
+    return InkWell(
+      onTap: () => onChanged(value),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Row(
+          children: [
+            Icon(
+              isSelected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+              color: isSelected ? AppColors.primary : AppColors.gray400,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(value, style: TextStyle(fontSize: 15, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400, color: AppColors.textPrimary)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    required String hint,
+    required IconData icon,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: controller,
+          keyboardType: keyboardType,
+          decoration: InputDecoration(
+            hintText: hint,
+            prefixIcon: Icon(icon, color: AppColors.textSecondary),
+            fillColor: Colors.white,
+            filled: true,
+          ),
+          validator: validator,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPasswordField(
+    String label,
+    TextEditingController controller,
+    bool obscure,
+    VoidCallback onToggle, {
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: controller,
+          obscureText: obscure,
+          decoration: InputDecoration(
+            hintText: 'Enter password',
+            prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.textSecondary),
+            fillColor: Colors.white,
+            filled: true,
+            suffixIcon: IconButton(
+              icon: Icon(obscure ? Icons.visibility_off_rounded : Icons.visibility_rounded),
+              onPressed: onToggle,
+            ),
+          ),
+          validator: validator ?? (v) {
+            if (v == null || v.isEmpty) return 'Password is required';
+            if (v.length < 6) return 'Password must be at least 6 characters';
+            return null;
+          },
+        ),
+      ],
     );
   }
 }

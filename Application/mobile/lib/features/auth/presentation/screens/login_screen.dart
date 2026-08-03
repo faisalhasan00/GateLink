@@ -157,39 +157,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
 
-                if (!_isRegisterMode) ...[
-                  const SizedBox(height: AppSpacing.lg),
-                  Row(children: [
-                    const Expanded(child: Divider()),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text('or', style: TextStyle(color: AppColors.textSecondary)),
-                    ),
-                    const Expanded(child: Divider()),
-                  ]),
-                  const SizedBox(height: AppSpacing.lg),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: OutlinedButton.icon(
-                      onPressed: _isLoading ? null : _handleGoogleSignIn,
-                      icon: const Icon(Icons.g_mobiledata, size: 28),
-                      label: const Text('Continue with Google', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-                        side: const BorderSide(color: AppColors.gray200),
-                      ),
-                    ),
-                  ),
-                ],
-
                 const SizedBox(height: AppSpacing.xl),
                 Center(
                   child: TextButton(
-                    onPressed: () => setState(() => _isRegisterMode = !_isRegisterMode),
-                    child: Text(
-                      _isRegisterMode ? 'Already have an account? Sign In' : 'New resident? Register here',
-                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600),
+                    onPressed: () => context.push('/register'),
+                    child: const Text(
+                      'New resident? Register & Add Home',
+                      style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 15),
                     ),
                   ),
                 ),

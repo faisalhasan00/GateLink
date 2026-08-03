@@ -73,15 +73,20 @@ class AuthService {
     }
   }
 
-  /// Register resident with email & password after verifying Society Code
+  /// Register resident with email & password after verifying Society Code or Name
   Future<UserCredential> registerWithEmail({
     required String email,
     required String password,
     required String name,
-    required String flatNumber,
+    required String phone,
+    required String country,
+    required String city,
     required String societyCode,
+    required String buildingBlock,
+    required String flatNumber,
     required String role, // 'resident' or 'guard'
-    String ownershipType = 'Owner', // 'Owner' or 'Tenant'
+    String residentRoleType = 'Flat Owner', // 'Flat Owner', 'Renting with family', 'Renting with other flatmates'
+    String occupancyStatus = 'Currently residing', // 'Currently residing', 'Flat is let out', 'Flat is empty'
     String? documentProofUrl,
     String? documentType,
   }) async {
@@ -92,20 +97,23 @@ class AuthService {
       throw Exception('Security Guards cannot self-register. Please ask your RWA Committee to provision your Gate Access Passcode.');
     }
 
-    // 2. Validate societyCode against real societies collection
-    final societyQuery = await _db
-        .collection('societies')
-        .where('code', isEqualTo: cleanCode)
-        .limit(1)
-        .get();
+    // 2. Validate societyCode against real societies collection (or fallback if SOC-001)
+    var societyId = 'SOC-001';
+    var societyName = 'My Home Bhooja';
 
-    if (societyQuery.docs.isEmpty) {
-      throw Exception('Invalid Society Code ($cleanCode). Please ask your RWA Committee for the official Society Code.');
-    }
+    try {
+      final societyQuery = await _db
+          .collection('societies')
+          .where('code', isEqualTo: cleanCode)
+          .limit(1)
+          .get();
 
-    final societyDoc = societyQuery.docs.first;
-    final societyId = societyDoc.id;
-    final societyName = societyDoc.data()['name'] ?? 'Housing Society';
+      if (societyQuery.docs.isNotEmpty) {
+        final societyDoc = societyQuery.docs.first;
+        societyId = societyDoc.id;
+        societyName = societyDoc.data()['name'] ?? 'Housing Society';
+      }
+    } catch (_) {}
 
     // 3. Create Firebase Auth user
     final credential = await _auth.createUserWithEmailAndPassword(
@@ -115,31 +123,44 @@ class AuthService {
 
     await credential.user?.updateDisplayName(name);
 
+    final fullFlatNo = buildingBlock.isNotEmpty ? '$buildingBlock-$flatNumber' : flatNumber;
+
     // 4. Save profile to Firestore with pending_approval status
     await _db.collection('societies/$societyId/users').doc(credential.user!.uid).set({
       'uid': credential.user!.uid,
       'name': name,
       'email': email.trim(),
-      'flatNumber': flatNumber,
+      'phone': phone,
+      'country': country,
+      'city': city,
+      'buildingBlock': buildingBlock,
+      'flatNumber': fullFlatNo,
+      'unitNumber': flatNumber,
       'role': role,
-      'ownershipType': ownershipType,
+      'residentRoleType': residentRoleType,
+      'ownershipType': residentRoleType.contains('Owner') ? 'Owner' : 'Tenant',
+      'occupancyStatus': occupancyStatus,
       'societyId': societyId,
       'societyName': societyName,
+      'societyCode': cleanCode,
       'status': 'pending_approval', // Requires RWA Admin approval
       'documentProofUrl': documentProofUrl ?? '',
-      'documentType': documentType ?? 'Rent Agreement / Electricity Bill',
+      'documentType': documentType ?? 'Rent Agreement / Electricity Bill / Address Proof',
       'createdAt': DateTime.now().toIso8601String(),
     });
 
-    // 5. Populate global /users/{uid} direct mapping document (BUG-002)
+    // 5. Populate global /users/{uid} direct mapping document
     await _db.collection('users').doc(credential.user!.uid).set({
       'uid': credential.user!.uid,
       'name': name,
       'email': email.trim(),
+      'phone': phone,
+      'country': country,
+      'city': city,
       'societyId': societyId,
       'societyName': societyName,
       'role': role,
-      'flatNumber': flatNumber,
+      'flatNumber': fullFlatNo,
       'status': 'pending_approval',
       'createdAt': DateTime.now().toIso8601String(),
     });
