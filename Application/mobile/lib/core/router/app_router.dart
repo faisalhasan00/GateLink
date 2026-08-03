@@ -82,6 +82,7 @@ class AppRoutes {
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authStateProvider);
+  final userProfile = ref.watch(userProfileProvider).value;
 
   return GoRouter(
     initialLocation: AppRoutes.splash,
@@ -98,15 +99,29 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isPendingRoute = state.uri.path == AppRoutes.pendingApproval;
 
       if (isSplash) {
-        return isAuth ? AppRoutes.dashboard : AppRoutes.onboarding;
+        if (!isAuth) return AppRoutes.onboarding;
+        final status = userProfile?['status'];
+        if (status == 'active' || status == 'approved') {
+          return AppRoutes.dashboard;
+        }
+        return AppRoutes.pendingApproval;
       }
 
       if (!isAuth && !isLoggingIn) {
         return AppRoutes.login;
       }
 
-      if (isAuth && isLoggingIn) {
-        return AppRoutes.dashboard;
+      if (isAuth) {
+        final status = userProfile?['status'] ?? 'pending_approval';
+        final isApproved = status == 'active' || status == 'approved';
+
+        if (!isApproved && !isPendingRoute) {
+          return AppRoutes.pendingApproval;
+        }
+
+        if (isApproved && (isLoggingIn || isPendingRoute)) {
+          return AppRoutes.dashboard;
+        }
       }
 
       return null;

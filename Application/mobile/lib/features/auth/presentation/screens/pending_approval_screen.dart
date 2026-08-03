@@ -36,6 +36,7 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
         if (userDoc.exists) {
           final status = userDoc.data()?['status'] ?? 'pending_approval';
           if (status == 'active' || status == 'approved') {
+            ref.invalidate(userProfileProvider);
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
