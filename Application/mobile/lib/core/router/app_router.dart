@@ -95,6 +95,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                           state.uri.path == AppRoutes.register ||
                           state.uri.path == AppRoutes.onboarding;
 
+      final isPendingRoute = state.uri.path == AppRoutes.pendingApproval;
+
       if (isSplash) {
         return isAuth ? AppRoutes.dashboard : AppRoutes.onboarding;
       }

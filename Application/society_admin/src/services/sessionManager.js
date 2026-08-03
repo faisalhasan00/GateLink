@@ -23,6 +23,7 @@ export const setSocietyAdminSession = (sessionData) => {
     const payload = {
       email: sessionData.email || 'admin@society.com',
       role: 'society_admin',
+      societyId: sessionData.societyId || 'SOC-001',
       token: sessionData.token || `soc_${Date.now()}`,
       updatedAt: Date.now()
     };

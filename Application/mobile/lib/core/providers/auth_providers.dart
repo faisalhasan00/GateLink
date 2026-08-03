@@ -21,21 +21,28 @@ final currentUserProvider = Provider<User?>((ref) {
 
 // ── USER PROFILE PROVIDER ─────────────────────────────────────────────────────
 
-/// Fetches the user profile from Firestore using a collection group query.
+/// Fetches the user profile from Firestore across societies.
 final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
   final user = ref.watch(currentUserProvider);
   if (user == null) return null;
 
-  // Temporarily check 'SOC-001' society first to bypass collectionGroup index requirement
   try {
-    final doc = await FirebaseFirestore.instance
-        .doc('societies/SOC-001/users/${user.uid}')
-        .get();
-    if (doc.exists) {
-      return doc.data();
+    final socSnap = await FirebaseFirestore.instance.collection('societies').get();
+    for (final soc in socSnap.docs) {
+      final doc = await FirebaseFirestore.instance
+          .doc('societies/${soc.id}/users/${user.uid}')
+          .get();
+      if (doc.exists) {
+        return doc.data();
+      }
     }
   } catch (_) {}
 
-  // If user doc doesn't exist, we don't mock. They must register properly.
   return null;
+});
+
+/// Convenience provider for user account status ('active', 'pending_approval', 'suspended', 'rejected')
+final userStatusProvider = FutureProvider<String?>((ref) async {
+  final profile = await ref.watch(userProfileProvider.future);
+  return profile?['status'] as String?;
 });

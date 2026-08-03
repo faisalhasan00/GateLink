@@ -45,12 +45,14 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
     const fetchSociety = async () => {
       if (isSuperAdmin) return;
       try {
-        const docRef = doc(db, 'societies', 'SOC-001');
+        const session = getSocietyAdminSession();
+        const activeSocId = session?.societyId || 'SOC-001';
+        const docRef = doc(db, 'societies', activeSocId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
           setSocietyInfo({
-            code: data.code || 'SOC-001',
+            code: data.code || activeSocId,
             plan: data.plan || 'ENTERPRISE',
           });
         }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, CheckCircle, XCircle, ShieldCheck, ShieldAlert, FileText, UserCheck, Phone, Mail } from 'lucide-react';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getSocietyAdminSession } from '../services/sessionManager';
 
 export default function Residents() {
   const [residents, setResidents] = useState([]);
@@ -10,19 +11,22 @@ export default function Residents() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', flatNumber: '', phone: '', email: '', password: '', role: 'resident', ownershipType: 'Owner' });
 
+  const session = getSocietyAdminSession();
+  const societyId = session?.societyId || 'SOC-001';
+
   useEffect(() => {
-    const q = query(collection(db, 'societies/SOC-001/users'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, `societies/${societyId}/users`), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setResidents(data);
       setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [societyId]);
 
   const handleApprove = async (userId) => {
     try {
-      await updateDoc(doc(db, `societies/SOC-001/users`, userId), { status: 'active' });
+      await updateDoc(doc(db, `societies/${societyId}/users`, userId), { status: 'active' });
     } catch (e) {
       alert("Error approving resident: " + e.message);
     }
@@ -31,7 +35,7 @@ export default function Residents() {
   const handleReject = async (userId) => {
     if (window.confirm("Are you sure you want to decline this resident registration?")) {
       try {
-        await updateDoc(doc(db, `societies/SOC-001/users`, userId), { status: 'rejected' });
+        await updateDoc(doc(db, `societies/${societyId}/users`, userId), { status: 'rejected' });
       } catch (e) {
         alert("Error declining resident: " + e.message);
       }
@@ -40,18 +44,18 @@ export default function Residents() {
 
   const toggleStatus = async (userId, currentStatus) => {
     const newStatus = currentStatus === 'active' || currentStatus === 'approved' ? 'suspended' : 'active';
-    await updateDoc(doc(db, `societies/SOC-001/users`, userId), { status: newStatus });
+    await updateDoc(doc(db, `societies/${societyId}/users`, userId), { status: newStatus });
   };
 
   const handleAddResident = async (e) => {
     e.preventDefault();
     try {
       const newId = `manual_${Date.now()}`;
-      await setDoc(doc(db, 'societies/SOC-001/users', newId), {
+      await setDoc(doc(db, `societies/${societyId}/users`, newId), {
         uid: newId,
         ...formData,
         status: 'active',
-        societyId: 'SOC-001',
+        societyId: societyId,
         createdAt: new Date().toISOString()
       });
       setIsModalOpen(false);
@@ -73,7 +77,7 @@ export default function Residents() {
         <div>
           <h2 style={{ fontSize: '24px', fontWeight: 900, margin: 0, color: 'var(--text-primary)' }}>Resident Directory & Access Control</h2>
           <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0', fontSize: '14px' }}>
-            Approve new self-registered residents, manage flat rosters, and control access permissions.
+            Approve new self-registered residents, manage flat rosters, and control access permissions. (Society ID: <code>{societyId}</code>)
           </p>
         </div>
 

@@ -33,7 +33,17 @@ export default function AdminLogin() {
     try {
       // 1. Attempt standard login
       const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
-      setSocietyAdminSession({ email: cleanEmail, token: res.user?.uid });
+      
+      let socId = 'SOC-001';
+      try {
+        const qSoc = query(collection(db, 'societies'), where('adminEmail', '==', cleanEmail));
+        const snapSoc = await getDocs(qSoc);
+        if (!snapSoc.empty) {
+          socId = snapSoc.docs[0].id;
+        }
+      } catch (_) {}
+
+      setSocietyAdminSession({ email: cleanEmail, token: res.user?.uid, societyId: socId });
       navigate('/');
     } catch (err) {
       // 2. If Auth account doesn't exist yet, check if society was onboarded with these credentials
@@ -42,11 +52,12 @@ export default function AdminLogin() {
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
-          const socData = snapshot.docs[0].data();
+          const socDoc = snapshot.docs[0];
+          const socData = socDoc.data();
           if (socData.tempPassword === password || password.length >= 6) {
             // Auto-register in Firebase Auth
             const newRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
-            setSocietyAdminSession({ email: cleanEmail, token: newRes.user?.uid });
+            setSocietyAdminSession({ email: cleanEmail, token: newRes.user?.uid, societyId: socDoc.id });
             navigate('/');
             return;
           }
