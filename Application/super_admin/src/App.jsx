@@ -18,9 +18,9 @@ const SuperAdminProfile = lazy(() => import('./pages/superadmin/SuperAdminProfil
 const SuperAdminLogin = lazy(() => import('./pages/superadmin/SuperAdminLogin'))
 
 function ProtectedSuperRoute({ user, children }) {
-  const superSession = getSuperAdminSession();
-  const isFirebaseSuperUser = user && user.email?.toLowerCase() === 'mohammedfaisalhasan@gmail.com';
-  if (!superSession && !isFirebaseSuperUser) {
+  if (user === undefined) return <SkeletonLoader />;
+  const isSuperUser = user && user.email?.toLowerCase() === 'mohammedfaisalhasan@gmail.com';
+  if (!isSuperUser) {
     return <Navigate to="/login" replace />;
   }
   return children;

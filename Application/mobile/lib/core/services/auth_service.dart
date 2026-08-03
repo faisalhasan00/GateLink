@@ -37,13 +37,6 @@ class AuthService {
             final docData = query.docs.first.data();
             final oldDocId = query.docs.first.id;
 
-            // Enforce temp password if set by admin
-            if (docData.containsKey('password') && docData['password'].toString().isNotEmpty) {
-              if (docData['password'] != cleanPass) {
-                throw Exception('Invalid password. Please use the initial passcode assigned by your RWA Admin.');
-              }
-            }
-
             // Auto-create Auth account for pre-added resident/staff
             final cred = await _auth.createUserWithEmailAndPassword(
               email: cleanEmail,
@@ -53,8 +46,21 @@ class AuthService {
             if (cred.user != null) {
               final updatedData = Map<String, dynamic>.from(docData);
               updatedData['uid'] = cred.user!.uid;
+              // Remove legacy plaintext password field
+              updatedData.remove('password');
               
               await _db.doc('societies/${socDoc.id}/users/${cred.user!.uid}').set(updatedData);
+              
+              // Also populate direct /users/{uid} index mapping
+              await _db.doc('users/${cred.user!.uid}').set({
+                'uid': cred.user!.uid,
+                'email': cleanEmail,
+                'societyId': socDoc.id,
+                'role': updatedData['role'] ?? 'resident',
+                'flatNumber': updatedData['flatNumber'] ?? '',
+                'createdAt': DateTime.now().toIso8601String(),
+              }, SetOptions(merge: true));
+
               if (oldDocId != cred.user!.uid) {
                 await _db.doc('societies/${socDoc.id}/users/$oldDocId').delete();
               }
@@ -125,6 +131,19 @@ class AuthService {
       'createdAt': DateTime.now().toIso8601String(),
     });
 
+    // 5. Populate global /users/{uid} direct mapping document (BUG-002)
+    await _db.collection('users').doc(credential.user!.uid).set({
+      'uid': credential.user!.uid,
+      'name': name,
+      'email': email.trim(),
+      'societyId': societyId,
+      'societyName': societyName,
+      'role': role,
+      'flatNumber': flatNumber,
+      'status': 'pending_approval',
+      'createdAt': DateTime.now().toIso8601String(),
+    });
+
     return credential;
   }
 
@@ -140,7 +159,17 @@ class AuthService {
       idToken: googleAuth.idToken,
     );
 
-    return await _auth.signInWithCredential(credential);
+    final userCred = await _auth.signInWithCredential(credential);
+    if (userCred.user != null) {
+      // Ensure global mapping exists
+      await _db.collection('users').doc(userCred.user!.uid).set({
+        'uid': userCred.user!.uid,
+        'email': userCred.user!.email ?? '',
+        'name': userCred.user!.displayName ?? '',
+        'updatedAt': DateTime.now().toIso8601String(),
+      }, SetOptions(merge: true));
+    }
+    return userCred;
   }
 
   // ── SIGN OUT ─────────────────────────────────────────────────────────────────

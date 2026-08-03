@@ -19,22 +19,40 @@ final currentUserProvider = Provider<User?>((ref) {
   return ref.watch(authStateProvider).value;
 });
 
-// ── USER PROFILE PROVIDER ─────────────────────────────────────────────────────
+// ── USER PROFILE PROVIDER (BUG-02 OPTIMIZED DIRECT LOOKUP) ───────────────────────
 
-/// Fetches the user profile from Firestore across societies.
+/// Directly fetches the user profile using the global /users/{uid} index mapping,
+/// with fallback to direct society document read if known.
 final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
   final user = ref.watch(currentUserProvider);
   if (user == null) return null;
 
   try {
-    final socSnap = await FirebaseFirestore.instance.collection('societies').get();
-    for (final soc in socSnap.docs) {
-      final doc = await FirebaseFirestore.instance
-          .doc('societies/${soc.id}/users/${user.uid}')
-          .get();
-      if (doc.exists) {
-        return doc.data();
+    // 1. Direct O(1) read from global user membership mapping
+    final rootDoc = await FirebaseFirestore.instance.doc('users/${user.uid}').get();
+    if (rootDoc.exists && rootDoc.data() != null) {
+      final data = rootDoc.data()!;
+      final societyId = data['societyId'] as String?;
+      if (societyId != null && societyId.isNotEmpty) {
+        // Fetch full society profile
+        final socUserDoc = await FirebaseFirestore.instance
+            .doc('societies/$societyId/users/${user.uid}')
+            .get();
+        if (socUserDoc.exists) {
+          return socUserDoc.data();
+        }
       }
+      return data;
+    }
+  } catch (_) {}
+
+  // 2. Direct fallback to default SOC-001 if index not populated yet
+  try {
+    final socUserDoc = await FirebaseFirestore.instance
+        .doc('societies/SOC-001/users/${user.uid}')
+        .get();
+    if (socUserDoc.exists) {
+      return socUserDoc.data();
     }
   } catch (_) {}
 

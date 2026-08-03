@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper functions for Multi-Tenant Isolation & Role Checks
+    // Helper functions for Authentication & Role-Based Access Control (RBAC)
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -10,14 +10,24 @@ service cloud.firestore {
     function isSuperAdmin() {
       return isAuthenticated() && (
         request.auth.token.email == 'mohammedfaisalhasan@gmail.com' ||
-        request.auth.token.role == 'super_admin'
+        (request.auth.token.keys().hasAll(['role']) && request.auth.token.role == 'super_admin')
       );
+    }
+
+    // Direct root user lookup mapping
+    function getUserData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function hasUserDoc() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
 
     function belongsToSociety(societyId) {
       return isAuthenticated() && (
         isSuperAdmin() ||
-        exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid))
+        exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)) ||
+        (hasUserDoc() && getUserData().societyId == societyId)
       );
     }
 
@@ -26,29 +36,99 @@ service cloud.firestore {
         isSuperAdmin() ||
         (
           belongsToSociety(societyId) &&
-          get(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)).data.role == 'admin'
+          (
+            (exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)).data.role == 'admin') ||
+            (hasUserDoc() && getUserData().role == 'admin')
+          )
         )
       );
     }
 
-    // Root Societies Collection (Tenant Isolation)
+    function isGuard(societyId) {
+      return isAuthenticated() && (
+        isSuperAdmin() ||
+        (
+          belongsToSociety(societyId) &&
+          (
+            (exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)) &&
+             get(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)).data.role == 'guard') ||
+            (hasUserDoc() && getUserData().role == 'guard')
+          )
+        )
+      );
+    }
+
+    function getUserFlat(societyId) {
+      return hasUserDoc() ? getUserData().flatNumber : 
+        (exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)) ?
+         get(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)).data.flatNumber : '');
+    }
+
+    // Global Direct User Membership Mapping (/users/{uid})
+    match /users/{userId} {
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isSuperAdmin());
+      allow create, update: if isAuthenticated() && (request.auth.uid == userId || isSuperAdmin());
+      allow delete: if isSuperAdmin();
+    }
+
+    // Root Societies Collection (Tenant Isolation - SEC-001)
     match /societies/{societyId} {
-      allow read: if isAuthenticated();
+      allow read: if isAuthenticated() && (belongsToSociety(societyId) || isSuperAdmin());
       allow write: if isSuperAdmin();
 
-      // Sub-collections under each society
+      // Users Sub-collection under society
       match /users/{userId} {
         allow read: if isAuthenticated() && (belongsToSociety(societyId) || isSuperAdmin());
         allow create: if isAuthenticated(); // Self-registration creates pending document
-        allow update, delete: if isSocietyAdmin(societyId) || request.auth.uid == userId;
+        allow update: if isSocietyAdmin(societyId) || (
+          request.auth.uid == userId &&
+          (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'societyId', 'status']))
+        );
+        allow delete: if isSocietyAdmin(societyId);
+
+        match /notifications/{notifId} {
+          allow read, write: if isAuthenticated() && (request.auth.uid == userId || isSocietyAdmin(societyId) || isSuperAdmin());
+        }
       }
 
+      // Visitors Sub-collection (SEC-002: Role + Flat Ownership Enforcement)
       match /visitors/{visitorId} {
-        allow read, write: if isAuthenticated() && (belongsToSociety(societyId) || isSuperAdmin());
+        allow read: if isAuthenticated() && (
+          isSocietyAdmin(societyId) ||
+          isGuard(societyId) ||
+          resource.data.hostFlat == getUserFlat(societyId) ||
+          resource.data.createdBy == request.auth.uid
+        );
+        allow create: if isAuthenticated() && belongsToSociety(societyId);
+        allow update: if isAuthenticated() && (
+          isSocietyAdmin(societyId) ||
+          isGuard(societyId) ||
+          (resource.data.hostFlat == getUserFlat(societyId) &&
+           !request.resource.data.diff(resource.data).affectedKeys().hasAny(['hostFlat', 'createdBy', 'societyId']))
+        );
+        allow delete: if isSocietyAdmin(societyId);
       }
 
+      // Complaints Sub-collection (SEC-002: Resident Ownership Enforcement)
       match /complaints/{complaintId} {
-        allow read, write: if isAuthenticated() && (belongsToSociety(societyId) || isSuperAdmin());
+        allow read: if isAuthenticated() && (
+          isSocietyAdmin(societyId) ||
+          resource.data.raisedBy == request.auth.uid
+        );
+        allow create: if isAuthenticated() && belongsToSociety(societyId);
+        allow update: if isAuthenticated() && (
+          isSocietyAdmin(societyId) ||
+          (resource.data.raisedBy == request.auth.uid &&
+           !request.resource.data.diff(resource.data).affectedKeys().hasAny(['raisedBy', 'societyId']))
+        );
+        allow delete: if isSocietyAdmin(societyId) || resource.data.raisedBy == request.auth.uid;
+      }
+
+      // Maintenance Bills Sub-collection (BUG-001)
+      match /maintenance_bills/{billId} {
+        allow read: if isAuthenticated() && belongsToSociety(societyId);
+        allow write: if isSocietyAdmin(societyId);
       }
 
       match /maintenance/{billId} {
@@ -56,9 +136,23 @@ service cloud.firestore {
         allow write: if isSocietyAdmin(societyId);
       }
 
+      // Amenity Bookings Sub-collection (BUG-001)
+      match /amenity_bookings/{bookingId} {
+        allow read: if isAuthenticated() && belongsToSociety(societyId);
+        allow create: if isAuthenticated() && belongsToSociety(societyId);
+        allow update, delete: if isSocietyAdmin(societyId) || (resource.data.uid == request.auth.uid);
+      }
+
       match /amenities/{amenityId} {
         allow read: if isAuthenticated() && belongsToSociety(societyId);
         allow write: if isSocietyAdmin(societyId);
+      }
+
+      // Audit Logs Sub-collection (BUG-001: Immutable Audit Trail)
+      match /audit_logs/{logId} {
+        allow read: if isSocietyAdmin(societyId);
+        allow create: if isAuthenticated() && belongsToSociety(societyId);
+        allow update, delete: if false; // Anti-tamper: Audit logs can NEVER be edited or erased by clients
       }
 
       match /documents/{docId} {
@@ -77,10 +171,14 @@ service cloud.firestore {
       }
     }
 
-    // Website Inbound Leads (Public Creation, Super Admin Access)
+    // Website Inbound Leads (Public Creation with Strict Field Validation - SEC-004)
     match /leads/{leadId} {
-      allow create: if true; // Public lead form submission
-      allow read, update, delete: if isSuperAdmin() || isAuthenticated();
+      allow create: if request.resource.data.keys().hasAll(['name', 'email', 'phone']) &&
+                       request.resource.data.name is string &&
+                       request.resource.data.email is string &&
+                       request.resource.data.name.size() < 200 &&
+                       (!request.resource.data.keys().hasAny(['status', 'assignedTo', 'internalNotes']));
+      allow read, update, delete: if isSuperAdmin();
     }
 
     // Ad Campaigns Collection (Super Admin Access)
