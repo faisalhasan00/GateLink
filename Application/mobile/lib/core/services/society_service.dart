@@ -24,28 +24,21 @@ class SocietyModel {
   factory SocietyModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
     
-    // Parse blocks (can be array or count)
+    // Parse blocks dynamically from Firestore document ONLY
     List<String> parsedBlocks = [];
-    if (data['blocksList'] is List) {
+    if (data['blocksList'] is List && (data['blocksList'] as List).isNotEmpty) {
       parsedBlocks = List<String>.from(data['blocksList']);
-    } else if (data['buildings'] is String && (data['buildings'] as String).isNotEmpty) {
-      parsedBlocks = (data['buildings'] as String).split(',').map((s) => s.trim()).toList();
+    } else if (data['buildings'] is String && (data['buildings'] as String).trim().isNotEmpty) {
+      parsedBlocks = (data['buildings'] as String)
+          .split(',')
+          .map((s) => s.trim())
+          .where((s) => s.isNotEmpty)
+          .toList();
     } else if (data['blocks'] != null) {
-      int count = int.tryParse(data['blocks'].toString()) ?? 4;
+      int count = int.tryParse(data['blocks'].toString()) ?? 0;
       for (int i = 0; i < count; i++) {
-        parsedBlocks.add(String.fromCharCode(65 + i)); // A, B, C, D...
+        parsedBlocks.add('Block ${String.fromCharCode(65 + i)}');
       }
-    }
-    
-    if (parsedBlocks.isEmpty) {
-      parsedBlocks = ['A', 'B', 'C', 'D', 'E', 'F'];
-    }
-
-    if (!parsedBlocks.contains('COMMON AREA')) {
-      parsedBlocks.add('COMMON AREA');
-    }
-    if (!parsedBlocks.contains('Common Area Vendor')) {
-      parsedBlocks.add('Common Area Vendor');
     }
 
     return SocietyModel(

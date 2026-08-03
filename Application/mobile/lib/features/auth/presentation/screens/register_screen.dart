@@ -467,33 +467,47 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
           // Building Block Dynamic Selector
           _buildDropdownLabel('SELECT BUILDING / BLOCK'),
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-              border: Border.all(color: AppColors.gray300),
-            ),
-            child: Column(
-              children: (_selectedSocietyModel?.blocks ?? ['A', 'B', 'C', 'D']).map((b) {
-                final isSelected = _selectedBuilding == b;
-                return ListTile(
-                  dense: true,
-                  leading: Icon(Icons.apartment_rounded, color: isSelected ? AppColors.primary : AppColors.textSecondary),
-                  title: Text(b, style: TextStyle(fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500, color: isSelected ? AppColors.primary : AppColors.textPrimary)),
-                  trailing: Icon(isSelected ? Icons.check_circle_rounded : Icons.chevron_right_rounded, color: isSelected ? AppColors.primary : AppColors.gray400),
-                  onTap: () {
-                    setState(() {
-                      _selectedBuilding = b;
-                      if (_selectedSocietyModel != null) {
-                        _dynamicFlats = ref.read(societyServiceProvider).generateFlatsForSociety(_selectedSocietyModel!, b);
-                        if (_dynamicFlats.isNotEmpty) _selectedFlatNo = _dynamicFlats.first;
-                      }
-                    });
-                  },
-                );
-              }).toList(),
-            ),
-          ),
+          (_selectedSocietyModel == null || _selectedSocietyModel!.blocks.isEmpty)
+              ? Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: AppColors.gray300),
+                  ),
+                  child: const Text(
+                    'No building blocks configured for this society in database',
+                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                  ),
+                )
+              : Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: AppColors.gray300),
+                  ),
+                  child: Column(
+                    children: _selectedSocietyModel!.blocks.map((b) {
+                      final isSelected = _selectedBuilding == b;
+                      return ListTile(
+                        dense: true,
+                        leading: Icon(Icons.apartment_rounded, color: isSelected ? AppColors.primary : AppColors.textSecondary),
+                        title: Text(b, style: TextStyle(fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500, color: isSelected ? AppColors.primary : AppColors.textPrimary)),
+                        trailing: Icon(isSelected ? Icons.check_circle_rounded : Icons.chevron_right_rounded, color: isSelected ? AppColors.primary : AppColors.gray400),
+                        onTap: () {
+                          setState(() {
+                            _selectedBuilding = b;
+                            if (_selectedSocietyModel != null) {
+                              _dynamicFlats = ref.read(societyServiceProvider).generateFlatsForSociety(_selectedSocietyModel!, b);
+                              if (_dynamicFlats.isNotEmpty) _selectedFlatNo = _dynamicFlats.first;
+                            }
+                          });
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ),
           const SizedBox(height: AppSpacing.md),
 
           // Flat Search & Dynamic Selection
