@@ -78,13 +78,13 @@ class AuthService {
     required String email,
     required String password,
     required String name,
-    required String phone,
-    required String country,
-    required String city,
-    required String societyCode,
-    required String buildingBlock,
     required String flatNumber,
+    required String societyCode,
     required String role, // 'resident' or 'guard'
+    String phone = '',
+    String country = 'India',
+    String city = 'Hyderabad',
+    String buildingBlock = '',
     String residentRoleType = 'Flat Owner', // 'Flat Owner', 'Renting with family', 'Renting with other flatmates'
     String occupancyStatus = 'Currently residing', // 'Currently residing', 'Flat is let out', 'Flat is empty'
     String? documentProofUrl,
