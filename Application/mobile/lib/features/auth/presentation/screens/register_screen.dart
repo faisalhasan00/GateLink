@@ -4,8 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../core/providers/auth_providers.dart';
+import '../../../../core/services/society_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+
+final societyServiceProvider = Provider<SocietyService>((ref) => SocietyService());
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -17,6 +20,7 @@ class RegisterScreen extends ConsumerStatefulWidget {
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   int _currentLayer = 1;
   bool _isLoading = false;
+  bool _isFetchingDb = false;
   final _picker = ImagePicker();
   File? _documentFile;
 
@@ -29,14 +33,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
 
-  // ── Layer 2: Location & Society ──
+  // ── Layer 2: Location & Dynamic Database Society Selection ──
   final _formKeyLayer2 = GlobalKey<FormState>();
   String _selectedCountry = 'India';
   String _selectedCity = 'Hyderabad';
-  String _selectedSociety = 'My Home Bhooja';
-  String _societyCode = 'SOC-001';
+  
+  List<SocietyModel> _dbSocieties = [];
+  SocietyModel? _selectedSocietyModel;
+  
   String _selectedBuilding = 'A';
   String _selectedFlatNo = '001';
+  List<String> _dynamicFlats = [];
   final _flatSearchController = TextEditingController();
 
   final List<String> _countries = ['India', 'UAE'];
@@ -45,34 +52,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     'UAE': ['Dubai', 'Abu Dhabi', 'Sharjah'],
   };
 
-  final List<String> _societies = [
-    'My Home Bhooja',
-    'HITEC City Towers',
-    'Greenwood Estate',
-    'Sunshine Heights',
-    'SOC-001'
-  ];
-
-  final List<String> _buildings = [
-    'A',
-    'B',
-    'C',
-    'COMMON AREA',
-    'Common Area Vendor',
-    'D',
-    'E',
-    'F'
-  ];
-
-  final List<String> _flats = [
-    '001', '101', '201', '301', '401', '501', '601', '701',
-    '801', '901', '1001', '1101', '1201', '1301', '1401'
-  ];
-
   // ── Layer 3: Residency, Occupancy & Proof ──
   String _selectedYouAre = 'Flat Owner'; // 'Flat Owner', 'Renting with family', 'Renting with other flatmates'
   String _selectedOccupancy = 'Currently residing'; // 'Currently residing', 'Flat is let out', 'Flat is empty'
   String _documentType = 'Rent Agreement / Electricity Bill';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDatabaseSocieties();
+  }
 
   @override
   void dispose() {
@@ -83,6 +72,45 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _confirmPasswordController.dispose();
     _flatSearchController.dispose();
     super.dispose();
+  }
+
+  /// Query real societies dynamically from Firestore database
+  Future<void> _loadDatabaseSocieties() async {
+    setState(() => _isFetchingDb = true);
+    try {
+      final service = ref.read(societyServiceProvider);
+      final societies = await service.fetchSocietiesByLocation(_selectedCountry, _selectedCity);
+
+      if (mounted) {
+        setState(() {
+          _dbSocieties = societies;
+          if (societies.isNotEmpty) {
+            _selectedSocietyModel = societies.first;
+            _updateBuildingAndFlats(_selectedSocietyModel!);
+          } else {
+            _selectedSocietyModel = null;
+            _dynamicFlats = [];
+          }
+        });
+      }
+    } catch (e) {
+      // Fallback handling
+    } finally {
+      if (mounted) setState(() => _isFetchingDb = false);
+    }
+  }
+
+  void _updateBuildingAndFlats(SocietyModel society) {
+    final service = ref.read(societyServiceProvider);
+    final blocks = society.blocks;
+    final building = blocks.isNotEmpty ? blocks.first : 'A';
+    final flats = service.generateFlatsForSociety(society, building);
+
+    setState(() {
+      _selectedBuilding = building;
+      _dynamicFlats = flats;
+      _selectedFlatNo = flats.isNotEmpty ? flats.first : '001';
+    });
   }
 
   Future<void> _pickDocument() async {
@@ -101,6 +129,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _submitRegistration() async {
+    if (_selectedSocietyModel == null) {
+      _showError('Please select a valid society from the database list');
+      return;
+    }
+
     setState(() => _isLoading = true);
     try {
       await ref.read(authServiceProvider).registerWithEmail(
@@ -110,7 +143,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         phone: _phoneController.text,
         country: _selectedCountry,
         city: _selectedCity,
-        societyCode: _societyCode,
+        societyCode: _selectedSocietyModel!.code,
         buildingBlock: _selectedBuilding,
         flatNumber: _selectedFlatNo,
         role: 'resident',
@@ -150,7 +183,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Progress Layer Stepper Bar
             _buildLayerProgressHeader(),
             Expanded(
               child: SingleChildScrollView(
@@ -289,10 +321,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     );
   }
 
-  // ── Layer 2: Country, City, Society, Building & Flat Selection ──
+  // ── Layer 2: Dynamic Database Location, Society, Building & Flat Selection ──
   Widget _buildLayer2LocationSociety() {
     final availableCities = _cityMap[_selectedCountry] ?? ['Hyderabad'];
-    final filteredFlats = _flats.where((f) {
+    final filteredFlats = _dynamicFlats.where((f) {
       if (_flatSearchController.text.isEmpty) return true;
       return f.contains(_flatSearchController.text);
     }).toList();
@@ -302,9 +334,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Select Your Home', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text('Select Your Home', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              if (_isFetchingDb)
+                const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)),
+            ],
+          ),
           const SizedBox(height: 4),
-          const Text('Locate your society, block, and flat unit number', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+          const Text('Data fetched directly from live Firestore database records', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
           const SizedBox(height: AppSpacing.xl),
 
           // Country Dropdown
@@ -327,6 +366,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       _selectedCountry = val;
                       _selectedCity = _cityMap[val]!.first;
                     });
+                    _loadDatabaseSocieties();
                   }
                 },
               ),
@@ -345,19 +385,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
-                value: _selectedCity,
+                value: availableCities.contains(_selectedCity) ? _selectedCity : availableCities.first,
                 isExpanded: true,
                 items: availableCities.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
                 onChanged: (val) {
-                  if (val != null) setState(() => _selectedCity = val);
+                  if (val != null) {
+                    setState(() => _selectedCity = val);
+                    _loadDatabaseSocieties();
+                  }
                 },
               ),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
 
-          // Society Dropdown / Input
-          _buildDropdownLabel('Society'),
+          // Society Dynamic Database Dropdown
+          _buildDropdownLabel('Society (Fetched from Database)'),
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -366,19 +409,41 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ),
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _societies.contains(_selectedSociety) ? _selectedSociety : _societies.first,
+              child: DropdownButton<SocietyModel>(
+                value: _selectedSocietyModel,
                 isExpanded: true,
-                items: _societies.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                hint: const Text('Select Society from Database'),
+                items: _dbSocieties.map((soc) => DropdownMenuItem(
+                  value: soc,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(soc.name, style: const TextStyle(fontWeight: FontWeight.w600)),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(soc.code, style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.bold)),
+                      ),
+                    ],
+                  ),
+                )).toList(),
                 onChanged: (val) {
-                  if (val != null) setState(() => _selectedSociety = val);
+                  if (val != null) {
+                    setState(() {
+                      _selectedSocietyModel = val;
+                      _updateBuildingAndFlats(val);
+                    });
+                  }
                 },
               ),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
 
-          // Building Block Selector
+          // Building Block Dynamic Selector
           _buildDropdownLabel('SELECT BUILDING / BLOCK'),
           Container(
             decoration: BoxDecoration(
@@ -387,21 +452,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               border: Border.all(color: AppColors.gray300),
             ),
             child: Column(
-              children: _buildings.map((b) {
+              children: (_selectedSocietyModel?.blocks ?? ['A', 'B', 'C', 'D']).map((b) {
                 final isSelected = _selectedBuilding == b;
                 return ListTile(
                   dense: true,
                   leading: Icon(Icons.apartment_rounded, color: isSelected ? AppColors.primary : AppColors.textSecondary),
                   title: Text(b, style: TextStyle(fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500, color: isSelected ? AppColors.primary : AppColors.textPrimary)),
                   trailing: Icon(isSelected ? Icons.check_circle_rounded : Icons.chevron_right_rounded, color: isSelected ? AppColors.primary : AppColors.gray400),
-                  onTap: () => setState(() => _selectedBuilding = b),
+                  onTap: () {
+                    setState(() {
+                      _selectedBuilding = b;
+                      if (_selectedSocietyModel != null) {
+                        _dynamicFlats = ref.read(societyServiceProvider).generateFlatsForSociety(_selectedSocietyModel!, b);
+                        if (_dynamicFlats.isNotEmpty) _selectedFlatNo = _dynamicFlats.first;
+                      }
+                    });
+                  },
                 );
               }).toList(),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
 
-          // Flat Search & Selection
+          // Flat Search & Dynamic Selection
           _buildDropdownLabel('Flat No.'),
           Container(
             decoration: BoxDecoration(
@@ -451,7 +524,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             width: double.infinity,
             height: 52,
             child: ElevatedButton(
-              onPressed: () => setState(() => _currentLayer = 3),
+              onPressed: () {
+                if (_selectedSocietyModel == null) {
+                  _showError('Please select a society from the database list');
+                  return;
+                }
+                setState(() => _currentLayer = 3);
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
@@ -490,8 +569,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('$_selectedSociety (${_selectedBuilding}-$_selectedFlatNo)', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.textPrimary)),
-                    Text('$_selectedCity, $_selectedCountry', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                    Text('${_selectedSocietyModel?.name ?? "Housing Society"} (${_selectedBuilding}-$_selectedFlatNo)', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.textPrimary)),
+                    Text('Code: ${_selectedSocietyModel?.code ?? "SOC-001"} | $_selectedCity, $_selectedCountry', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                   ],
                 ),
               ),
