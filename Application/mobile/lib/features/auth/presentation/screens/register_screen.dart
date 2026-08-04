@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/services/society_service.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -139,9 +140,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     try {
       String? documentUrl;
       if (_documentFile != null && await _documentFile!.exists()) {
-        final bytes = await _documentFile!.readAsBytes();
-        final base64Str = base64Encode(bytes);
-        documentUrl = 'data:image/jpeg;base64,$base64Str';
+        try {
+          final fileName = 'proof_${DateTime.now().millisecondsSinceEpoch}.jpg';
+          final storageRef = FirebaseStorage.instance.ref().child('verification_documents').child(fileName);
+          final uploadTask = await storageRef.putFile(_documentFile!);
+          documentUrl = await uploadTask.ref.getDownloadURL();
+        } catch (storageErr) {
+          debugPrint("Firebase Storage upload fallback: $storageErr");
+          final bytes = await _documentFile!.readAsBytes();
+          final base64Str = base64Encode(bytes);
+          documentUrl = 'data:image/jpeg;base64,$base64Str';
+        }
       }
 
       await ref.read(authServiceProvider).registerWithEmail(
