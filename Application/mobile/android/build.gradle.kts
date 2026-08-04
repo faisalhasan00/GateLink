@@ -20,15 +20,16 @@ subprojects {
 }
 
 subprojects {
-    plugins.withId("com.android.library") {
-        configure<com.android.build.gradle.BaseExtension> {
-            compileSdkVersion(36)
+    val p = this
+    val applyCompileSdk = {
+        if (p.plugins.hasPlugin("com.android.application") || p.plugins.hasPlugin("com.android.library")) {
+            p.extensions.getByType(com.android.build.gradle.BaseExtension::class.java).compileSdkVersion(36)
         }
     }
-    plugins.withId("com.android.application") {
-        configure<com.android.build.gradle.BaseExtension> {
-            compileSdkVersion(36)
-        }
+    if (p.state.executed) {
+        applyCompileSdk()
+    } else {
+        p.afterEvaluate { applyCompileSdk() }
     }
 }
 
