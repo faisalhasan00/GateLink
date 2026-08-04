@@ -19,7 +19,8 @@ const SuperAdminLogin = lazy(() => import('./pages/superadmin/SuperAdminLogin'))
 
 function ProtectedSuperRoute({ user, children }) {
   if (user === undefined) return <SkeletonLoader />;
-  const isSuperUser = user && user.email?.toLowerCase() === 'mohammedfaisalhasan@gmail.com';
+  const session = getSuperAdminSession();
+  const isSuperUser = (user && user.email?.toLowerCase() === 'mohammedfaisalhasan@gmail.com') || (session && session.email?.toLowerCase() === 'mohammedfaisalhasan@gmail.com');
   if (!isSuperUser) {
     return <Navigate to="/login" replace />;
   }

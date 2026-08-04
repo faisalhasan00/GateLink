@@ -29,7 +29,8 @@ const AdminProfile = lazy(() => import('./pages/AdminProfile'))
 
 function ProtectedRoute({ user, children }) {
   if (user === undefined) return <SkeletonLoader />;
-  if (!user) {
+  const session = getSocietyAdminSession();
+  if (!user && !session) {
     return <Navigate to="/login" replace />;
   }
   return children;
