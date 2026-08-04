@@ -36,8 +36,9 @@ dependencies:
   # OTP & PIN Input
   pinput: ^5.0.0
 
-  # Image Picker
+  # Image & File Picker
   image_picker: ^1.1.2
+  file_picker: ^8.0.3
   firebase_storage: ^12.4.10
 
   # QR Code

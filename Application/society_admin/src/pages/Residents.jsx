@@ -427,7 +427,7 @@ export default function Residents() {
         </div>
       )}
 
-      {/* Fullscreen Image Lightbox (SAME TAB) */}
+      {/* Fullscreen Image / PDF Lightbox (SAME TAB) */}
       {fullscreenImage && (
         <div
           className="modal-overlay"
@@ -435,24 +435,43 @@ export default function Residents() {
           onClick={() => setFullscreenImage(null)}
         >
           <div
-            style={{ position: 'relative', maxWidth: '92vw', maxHeight: '92vh', background: '#0F172A', padding: '16px', borderRadius: '12px', textAlign: 'center' }}
+            style={{ position: 'relative', width: '92vw', height: '92vh', background: '#0F172A', padding: '16px', borderRadius: '12px', textAlign: 'center', display: 'flex', flexDirection: 'column' }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', color: '#FFFFFF' }}>
               <h4 style={{ margin: 0, fontSize: '16px', color: '#FFFFFF' }}>📄 {fullscreenImage.title || 'Verification Proof Document'}</h4>
-              <button
-                onClick={() => setFullscreenImage(null)}
-                style={{ background: 'none', border: 'none', color: '#FFFFFF', fontSize: '24px', cursor: 'pointer', padding: '0 8px' }}
-              >
-                ✕
-              </button>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <a
+                  href={fullscreenImage.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  download="verification_document"
+                  style={{ color: '#60A5FA', fontSize: '13px', textDecoration: 'none', background: '#1E293B', padding: '4px 12px', borderRadius: '6px', border: '1px solid #334155' }}
+                >
+                  ⬇️ Download File
+                </a>
+                <button
+                  onClick={() => setFullscreenImage(null)}
+                  style={{ background: 'none', border: 'none', color: '#FFFFFF', fontSize: '24px', cursor: 'pointer', padding: '0 8px' }}
+                >
+                  ✕
+                </button>
+              </div>
             </div>
-            <div style={{ overflow: 'auto', maxHeight: '80vh' }}>
-              <img
-                src={fullscreenImage.url}
-                alt="Full Size Proof Document"
-                style={{ maxWidth: '100%', maxHeight: '76vh', borderRadius: '8px', objectFit: 'contain' }}
-              />
+            <div style={{ flex: 1, overflow: 'hidden', background: '#1E293B', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              {fullscreenImage.url.includes('.pdf') || fullscreenImage.url.startsWith('data:application/pdf') ? (
+                <iframe
+                  src={fullscreenImage.url}
+                  title="PDF Verification Document"
+                  style={{ width: '100%', height: '100%', border: 'none', borderRadius: '8px' }}
+                />
+              ) : (
+                <img
+                  src={fullscreenImage.url}
+                  alt="Full Size Proof Document"
+                  style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: '8px', objectFit: 'contain' }}
+                />
+              )}
             </div>
           </div>
         </div>

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/services/society_service.dart';
@@ -116,17 +117,63 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 
   Future<void> _pickDocument() async {
-    final picked = await _picker.pickImage(
-      source: ImageSource.gallery,
-      maxWidth: 800,
-      maxHeight: 800,
-      imageQuality: 60,
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Upload Verification Document', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            const SizedBox(height: 6),
+            const Text('Select document format (Image, PDF, or File)', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.photo_library_rounded, color: AppColors.primary, size: 28),
+              title: const Text('Image / Photo', style: TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: const Text('PNG, JPG, WEBP from Gallery'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final picked = await _picker.pickImage(
+                  source: ImageSource.gallery,
+                  maxWidth: 800,
+                  maxHeight: 800,
+                  imageQuality: 60,
+                );
+                if (picked != null) {
+                  setState(() {
+                    _documentFile = File(picked.path);
+                    _documentType = 'Rent Agreement / Image';
+                  });
+                }
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.picture_as_pdf_rounded, color: Colors.redAccent, size: 28),
+              title: const Text('PDF / Document File', style: TextStyle(fontWeight: FontWeight.w700)),
+              subtitle: const Text('PDF, DOC, DOCX, or scan document'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final result = await FilePicker.platform.pickFiles(
+                  type: FileType.custom,
+                  allowedExtensions: ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg'],
+                );
+                if (result != null && result.files.single.path != null) {
+                  setState(() {
+                    _documentFile = File(result.files.single.path!);
+                    final ext = result.files.single.extension?.toUpperCase() ?? 'PDF';
+                    _documentType = '$ext Document';
+                  });
+                }
+              },
+            ),
+          ],
+        ),
+      ),
     );
-    if (picked != null) {
-      setState(() {
-        _documentFile = File(picked.path);
-      });
-    }
   }
 
   void _showError(String msg) {
@@ -146,7 +193,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       String? documentUrl;
       if (_documentFile != null && await _documentFile!.exists()) {
         try {
-          final fileName = 'proof_${DateTime.now().millisecondsSinceEpoch}.jpg';
+          final ext = _documentFile!.path.split('.').last.toLowerCase();
+          final fileName = 'proof_${DateTime.now().millisecondsSinceEpoch}.$ext';
           final storageRef = FirebaseStorage.instance.ref().child('verification_documents').child(fileName);
           final uploadTask = await storageRef.putFile(_documentFile!);
           documentUrl = await uploadTask.ref.getDownloadURL();
@@ -154,7 +202,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           debugPrint("Firebase Storage upload fallback: $storageErr");
           final bytes = await _documentFile!.readAsBytes();
           final base64Str = base64Encode(bytes);
-          documentUrl = 'data:image/jpeg;base64,$base64Str';
+          final isPdf = _documentFile!.path.toLowerCase().endsWith('.pdf');
+          final mime = isPdf ? 'application/pdf' : 'image/jpeg';
+          documentUrl = 'data:$mime;base64,$base64Str';
         }
       }
 
