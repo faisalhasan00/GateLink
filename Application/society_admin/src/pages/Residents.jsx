@@ -10,6 +10,7 @@ export default function Residents() {
   const [activeTab, setActiveTab] = useState('active'); // 'active' or 'pending'
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedResidentForView, setSelectedResidentForView] = useState(null);
+  const [fullscreenImage, setFullscreenImage] = useState(null);
   const [formData, setFormData] = useState({ name: '', flatNumber: '', phone: '', email: '', password: '', role: 'resident', ownershipType: 'Owner' });
 
   const session = getSocietyAdminSession();
@@ -58,7 +59,7 @@ export default function Residents() {
       return;
     }
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:') || url.startsWith('data:')) {
-      window.open(url, '_blank', 'noopener,noreferrer');
+      setFullscreenImage({ url, title: typeName });
     } else {
       alert(`Resident Verification Proof:\n\nType: ${typeName}\nAttachment Reference: ${url}`);
     }
@@ -390,7 +391,10 @@ export default function Residents() {
 
                 {/* Live Document Image Preview Box */}
                 {selectedResidentForView.documentProofUrl && (selectedResidentForView.documentProofUrl.startsWith('data:image/') || selectedResidentForView.documentProofUrl.startsWith('http')) ? (
-                  <div style={{ marginTop: '8px', textAlign: 'center', background: '#FFFFFF', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                  <div 
+                    style={{ marginTop: '8px', textAlign: 'center', background: '#FFFFFF', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)', cursor: 'pointer' }}
+                    onClick={(e) => handleOpenDocument(e, selectedResidentForView.documentProofUrl, selectedResidentForView.documentType || 'Rent Agreement')}
+                  >
                     <img
                       src={selectedResidentForView.documentProofUrl}
                       alt="Verification Proof Document"
@@ -418,6 +422,37 @@ export default function Residents() {
                   </button>
                 </>
               ) : null}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fullscreen Image Lightbox (SAME TAB) */}
+      {fullscreenImage && (
+        <div
+          className="modal-overlay"
+          style={{ zIndex: 1200, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}
+          onClick={() => setFullscreenImage(null)}
+        >
+          <div
+            style={{ position: 'relative', maxWidth: '92vw', maxHeight: '92vh', background: '#0F172A', padding: '16px', borderRadius: '12px', textAlign: 'center' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', color: '#FFFFFF' }}>
+              <h4 style={{ margin: 0, fontSize: '16px', color: '#FFFFFF' }}>📄 {fullscreenImage.title || 'Verification Proof Document'}</h4>
+              <button
+                onClick={() => setFullscreenImage(null)}
+                style={{ background: 'none', border: 'none', color: '#FFFFFF', fontSize: '24px', cursor: 'pointer', padding: '0 8px' }}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={{ overflow: 'auto', maxHeight: '80vh' }}>
+              <img
+                src={fullscreenImage.url}
+                alt="Full Size Proof Document"
+                style={{ maxWidth: '100%', maxHeight: '76vh', borderRadius: '8px', objectFit: 'contain' }}
+              />
             </div>
           </div>
         </div>
