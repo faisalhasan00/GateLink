@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, CheckCircle, XCircle, ShieldCheck, ShieldAlert, FileText, UserCheck, Phone, Mail, Eye } from 'lucide-react';
+import { Plus, CheckCircle, XCircle, ShieldCheck, ShieldAlert, FileText, UserCheck, Phone, Mail, Eye, ExternalLink } from 'lucide-react';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getSocietyAdminSession } from '../services/sessionManager';
@@ -46,6 +46,22 @@ export default function Residents() {
   const toggleStatus = async (userId, currentStatus) => {
     const newStatus = currentStatus === 'active' || currentStatus === 'approved' ? 'suspended' : 'active';
     await updateDoc(doc(db, `societies/${societyId}/users`, userId), { status: newStatus });
+  };
+
+  const handleOpenDocument = (e, url, typeName = 'Residence Document Proof') => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (!url || url === '#' || url.trim() === '') {
+      alert(`Document Info:\n\nType: ${typeName}\nStatus: Attached during mobile registration.`);
+      return;
+    }
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:') || url.startsWith('data:')) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } else {
+      alert(`Resident Verification Proof:\n\nType: ${typeName}\nAttachment Reference: ${url}`);
+    }
   };
 
   const handleAddResident = async (e) => {
@@ -249,13 +265,14 @@ export default function Residents() {
                         </span>
                       </td>
                       <td>
-                        {r.documentProofUrl ? (
-                          <a href={r.documentProofUrl} target="_blank" rel="noreferrer" style={{ fontSize: '12px', color: '#2563EB', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                            <FileText size={14} /> View Proof
-                          </a>
-                        ) : (
-                          <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{r.documentType || 'Rent Agreement'}</span>
-                        )}
+                        <button
+                          type="button"
+                          className="btn btn-outline"
+                          style={{ padding: '4px 10px', fontSize: '12px', color: '#2563EB', borderColor: '#2563EB', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                          onClick={(e) => handleOpenDocument(e, r.documentProofUrl, r.documentType || 'Rent Agreement / Address Proof')}
+                        >
+                          <FileText size={14} /> View Proof
+                        </button>
                       </td>
                       <td>
                         <div style={{ display: 'flex', gap: '8px' }}>
@@ -364,13 +381,14 @@ export default function Residents() {
                       <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>{selectedResidentForView.documentProofUrl.split('/').pop()}</div>
                     )}
                   </div>
-                  {selectedResidentForView.documentProofUrl ? (
-                    <a href={selectedResidentForView.documentProofUrl} target="_blank" rel="noreferrer" className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '12px', textDecoration: 'none' }}>
-                      View Document ➔
-                    </a>
-                  ) : (
-                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic' }}>Attachment on file</span>
-                  )}
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{ padding: '6px 14px', fontSize: '12px' }}
+                    onClick={(e) => handleOpenDocument(e, selectedResidentForView.documentProofUrl, selectedResidentForView.documentType || 'Rent Agreement')}
+                  >
+                    View Document ➔
+                  </button>
                 </div>
               </div>
             </div>

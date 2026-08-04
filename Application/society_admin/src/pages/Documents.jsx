@@ -479,16 +479,22 @@ export default function Documents() {
                           </button>
 
                           {d.downloadUrl && (
-                            <a
-                              href={d.downloadUrl}
-                              download={d.fileName || d.title}
-                              target="_blank"
-                              rel="noreferrer"
+                            <button
+                              type="button"
                               className="btn btn-outline"
-                              style={{ padding: '4px 8px', fontSize: '11px', color: 'var(--primary)', borderColor: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}
+                              style={{ padding: '4px 8px', fontSize: '11px', color: 'var(--primary)', borderColor: 'var(--primary)', display: 'flex', alignItems: 'center', gap: '4px' }}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                if (d.downloadUrl && (d.downloadUrl.startsWith('http://') || d.downloadUrl.startsWith('https://') || d.downloadUrl.startsWith('data:'))) {
+                                  window.open(d.downloadUrl, '_blank', 'noopener,noreferrer');
+                                } else {
+                                  alert(`Document Info:\n\nTitle: ${d.title}\nFormat: ${d.fileType || 'File'}`);
+                                }
+                              }}
                             >
                               <Download size={13} /> Download
-                            </a>
+                            </button>
                           )}
 
                           <button
@@ -630,9 +636,22 @@ export default function Documents() {
               </div>
               <div style={{ display: 'flex', gap: '10px' }}>
                 {previewDoc.downloadUrl && (
-                  <a href={previewDoc.downloadUrl} target="_blank" rel="noreferrer" className="btn btn-primary" style={{ padding: '6px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px', textDecoration: 'none' }}>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{ padding: '6px 12px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (previewDoc.downloadUrl && (previewDoc.downloadUrl.startsWith('http://') || previewDoc.downloadUrl.startsWith('https://') || previewDoc.downloadUrl.startsWith('data:'))) {
+                        window.open(previewDoc.downloadUrl, '_blank', 'noopener,noreferrer');
+                      } else {
+                        alert(`Document Info:\n\nTitle: ${previewDoc.title}\nPath: ${previewDoc.downloadUrl}`);
+                      }
+                    }}
+                  >
                     <Download size={14} /> Download File
-                  </a>
+                  </button>
                 )}
                 <button style={{ background: 'transparent', border: 'none', color: '#ffffff', cursor: 'pointer' }} onClick={() => setPreviewDoc(null)}>
                   <X size={24} />
