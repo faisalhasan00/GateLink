@@ -47,10 +47,13 @@ export default function SocietyOnboardingWizard({ isOpen, onClose, existingSocie
     longitude: '',
     fullAddress: '',
     // Step 3
-    buildings: '',
-    blocks: '1',
+    buildings: 'A, B, C, D',
+    blockNames: 'A, B, C, D',
+    blocks: '4',
     floors: '10',
     flats: '100',
+    flatsPerBlock: '50',
+    startFlatNumber: '101',
     villas: '0',
     parkingSlots: '100',
     // Step 4
@@ -161,6 +164,9 @@ export default function SocietyOnboardingWizard({ isOpen, onClose, existingSocie
       // Atomic Transaction using Firestore Write Batch
       const batch = writeBatch(db);
 
+      const blockNamesRaw = cleanData.blockNames || cleanData.buildings || 'A, B, C, D';
+      const parsedBlocks = blockNamesRaw.split(',').map(s => s.trim()).filter(Boolean);
+
       // 1. Main Society Document (`societies`)
       const societyRef = doc(db, 'societies', societyId);
       batch.set(societyRef, {
@@ -176,7 +182,14 @@ export default function SocietyOnboardingWizard({ isOpen, onClose, existingSocie
         president: cleanData.presidentName || 'Management Committee',
         phone: cleanData.phone,
         city: cleanData.city,
-        flats: Number(cleanData.flats) || 0,
+        country: cleanData.country || 'India',
+        buildings: blockNamesRaw,
+        blocksList: parsedBlocks,
+        blocks: parsedBlocks.length || Number(cleanData.blocks) || 4,
+        flats: Number(cleanData.flats) || 100,
+        flatsPerBlock: Number(cleanData.flatsPerBlock) || 50,
+        startFlatNumber: Number(cleanData.startFlatNumber) || 101,
+        floors: Number(cleanData.floors) || 10,
         status: 'Active',
         createdAt: timestamp,
         updatedAt: timestamp,
@@ -565,6 +578,49 @@ export default function SocietyOnboardingWizard({ isOpen, onClose, existingSocie
               <h3 style={{ fontSize: '16px', fontWeight: 700, borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
                 Step 3: Physical Structure & Capacities
               </h3>
+
+              <div className="form-group">
+                <label>Building / Block Names (Comma Separated) *</label>
+                <input
+                  required
+                  type="text"
+                  value={formData.blockNames}
+                  onChange={e => handleInputChange('blockNames', e.target.value)}
+                  placeholder="e.g. Tower A, Tower B, Block C or A, B, C, D"
+                />
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                  These block names will populate the resident registration dropdowns.
+                </span>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div className="form-group">
+                  <label>Flats per Block / Tower *</label>
+                  <input
+                    required
+                    type="number"
+                    min="1"
+                    value={formData.flatsPerBlock}
+                    onChange={e => handleInputChange('flatsPerBlock', e.target.value)}
+                    placeholder="e.g. 50 or 100"
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Starting Flat Number for Block *</label>
+                  <input
+                    required
+                    type="number"
+                    min="1"
+                    value={formData.startFlatNumber}
+                    onChange={e => handleInputChange('startFlatNumber', e.target.value)}
+                    placeholder="e.g. 101, 309, 1001"
+                  />
+                  <span style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+                    e.g. If 101, flats will start from 101 up to 101 + Flats Per Block.
+                  </span>
+                </div>
+              </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                 <div className="form-group">

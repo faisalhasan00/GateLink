@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, CheckCircle, XCircle, ShieldCheck, ShieldAlert, FileText, UserCheck, Phone, Mail } from 'lucide-react';
+import { Plus, CheckCircle, XCircle, ShieldCheck, ShieldAlert, FileText, UserCheck, Phone, Mail, Eye } from 'lucide-react';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getSocietyAdminSession } from '../services/sessionManager';
@@ -9,6 +9,7 @@ export default function Residents() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('active'); // 'active' or 'pending'
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedResidentForView, setSelectedResidentForView] = useState(null);
   const [formData, setFormData] = useState({ name: '', flatNumber: '', phone: '', email: '', password: '', role: 'resident', ownershipType: 'Owner' });
 
   const session = getSocietyAdminSession();
@@ -177,13 +178,22 @@ export default function Residents() {
                         </span>
                       </td>
                       <td>
-                        <button
-                          className="btn btn-outline"
-                          style={{ padding: '4px 10px', fontSize: '12px', color: (r.status === 'active' || r.status === 'approved') ? 'var(--danger)' : 'var(--secondary)' }}
-                          onClick={() => toggleStatus(r.id, r.status)}
-                        >
-                          {(r.status === 'active' || r.status === 'approved') ? <><XCircle size={14} /> Suspend</> : <><CheckCircle size={14} /> Activate</>}
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button
+                            className="btn btn-outline"
+                            style={{ padding: '4px 10px', fontSize: '12px', color: '#2563EB', borderColor: '#2563EB' }}
+                            onClick={() => setSelectedResidentForView(r)}
+                          >
+                            <Eye size={14} /> View
+                          </button>
+                          <button
+                            className="btn btn-outline"
+                            style={{ padding: '4px 10px', fontSize: '12px', color: (r.status === 'active' || r.status === 'approved') ? 'var(--danger)' : 'var(--secondary)' }}
+                            onClick={() => toggleStatus(r.id, r.status)}
+                          >
+                            {(r.status === 'active' || r.status === 'approved') ? <><XCircle size={14} /> Suspend</> : <><CheckCircle size={14} /> Activate</>}
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -250,6 +260,13 @@ export default function Residents() {
                       <td>
                         <div style={{ display: 'flex', gap: '8px' }}>
                           <button
+                            className="btn btn-outline"
+                            style={{ padding: '6px 12px', fontSize: '12px', color: '#2563EB', borderColor: '#2563EB' }}
+                            onClick={() => setSelectedResidentForView(r)}
+                          >
+                            <Eye size={14} /> View Details
+                          </button>
+                          <button
                             className="btn btn-primary"
                             style={{ padding: '6px 12px', fontSize: '12px', backgroundColor: '#00B589' }}
                             onClick={() => handleApprove(r.id)}
@@ -270,6 +287,108 @@ export default function Residents() {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* Resident Details Modal */}
+      {selectedResidentForView && (
+        <div className="modal-overlay" onClick={() => setSelectedResidentForView(null)}>
+          <div className="modal-content" style={{ maxWidth: '620px', width: '90%' }} onClick={e => e.stopPropagation()}>
+            <div className="modal-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>Resident Access Details</h3>
+                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>UID: <code>{selectedResidentForView.uid || selectedResidentForView.id}</code></span>
+              </div>
+              <button onClick={() => setSelectedResidentForView(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px' }}>✕</button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px 0' }}>
+              {/* Flat & Status Box */}
+              <div style={{ background: '#F8FAFC', padding: '14px 16px', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: '11px', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)' }}>REQUESTED UNIT</div>
+                  <div style={{ fontSize: '20px', fontWeight: 900, color: '#2563EB' }}>
+                    {selectedResidentForView.societyName || 'Housing Society'} — Flat {selectedResidentForView.flatNumber || selectedResidentForView.unitNumber || 'N/A'}
+                  </div>
+                  {selectedResidentForView.buildingBlock && (
+                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>
+                      Building / Block: <strong>{selectedResidentForView.buildingBlock}</strong>
+                    </div>
+                  )}
+                </div>
+                <span className={`badge ${selectedResidentForView.status === 'active' || selectedResidentForView.status === 'approved' ? 'success' : 'warning'}`} style={{ fontSize: '13px', padding: '6px 12px' }}>
+                  {selectedResidentForView.status}
+                </span>
+              </div>
+
+              {/* Personal Contact Details */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)' }}>FULL NAME</label>
+                  <div style={{ fontSize: '15px', fontWeight: 800 }}>{selectedResidentForView.name}</div>
+                </div>
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)' }}>MOBILE PHONE</label>
+                  <div style={{ fontSize: '14px', fontWeight: 700 }}>📞 {selectedResidentForView.phone || 'N/A'}</div>
+                </div>
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)' }}>EMAIL ADDRESS</label>
+                  <div style={{ fontSize: '14px', color: '#2563EB', fontWeight: 600 }}>✉️ {selectedResidentForView.email || 'N/A'}</div>
+                </div>
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)' }}>LOCATION</label>
+                  <div style={{ fontSize: '14px', fontWeight: 600 }}>{selectedResidentForView.city || 'Hyderabad'}, {selectedResidentForView.country || 'India'}</div>
+                </div>
+              </div>
+
+              {/* Resident Role & Occupancy */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', background: '#FFFBEB', padding: '12px 16px', borderRadius: '8px', border: '1px solid #FDE68A' }}>
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: '#B45309' }}>RESIDENT ROLE TYPE</label>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: '#92400E' }}>{selectedResidentForView.residentRoleType || selectedResidentForView.ownershipType || 'Flat Owner'}</div>
+                </div>
+                <div>
+                  <label style={{ fontSize: '11px', fontWeight: 700, color: '#B45309' }}>OCCUPANCY STATUS</label>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: '#92400E' }}>{selectedResidentForView.occupancyStatus || 'Currently residing'}</div>
+                </div>
+              </div>
+
+              {/* Proof Document Verification */}
+              <div style={{ background: '#F1F5F9', padding: '14px 16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>ADDRESS PROOF DOCUMENT</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: '14px', fontWeight: 700 }}>📄 {selectedResidentForView.documentType || 'Rent Agreement / Utility Bill'}</div>
+                    {selectedResidentForView.documentProofUrl && (
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>{selectedResidentForView.documentProofUrl.split('/').pop()}</div>
+                    )}
+                  </div>
+                  {selectedResidentForView.documentProofUrl ? (
+                    <a href={selectedResidentForView.documentProofUrl} target="_blank" rel="noreferrer" className="btn btn-primary" style={{ padding: '6px 14px', fontSize: '12px', textDecoration: 'none' }}>
+                      View Document ➔
+                    </a>
+                  ) : (
+                    <span style={{ fontSize: '12px', color: 'var(--text-muted)', fontStyle: 'italic' }}>Attachment on file</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '14px', borderTop: '1px solid var(--border-color)' }}>
+              <button className="btn btn-outline" onClick={() => setSelectedResidentForView(null)}>Close</button>
+              {selectedResidentForView.status === 'pending_approval' || selectedResidentForView.status === 'pending' ? (
+                <>
+                  <button className="btn btn-outline" style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => { handleReject(selectedResidentForView.id); setSelectedResidentForView(null); }}>
+                    Decline Registration
+                  </button>
+                  <button className="btn btn-primary" style={{ backgroundColor: '#00B589' }} onClick={() => { handleApprove(selectedResidentForView.id); setSelectedResidentForView(null); }}>
+                    Approve Access ➔
+                  </button>
+                </>
+              ) : null}
+            </div>
           </div>
         </div>
       )}

@@ -9,6 +9,8 @@ class SocietyModel {
   final List<String> blocks;
   final int totalFlats;
   final int floors;
+  final int flatsPerBlock;
+  final int startFlatNumber;
 
   SocietyModel({
     required this.id,
@@ -19,6 +21,8 @@ class SocietyModel {
     required this.blocks,
     required this.totalFlats,
     required this.floors,
+    this.flatsPerBlock = 50,
+    this.startFlatNumber = 101,
   });
 
   factory SocietyModel.fromFirestore(DocumentSnapshot doc) {
@@ -50,6 +54,8 @@ class SocietyModel {
       blocks: parsedBlocks,
       totalFlats: int.tryParse(data['flats']?.toString() ?? '') ?? int.tryParse(data['totalFlats']?.toString() ?? '') ?? 200,
       floors: int.tryParse(data['floors']?.toString() ?? '') ?? 14,
+      flatsPerBlock: int.tryParse(data['flatsPerBlock']?.toString() ?? '') ?? 50,
+      startFlatNumber: int.tryParse(data['startFlatNumber']?.toString() ?? '') ?? 101,
     );
   }
 }
@@ -96,23 +102,17 @@ class SocietyService {
     }
   }
 
-  /// Generate flat numbers dynamically based on society structure (floors and total flats)
+  /// Generate flat numbers dynamically based on starting flat number and flats per block
   List<String> generateFlatsForSociety(SocietyModel society, String block) {
     List<String> flats = [];
 
-    // Ground floor flats
-    flats.addAll(['001', '002', '003', '004']);
+    int start = society.startFlatNumber > 0 ? society.startFlatNumber : 101;
+    int count = society.flatsPerBlock > 0 ? society.flatsPerBlock : 50;
 
-    // Floor-based flat numbers (e.g. 101-104, 201-204 ... up to floor count)
-    int maxFloors = society.floors > 0 ? society.floors : 14;
-    int flatsPerFloor = 4;
-
-    for (int floor = 1; floor <= maxFloors; floor++) {
-      for (int unit = 1; unit <= flatsPerFloor; unit++) {
-        String flatNo = '${floor}0$unit';
-        if (unit >= 10) flatNo = '$floor$unit';
-        flats.add(flatNo);
-      }
+    for (int i = 0; i < count; i++) {
+      int num = start + i;
+      String flatStr = num < 10 ? '00$num' : num < 100 ? '0$num' : '$num';
+      flats.add(flatStr);
     }
 
     return flats;
