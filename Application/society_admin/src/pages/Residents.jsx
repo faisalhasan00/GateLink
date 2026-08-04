@@ -374,12 +374,9 @@ export default function Residents() {
               {/* Proof Document Verification */}
               <div style={{ background: '#F1F5F9', padding: '14px 16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
                 <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>ADDRESS PROOF DOCUMENT</label>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: selectedResidentForView.documentProofUrl ? '10px' : '0' }}>
                   <div>
                     <div style={{ fontSize: '14px', fontWeight: 700 }}>📄 {selectedResidentForView.documentType || 'Rent Agreement / Utility Bill'}</div>
-                    {selectedResidentForView.documentProofUrl && (
-                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>{selectedResidentForView.documentProofUrl.split('/').pop()}</div>
-                    )}
                   </div>
                   <button
                     type="button"
@@ -387,9 +384,24 @@ export default function Residents() {
                     style={{ padding: '6px 14px', fontSize: '12px' }}
                     onClick={(e) => handleOpenDocument(e, selectedResidentForView.documentProofUrl, selectedResidentForView.documentType || 'Rent Agreement')}
                   >
-                    View Document ➔
+                    Open Full Image ➔
                   </button>
                 </div>
+
+                {/* Live Document Image Preview Box */}
+                {selectedResidentForView.documentProofUrl && (selectedResidentForView.documentProofUrl.startsWith('data:image/') || selectedResidentForView.documentProofUrl.startsWith('http')) ? (
+                  <div style={{ marginTop: '8px', textAlign: 'center', background: '#FFFFFF', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                    <img
+                      src={selectedResidentForView.documentProofUrl}
+                      alt="Verification Proof Document"
+                      style={{ maxWidth: '100%', maxHeight: '240px', borderRadius: '6px', objectFit: 'contain' }}
+                    />
+                  </div>
+                ) : selectedResidentForView.documentProofUrl ? (
+                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '4px' }}>
+                    File path reference: <code>{selectedResidentForView.documentProofUrl}</code>
+                  </div>
+                ) : null}
               </div>
             </div>
 

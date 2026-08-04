@@ -136,6 +136,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     setState(() => _isLoading = true);
     try {
+      String? documentUrl;
+      if (_documentFile != null && await _documentFile!.exists()) {
+        final bytes = await _documentFile!.readAsBytes();
+        final base64Str = base64Encode(bytes);
+        documentUrl = 'data:image/jpeg;base64,$base64Str';
+      }
+
       await ref.read(authServiceProvider).registerWithEmail(
         email: _emailController.text,
         password: _passwordController.text,
@@ -149,7 +156,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         role: 'resident',
         residentRoleType: _selectedYouAre,
         occupancyStatus: _selectedOccupancy,
-        documentProofUrl: _documentFile?.path,
+        documentProofUrl: documentUrl ?? _documentFile?.path,
         documentType: _documentType,
       );
 
