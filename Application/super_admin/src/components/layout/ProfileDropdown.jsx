@@ -35,14 +35,14 @@ export default function ProfileDropdown({ userEmail, role = 'Society Admin', soc
           width: '48px',
           height: '48px',
           borderRadius: '50%',
-          background: 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)',
+          background: 'linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)',
           color: '#FFFFFF',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           fontWeight: 800,
           fontSize: '18px',
-          boxShadow: '0 2px 8px rgba(79, 70, 229, 0.25)',
+          boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)',
           flexShrink: 0
         }}
       >
