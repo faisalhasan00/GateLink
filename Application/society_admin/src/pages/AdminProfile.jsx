@@ -24,13 +24,13 @@ export default function AdminProfile() {
   const societyId = session?.societyId || 'SOC-001';
 
   const [profile, setProfile] = useState({
-    name: 'Society Administrator',
-    email: auth.currentUser?.email || 'admin@society.com',
-    phone: '+91 98765 43210',
+    name: session?.adminEmail ? session.adminEmail.split('@')[0].replace('.', ' ') : 'Society Administrator',
+    email: auth.currentUser?.email || session?.adminEmail || '',
+    phone: session?.phone || 'Not configured',
     societyName: session?.societyName || 'Housing Society',
     societyId: societyId,
     role: 'Society Administrator',
-    memberSince: 'January 2025'
+    memberSince: new Date().getFullYear().toString()
   });
 
   const [activityLogs, setActivityLogs] = useState([]);

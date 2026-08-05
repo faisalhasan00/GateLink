@@ -30,19 +30,12 @@ import {
 import { db } from '../firebase';
 import { getSocietyAdminSession } from '../services/sessionManager';
 
-const STAFF_LIST = [
-  { id: 'STF-01', name: 'Ramesh Kumar', role: 'Electrician' },
-  { id: 'STF-02', name: 'Suresh Patil', role: 'Plumber' },
-  { id: 'STF-03', name: 'Sunita Sharma', role: 'Housekeeping Supervisor' },
-  { id: 'STF-04', name: 'Vikram Singh', role: 'Head Security Officer' },
-  { id: 'STF-05', name: 'Anil Verma', role: 'Lift & Building Technician' },
-];
-
 export default function Complaints() {
   const session = getSocietyAdminSession();
   const societyId = session?.societyId || 'SOC-001';
 
   const [complaints, setComplaints] = useState([]);
+  const [staffList, setStaffList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
 
@@ -60,8 +53,9 @@ export default function Complaints() {
   const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
-    const q = query(collection(db, `societies/${societyId}/complaints`), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
+    // 1. Fetch Complaints Stream
+    const qComplaints = query(collection(db, `societies/${societyId}/complaints`), orderBy('createdAt', 'desc'));
+    const unsubComplaints = onSnapshot(qComplaints, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setComplaints(data);
       setLoading(false);
@@ -72,7 +66,18 @@ export default function Complaints() {
         if (updated) setSelectedComplaint(updated);
       }
     });
-    return () => unsubscribe();
+
+    // 2. Fetch Real Society Staff Directory Stream
+    const qStaff = query(collection(db, `societies/${societyId}/staff`));
+    const unsubStaff = onSnapshot(qStaff, (snapshot) => {
+      const data = snapshot.docs.map(doc => ({ id: doc.id, name: doc.data().name, role: doc.data().role }));
+      setStaffList(data);
+    });
+
+    return () => {
+      unsubComplaints();
+      unsubStaff();
+    };
   }, [societyId, selectedComplaint?.id]);
 
   // Status Machine update helper with audit log & resident notification
@@ -113,7 +118,7 @@ export default function Complaints() {
     if (!selectedComplaint || !selectedStaff) return;
 
     try {
-      const staffObj = STAFF_LIST.find(s => s.name === selectedStaff);
+      const staffObj = staffList.find(s => s.name === selectedStaff);
       const timestampStr = new Date().toLocaleString();
       const complaintRef = doc(db, `societies/${societyId}/complaints`, selectedComplaint.id);
 

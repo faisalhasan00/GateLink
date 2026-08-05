@@ -200,6 +200,22 @@ export default function Dashboard() {
         }));
       });
 
+      // 7. Listen to Staff Directory
+      const qStaff = query(collection(db, `societies/${societyId}/staff`));
+      unsubStaff = onSnapshot(qStaff, (snapshot) => {
+        const docs = snapshot.docs.map(d => d.data());
+        const guards = docs.filter(s => (s.department || '').toLowerCase().includes('security') || (s.role || '').toLowerCase().includes('guard')).length;
+        const maint = docs.filter(s => (s.department || '').toLowerCase().includes('maintenance') || (s.department || '').toLowerCase().includes('electrical') || (s.department || '').toLowerCase().includes('plumbing')).length;
+        const house = docs.filter(s => (s.department || '').toLowerCase().includes('housekeeping') || (s.department || '').toLowerCase().includes('cleaning')).length;
+        setStats(prev => ({
+          ...prev,
+          staffActive: docs.filter(s => s.status === 'Active').length,
+          staffGuards: guards,
+          staffMaintenance: maint,
+          staffHousekeeping: house
+        }));
+      });
+
     } catch (err) {
       console.error('Error attaching dashboard Firestore listeners:', err);
       setError(err.message);
@@ -213,6 +229,7 @@ export default function Dashboard() {
       if (unsubBills) unsubBills();
       if (unsubDocs) unsubDocs();
       if (unsubAmenity) unsubAmenity();
+      if (unsubStaff) unsubStaff();
     };
   }, [societyId]);
 
