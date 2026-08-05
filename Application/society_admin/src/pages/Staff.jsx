@@ -40,28 +40,58 @@ import {
 import { db } from '../firebase';
 import { getSocietyAdminSession } from '../services/sessionManager';
 
-const DEPARTMENTS = [
-  'Security',
-  'Housekeeping',
-  'Electrical',
-  'Plumbing',
-  'Gardening',
-  'Reception',
-  'Accounts',
-  'Management',
-  'Maintenance'
-];
+const DEPARTMENT_ROLES_MAP = {
+  'Security': [
+    'Security Guard',
+    'Security Supervisor',
+    'Head Security Officer',
+    'CCTV Monitor Operator'
+  ],
+  'Housekeeping': [
+    'Housekeeping Staff',
+    'Housekeeping Supervisor',
+    'Janitor & Cleaner',
+    'Waste Management Operator'
+  ],
+  'Electrical': [
+    'Electrician',
+    'Senior Electrical Engineer',
+    'Generator Operator'
+  ],
+  'Plumbing': [
+    'Plumber',
+    'Pump Room Operator',
+    'Sanitation Technician'
+  ],
+  'Gardening': [
+    'Gardener & Horticulturist',
+    'Lawn Maintenance Worker'
+  ],
+  'Reception': [
+    'Front Desk Executive',
+    'Receptionist',
+    'Concierge Desk Manager'
+  ],
+  'Accounts': [
+    'Accountant',
+    'Billing & Collections Executive',
+    'Audit Officer'
+  ],
+  'Management': [
+    'Facility Manager',
+    'Society Manager',
+    'Estate Officer',
+    'Operations Supervisor'
+  ],
+  'Maintenance': [
+    'Maintenance Technician',
+    'Lift & Elevator Technician',
+    'HVAC Technician',
+    'Building Maintenance Engineer'
+  ]
+};
 
-const PREDEFINED_ROLES = [
-  'Security Guard',
-  'Security Supervisor',
-  'Receptionist',
-  'Accountant',
-  'Facility Manager',
-  'Maintenance Technician',
-  'Housekeeping Supervisor',
-  'Custom Role'
-];
+const DEPARTMENTS = Object.keys(DEPARTMENT_ROLES_MAP);
 
 const MODULE_PERMISSIONS = [
   { id: 'residents', label: 'Residents Directory', actions: ['View', 'Approve', 'Edit', 'Delete'] },
@@ -136,6 +166,16 @@ export default function Staff() {
       unsubRoles();
     };
   }, [societyId]);
+
+  const handleDepartmentChange = (newDept) => {
+    const relatedRoles = DEPARTMENT_ROLES_MAP[newDept] || [];
+    const defaultRole = relatedRoles.length > 0 ? relatedRoles[0] : '';
+    setFormData(prev => ({
+      ...prev,
+      department: newDept,
+      role: defaultRole
+    }));
+  };
 
   const handleAddOrEditStaff = async (e) => {
     e.preventDefault();
@@ -576,7 +616,12 @@ export default function Staff() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div>
                   <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Department *</label>
-                  <select className="form-select" value={formData.department} onChange={e => setFormData({ ...formData, department: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }}>
+                  <select 
+                    className="form-select" 
+                    value={formData.department} 
+                    onChange={e => handleDepartmentChange(e.target.value)} 
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }}
+                  >
                     {DEPARTMENTS.map(d => (
                       <option key={d} value={d}>{d}</option>
                     ))}
@@ -584,13 +629,32 @@ export default function Staff() {
                 </div>
                 <div>
                   <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Assigned Role *</label>
-                  <select className="form-select" value={formData.role} onChange={e => setFormData({ ...formData, role: e.target.value })} style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }}>
-                    {PREDEFINED_ROLES.map(r => (
-                      <option key={r} value={r}>{r}</option>
-                    ))}
-                    {customRoles.map(cr => (
-                      <option key={cr.id} value={cr.roleName}>{cr.roleName} (Custom)</option>
-                    ))}
+                  <select 
+                    className="form-select" 
+                    value={formData.role} 
+                    onChange={e => setFormData({ ...formData, role: e.target.value })} 
+                    style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }}
+                  >
+                    <optgroup label={`Related ${formData.department} Roles`}>
+                      {(DEPARTMENT_ROLES_MAP[formData.department] || []).map(r => (
+                        <option key={r} value={r}>{r}</option>
+                      ))}
+                    </optgroup>
+                    {customRoles.length > 0 && (
+                      <optgroup label="Custom RBAC Roles">
+                        {customRoles.map(cr => (
+                          <option key={cr.id} value={cr.roleName}>{cr.roleName} (Custom)</option>
+                        ))}
+                      </optgroup>
+                    )}
+                    <optgroup label="Other Department Roles">
+                      {Object.entries(DEPARTMENT_ROLES_MAP)
+                        .filter(([dept]) => dept !== formData.department)
+                        .flatMap(([_, roles]) => roles)
+                        .map(r => (
+                          <option key={r} value={r}>{r}</option>
+                        ))}
+                    </optgroup>
                   </select>
                 </div>
               </div>
