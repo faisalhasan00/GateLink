@@ -63,19 +63,19 @@ const PREDEFINED_ROLES = [
 ];
 
 const MODULE_PERMISSIONS = [
-  { id: 'dashboard', label: 'Dashboard Overview', actions: ['View'] },
-  { id: 'residents', label: 'Resident Directory', actions: ['View', 'Create', 'Edit', 'Delete'] },
-  { id: 'visitors', label: 'Visitor Entry & Gate Pass', actions: ['View', 'Approve', 'Reject', 'Edit'] },
-  { id: 'complaints', label: 'Complaint Helpdesk', actions: ['View', 'Assign', 'Update', 'Close'] },
-  { id: 'billing', label: 'Maintenance & Billing', actions: ['View', 'Generate Bills', 'Edit Bills', 'Verify Payments'] },
-  { id: 'documents', label: 'Society Documents', actions: ['View', 'Upload', 'Edit', 'Delete'] },
-  { id: 'amenities', label: 'Amenity Bookings', actions: ['View', 'Manage Bookings'] },
-  { id: 'notices', label: 'Notice Board', actions: ['View', 'Create', 'Edit', 'Delete'] },
+  { id: 'residents', label: 'Residents Directory', actions: ['View', 'Approve', 'Edit', 'Delete'] },
+  { id: 'visitors', label: 'Visitor Logs & Gate Passes', actions: ['View', 'Create Pass', 'Approve Entry'] },
+  { id: 'complaints', label: 'Helpdesk Complaints', actions: ['View', 'Assign', 'Resolve', 'Delete'] },
+  { id: 'notices', label: 'Broadcast Notices', actions: ['View', 'Create', 'Delete'] },
+  { id: 'maintenance', label: 'Maintenance & Billing', actions: ['View', 'Generate Bills', 'Record Payments'] },
   { id: 'staff', label: 'Staff & RBAC Permissions', actions: ['View', 'Create', 'Edit', 'Delete'] },
   { id: 'settings', label: 'Society Settings', actions: ['View', 'Modify'] }
 ];
 
 export default function Staff() {
+  const session = getSocietyAdminSession();
+  const societyId = session?.societyId || 'SOC-001';
+
   const [staffList, setStaffList] = useState([]);
   const [customRoles, setCustomRoles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -116,7 +116,7 @@ export default function Staff() {
 
   useEffect(() => {
     // 1. Fetch Staff Directory Stream
-    const qStaff = query(collection(db, 'societies/SOC-001/staff'), orderBy('createdAt', 'desc'));
+    const qStaff = query(collection(db, `societies/${societyId}/staff`), orderBy('createdAt', 'desc'));
     const unsubStaff = onSnapshot(qStaff, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setStaffList(data);
@@ -124,7 +124,7 @@ export default function Staff() {
     });
 
     // 2. Fetch Custom Roles Stream
-    const qRoles = query(collection(db, 'societies/SOC-001/roles'));
+    const qRoles = query(collection(db, `societies/${societyId}/roles`));
     const unsubRoles = onSnapshot(qRoles, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setCustomRoles(data);
@@ -134,7 +134,7 @@ export default function Staff() {
       unsubStaff();
       unsubRoles();
     };
-  }, []);
+  }, [societyId]);
 
   const handleAddOrEditStaff = async (e) => {
     e.preventDefault();
@@ -160,14 +160,14 @@ export default function Staff() {
       };
 
       if (editingStaff) {
-        await updateDoc(doc(db, 'societies/SOC-001/staff', editingStaff.id), staffPayload);
+        await updateDoc(doc(db, `societies/${societyId}/staff`, editingStaff.id), staffPayload);
         alert(`Successfully updated staff record for ${formData.name}.`);
       } else {
         staffPayload.createdAt = timestampStr;
-        const newRef = await addDoc(collection(db, 'societies/SOC-001/staff'), staffPayload);
+        const newRef = await addDoc(collection(db, `societies/${societyId}/staff`), staffPayload);
 
         // Add Initial Audit Activity Log
-        await addDoc(collection(db, `societies/SOC-001/staff/${newRef.id}/activity_logs`), {
+        await addDoc(collection(db, `societies/${societyId}/staff/${newRef.id}/activity_logs`), {
           action: 'Staff Member Onboarded',
           description: `Onboarded as ${formData.role} in ${formData.department} department.`,
           timestamp: timestampStr
@@ -200,10 +200,10 @@ export default function Staff() {
   const handleToggleStatus = async (staffObj) => {
     const newStatus = staffObj.status === 'Active' ? 'Suspended' : 'Active';
     try {
-      await updateDoc(doc(db, 'societies/SOC-001/staff', staffObj.id), { status: newStatus });
+      await updateDoc(doc(db, `societies/${societyId}/staff`, staffObj.id), { status: newStatus });
       
       // Log audit
-      await addDoc(collection(db, `societies/SOC-001/staff/${staffObj.id}/activity_logs`), {
+      await addDoc(collection(db, `societies/${societyId}/staff/${staffObj.id}/activity_logs`), {
         action: `Status Changed to ${newStatus}`,
         description: `Staff account status changed from ${staffObj.status} to ${newStatus}.`,
         timestamp: new Date().toISOString()
@@ -216,7 +216,7 @@ export default function Staff() {
   const handleDeleteStaff = async (id, name) => {
     if (window.confirm(`Are you sure you want to soft delete ${name} from staff directory?`)) {
       try {
-        await deleteDoc(doc(db, 'societies/SOC-001/staff', id));
+        await deleteDoc(doc(db, `societies/${societyId}/staff`, id));
       } catch (e) {
         alert('Error deleting staff: ' + e.message);
       }
@@ -233,7 +233,7 @@ export default function Staff() {
 
     setSubmitting(true);
     try {
-      const roleRef = collection(db, 'societies/SOC-001/roles');
+      const roleRef = collection(db, `societies/${societyId}/roles`);
       await addDoc(roleRef, {
         roleName: roleFormData.roleName.trim(),
         permissions: roleFormData.permissions,

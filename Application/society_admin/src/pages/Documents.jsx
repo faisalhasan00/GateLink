@@ -47,6 +47,9 @@ const CATEGORIES = [
 ];
 
 export default function Documents() {
+  const session = getSocietyAdminSession();
+  const societyId = session?.societyId || 'SOC-001';
+
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -75,14 +78,14 @@ export default function Documents() {
   const [selectedFile, setSelectedFile] = useState(null);
 
   useEffect(() => {
-    const q = query(collection(db, 'societies/SOC-001/documents'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, `societies/${societyId}/documents`), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setDocuments(data);
       setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [societyId]);
 
   const formatBytes = (bytes, decimals = 2) => {
     if (!+bytes) return '0 Bytes';
@@ -129,7 +132,7 @@ export default function Documents() {
 
       // Upload file to Firebase Storage (or Base64 data URL fallback if storage unconfigured)
       try {
-        const storageRef = ref(storage, `documents/SOC-001/${Date.now()}_${selectedFile.name}`);
+        const storageRef = ref(storage, `documents/${societyId}/${Date.now()}_${selectedFile.name}`);
         const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
         await new Promise((resolve, reject) => {
@@ -173,14 +176,14 @@ export default function Documents() {
         createdAt: timestampStr
       };
 
-      await addDoc(collection(db, 'societies/SOC-001/documents'), newDoc);
+      await addDoc(collection(db, `societies/${societyId}/documents`), newDoc);
 
       // Dispatch Notification to Residents if document visibility includes residents
       if (formData.visibility === 'All Residents') {
-        const qUsers = query(collection(db, 'societies/SOC-001/users'), where('role', '==', 'resident'));
+        const qUsers = query(collection(db, `societies/${societyId}/users`), where('role', '==', 'resident'));
         const userSnaps = await getDocs(qUsers);
         userSnaps.forEach((userDoc) => {
-          addDoc(collection(db, `societies/SOC-001/users/${userDoc.id}/notifications`), {
+          addDoc(collection(db, `societies/${societyId}/users/${userDoc.id}/notifications`), {
             title: `New Document Published: ${formData.title}`,
             body: `A new document "${formData.title}" (${formData.category}) has been uploaded to the society repository.`,
             createdAt: timestampStr,
@@ -211,7 +214,7 @@ export default function Documents() {
   const handleDelete = async (id, title) => {
     if (window.confirm(`Are you sure you want to delete "${title}" from society repository?`)) {
       try {
-        await deleteDoc(doc(db, 'societies/SOC-001/documents', id));
+        await deleteDoc(doc(db, `societies/${societyId}/documents`, id));
       } catch (e) {
         alert('Error deleting document: ' + e.message);
       }

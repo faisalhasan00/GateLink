@@ -28,6 +28,7 @@ import {
   serverTimestamp 
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getSocietyAdminSession } from '../services/sessionManager';
 
 const STAFF_LIST = [
   { id: 'STF-01', name: 'Ramesh Kumar', role: 'Electrician' },
@@ -38,6 +39,9 @@ const STAFF_LIST = [
 ];
 
 export default function Complaints() {
+  const session = getSocietyAdminSession();
+  const societyId = session?.societyId || 'SOC-001';
+
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedComplaint, setSelectedComplaint] = useState(null);
@@ -56,7 +60,7 @@ export default function Complaints() {
   const [previewImage, setPreviewImage] = useState(null);
 
   useEffect(() => {
-    const q = query(collection(db, 'societies/SOC-001/complaints'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, `societies/${societyId}/complaints`), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setComplaints(data);
@@ -69,12 +73,12 @@ export default function Complaints() {
       }
     });
     return () => unsubscribe();
-  }, [selectedComplaint?.id]);
+  }, [societyId, selectedComplaint?.id]);
 
   // Status Machine update helper with audit log & resident notification
   const handleUpdateStatus = async (complaintId, newStatus, residentUid) => {
     try {
-      const complaintRef = doc(db, 'societies/SOC-001/complaints', complaintId);
+      const complaintRef = doc(db, `societies/${societyId}/complaints`, complaintId);
       const timestampStr = new Date().toLocaleString();
 
       await updateDoc(complaintRef, {
@@ -90,7 +94,7 @@ export default function Complaints() {
 
       // Dispatch real-time resident notification
       if (residentUid) {
-        await addDoc(collection(db, `societies/SOC-001/users/${residentUid}/notifications`), {
+        await addDoc(collection(db, `societies/${societyId}/users/${residentUid}/notifications`), {
           title: `Complaint Status Updated: ${newStatus}`,
           body: `Your complaint #${complaintId.substring(0, 7)} status has been updated to "${newStatus}".`,
           createdAt: new Date().toISOString(),
@@ -111,7 +115,7 @@ export default function Complaints() {
     try {
       const staffObj = STAFF_LIST.find(s => s.name === selectedStaff);
       const timestampStr = new Date().toLocaleString();
-      const complaintRef = doc(db, 'societies/SOC-001/complaints', selectedComplaint.id);
+      const complaintRef = doc(db, `societies/${societyId}/complaints`, selectedComplaint.id);
 
       await updateDoc(complaintRef, {
         assignedStaffName: selectedStaff,
@@ -142,7 +146,7 @@ export default function Complaints() {
 
     try {
       const timestampStr = new Date().toLocaleString();
-      const complaintRef = doc(db, 'societies/SOC-001/complaints', selectedComplaint.id);
+      const complaintRef = doc(db, `societies/${societyId}/complaints`, selectedComplaint.id);
 
       const newComment = {
         id: Date.now().toString(),
@@ -165,7 +169,7 @@ export default function Complaints() {
 
       // Dispatch resident notification if message is public
       if (!isInternalNote && selectedComplaint.residentUid) {
-        await addDoc(collection(db, `societies/SOC-001/users/${selectedComplaint.residentUid}/notifications`), {
+        await addDoc(collection(db, `societies/${societyId}/users/${selectedComplaint.residentUid}/notifications`), {
           title: `New Response on Complaint #${selectedComplaint.id.substring(0, 7)}`,
           body: `Admin replied: "${commentText.substring(0, 45)}..."`,
           createdAt: new Date().toISOString(),

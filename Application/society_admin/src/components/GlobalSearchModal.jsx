@@ -1,25 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Search, X, Users, UserCheck, ShieldAlert, FileText, Wrench, Megaphone, Truck, Shield } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
+import { getSocietyAdminSession } from '../services/sessionManager';
 
 export default function GlobalSearchModal({ isOpen, onClose }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const inputRef = useRef(null);
   const navigate = useNavigate();
 
+  const session = getSocietyAdminSession();
+  const societyId = session?.societyId || 'SOC-001';
+
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        if (isOpen) onClose();
-      }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+    if (isOpen) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    } else {
+      setQuery('');
+      setResults([]);
+    }
+  }, [isOpen]);
 
   const handleSearch = async (val) => {
     setQuery(val);
@@ -34,7 +37,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
 
     try {
       // 1. Search Residents
-      const snapUsers = await getDocs(collection(db, 'societies/SOC-001/users'));
+      const snapUsers = await getDocs(collection(db, `societies/${societyId}/users`));
       snapUsers.forEach(d => {
         const u = d.data();
         if ((u.name || '').toLowerCase().includes(q) || (u.flatNumber || '').toLowerCase().includes(q) || (u.phone || '').includes(q)) {
@@ -50,7 +53,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
       });
 
       // 2. Search Visitors
-      const snapVisitors = await getDocs(collection(db, 'societies/SOC-001/visitors'));
+      const snapVisitors = await getDocs(collection(db, `societies/${societyId}/visitors`));
       snapVisitors.forEach(d => {
         const v = d.data();
         if ((v.name || '').toLowerCase().includes(q) || (v.hostFlat || '').toLowerCase().includes(q) || (v.phone || '').includes(q)) {
@@ -66,7 +69,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
       });
 
       // 3. Search Complaints
-      const snapComplaints = await getDocs(collection(db, 'societies/SOC-001/complaints'));
+      const snapComplaints = await getDocs(collection(db, `societies/${societyId}/complaints`));
       snapComplaints.forEach(d => {
         const c = d.data();
         if ((c.title || '').toLowerCase().includes(q) || (c.category || '').toLowerCase().includes(q) || (c.flatNumber || '').toLowerCase().includes(q)) {
@@ -82,7 +85,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
       });
 
       // 4. Search Bills
-      const snapBills = await getDocs(collection(db, 'societies/SOC-001/maintenance_bills'));
+      const snapBills = await getDocs(collection(db, `societies/${societyId}/maintenance_bills`));
       snapBills.forEach(d => {
         const b = d.data();
         if ((b.billNumber || d.id).toLowerCase().includes(q) || (b.residentName || '').toLowerCase().includes(q)) {

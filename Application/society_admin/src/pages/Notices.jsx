@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Plus, XCircle, Trash2, Edit3 } from 'lucide-react';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, addDoc, deleteDoc, getDocs, writeBatch } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getSocietyAdminSession } from '../services/sessionManager';
 
 const CATEGORIES = ['General', 'Maintenance', 'Safety', 'Event', 'Emergency', 'Rules'];
 
 export default function Notices() {
+  const session = getSocietyAdminSession();
+  const societyId = session?.societyId || 'SOC-001';
+
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,14 +18,14 @@ export default function Notices() {
   const [formData, setFormData] = useState({ title: '', body: '', category: 'General' });
 
   useEffect(() => {
-    const q = query(collection(db, 'societies/SOC-001/notices'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, `societies/${societyId}/notices`), orderBy('createdAt', 'desc'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
       setNotices(data);
       setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [societyId]);
 
   const openCreateModal = () => {
     setEditingNotice(null);
@@ -41,7 +45,7 @@ export default function Notices() {
     try {
       if (editingNotice) {
         // Update existing notice
-        await updateDoc(doc(db, 'societies/SOC-001/notices', editingNotice.id), {
+        await updateDoc(doc(db, `societies/${societyId}/notices`, editingNotice.id), {
           title: formData.title,
           body: formData.body,
           category: formData.category,
@@ -56,15 +60,15 @@ export default function Notices() {
           isNew: true,
           createdAt: new Date().toISOString(),
         };
-        await addDoc(collection(db, 'societies/SOC-001/notices'), noticeData);
+        await addDoc(collection(db, `societies/${societyId}/notices`), noticeData);
 
         // Also send a notification to every resident
-        const usersSnap = await getDocs(collection(db, 'societies/SOC-001/users'));
+        const usersSnap = await getDocs(collection(db, `societies/${societyId}/users`));
         const batch = writeBatch(db);
         usersSnap.forEach((userDoc) => {
           const userData = userDoc.data();
           if (userData.role === 'resident') {
-            const notifRef = doc(collection(db, `societies/SOC-001/users/${userDoc.id}/notifications`));
+            const notifRef = doc(collection(db, `societies/${societyId}/users/${userDoc.id}/notifications`));
             batch.set(notifRef, {
               title: '📢 New Notice: ' + formData.title,
               body: formData.body.length > 100 ? formData.body.substring(0, 100) + '...' : formData.body,
@@ -88,7 +92,7 @@ export default function Notices() {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this notice?')) return;
     try {
-      await deleteDoc(doc(db, 'societies/SOC-001/notices', id));
+      await deleteDoc(doc(db, `societies/${societyId}/notices`, id));
     } catch (error) {
       alert('Error deleting notice: ' + error.message);
     }

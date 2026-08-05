@@ -11,33 +11,30 @@ import {
   X,
   FileText
 } from 'lucide-react';
-import { 
-  collection, 
-  onSnapshot, 
-  query, 
-  orderBy, 
-  doc, 
-  updateDoc 
-} from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getSocietyAdminSession } from '../services/sessionManager';
 
 export default function EmergencySos() {
+  const session = getSocietyAdminSession();
+  const societyId = session?.societyId || 'SOC-001';
+
   const [sosAlerts, setSosAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, 'societies/SOC-001/sos_alerts'), orderBy('createdAt', 'desc'));
+    const q = query(collection(db, `societies/${societyId}/sos_alerts`), orderBy('createdAt', 'desc'));
     const unsub = onSnapshot(q, (snap) => {
       const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setSosAlerts(data);
       setLoading(false);
     });
     return () => unsub();
-  }, []);
+  }, [societyId]);
 
   const handleUpdateSosStatus = async (id, newStatus) => {
     try {
-      await updateDoc(doc(db, 'societies/SOC-001/sos_alerts', id), {
+      await updateDoc(doc(db, `societies/${societyId}/sos_alerts`, id), {
         status: newStatus,
         resolvedAt: newStatus === 'Resolved' ? new Date().toISOString() : null
       });

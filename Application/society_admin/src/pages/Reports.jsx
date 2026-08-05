@@ -18,15 +18,22 @@ import {
 } from 'lucide-react';
 import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getSocietyAdminSession } from '../services/sessionManager';
 import { exportToCSV, exportToPDF } from '../utils/exportUtils';
 
 export default function Reports() {
+  const session = getSocietyAdminSession();
+  const societyId = session?.societyId || 'SOC-001';
+
+  const [dateRange, setDateRange] = useState('This Month');
+  const [reportType, setReportType] = useState('All');
   const [stats, setStats] = useState({
     residents: 0,
     occupied: 0,
     vacant: 0,
     visitors: 0,
     visitorsToday: 0,
+    deliveriesToday: 0,
     complaints: 0,
     openComplaints: 0,
     closedComplaints: 0,
@@ -35,7 +42,6 @@ export default function Reports() {
     pendingPayments: 0,
     staff: 0,
     helpers: 0,
-    deliveriesToday: 0,
     sosEvents: 0,
     documents: 0,
   });
@@ -43,18 +49,18 @@ export default function Reports() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Live Firestore Listeners across all 10 core collections
-    const unsubUsers = onSnapshot(collection(db, 'societies/SOC-001/users'), (snap) => {
+    // Live Firestore Listeners across all core collections
+    const unsubUsers = onSnapshot(collection(db, `societies/${societyId}/users`), (snap) => {
       const docs = snap.docs.map(d => d.data());
       setStats(prev => ({
         ...prev,
         residents: docs.length,
         occupied: docs.length,
-        vacant: 480 - docs.length,
+        vacant: Math.max(0, 200 - docs.length),
       }));
     });
 
-    const unsubVisitors = onSnapshot(collection(db, 'societies/SOC-001/visitors'), (snap) => {
+    const unsubVisitors = onSnapshot(collection(db, `societies/${societyId}/visitors`), (snap) => {
       const docs = snap.docs.map(d => d.data());
       const deliveries = docs.filter(v => v.type === 'Delivery' || v.company).length;
       setStats(prev => ({
@@ -65,7 +71,7 @@ export default function Reports() {
       }));
     });
 
-    const unsubComplaints = onSnapshot(collection(db, 'societies/SOC-001/complaints'), (snap) => {
+    const unsubComplaints = onSnapshot(collection(db, `societies/${societyId}/complaints`), (snap) => {
       const docs = snap.docs.map(d => d.data());
       const open = docs.filter(c => c.status === 'Open' || c.status === 'In Progress').length;
       const closed = docs.filter(c => c.status === 'Resolved' || c.status === 'Closed').length;
@@ -77,7 +83,7 @@ export default function Reports() {
       }));
     });
 
-    const unsubBills = onSnapshot(collection(db, 'societies/SOC-001/maintenance_bills'), (snap) => {
+    const unsubBills = onSnapshot(collection(db, `societies/${societyId}/maintenance_bills`), (snap) => {
       const docs = snap.docs.map(d => d.data());
       const totalGen = docs.reduce((acc, b) => acc + (Number(b.amount) || 0), 0);
       const totalColl = docs.filter(b => b.status === 'Paid').reduce((acc, b) => acc + (Number(b.amount) || 0), 0);
@@ -89,15 +95,15 @@ export default function Reports() {
       }));
     });
 
-    const unsubStaff = onSnapshot(collection(db, 'societies/SOC-001/staff'), (snap) => {
+    const unsubStaff = onSnapshot(collection(db, `societies/${societyId}/staff`), (snap) => {
       setStats(prev => ({ ...prev, staff: snap.docs.length }));
     });
 
-    const unsubHelpers = onSnapshot(collection(db, 'societies/SOC-001/helpers'), (snap) => {
+    const unsubHelpers = onSnapshot(collection(db, `societies/${societyId}/helpers`), (snap) => {
       setStats(prev => ({ ...prev, helpers: snap.docs.length }));
     });
 
-    const unsubSos = onSnapshot(collection(db, 'societies/SOC-001/sos_alerts'), (snap) => {
+    const unsubSos = onSnapshot(collection(db, `societies/${societyId}/sos_alerts`), (snap) => {
       setStats(prev => ({ ...prev, sosEvents: snap.docs.length }));
       setLoading(false);
     });
@@ -111,7 +117,7 @@ export default function Reports() {
       unsubHelpers();
       unsubSos();
     };
-  }, []);
+  }, [societyId]);
 
   const handleExportCSV = () => {
     const reportData = [

@@ -2,32 +2,36 @@ import React, { useState, useEffect } from 'react';
 import { Plus, XCircle, CheckCircle } from 'lucide-react';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, addDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getSocietyAdminSession } from '../services/sessionManager';
 
 export default function Parking() {
+  const session = getSocietyAdminSession();
+  const societyId = session?.societyId || 'SOC-001';
+
   const [parkingSlots, setParkingSlots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ slot: '', level: 'Basement 1', number: '', type: 'Car', model: '', color: '', status: 'Active' });
 
   useEffect(() => {
-    const q = query(collection(db, 'societies/SOC-001/parking'), orderBy('slot'));
+    const q = query(collection(db, `societies/${societyId}/parking`), orderBy('slot'));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setParkingSlots(data);
       setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [societyId]);
 
   const toggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
-    await updateDoc(doc(db, `societies/SOC-001/parking`, id), { status: newStatus });
+    await updateDoc(doc(db, `societies/${societyId}/parking`, id), { status: newStatus });
   };
 
   const handleAllocate = async (e) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, 'societies/SOC-001/parking'), {
+      await addDoc(collection(db, `societies/${societyId}/parking`), {
         ...formData,
         createdAt: new Date().toISOString()
       });

@@ -17,14 +17,18 @@ import {
 import { auth, db } from '../firebase';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { doc, getDoc, updateDoc, collection, addDoc, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { getSocietyAdminSession } from '../services/sessionManager';
 
 export default function AdminProfile() {
+  const session = getSocietyAdminSession();
+  const societyId = session?.societyId || 'SOC-001';
+
   const [profile, setProfile] = useState({
     name: 'Society Administrator',
     email: auth.currentUser?.email || 'admin@society.com',
     phone: '+91 98765 43210',
-    societyName: 'Housing Society',
-    societyId: 'SOC-001',
+    societyName: session?.societyName || 'Housing Society',
+    societyId: societyId,
     role: 'Society Administrator',
     memberSince: 'January 2025'
   });
@@ -44,7 +48,7 @@ export default function AdminProfile() {
     // 1. Fetch Profile Info
     const user = auth.currentUser;
     if (user) {
-      getDoc(doc(db, 'societies/SOC-001/users', user.uid)).then(snap => {
+      getDoc(doc(db, `societies/${societyId}/users`, user.uid)).then(snap => {
         if (snap.exists()) {
           setProfile(prev => ({ ...prev, ...snap.data() }));
           setFormData({ name: snap.data().name || 'Society Administrator', email: user.email || '' });
@@ -52,27 +56,27 @@ export default function AdminProfile() {
       }).catch(e => console.error(e));
 
       // 2. Fetch Activity Logs Stream
-      const qLogs = query(collection(db, `societies/SOC-001/users/${user.uid}/activity_logs`), orderBy('timestamp', 'desc'));
+      const qLogs = query(collection(db, `societies/${societyId}/users/${user.uid}/activity_logs`), orderBy('timestamp', 'desc'));
       const unsub = onSnapshot(qLogs, (snap) => {
         const logs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         setActivityLogs(logs);
       });
       return () => unsub();
     }
-  }, []);
+  }, [societyId]);
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     try {
       const user = auth.currentUser;
       if (user) {
-        await updateDoc(doc(db, 'societies/SOC-001/users', user.uid), {
+        await updateDoc(doc(db, `societies/${societyId}/users`, user.uid), {
           name: formData.name,
           updatedAt: new Date().toISOString()
         });
 
         // Add Log
-        await addDoc(collection(db, `societies/SOC-001/users/${user.uid}/activity_logs`), {
+        await addDoc(collection(db, `societies/${societyId}/users/${user.uid}/activity_logs`), {
           action: 'Profile Updated',
           description: 'Updated administrator name and profile metadata.',
           timestamp: new Date().toISOString()
@@ -108,7 +112,7 @@ export default function AdminProfile() {
         await reauthenticateWithCredential(user, cred);
         await updatePassword(user, pwdData.newPwd);
 
-        await addDoc(collection(db, `societies/SOC-001/users/${user.uid}/activity_logs`), {
+        await addDoc(collection(db, `societies/${societyId}/users/${user.uid}/activity_logs`), {
           action: 'Password Changed',
           description: 'Administrator account password changed successfully.',
           timestamp: new Date().toISOString()

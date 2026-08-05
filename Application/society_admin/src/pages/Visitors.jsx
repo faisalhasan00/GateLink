@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getSocietyAdminSession } from '../services/sessionManager';
 
 export default function Visitors() {
+  const session = getSocietyAdminSession();
+  const societyId = session?.societyId || 'SOC-001';
+
   const [visitors, setVisitors] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const q = query(
-      collection(db, 'societies/SOC-001/visitors'),
+      collection(db, `societies/${societyId}/visitors`),
       orderBy('entryTime', 'desc')
     );
 
@@ -19,7 +23,7 @@ export default function Visitors() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [societyId]);
 
   const formatTime = (isoString) => {
     if (!isoString) return '-';

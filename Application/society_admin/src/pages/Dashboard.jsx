@@ -32,22 +32,25 @@ import {
   getDoc 
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getSocietyAdminSession } from '../services/sessionManager';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const session = getSocietyAdminSession();
+  const societyId = session?.societyId || 'SOC-001';
 
   // Society Metadata State
   const [society, setSociety] = useState({
-    name: 'Housing Society',
-    code: 'SOC-001',
-    address: '124 Palm Avenue',
-    city: 'Hyderabad',
-    state: 'Telangana',
-    pin: '500081',
-    plan: 'ENTERPRISE'
+    name: session?.societyName || 'Society Management Committee',
+    code: societyId,
+    address: 'Gated Community Operations Hub',
+    city: 'N/A',
+    state: 'N/A',
+    pin: '000000',
+    plan: 'BASIC'
   });
 
-  // Real-Time Dynamic Module Statistics
+  // Aggregated Real-time Metrics State
   const [stats, setStats] = useState({
     // 1. Residents
     residentsTotal: 0,
@@ -68,8 +71,8 @@ export default function Dashboard() {
     billsPaid: 0,
     billsPending: 0,
     billsOverdue: 0,
-    collectionTotal: 485000,
-    outstandingTotal: 45000,
+    collectionTotal: 0,
+    outstandingTotal: 0,
     // 5. Amenities
     amenitiesBookingsToday: 0,
     amenitiesBookingsUpcoming: 0,
@@ -95,14 +98,14 @@ export default function Dashboard() {
 
     try {
       // 0. Fetch Society Metadata
-      getDoc(doc(db, 'societies', 'SOC-001')).then((snap) => {
+      getDoc(doc(db, 'societies', societyId)).then((snap) => {
         if (snap.exists()) {
           setSociety((prev) => ({ ...prev, ...snap.data() }));
         }
       }).catch((e) => console.error('Society metadata fetch error:', e));
 
       // 1. Listen to Users (Residents)
-      const qUsers = query(collection(db, 'societies/SOC-001/users'), where('role', '==', 'resident'));
+      const qUsers = query(collection(db, `societies/${societyId}/users`), where('role', '==', 'resident'));
       unsubUsers = onSnapshot(qUsers, (snapshot) => {
         const total = snapshot.docs.length;
         const active = snapshot.docs.filter(d => d.data().status !== 'inactive').length;
@@ -115,7 +118,7 @@ export default function Dashboard() {
       });
 
       // 2. Listen to Visitors (Live Stream)
-      const qVisitors = query(collection(db, 'societies/SOC-001/visitors'), orderBy('createdDate', 'desc'), limit(30));
+      const qVisitors = query(collection(db, `societies/${societyId}/visitors`), orderBy('createdDate', 'desc'), limit(30));
       unsubVisitors = onSnapshot(qVisitors, (snapshot) => {
         const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         
@@ -148,7 +151,7 @@ export default function Dashboard() {
       });
 
       // 3. Listen to Complaints
-      const qComplaints = query(collection(db, 'societies/SOC-001/complaints'), orderBy('createdAt', 'desc'), limit(10));
+      const qComplaints = query(collection(db, `societies/${societyId}/complaints`), orderBy('createdAt', 'desc'), limit(10));
       unsubComplaints = onSnapshot(qComplaints, (snapshot) => {
         const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         const open = docs.filter(c => c.status === 'open' || c.status === 'Pending').length;
@@ -166,7 +169,7 @@ export default function Dashboard() {
       });
 
       // 4. Listen to Maintenance Bills
-      const qBills = query(collection(db, 'societies/SOC-001/maintenance'), limit(20));
+      const qBills = query(collection(db, `societies/${societyId}/maintenance`), limit(20));
       unsubBills = onSnapshot(qBills, (snapshot) => {
         const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
         const paid = docs.filter(b => b.status === 'paid' || b.status === 'Paid').length;
@@ -182,13 +185,13 @@ export default function Dashboard() {
       });
 
       // 5. Listen to Documents
-      const qDocs = query(collection(db, 'societies/SOC-001/documents'));
+      const qDocs = query(collection(db, `societies/${societyId}/documents`));
       unsubDocs = onSnapshot(qDocs, (snapshot) => {
         setStats(prev => ({ ...prev, documentsTotal: snapshot.docs.length }));
       });
 
       // 6. Listen to Amenity Bookings
-      const qAmenity = query(collection(db, 'societies/SOC-001/amenities'));
+      const qAmenity = query(collection(db, `societies/${societyId}/amenities`));
       unsubAmenity = onSnapshot(qAmenity, (snapshot) => {
         setStats(prev => ({
           ...prev,
@@ -198,8 +201,8 @@ export default function Dashboard() {
       });
 
     } catch (err) {
-      console.error('Error attaching Firebase listeners:', err);
-      setError('Failed to connect to real-time database.');
+      console.error('Error attaching dashboard Firestore listeners:', err);
+      setError(err.message);
       setLoading(false);
     }
 
@@ -211,11 +214,11 @@ export default function Dashboard() {
       if (unsubDocs) unsubDocs();
       if (unsubAmenity) unsubAmenity();
     };
-  }, []);
+  }, [societyId]);
 
   const handleApproveVisitor = async (docId) => {
     try {
-      await updateDoc(doc(db, 'societies/SOC-001/visitors', docId), {
+      await updateDoc(doc(db, `societies/${societyId}/visitors`, docId), {
         status: 'approved',
         approvedAt: new Date().toISOString()
       });
@@ -226,7 +229,7 @@ export default function Dashboard() {
 
   const handleDenyVisitor = async (docId) => {
     try {
-      await updateDoc(doc(db, 'societies/SOC-001/visitors', docId), {
+      await updateDoc(doc(db, `societies/${societyId}/visitors`, docId), {
         status: 'denied',
         rejectedAt: new Date().toISOString()
       });

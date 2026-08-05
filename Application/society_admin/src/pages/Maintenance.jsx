@@ -31,11 +31,16 @@ import {
   where 
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getSocietyAdminSession } from '../services/sessionManager';
 
 export default function Maintenance() {
+  const session = getSocietyAdminSession();
+  const societyId = session?.societyId || 'SOC-001';
+
   const [bills, setBills] = useState([]);
   const [residents, setResidents] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('all'); // 'all', 'paid', 'pending'
 
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,12 +53,12 @@ export default function Maintenance() {
   const [paymentModalBill, setPaymentModalBill] = useState(null);
 
   // Form State for Bill Generation
-  const [billingScope, setBillingScope] = useState('bulk'); // 'bulk' or 'single'
+  const [billingScope, setBillingScope] = useState('single'); // 'single' or 'all'
   const [selectedResidentUid, setSelectedResidentUid] = useState('');
   const [formData, setFormData] = useState({
-    title: 'Monthly Maintenance & Utilities',
-    month: 'July 2026',
-    dueDate: new Date(Date.now() + 15 * 86400000).toISOString().split('T')[0],
+    title: 'Monthly Maintenance & Society Facilities',
+    month: 'March 2026',
+    dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     maintenanceCharge: 3500,
     parkingCharge: 500,
     waterCharge: 300,
@@ -63,16 +68,16 @@ export default function Maintenance() {
 
   // Payment Form State
   const [paymentData, setPaymentData] = useState({
-    method: 'Razorpay',
+    method: 'Razorpay UPI / Card',
     transactionId: '',
-    notes: 'Online settlement verified'
+    notes: 'Verified via Society Admin Office'
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     // 1. Fetch Maintenance Bills Stream
-    const qBills = query(collection(db, 'societies/SOC-001/maintenance_bills'), orderBy('createdAt', 'desc'));
+    const qBills = query(collection(db, `societies/${societyId}/maintenance_bills`), orderBy('createdAt', 'desc'));
     const unsubBills = onSnapshot(qBills, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setBills(data);
@@ -80,14 +85,14 @@ export default function Maintenance() {
     });
 
     // 2. Fetch Residents for single bill dropdown
-    const qUsers = query(collection(db, 'societies/SOC-001/users'), where('role', '==', 'resident'));
+    const qUsers = query(collection(db, `societies/${societyId}/users`), where('role', '==', 'resident'));
     getDocs(qUsers).then((snap) => {
       const resList = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
       setResidents(resList);
     }).catch(e => console.error(e));
 
     return () => unsubBills();
-  }, []);
+  }, [societyId]);
 
   // Compute Total Bill Amount dynamically
   const calculateTotal = (data) => {
@@ -106,7 +111,7 @@ export default function Maintenance() {
 
     try {
       const totalAmount = calculateTotal(formData);
-      const billsRef = collection(db, 'societies/SOC-001/maintenance_bills');
+      const billsRef = collection(db, `societies/${societyId}/maintenance_bills`);
       const timestampStr = new Date().toISOString();
 
       if (billingScope === 'single') {
@@ -141,7 +146,7 @@ export default function Maintenance() {
         await addDoc(billsRef, newBill);
 
         // Dispatch in-app notification to resident
-        await addDoc(collection(db, `societies/SOC-001/users/${selectedResidentUid}/notifications`), {
+        await addDoc(collection(db, `societies/${societyId}/users/${selectedResidentUid}/notifications`), {
           title: `New Maintenance Bill Generated (${formData.month})`,
           body: `Bill #${billNo} for ₹${totalAmount} has been generated. Due Date: ${formData.dueDate}`,
           createdAt: timestampStr,
@@ -185,7 +190,7 @@ export default function Maintenance() {
           });
 
           // Dispatch notification
-          addDoc(collection(db, `societies/SOC-001/users/${resObj.uid}/notifications`), {
+          addDoc(collection(db, `societies/${societyId}/users/${resObj.uid}/notifications`), {
             title: `New Maintenance Bill Generated (${formData.month})`,
             body: `Bill #${billNo} for ₹${totalAmount} has been generated. Due Date: ${formData.dueDate}`,
             createdAt: timestampStr,
@@ -217,7 +222,7 @@ export default function Maintenance() {
       const txnId = paymentData.transactionId.trim() || `TXN-${Math.floor(100000 + Math.random() * 900000)}`;
       const timestampStr = new Date().toISOString();
 
-      await updateDoc(doc(db, 'societies/SOC-001/maintenance_bills', paymentModalBill.id), {
+      await updateDoc(doc(db, `societies/${societyId}/maintenance_bills`, paymentModalBill.id), {
         status: 'paid',
         paymentMethod: paymentData.method,
         transactionId: txnId,
@@ -227,7 +232,7 @@ export default function Maintenance() {
 
       // Dispatch resident notification
       if (paymentModalBill.residentUid) {
-        await addDoc(collection(db, `societies/SOC-001/users/${paymentModalBill.residentUid}/notifications`), {
+        await addDoc(collection(db, `societies/${societyId}/users/${paymentModalBill.residentUid}/notifications`), {
           title: `Payment Received & Verified!`,
           body: `Payment of ₹${paymentModalBill.amount} for Bill #${paymentModalBill.billNumber || paymentModalBill.id.substring(0,7)} has been settled via ${paymentData.method}. Txn: ${txnId}`,
           createdAt: timestampStr,

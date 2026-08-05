@@ -26,8 +26,12 @@ import {
   updateDoc 
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getSocietyAdminSession } from '../services/sessionManager';
 
 export default function HelpersDeliveries() {
+  const session = getSocietyAdminSession();
+  const societyId = session?.societyId || 'SOC-001';
+
   const [activeTab, setActiveTab] = useState('helpers'); // 'helpers' or 'deliveries'
   const [helpers, setHelpers] = useState([]);
   const [deliveries, setDeliveries] = useState([]);
@@ -40,7 +44,7 @@ export default function HelpersDeliveries() {
 
   useEffect(() => {
     // 1. Fetch Domestic Helpers Stream
-    const qHelpers = query(collection(db, 'societies/SOC-001/helpers'), orderBy('createdAt', 'desc'));
+    const qHelpers = query(collection(db, `societies/${societyId}/helpers`), orderBy('createdAt', 'desc'));
     const unsubHelpers = onSnapshot(qHelpers, (snap) => {
       const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setHelpers(data);
@@ -48,7 +52,7 @@ export default function HelpersDeliveries() {
     });
 
     // 2. Fetch Deliveries Stream
-    const qDeliveries = query(collection(db, 'societies/SOC-001/visitors'), orderBy('createdAt', 'desc'));
+    const qDeliveries = query(collection(db, `societies/${societyId}/visitors`), orderBy('createdAt', 'desc'));
     const unsubDeliveries = onSnapshot(qDeliveries, (snap) => {
       const data = snap.docs
         .map(doc => ({ id: doc.id, ...doc.data() }))
@@ -60,12 +64,12 @@ export default function HelpersDeliveries() {
       unsubHelpers();
       unsubDeliveries();
     };
-  }, []);
+  }, [societyId]);
 
   const handleToggleHelperStatus = async (helperObj) => {
     const newStatus = helperObj.status === 'Active' ? 'Suspended' : 'Active';
     try {
-      await updateDoc(doc(db, 'societies/SOC-001/helpers', helperObj.id), { status: newStatus });
+      await updateDoc(doc(db, `societies/${societyId}/helpers`, helperObj.id), { status: newStatus });
       alert(`Helper ${helperObj.name} status updated to ${newStatus}.`);
     } catch (e) {
       alert('Error updating status: ' + e.message);

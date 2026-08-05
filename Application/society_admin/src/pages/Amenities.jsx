@@ -2,33 +2,37 @@ import React, { useState, useEffect } from 'react';
 import { Plus, CheckCircle, XCircle } from 'lucide-react';
 import { collection, onSnapshot, query, doc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getSocietyAdminSession } from '../services/sessionManager';
 
 export default function Amenities() {
+  const session = getSocietyAdminSession();
+  const societyId = session?.societyId || 'SOC-001';
+
   const [amenities, setAmenities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', description: '', capacity: 10, timings: '', status: 'Available' });
 
   useEffect(() => {
-    const q = query(collection(db, 'societies/SOC-001/amenities'));
+    const q = query(collection(db, `societies/${societyId}/amenities`));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setAmenities(data);
       setLoading(false);
     });
     return () => unsubscribe();
-  }, []);
+  }, [societyId]);
 
   const toggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === 'Available' ? 'Closed' : 'Available';
-    await updateDoc(doc(db, `societies/SOC-001/amenities`, id), { status: newStatus });
+    await updateDoc(doc(db, `societies/${societyId}/amenities`, id), { status: newStatus });
   };
 
   const handleAddAmenity = async (e) => {
     e.preventDefault();
     try {
       const newId = formData.name.toLowerCase().replace(/\s+/g, '_');
-      await setDoc(doc(db, 'societies/SOC-001/amenities', newId), {
+      await setDoc(doc(db, `societies/${societyId}/amenities`, newId), {
         ...formData,
         capacity: Number(formData.capacity),
         icon: 'waves', // Default icon for now
