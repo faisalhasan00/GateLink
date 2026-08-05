@@ -149,6 +149,27 @@ class AuthService {
       'createdAt': DateTime.now().toIso8601String(),
     });
 
+    // 4b. Trigger Real Cloud Notifications for Society Admin & Super Admin
+    try {
+      await _db.collection('societies/$societyId/notifications').add({
+        'title': '🏠 New Resident Registration',
+        'message': '$name requested approval for Flat $fullFlatNo.',
+        'type': 'resident',
+        'read': false,
+        'createdAt': DateTime.now().toIso8601String(),
+      });
+
+      await _db.collection('notifications').add({
+        'title': '🏠 Resident Signed Up',
+        'message': '$name registered for $societyName (Flat $fullFlatNo).',
+        'type': 'resident',
+        'read': false,
+        'createdAt': DateTime.now().toIso8601String(),
+      });
+    } catch (notifErr) {
+      print("Error creating registration notification: $notifErr");
+    }
+
     // 5. Populate global /users/{uid} direct mapping document
     await _db.collection('users').doc(credential.user!.uid).set({
       'uid': credential.user!.uid,

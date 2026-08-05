@@ -38,6 +38,14 @@ export default function ContactSection() {
         createdAt: serverTimestamp()
       });
 
+      await addDoc(collection(db, 'notifications'), {
+        title: '🔥 New Inbound Sales Lead',
+        message: `${formData.fullName} requested a demo for ${formData.societyName || 'Housing Society'} (${formData.flatCount} flats).`,
+        type: 'lead',
+        read: false,
+        createdAt: new Date().toISOString()
+      });
+
       setSubmitted(true);
       setFormData({
         fullName: '',

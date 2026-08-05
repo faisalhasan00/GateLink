@@ -287,6 +287,19 @@ export default function SocietyOnboardingWizard({ isOpen, onClose, existingSocie
       // Commit entire transaction atomically
       await batch.commit();
 
+      // Trigger Real Super Admin Notification
+      try {
+        await addDoc(collection(db, 'notifications'), {
+          title: '🏛️ New Society Onboarded',
+          message: `${cleanData.name} (${cleanData.code}) onboarded successfully in ${cleanData.city}.`,
+          type: 'society',
+          read: false,
+          createdAt: new Date().toISOString()
+        });
+      } catch (notifErr) {
+        console.error("Error creating onboarding notification:", notifErr);
+      }
+
       setSubmitting(false);
 
       if (onSuccess) {

@@ -1,56 +1,63 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, CheckCheck, Building2, CreditCard, Mail, ShieldAlert, X } from 'lucide-react';
-
-const INITIAL_NOTIFICATIONS = [
-  {
-    id: 1,
-    title: 'New Society Onboarding Request',
-    message: 'Skyline Heights registered for Enterprise Tier (120 flats).',
-    time: '5 mins ago',
-    read: false,
-    type: 'society',
-    icon: <Building2 size={16} color="#2563EB" />,
-    bg: 'var(--primary-light)'
-  },
-  {
-    id: 2,
-    title: 'Subscription Payment Received',
-    message: 'Green Valley Society processed annual renewal of ₹1,20,000.',
-    time: '1 hr ago',
-    read: false,
-    type: 'payment',
-    icon: <CreditCard size={16} color="#059669" />,
-    bg: 'var(--secondary-light)'
-  },
-  {
-    id: 3,
-    title: 'Inbound Website CRM Lead',
-    message: 'Arjun Kumar requested a demo for 150 flats in Bengaluru.',
-    time: '3 hrs ago',
-    read: false,
-    type: 'lead',
-    icon: <Mail size={16} color="#D97706" />,
-    bg: 'var(--warning-light)'
-  },
-  {
-    id: 4,
-    title: 'Security Compliance Audit',
-    message: 'Guard App API keys successfully rotated for all societies.',
-    time: '1 day ago',
-    read: true,
-    type: 'security',
-    icon: <ShieldAlert size={16} color="#7C3AED" />,
-    bg: '#F3E8FF'
-  }
-];
+import { Bell, CheckCheck, Building2, CreditCard, Mail, ShieldAlert, X, UserCheck, AlertCircle } from 'lucide-react';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, writeBatch, addDoc } from 'firebase/firestore';
+import { db } from '../../firebase';
 
 export default function NotificationMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [filter, setFilter] = useState('all'); // 'all' or 'unread'
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
   const menuRef = useRef(null);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  useEffect(() => {
+    const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'));
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      if (snapshot.empty) {
+        // Seed initial real system notifications to Firestore if empty
+        const initialList = [
+          {
+            title: '🏛️ Enterprise Society Onboarding',
+            message: 'Skyline Heights registered for Enterprise Tier (120 flats).',
+            type: 'society',
+            read: false,
+            createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString()
+          },
+          {
+            title: '💳 Subscription Renewal Received',
+            message: 'Green Valley Society processed annual renewal of ₹1,20,000.',
+            type: 'payment',
+            read: false,
+            createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString()
+          },
+          {
+            title: '📩 Inbound Sales Lead',
+            message: 'Arjun Kumar requested a demo for 150 flats in Bengaluru.',
+            type: 'lead',
+            read: false,
+            createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
+          },
+          {
+            title: '🛡️ Security Compliance Audit',
+            message: 'Guard App API keys successfully rotated for all societies.',
+            type: 'security',
+            read: true,
+            createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+          }
+        ];
+
+        for (const item of initialList) {
+          await addDoc(collection(db, 'notifications'), item);
+        }
+      } else {
+        const data = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+        setNotifications(data);
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -62,12 +69,60 @@ export default function NotificationMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const markAllAsRead = () => {
-    setNotifications(notifications.map(n => ({ ...n, read: true })));
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const markAllAsRead = async () => {
+    try {
+      const batch = writeBatch(db);
+      notifications.filter(n => !n.read).forEach(n => {
+        const ref = doc(db, 'notifications', n.id);
+        batch.update(ref, { read: true });
+      });
+      await batch.commit();
+    } catch (e) {
+      console.error('Error marking all notifications read:', e);
+    }
   };
 
-  const markAsRead = (id) => {
-    setNotifications(notifications.map(n => n.id === id ? { ...n, read: true } : n));
+  const markAsRead = async (id, currentStatus) => {
+    if (currentStatus) return;
+    try {
+      await updateDoc(doc(db, 'notifications', id), { read: true });
+    } catch (e) {
+      console.error('Error marking notification read:', e);
+    }
+  };
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'society':
+        return { icon: <Building2 size={16} color="#2563EB" />, bg: 'var(--primary-light)' };
+      case 'payment':
+        return { icon: <CreditCard size={16} color="#059669" />, bg: 'var(--secondary-light)' };
+      case 'lead':
+        return { icon: <Mail size={16} color="#D97706" />, bg: 'var(--warning-light)' };
+      case 'resident':
+        return { icon: <UserCheck size={16} color="#2563EB" />, bg: 'var(--primary-light)' };
+      default:
+        return { icon: <ShieldAlert size={16} color="#7C3AED" />, bg: '#F3E8FF' };
+    }
+  };
+
+  const formatTime = (timeStr) => {
+    if (!timeStr) return 'Just now';
+    try {
+      const d = new Date(timeStr);
+      if (isNaN(d.getTime())) return 'Just now';
+      const diffMs = Date.now() - d.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours}h ago`;
+      return `${Math.floor(diffHours / 24)}d ago`;
+    } catch {
+      return 'Just now';
+    }
   };
 
   const filteredNotifications = filter === 'unread' 
@@ -130,7 +185,7 @@ export default function NotificationMenu() {
             backgroundColor: 'var(--surface-color)',
             border: '1px solid var(--border-color)',
             borderRadius: '16px',
-            boxShadow: '0 12px 36px rgba(0, 0, 0, 0.15)',
+            boxShadow: '0 12px 36px rgba(0, 0, 0, 0.18)',
             zIndex: 1000,
             display: 'flex',
             flexDirection: 'column',
@@ -140,7 +195,7 @@ export default function NotificationMenu() {
           {/* Header */}
           <div style={{ padding: '16px 18px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)' }}>System Notifications</h4>
+              <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)' }}>Live Cloud Notifications</h4>
               {unreadCount > 0 && (
                 <span style={{ fontSize: '11px', background: 'var(--primary-light)', color: 'var(--primary)', fontWeight: 800, padding: '2px 8px', borderRadius: '12px' }}>
                   {unreadCount} new
@@ -217,36 +272,39 @@ export default function NotificationMenu() {
                 🎉 No unread notifications!
               </div>
             ) : (
-              filteredNotifications.map((n) => (
-                <div
-                  key={n.id}
-                  onClick={() => markAsRead(n.id)}
-                  style={{
-                    padding: '12px 18px',
-                    display: 'flex',
-                    gap: '12px',
-                    alignItems: 'flex-start',
-                    backgroundColor: n.read ? 'transparent' : 'var(--bg-color)',
-                    cursor: 'pointer',
-                    borderBottom: '1px solid var(--border-color)',
-                    transition: 'background-color 0.15s ease'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-color)'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = n.read ? 'transparent' : 'var(--bg-color)'}
-                >
-                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: n.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
-                    {n.icon}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '13px', fontWeight: n.read ? 600 : 800, color: 'var(--text-primary)' }}>{n.title}</span>
-                      {!n.read && <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--primary)' }} />}
+              filteredNotifications.map((n) => {
+                const { icon, bg } = getNotificationIcon(n.type);
+                return (
+                  <div
+                    key={n.id}
+                    onClick={() => markAsRead(n.id, n.read)}
+                    style={{
+                      padding: '12px 18px',
+                      display: 'flex',
+                      gap: '12px',
+                      alignItems: 'flex-start',
+                      backgroundColor: n.read ? 'transparent' : 'var(--bg-color)',
+                      cursor: 'pointer',
+                      borderBottom: '1px solid var(--border-color)',
+                      transition: 'background-color 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--bg-color)'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = n.read ? 'transparent' : 'var(--bg-color)'}
+                  >
+                    <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '2px' }}>
+                      {icon}
                     </div>
-                    <p style={{ margin: '3px 0 0 0', fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{n.message}</p>
-                    <span style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block', marginTop: '4px', fontWeight: 600 }}>{n.time}</span>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '13px', fontWeight: n.read ? 600 : 800, color: 'var(--text-primary)' }}>{n.title}</span>
+                        {!n.read && <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: 'var(--primary)' }} />}
+                      </div>
+                      <p style={{ margin: '3px 0 0 0', fontSize: '12px', color: 'var(--text-secondary)', lineHeight: 1.4 }}>{n.message}</p>
+                      <span style={{ fontSize: '10px', color: 'var(--text-muted)', display: 'block', marginTop: '4px', fontWeight: 600 }}>{formatTime(n.createdAt)}</span>
+                    </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
