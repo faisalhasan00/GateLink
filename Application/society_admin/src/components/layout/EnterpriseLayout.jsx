@@ -71,6 +71,14 @@ export default function EnterpriseLayout({ isSuperAdmin = false }) {
   const navItems = SOCIETY_ADMIN_NAV;
   const brandTitle = 'HomeHni Hood';
 
+  const handleToggleSidebar = () => {
+    if (window.innerWidth < 1024) {
+      setIsMobileOpen(prev => !prev);
+    } else {
+      setIsSidebarCollapsed(prev => !prev);
+    }
+  };
+
   return (
     <div className="app-container" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', backgroundColor: 'var(--bg-color)' }}>
       {/* Reusable Enterprise Sidebar */}
@@ -90,7 +98,7 @@ export default function EnterpriseLayout({ isSuperAdmin = false }) {
         <EnterpriseHeader 
           title={currentRouteMeta.title}
           subtitle={currentRouteMeta.subtitle}
-          toggleSidebar={() => setIsMobileOpen(!isMobileOpen)}
+          toggleSidebar={handleToggleSidebar}
           isSuperAdmin={isSuperAdmin}
         />
 

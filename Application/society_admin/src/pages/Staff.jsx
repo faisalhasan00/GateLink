@@ -653,7 +653,7 @@ export default function Staff() {
                       </optgroup>
                     )}
                     <optgroup label="Custom Option">
-                      <option value="Custom">✏️ Type Custom Role Manually...</option>
+                      <option value="Custom">Type Custom Role Manually...</option>
                     </optgroup>
                   </select>
 

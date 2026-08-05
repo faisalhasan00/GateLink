@@ -65,13 +65,13 @@ export default function EnterpriseSidebar({
           <HomeHniHoodLogo isDark={true} size={isCollapsed ? 'small' : 'medium'} />
         </div>
 
-        {!isCollapsed && setIsCollapsed && (
+        {setIsCollapsed && (
           <button 
-            aria-label="Collapse Sidebar"
+            aria-label={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
             onClick={() => setIsCollapsed(!isCollapsed)}
             style={{ background: 'rgba(255, 255, 255, 0.1)', border: 'none', borderRadius: '8px', padding: '6px', cursor: 'pointer', color: '#FFFFFF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            <ChevronLeft size={16} />
+            {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
           </button>
         )}
       </div>
@@ -84,15 +84,14 @@ export default function EnterpriseSidebar({
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
-          gap: '6px'
+          gap: '4px'
         }}
       >
         {navItems.map((item) => (
           <NavLink
-            key={item.name}
+            key={item.path}
             to={item.path}
-            end={item.path === '/' || item.path === '/super-admin'}
-            onClick={() => setIsOpen && setIsOpen(false)}
+            onClick={() => { if (setIsOpen) setIsOpen(false); }}
             className={({ isActive }) => `enterprise-nav-item ${isActive ? 'active' : ''}`}
             title={isCollapsed ? item.name : undefined}
             style={({ isActive }) => ({
