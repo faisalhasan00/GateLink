@@ -85,20 +85,20 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
   }
 
   Future<void> _allowEntry(String docId) async {
-    final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: 'SOC-001');
+    final firestoreService = ref.read(firestoreServiceProvider);
     await firestoreService.updateVisitorStatus(docId, 'inside');
-    await FirebaseFirestore.instance.doc('societies/SOC-001/visitors/$docId').update({
+    await FirebaseFirestore.instance.doc('societies/${firestoreService.societyId}/visitors/$docId').update({
       'entryTime': DateTime.now().toIso8601String(),
     });
   }
 
   Future<void> _denyEntry(String docId) async {
-    final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: 'SOC-001');
+    final firestoreService = ref.read(firestoreServiceProvider);
     await firestoreService.updateVisitorStatus(docId, 'denied');
   }
 
   Future<void> _markExit(String docId) async {
-    final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: 'SOC-001');
+    final firestoreService = ref.read(firestoreServiceProvider);
     await firestoreService.markVisitorExit(docId);
   }
 

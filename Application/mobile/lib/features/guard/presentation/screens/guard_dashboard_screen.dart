@@ -72,7 +72,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
   Future<void> _approveEntry(String docId) async {
     try {
       await FirebaseFirestore.instance
-          .doc('societies/SOC-001/visitors/$docId')
+          .doc('societies/${_service.societyId}/visitors/$docId')
           .update({'status': 'inside', 'entryTime': DateTime.now().toIso8601String()});
     } catch (e) {
       if (mounted) {
@@ -111,7 +111,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
               final messenger = ScaffoldMessenger.of(context);
               try {
                 await FirebaseFirestore.instance
-                    .collection('societies/SOC-001/alerts')
+                    .collection('societies/${_service.societyId}/alerts')
                     .add({
                   'type': 'SOS',
                   'guardEmail': FirebaseAuth.instance.currentUser?.email ?? 'Guard',

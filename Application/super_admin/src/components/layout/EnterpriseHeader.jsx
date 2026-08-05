@@ -28,7 +28,7 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
   };
 
   const [userEmail, setUserEmail] = useState(getRoleEmail);
-  const [societyInfo, setSocietyInfo] = useState({ code: isSuperAdmin ? 'HQ-GLOBAL' : 'SOC-001', plan: 'ENTERPRISE' });
+  const [societyInfo, setSocietyInfo] = useState({ code: isSuperAdmin ? 'HQ-GLOBAL' : 'HQ', plan: 'ENTERPRISE' });
 
   useEffect(() => {
     setUserEmail(getRoleEmail());

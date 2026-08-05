@@ -6,35 +6,15 @@ import { auth, db } from '../firebase';
 import GlobalSearchModal from './GlobalSearchModal';
 
 export default function Topbar({ title, toggleSidebar }) {
-  const [society, setSociety] = useState({ name: 'Society Admin', code: 'SOC-001', plan: 'ENTERPRISE', city: 'Mumbai' });
-  const [userEmail, setUserEmail] = useState('Admin');
+  const [society, setSociety] = useState({ name: 'SocietySphere HQ', code: 'HQ-GLOBAL', plan: 'ENTERPRISE', city: 'Global Ops' });
+  const [userEmail, setUserEmail] = useState('Super Administrator');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
-      setUserEmail(user.email || 'Admin User');
+      setUserEmail(user.email || 'Super Administrator');
     }
-
-    // Fetch Society details dynamically
-    const fetchSociety = async () => {
-      try {
-        const docRef = doc(db, 'societies', 'SOC-001');
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setSociety({
-            name: data.name || 'Housing Society',
-            code: data.code || 'SOC-001',
-            plan: data.plan || 'ENTERPRISE',
-            city: data.city || 'Hyderabad',
-          });
-        }
-      } catch (e) {
-        console.error('Error fetching society info:', e);
-      }
-    };
-    fetchSociety();
   }, []);
 
   return (

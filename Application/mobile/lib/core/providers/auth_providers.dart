@@ -46,13 +46,15 @@ final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
     }
   } catch (_) {}
 
-  // 2. Direct fallback to default SOC-001 if index not populated yet
+  // 2. CollectionGroup fallback query across all societies
   try {
-    final socUserDoc = await FirebaseFirestore.instance
-        .doc('societies/SOC-001/users/${user.uid}')
+    final querySnap = await FirebaseFirestore.instance
+        .collectionGroup('users')
+        .where('uid', '==', user.uid)
+        .limit(1)
         .get();
-    if (socUserDoc.exists) {
-      return socUserDoc.data();
+    if (querySnap.docs.isNotEmpty) {
+      return querySnap.docs.first.data();
     }
   } catch (_) {}
 

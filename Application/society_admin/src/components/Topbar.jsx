@@ -3,31 +3,42 @@ import { Bell, Search, Menu } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 
+import { getSocietyAdminSession } from '../services/sessionManager';
 import GlobalSearchModal from './GlobalSearchModal';
 
 export default function Topbar({ title, toggleSidebar }) {
-  const [society, setSociety] = useState({ name: 'Society Admin', code: 'SOC-001', plan: 'ENTERPRISE', city: 'Mumbai' });
-  const [userEmail, setUserEmail] = useState('Admin');
+  const session = getSocietyAdminSession();
+  const activeSocId = session?.societyId || '';
+
+  const [society, setSociety] = useState({ 
+    name: session?.societyName || 'Society Administration', 
+    code: activeSocId || 'HQ', 
+    plan: 'ENTERPRISE', 
+    city: session?.city || 'Operations Hub' 
+  });
+  const [userEmail, setUserEmail] = useState(session?.adminEmail || 'Admin User');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
-      setUserEmail(user.email || 'Admin User');
+      setUserEmail(user.email || session?.adminEmail || 'Admin User');
     }
+
+    if (!activeSocId) return;
 
     // Fetch Society details dynamically
     const fetchSociety = async () => {
       try {
-        const docRef = doc(db, 'societies', 'SOC-001');
+        const docRef = doc(db, 'societies', activeSocId);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const data = docSnap.data();
           setSociety({
             name: data.name || 'Housing Society',
-            code: data.code || 'SOC-001',
+            code: data.code || activeSocId,
             plan: data.plan || 'ENTERPRISE',
-            city: data.city || 'Hyderabad',
+            city: data.city || 'Operations Hub',
           });
         }
       } catch (e) {
@@ -35,7 +46,7 @@ export default function Topbar({ title, toggleSidebar }) {
       }
     };
     fetchSociety();
-  }, []);
+  }, [activeSocId]);
 
   return (
     <header className="topbar">

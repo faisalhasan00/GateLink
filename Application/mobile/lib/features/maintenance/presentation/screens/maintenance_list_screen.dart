@@ -102,6 +102,10 @@ class _BillsListView extends StatelessWidget {
                   final db = FirebaseFirestore.instance;
                   final batch = db.batch();
 
+                  final userProfile = ref.read(userProfileProvider).value;
+                  final activeSocId = userProfile?['societyId'] as String? ?? '';
+                  if (activeSocId.isEmpty) return;
+
                   final bills = [
                     {
                       'month': 'August 2026',
@@ -114,7 +118,7 @@ class _BillsListView extends StatelessWidget {
                       'dueDate': '10 Aug 2026',
                       'status': 'pending',
                       'residentUid': user?.uid ?? '',
-                      'societyId': 'SOC-001',
+                      'societyId': activeSocId,
                       'createdAt': DateTime.now().toIso8601String(),
                     },
                     {
@@ -128,13 +132,13 @@ class _BillsListView extends StatelessWidget {
                       'dueDate': '10 Jul 2026',
                       'status': 'overdue',
                       'residentUid': user?.uid ?? '',
-                      'societyId': 'SOC-001',
+                      'societyId': activeSocId,
                       'createdAt': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
                     },
                   ];
 
                   for (final b in bills) {
-                    final docRef = db.collection('societies/SOC-001/maintenance_bills').doc();
+                    final docRef = db.collection('societies/$activeSocId/maintenance_bills').doc();
                     batch.set(docRef, b);
                   }
 

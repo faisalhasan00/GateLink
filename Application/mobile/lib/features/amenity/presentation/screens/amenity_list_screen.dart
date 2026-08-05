@@ -84,8 +84,9 @@ class _AmenityListScreenState extends ConsumerState<AmenityListScreen> {
                           {'name': 'Community Garden', 'iconKey': 'garden', 'timing': '6:00 AM - 7:00 PM', 'available': true, 'availableSlots': 50, 'fee': 'Free', 'location': 'East Lawn'},
                         ];
 
+                        final activeSocId = userProfile?['societyId'] as String? ?? 'SOC-001';
                         for (final item in items) {
-                          final docRef = db.collection('societies/SOC-001/amenities').doc();
+                          final docRef = db.collection('societies/$activeSocId/amenities').doc();
                           batch.set(docRef, item);
                         }
 

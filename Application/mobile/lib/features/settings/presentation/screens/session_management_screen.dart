@@ -18,7 +18,7 @@ class SessionManagementScreen extends StatelessWidget {
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
-            .collection('societies/SOC-001/user_sessions')
+            .collectionGroup('user_sessions')
             .where('userUid', isEqualTo: user?.uid)
             .snapshots(),
         builder: (context, snapshot) {

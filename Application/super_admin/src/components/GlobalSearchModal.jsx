@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, X, Users, UserCheck, ShieldAlert, FileText, Wrench, Megaphone, Truck, Shield } from 'lucide-react';
+import { Search, X, Users, UserCheck, ShieldAlert, FileText, Wrench, Megaphone, Truck, Shield, Building2 } from 'lucide-react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
@@ -33,66 +33,18 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
     const searchResults = [];
 
     try {
-      // 1. Search Residents
-      const snapUsers = await getDocs(collection(db, 'societies/SOC-001/users'));
-      snapUsers.forEach(d => {
-        const u = d.data();
-        if ((u.name || '').toLowerCase().includes(q) || (u.flatNumber || '').toLowerCase().includes(q) || (u.phone || '').includes(q)) {
+      // 1. Search Societies across platform
+      const snapSocieties = await getDocs(collection(db, 'societies'));
+      snapSocieties.forEach(d => {
+        const s = d.data();
+        if ((s.name || '').toLowerCase().includes(q) || (s.code || d.id).toLowerCase().includes(q) || (s.city || '').toLowerCase().includes(q)) {
           searchResults.push({
             id: d.id,
-            title: u.name || 'Resident',
-            subtitle: `Flat ${u.flatNumber || 'N/A'} • ${u.phone || 'Resident'}`,
-            type: 'Resident',
-            path: '/residents',
-            icon: <Users size={16} color="var(--primary)" />
-          });
-        }
-      });
-
-      // 2. Search Visitors
-      const snapVisitors = await getDocs(collection(db, 'societies/SOC-001/visitors'));
-      snapVisitors.forEach(d => {
-        const v = d.data();
-        if ((v.name || '').toLowerCase().includes(q) || (v.hostFlat || '').toLowerCase().includes(q) || (v.phone || '').includes(q)) {
-          searchResults.push({
-            id: d.id,
-            title: v.name || 'Visitor',
-            subtitle: `Flat ${v.hostFlat} • ${v.type || 'Guest'}`,
-            type: 'Visitor',
-            path: '/visitors',
-            icon: <UserCheck size={16} color="var(--secondary)" />
-          });
-        }
-      });
-
-      // 3. Search Complaints
-      const snapComplaints = await getDocs(collection(db, 'societies/SOC-001/complaints'));
-      snapComplaints.forEach(d => {
-        const c = d.data();
-        if ((c.title || '').toLowerCase().includes(q) || (c.category || '').toLowerCase().includes(q) || (c.flatNumber || '').toLowerCase().includes(q)) {
-          searchResults.push({
-            id: d.id,
-            title: c.title || 'Complaint',
-            subtitle: `Flat ${c.flatNumber || 'N/A'} • ${c.category || 'General'}`,
-            type: 'Complaint',
-            path: '/complaints',
-            icon: <ShieldAlert size={16} color="var(--danger)" />
-          });
-        }
-      });
-
-      // 4. Search Bills
-      const snapBills = await getDocs(collection(db, 'societies/SOC-001/maintenance_bills'));
-      snapBills.forEach(d => {
-        const b = d.data();
-        if ((b.billNumber || d.id).toLowerCase().includes(q) || (b.residentName || '').toLowerCase().includes(q)) {
-          searchResults.push({
-            id: d.id,
-            title: `Bill #${b.billNumber || d.id.substring(0, 6)}`,
-            subtitle: `${b.residentName} • ₹${b.amount}`,
-            type: 'Maintenance Bill',
-            path: '/maintenance',
-            icon: <Wrench size={16} color="var(--warning)" />
+            title: s.name || 'Society',
+            subtitle: `Code: ${s.code || d.id} • ${s.city || 'Active'}`,
+            type: 'Society',
+            path: '/societies',
+            icon: <Building2 size={16} color="var(--primary)" />
           });
         }
       });

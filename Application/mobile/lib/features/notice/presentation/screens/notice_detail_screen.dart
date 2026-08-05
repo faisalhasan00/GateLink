@@ -1,22 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/providers/auth_providers.dart';
 
-class NoticeDetailScreen extends StatelessWidget {
+class NoticeDetailScreen extends ConsumerWidget {
   final String noticeId;
   const NoticeDetailScreen({super.key, required this.noticeId});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userProfileAsync = ref.watch(userProfileProvider);
+    final societyId = userProfileAsync.value?['societyId'] as String? ?? '';
+
     return Scaffold(
       appBar: AppBar(title: const Text('Notice Details')),
       backgroundColor: AppColors.background,
       body: FutureBuilder<DocumentSnapshot>(
-        future: FirebaseFirestore.instance
-            .collection('societies/SOC-001/notices')
-            .doc(noticeId)
-            .get(),
+        future: societyId.isNotEmpty 
+            ? FirebaseFirestore.instance.doc('societies/$societyId/notices/$noticeId').get()
+            : FirebaseFirestore.instance.collectionGroup('notices').where(FieldPath.documentId, '==', noticeId).get().then((snap) => snap.docs.first),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());

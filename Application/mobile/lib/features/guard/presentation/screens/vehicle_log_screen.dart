@@ -1,19 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/firebase_providers.dart';
-import '../../../../core/services/firestore_service.dart';
 
-class VehicleLogScreen extends StatefulWidget {
+class VehicleLogScreen extends ConsumerStatefulWidget {
   const VehicleLogScreen({super.key});
 
   @override
-  State<VehicleLogScreen> createState() => _VehicleLogScreenState();
+  ConsumerState<VehicleLogScreen> createState() => _VehicleLogScreenState();
 }
 
-class _VehicleLogScreenState extends State<VehicleLogScreen> {
+class _VehicleLogScreenState extends ConsumerState<VehicleLogScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -25,7 +25,7 @@ class _VehicleLogScreenState extends State<VehicleLogScreen> {
 
   Future<void> _markVehicleExited(String docId) async {
     try {
-      final firestoreService = FirestoreService(societyId: 'SOC-001');
+      final firestoreService = ref.read(firestoreServiceProvider);
       await firestoreService.markVisitorExit(docId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -103,10 +103,7 @@ class _VehicleLogScreenState extends State<VehicleLogScreen> {
           // Live Firestore stream
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: FirebaseFirestore.instance
-                  .collection('societies/SOC-001/visitors')
-                  .where('status', isEqualTo: 'inside')
-                  .snapshots(),
+              stream: ref.watch(firestoreServiceProvider).visitorsStream(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
