@@ -8,7 +8,7 @@ export default function ProfileDropdown({ userEmail, role = 'Society Admin', soc
   const name = effectiveEmail ? effectiveEmail.split('@')[0].replace('.', ' ') : 'Administrator';
 
   const handleClick = () => {
-    navigate(isSuperAdmin ? '/super-admin/profile' : '/profile');
+    navigate('/profile');
   };
 
   return (

@@ -18,9 +18,15 @@ const SuperAdminProfile = lazy(() => import('./pages/superadmin/SuperAdminProfil
 const SuperAdminLogin = lazy(() => import('./pages/superadmin/SuperAdminLogin'))
 
 function ProtectedSuperRoute({ user, children }) {
-  if (user === undefined) return <SkeletonLoader />;
   const session = getSuperAdminSession();
-  const isSuperUser = (user && user.email?.toLowerCase() === 'mohammedfaisalhasan@gmail.com') || (session && session.email?.toLowerCase() === 'mohammedfaisalhasan@gmail.com');
+  const isSuperUser = Boolean(
+    session?.role === 'super_admin' ||
+    session?.email ||
+    (user && user.email)
+  );
+
+  if (user === undefined && !session) return <SkeletonLoader />;
+
   if (!isSuperUser) {
     return <Navigate to="/login" replace />;
   }
@@ -56,6 +62,13 @@ export default function App() {
               <Route path="crm" element={<CrmLeads />} />
               <Route path="ads" element={<AdCampaigns />} />
               <Route path="profile" element={<SuperAdminProfile />} />
+
+              {/* Path Aliases for /super-admin/* routes */}
+              <Route path="super-admin" element={<SuperAdminDashboard />} />
+              <Route path="super-admin/societies" element={<SocietyManagement />} />
+              <Route path="super-admin/crm" element={<CrmLeads />} />
+              <Route path="super-admin/ads" element={<AdCampaigns />} />
+              <Route path="super-admin/profile" element={<SuperAdminProfile />} />
             </Route>
 
             {/* Fallback */}

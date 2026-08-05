@@ -105,7 +105,7 @@ export default function SuperAdminDashboard() {
             Wipe Dummy Societies
           </button>
           <Link
-            to="/super-admin/societies"
+            to="/societies"
             className="btn btn-primary"
             style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}
           >
@@ -134,7 +134,7 @@ export default function SuperAdminDashboard() {
       <div className="card" style={{ padding: '20px', marginBottom: '24px', background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)', color: 'white', borderRadius: '10px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '10px' }}>
           <div style={{ fontSize: '15px', fontWeight: 800 }}>📊 Sales Lead Pipeline Breakdown</div>
-          <Link to="/super-admin/crm" style={{ color: '#00B589', textDecoration: 'none', fontWeight: 800, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <Link to="/crm" style={{ color: '#00B589', textDecoration: 'none', fontWeight: 800, fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <span>Manage All Leads in CRM</span>
             <ArrowRight size={14} />
           </Link>
@@ -165,7 +165,7 @@ export default function SuperAdminDashboard() {
               <h3 className="card-title" style={{ fontSize: '16px', fontWeight: 800, margin: 0 }}>🔥 Live Website Inbound Leads ({leads.length})</h3>
               <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '2px 0 0 0' }}>Click any lead row to inspect contact details</p>
             </div>
-            <Link to="/super-admin/crm" className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '12px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <Link to="/crm" className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '12px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span>Open CRM</span>
               <ArrowRight size={14} />
             </Link>
@@ -195,7 +195,7 @@ export default function SuperAdminDashboard() {
                       key={ld.id} 
                       onClick={() => setSelectedLead(ld)} 
                       style={{ cursor: 'pointer', transition: 'background 0.15s ease' }}
-                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#F8FAFC'}
+                      onMouseEnter={e => e.currentTarget.style.backgroundColor = 'var(--bg-color)'}
                       onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
                       <td><strong>{ld.name}</strong></td>
@@ -209,7 +209,7 @@ export default function SuperAdminDashboard() {
                         </a>
                       </td>
                       <td>{ld.societyName !== 'N/A' ? `${ld.societyName} ${ld.city !== 'N/A' ? `(${ld.city})` : ''}` : 'N/A'}</td>
-                      <td><span style={{ fontSize: '11px', background: '#F1F5F9', padding: '3px 8px', borderRadius: '4px', fontWeight: 600 }}>{ld.source}</span></td>
+                      <td><span style={{ fontSize: '11px', background: 'var(--bg-color)', padding: '3px 8px', borderRadius: '4px', fontWeight: 600 }}>{ld.source}</span></td>
                       <td>
                         <span className={`badge ${ld.status === 'Closed Won' ? 'success' : ld.status === 'New' ? 'primary' : 'warning'}`}>
                           {ld.status}
@@ -227,7 +227,7 @@ export default function SuperAdminDashboard() {
         <div className="card" style={{ padding: '24px' }}>
           <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <h3 className="card-title" style={{ fontSize: '16px', fontWeight: 800 }}>🏛️ Active Societies ({societies.length})</h3>
-            <Link to="/super-admin/societies" className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '12px', textDecoration: 'none' }}>Manage Tiers</Link>
+            <Link to="/societies" className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '12px', textDecoration: 'none' }}>Manage Tiers</Link>
           </div>
 
           <div className="table-container">

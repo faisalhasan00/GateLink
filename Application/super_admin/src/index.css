@@ -1,4 +1,5 @@
-:root {
+/* Light & Dark Theme Variables */
+:root, html.light-theme {
   --primary: #2563EB;
   --primary-hover: #1D4ED8;
   --primary-light: #EFF6FF;
@@ -16,6 +17,8 @@
   --text-primary: #0F172A;
   --text-secondary: #475569;
   --text-muted: #64748B;
+  --header-bg: #FFFFFF;
+  --search-bg: #F1F5F9;
   
   --sidebar-width: 280px;
   --sidebar-width-collapsed: 80px;
@@ -58,6 +61,10 @@ html.dark-theme {
   --border-color: rgba(255, 255, 255, 0.12);
   --text-primary: #FFFFFF;
   --text-secondary: #94A3B8;
+  --primary-light: rgba(37, 99, 235, 0.15);
+  --secondary-light: rgba(5, 150, 105, 0.15);
+  --warning-light: rgba(217, 119, 6, 0.15);
+  --danger-light: rgba(220, 38, 38, 0.15);
   --header-bg: #1E293B;
   --search-bg: #0F172A;
 }
