@@ -185,18 +185,22 @@ export default function Staff() {
       const timestampStr = new Date().toISOString();
       const empId = editingStaff?.employeeId || `EMP-2026-${Math.floor(1000 + Math.random() * 9000)}`;
 
+      const finalRole = formData.role === 'Custom'
+        ? (formData.customRoleText.trim() || 'Custom Role')
+        : formData.role;
+
       const staffPayload = {
         employeeId: empId,
         name: formData.name.trim(),
         email: formData.email.trim(),
         phone: formData.phone.trim(),
         department: formData.department,
-        role: formData.role,
+        role: finalRole,
         assignedGate: formData.assignedGate || 'Gate 1 — Main Entry',
         joiningDate: formData.joiningDate,
         emergencyContact: formData.emergencyContact.trim(),
         status: formData.status,
-        notes: formData.notes.trim(),
+        notes: formData.notes?.trim() || '',
         updatedAt: timestampStr
       };
 
@@ -210,7 +214,7 @@ export default function Staff() {
         // Add Initial Audit Activity Log
         await addDoc(collection(db, `societies/${societyId}/staff/${newRef.id}/activity_logs`), {
           action: 'Staff Member Onboarded',
-          description: `Onboarded as ${formData.role} in ${formData.department} department.`,
+          description: `Onboarded as ${finalRole} in ${formData.department} department.`,
           timestamp: timestampStr
         });
 
@@ -225,6 +229,7 @@ export default function Staff() {
         phone: '',
         department: 'Security',
         role: 'Security Guard',
+        customRoleText: '',
         assignedGate: 'Gate 1 — Main Entry',
         joiningDate: new Date().toISOString().split('T')[0],
         emergencyContact: '',
@@ -647,6 +652,9 @@ export default function Staff() {
                         ))}
                       </optgroup>
                     )}
+                    <optgroup label="Other Options">
+                      <option value="Custom">✏️ Type Custom Role Manually...</option>
+                    </optgroup>
                     <optgroup label="Other Department Roles">
                       {Object.entries(DEPARTMENT_ROLES_MAP)
                         .filter(([dept]) => dept !== formData.department)
@@ -656,6 +664,19 @@ export default function Staff() {
                         ))}
                     </optgroup>
                   </select>
+
+                  {formData.role === 'Custom' && (
+                    <div style={{ marginTop: '8px' }}>
+                      <input 
+                        required 
+                        type="text" 
+                        placeholder="Type custom role title (e.g. Night Patrol Lead)..." 
+                        value={formData.customRoleText} 
+                        onChange={e => setFormData({ ...formData, customRoleText: e.target.value })} 
+                        style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: '1.5px solid var(--primary)', fontSize: '12px', outline: 'none' }} 
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
