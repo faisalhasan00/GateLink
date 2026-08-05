@@ -38,6 +38,7 @@ import {
   writeBatch 
 } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getSocietyAdminSession } from '../services/sessionManager';
 
 const DEPARTMENTS = [
   'Security',

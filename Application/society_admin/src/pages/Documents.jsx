@@ -33,6 +33,7 @@ import {
 } from 'firebase/firestore';
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '../firebase';
+import { getSocietyAdminSession } from '../services/sessionManager';
 
 const CATEGORIES = [
   'Society Rules',
