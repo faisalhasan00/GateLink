@@ -20,7 +20,7 @@ class NoticeDetailScreen extends ConsumerWidget {
       body: FutureBuilder<DocumentSnapshot>(
         future: societyId.isNotEmpty 
             ? FirebaseFirestore.instance.doc('societies/$societyId/notices/$noticeId').get()
-            : FirebaseFirestore.instance.collectionGroup('notices').where(FieldPath.documentId, '==', noticeId).get().then((snap) => snap.docs.first),
+            : FirebaseFirestore.instance.collectionGroup('notices').where(FieldPath.documentId, isEqualTo: noticeId).get().then((snap) => snap.docs.first),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
