@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function ProfileDropdown({ userEmail, role = 'Society Admin', societyCode = 'SOC-001', isSuperAdmin = false }) {
+export default function ProfileDropdown({ userEmail, role = 'Society Admin', societyCode = '', isSuperAdmin = false }) {
   const navigate = useNavigate();
   const effectiveEmail = userEmail || (isSuperAdmin ? 'superadmin@societysphere.com' : 'admin@societysphere.com');
   const initial = effectiveEmail ? effectiveEmail.charAt(0).toUpperCase() : 'A';

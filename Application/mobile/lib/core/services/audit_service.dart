@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 class AuditService {
   final String societyId;
 
-  AuditService({this.societyId = 'SOC-001'});
+  AuditService({required this.societyId});
 
   Future<void> logAction({
     required String action,

@@ -42,24 +42,6 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
       setUserEmail(getRoleEmail());
     });
 
-    const fetchSociety = async () => {
-      if (isSuperAdmin) return;
-      try {
-        const docRef = doc(db, 'societies', 'SOC-001');
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setSocietyInfo({
-            code: data.code || 'SOC-001',
-            plan: data.plan || 'ENTERPRISE',
-          });
-        }
-      } catch (e) {
-        console.error('Error fetching society:', e);
-      }
-    };
-    fetchSociety();
-
     return () => {
       window.removeEventListener('storage', handleStorageChange);
       unsubscribe();

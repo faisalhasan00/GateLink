@@ -1,9 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// The society ID this app is currently managing.
-// In a real app, this would be set during login based on the guard's profile.
-const String kCurrentSocietyId = 'SOC-001';
-
 class FlatValidationResult {
   final bool isValid;
   final String? residentName;
