@@ -640,7 +640,7 @@ export default function Staff() {
                     onChange={e => setFormData({ ...formData, role: e.target.value })} 
                     style={{ width: '100%', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }}
                   >
-                    <optgroup label={`Related ${formData.department} Roles`}>
+                    <optgroup label={`Roles for ${formData.department}`}>
                       {(DEPARTMENT_ROLES_MAP[formData.department] || []).map(r => (
                         <option key={r} value={r}>{r}</option>
                       ))}
@@ -652,16 +652,8 @@ export default function Staff() {
                         ))}
                       </optgroup>
                     )}
-                    <optgroup label="Other Options">
+                    <optgroup label="Custom Option">
                       <option value="Custom">✏️ Type Custom Role Manually...</option>
-                    </optgroup>
-                    <optgroup label="Other Department Roles">
-                      {Object.entries(DEPARTMENT_ROLES_MAP)
-                        .filter(([dept]) => dept !== formData.department)
-                        .flatMap(([_, roles]) => roles)
-                        .map(r => (
-                          <option key={r} value={r}>{r}</option>
-                        ))}
                     </optgroup>
                   </select>
 
