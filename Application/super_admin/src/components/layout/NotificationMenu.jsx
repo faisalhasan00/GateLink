@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, CheckCheck, Building2, CreditCard, Mail, ShieldAlert, X, UserCheck, AlertCircle } from 'lucide-react';
-import { collection, onSnapshot, query, orderBy, doc, updateDoc, writeBatch, addDoc } from 'firebase/firestore';
+import { Bell, CheckCheck, Building2, CreditCard, Mail, ShieldAlert, X, UserCheck, Inbox } from 'lucide-react';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase';
 
 export default function NotificationMenu() {
@@ -12,48 +12,13 @@ export default function NotificationMenu() {
 
   useEffect(() => {
     const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      if (snapshot.empty) {
-        // Seed initial real system notifications to Firestore if empty
-        const initialList = [
-          {
-            title: '🏛️ Enterprise Society Onboarding',
-            message: 'Skyline Heights registered for Enterprise Tier (120 flats).',
-            type: 'society',
-            read: false,
-            createdAt: new Date(Date.now() - 5 * 60 * 1000).toISOString()
-          },
-          {
-            title: '💳 Subscription Renewal Received',
-            message: 'Green Valley Society processed annual renewal of ₹1,20,000.',
-            type: 'payment',
-            read: false,
-            createdAt: new Date(Date.now() - 60 * 60 * 1000).toISOString()
-          },
-          {
-            title: '📩 Inbound Sales Lead',
-            message: 'Arjun Kumar requested a demo for 150 flats in Bengaluru.',
-            type: 'lead',
-            read: false,
-            createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString()
-          },
-          {
-            title: '🛡️ Security Compliance Audit',
-            message: 'Guard App API keys successfully rotated for all societies.',
-            type: 'security',
-            read: true,
-            createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-          }
-        ];
-
-        for (const item of initialList) {
-          await addDoc(collection(db, 'notifications'), item);
-        }
-      } else {
-        const data = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
-        setNotifications(data);
-        setLoading(false);
-      }
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+      setNotifications(data);
+      setLoading(false);
+    }, (err) => {
+      console.error('Real-time notification snapshot error:', err);
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -195,7 +160,7 @@ export default function NotificationMenu() {
           {/* Header */}
           <div style={{ padding: '16px 18px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)' }}>Live Cloud Notifications</h4>
+              <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)' }}>System Notifications</h4>
               {unreadCount > 0 && (
                 <span style={{ fontSize: '11px', background: 'var(--primary-light)', color: 'var(--primary)', fontWeight: 800, padding: '2px 8px', borderRadius: '12px' }}>
                   {unreadCount} new
@@ -267,9 +232,17 @@ export default function NotificationMenu() {
 
           {/* Notification List */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
-            {filteredNotifications.length === 0 ? (
-              <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px', fontStyle: 'italic' }}>
-                🎉 No unread notifications!
+            {loading ? (
+              <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                Loading live notifications...
+              </div>
+            ) : filteredNotifications.length === 0 ? (
+              <div style={{ padding: '36px 20px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                <Inbox size={28} style={{ opacity: 0.4, marginBottom: '8px' }} />
+                <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>No notifications yet</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Real-time alerts for sales leads, resident signups & onboarding will appear here.
+                </div>
               </div>
             ) : (
               filteredNotifications.map((n) => {

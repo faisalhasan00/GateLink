@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, CheckCheck, Building2, CreditCard, Mail, ShieldAlert, X, UserCheck, MessageSquare, Car } from 'lucide-react';
-import { collection, onSnapshot, query, orderBy, doc, updateDoc, writeBatch, addDoc } from 'firebase/firestore';
+import { Bell, CheckCheck, Building2, CreditCard, Mail, ShieldAlert, X, UserCheck, MessageSquare, Car, Inbox } from 'lucide-react';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, writeBatch } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { getSocietyAdminSession } from '../../services/sessionManager';
 
@@ -8,6 +8,7 @@ export default function NotificationMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [filter, setFilter] = useState('all'); // 'all' or 'unread'
   const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
   const menuRef = useRef(null);
 
   const session = getSocietyAdminSession();
@@ -15,47 +16,13 @@ export default function NotificationMenu() {
 
   useEffect(() => {
     const q = query(collection(db, `societies/${societyId}/notifications`), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      if (snapshot.empty) {
-        // Seed initial society admin notifications if empty
-        const initialList = [
-          {
-            title: '🏠 New Resident Registration',
-            message: 'Rahul Sharma submitted registration for Flat A-101 (Rent Agreement attached).',
-            type: 'resident',
-            read: false,
-            createdAt: new Date(Date.now() - 10 * 60 * 1000).toISOString()
-          },
-          {
-            title: '💳 Maintenance Payment Received',
-            message: 'Flat B-302 paid monthly maintenance bill of ₹4,500 via UPI.',
-            type: 'payment',
-            read: false,
-            createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString()
-          },
-          {
-            title: '⚠️ New Resident Complaint',
-            message: 'Noise complaint logged for Block C, 4th Floor.',
-            type: 'complaint',
-            read: false,
-            createdAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString()
-          },
-          {
-            title: '🚗 Parking Slot Allocated',
-            message: 'Slot P-45 assigned to Flat A-204.',
-            type: 'parking',
-            read: true,
-            createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-          }
-        ];
-
-        for (const item of initialList) {
-          await addDoc(collection(db, `societies/${societyId}/notifications`), item);
-        }
-      } else {
-        const data = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
-        setNotifications(data);
-      }
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const data = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
+      setNotifications(data);
+      setLoading(false);
+    }, (err) => {
+      console.error('Real-time notification snapshot error:', err);
+      setLoading(false);
     });
 
     return () => unsubscribe();
@@ -269,9 +236,17 @@ export default function NotificationMenu() {
 
           {/* Notification List */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
-            {filteredNotifications.length === 0 ? (
-              <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px', fontStyle: 'italic' }}>
-                🎉 No unread notifications!
+            {loading ? (
+              <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px' }}>
+                Loading live notifications...
+              </div>
+            ) : filteredNotifications.length === 0 ? (
+              <div style={{ padding: '36px 20px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                <Inbox size={28} style={{ opacity: 0.4, marginBottom: '8px' }} />
+                <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--text-primary)' }}>No notifications yet</div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '4px' }}>
+                  Real-time alerts for resident signups, payments & complaints will appear here.
+                </div>
               </div>
             ) : (
               filteredNotifications.map((n) => {
