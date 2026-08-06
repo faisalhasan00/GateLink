@@ -31,45 +31,41 @@ export default function AdminLogin() {
     const cleanEmail = email.trim().toLowerCase();
 
     try {
-      // 1. Attempt standard login
-      const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
-      
-      let socId = 'SOC-001';
-      try {
-        const qSoc = query(collection(db, 'societies'), where('adminEmail', '==', cleanEmail));
-        const snapSoc = await getDocs(qSoc);
-        if (!snapSoc.empty) {
-          socId = snapSoc.docs[0].id;
-        }
-      } catch (_) {}
+      // 1. Verify that a registered society exists for this admin email in Firestore
+      const qSoc = query(collection(db, 'societies'), where('adminEmail', '==', cleanEmail));
+      const snapSoc = await getDocs(qSoc);
 
-      setSocietyAdminSession({ email: cleanEmail, token: res.user?.uid, societyId: socId });
-      navigate('/');
-    } catch (err) {
-      // 2. If Auth account doesn't exist yet, check if society was onboarded with these credentials
-      try {
-        const q = query(collection(db, 'societies'), where('adminEmail', '==', cleanEmail));
-        const snapshot = await getDocs(q);
-
-        if (!snapshot.empty) {
-          const socDoc = snapshot.docs[0];
-          const socData = socDoc.data();
-          if (socData.tempPassword === password || password.length >= 6) {
-            // Auto-register in Firebase Auth
-            const newRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
-            setSocietyAdminSession({ email: cleanEmail, token: newRes.user?.uid, societyId: socDoc.id });
-            navigate('/');
-            return;
-          }
-        }
-      } catch (fallbackError) {
-        if (fallbackError.code === 'auth/email-already-in-use') {
-          setError('This email is already registered. Please enter your account password.');
-          return;
-        }
-        console.error("Onboarding auth fallback error:", fallbackError);
+      if (snapSoc.empty) {
+        throw new Error('Access Denied: No active society account found for this email address. Please contact Super Admin or enroll your society.');
       }
 
+      const socDoc = snapSoc.docs[0];
+      const socId = socDoc.id;
+      const socData = socDoc.data();
+
+      // 2. Attempt Firebase Auth authentication
+      try {
+        const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
+        setSocietyAdminSession({ email: cleanEmail, token: res.user?.uid, societyId: socId });
+        navigate('/');
+      } catch (authErr) {
+        // If Auth account not yet created, allow login if temporary onboarding password matches
+        if (socData.tempPassword && socData.tempPassword === password) {
+          try {
+            const newRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
+            setSocietyAdminSession({ email: cleanEmail, token: newRes.user?.uid, societyId: socId });
+            navigate('/');
+            return;
+          } catch (createErr) {
+            if (createErr.code === 'auth/email-already-in-use') {
+              throw new Error('Invalid password. Please enter your correct account password.');
+            }
+            throw createErr;
+          }
+        }
+        throw authErr;
+      }
+    } catch (err) {
       setError(err.message.replace('Firebase: ', '').replace(/\(.*\)\.?/, ''));
     } finally {
       setLoading(false);

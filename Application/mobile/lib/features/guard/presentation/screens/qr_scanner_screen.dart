@@ -372,6 +372,33 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
           MobileScanner(
             controller: _controller,
             onDetect: _onDetect,
+            errorBuilder: (context, error, child) {
+              return Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.camera_alt_rounded, size: 56, color: Colors.white70),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Camera Access / Permission Required',
+                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Error: ${error.errorCode}',
+                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton.icon(
+                      onPressed: () => _controller.start(),
+                      icon: const Icon(Icons.refresh_rounded),
+                      label: const Text('Start Camera Scanner'),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
 
           // Scanner Overlay Frame

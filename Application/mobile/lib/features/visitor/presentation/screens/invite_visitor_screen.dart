@@ -73,7 +73,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
       final flatNumber = profile?['flatNumber'] ?? 'Unknown';
       final fullHostFlat = tower.isNotEmpty ? '$tower-$flatNumber' : flatNumber;
 
-      final visitorId = await firestoreService.inviteVisitor(
+      final inviteResult = await firestoreService.inviteVisitor(
         name: _nameController.text.trim(),
         phone: _mobileController.text.trim(),
         purpose: _selectedPurpose,
@@ -89,7 +89,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
 
       if (!mounted) return;
       setState(() => _isLoading = false);
-      _showQrDialog(visitorId);
+      _showQrDialog(inviteResult['visitorId'] ?? '', inviteResult['passCode'] ?? '100000');
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
@@ -100,7 +100,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
     }
   }
 
-  void _showQrDialog(String visitorId) {
+  void _showQrDialog(String visitorId, String passCode) {
     final qrKey = GlobalKey();
     showModalBottomSheet(
       context: context,
@@ -122,10 +122,32 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
             const Text('Visitor Invited!',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
             const SizedBox(height: AppSpacing.sm),
-            Text('A QR code pass has been generated for ${_nameController.text}.',
+            Text('A QR code & Gate Pass Code has been generated for ${_nameController.text}.',
                 style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
                 textAlign: TextAlign.center),
-            const SizedBox(height: AppSpacing.xl),
+            const SizedBox(height: AppSpacing.md),
+
+            // Display 6-digit numeric Gate Pass Code
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.primaryLight,
+                borderRadius: BorderRadius.circular(AppRadius.md),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+              ),
+              child: Column(
+                children: [
+                  const Text('6-DIGIT GATE PASS CODE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary, letterSpacing: 1)),
+                  const SizedBox(height: 4),
+                  SelectableText(
+                    passCode,
+                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: 6, color: AppColors.primary),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+
             RepaintBoundary(
               key: qrKey,
               child: Container(
@@ -136,9 +158,9 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
                   border: Border.all(color: AppColors.border),
                 ),
                 child: QrImageView(
-                  data: visitorId,
+                  data: passCode,
                   version: QrVersions.auto,
-                  size: 180.0,
+                  size: 160.0,
                 ),
               ),
             ),

@@ -189,10 +189,11 @@ class FirestoreService {
     });
   }
 
-  /// Processes QR code scan with duplicate prevention, expiration check, and validation
+  /// Processes QR code or 6-digit numeric Pass Code scan with duplicate prevention, expiration check, and validation
   Future<Map<String, dynamic>> validateAndProcessQrScan(String code) async {
     final cleanCode = code.trim();
-    // 1. Look up visitor by qrCode field or docId
+    
+    // 1. Look up visitor by qrCode, passCode, or docId
     QuerySnapshot query = await _db
         .collection('societies/$societyId/visitors')
         .where('qrCode', isEqualTo: cleanCode)
@@ -203,8 +204,20 @@ class FirestoreService {
     if (query.docs.isNotEmpty) {
       targetDoc = query.docs.first;
     } else {
-      final doc = await _db.doc('societies/$societyId/visitors/$cleanCode').get();
-      if (doc.exists) targetDoc = doc;
+      // Search by 6-digit numeric passCode
+      final passQuery = await _db
+          .collection('societies/$societyId/visitors')
+          .where('passCode', isEqualTo: cleanCode)
+          .limit(1)
+          .get();
+
+      if (passQuery.docs.isNotEmpty) {
+        targetDoc = passQuery.docs.first;
+      } else {
+        // Fallback to document ID search
+        final doc = await _db.doc('societies/$societyId/visitors/$cleanCode').get();
+        if (doc.exists) targetDoc = doc;
+      }
     }
 
     if (targetDoc == null || !targetDoc.exists) {
@@ -563,7 +576,7 @@ class FirestoreService {
 
   // ── VISITOR INVITES ──────────────────────────────────────────────────────
 
-  Future<String> inviteVisitor({
+  Future<Map<String, String>> inviteVisitor({
     required String name,
     required String phone,
     required String purpose,
@@ -572,6 +585,9 @@ class FirestoreService {
     required String expectedDate,
     required String expectedTime,
   }) async {
+    // Generate 6-digit numeric Pass Code (e.g. 784920)
+    final passCode = (100000 + (DateTime.now().microsecondsSinceEpoch % 900000)).toString();
+
     final docRef = await _db
         .collection('societies/$societyId/visitors')
         .add({
@@ -582,12 +598,18 @@ class FirestoreService {
       'invitedBy': invitedBy,
       'expectedDate': expectedDate,
       'expectedTime': expectedTime,
+      'passCode': passCode,
+      'qrCode': passCode,
       'entryTime': null,
       'exitTime': null,
       'status': 'expected',
       'createdAt': DateTime.now().toIso8601String(),
     });
-    return docRef.id;
+
+    return {
+      'visitorId': docRef.id,
+      'passCode': passCode,
+    };
   }
 
 
