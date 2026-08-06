@@ -1,0 +1,117 @@
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'firebase_options.dart';
+import 'core/router/guard_router.dart';
+import 'core/theme/app_colors.dart';
+import 'core/services/notification_service.dart';
+
+/// Background FCM handler — must be top-level
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  debugPrint('Background FCM message: ${message.notification?.title}');
+}
+
+/// Saves the device FCM token to Firestore so Cloud Functions can reach this device.
+Future<void> saveFcmToken() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) return;
+  try {
+    final token = await FirebaseMessaging.instance.getToken();
+    if (token == null) return;
+    final userDoc = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .get();
+    final societyId =
+        (userDoc.data()?['societyId'] as String?)?.isNotEmpty == true
+            ? userDoc.data()!['societyId'] as String
+            : 'SOC-001';
+    await FirebaseFirestore.instance
+        .collection('societies/$societyId/users')
+        .doc(user.uid)
+        .set({'fcmToken': token}, SetOptions(merge: true));
+    debugPrint('FCM token saved for society $societyId');
+  } catch (e) {
+    debugPrint('Error saving FCM token: $e');
+  }
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Firebase
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Initialize local notifications
+  await NotificationService.init();
+
+  // Register background FCM handler
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  // Request notification permission and save FCM token
+  await FirebaseMessaging.instance.requestPermission(
+    alert: true,
+    badge: true,
+    sound: true,
+  );
+  await saveFcmToken();
+  FirebaseMessaging.instance.onTokenRefresh.listen((_) => saveFcmToken());
+
+  // Lock to portrait orientation
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light,
+    ),
+  );
+
+  runApp(
+    const ProviderScope(
+      child: SocietySphereGuardApp(),
+    ),
+  );
+}
+
+class SocietySphereGuardApp extends ConsumerWidget {
+  const SocietySphereGuardApp({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = ref.watch(guardRouterProvider);
+
+    return MaterialApp.router(
+      title: 'HomeHni Guard',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: AppColors.secondary,
+          primary: AppColors.secondary,
+          secondary: AppColors.primary,
+        ),
+        scaffoldBackgroundColor: AppColors.background,
+        appBarTheme: const AppBarTheme(
+          centerTitle: false,
+          elevation: 0,
+          backgroundColor: AppColors.secondary,
+          foregroundColor: Colors.white,
+        ),
+      ),
+      routerConfig: router,
+    );
+  }
+}

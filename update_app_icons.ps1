@@ -37,18 +37,29 @@ function Save-ResizedImage {
     Write-Host "Successfully generated resized icon: $destPath ($($width)x$($height))"
 }
 
-# 1. Android Mipmap App Icons
-$mobileResDir = "c:\Faisal\SocietySphere\Application\Frontend\mobile\android\app\src\main\res"
-Save-ResizedImage "$mobileResDir\mipmap-mdpi\ic_launcher.png" 48 48
-Save-ResizedImage "$mobileResDir\mipmap-hdpi\ic_launcher.png" 72 72
-Save-ResizedImage "$mobileResDir\mipmap-xhdpi\ic_launcher.png" 96 96
-Save-ResizedImage "$mobileResDir\mipmap-xxhdpi\ic_launcher.png" 144 144
-Save-ResizedImage "$mobileResDir\mipmap-xxxhdpi\ic_launcher.png" 192 192
+# 1. Android Mipmap App Icons (Resident & Guard)
+$residentResDir = "c:\Faisal\SocietySphere\Application\Frontend\resident_app\android\app\src\main\res"
+Save-ResizedImage "$residentResDir\mipmap-mdpi\ic_launcher.png" 48 48
+Save-ResizedImage "$residentResDir\mipmap-hdpi\ic_launcher.png" 72 72
+Save-ResizedImage "$residentResDir\mipmap-xhdpi\ic_launcher.png" 96 96
+Save-ResizedImage "$residentResDir\mipmap-xxhdpi\ic_launcher.png" 144 144
+Save-ResizedImage "$residentResDir\mipmap-xxxhdpi\ic_launcher.png" 192 192
+
+$guardResDir = "c:\Faisal\SocietySphere\Application\Frontend\guard_app\android\app\src\main\res"
+Save-ResizedImage "$guardResDir\mipmap-mdpi\ic_launcher.png" 48 48
+Save-ResizedImage "$guardResDir\mipmap-hdpi\ic_launcher.png" 72 72
+Save-ResizedImage "$guardResDir\mipmap-xhdpi\ic_launcher.png" 96 96
+Save-ResizedImage "$guardResDir\mipmap-xxhdpi\ic_launcher.png" 144 144
+Save-ResizedImage "$guardResDir\mipmap-xxxhdpi\ic_launcher.png" 192 192
 
 # 2. Mobile Assets
-$mobileAssetsDir = "c:\Faisal\SocietySphere\Application\Frontend\mobile\assets\images"
-Save-ResizedImage "$mobileAssetsDir\app_logo.png" 512 512
-Save-ResizedImage "$mobileAssetsDir\logo.png" 512 512
+$residentAssetsDir = "c:\Faisal\SocietySphere\Application\Frontend\resident_app\assets\images"
+Save-ResizedImage "$residentAssetsDir\app_logo.png" 512 512
+Save-ResizedImage "$residentAssetsDir\logo.png" 512 512
+
+$guardAssetsDir = "c:\Faisal\SocietySphere\Application\Frontend\guard_app\assets\images"
+Save-ResizedImage "$guardAssetsDir\app_logo.png" 512 512
+Save-ResizedImage "$guardAssetsDir\logo.png" 512 512
 
 # 3. Website Assets
 $webPublicDir = "c:\Faisal\SocietySphere\Application\Frontend\website\public"
