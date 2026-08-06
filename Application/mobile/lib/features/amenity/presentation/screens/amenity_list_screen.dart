@@ -112,11 +112,16 @@ class _AmenityListScreenState extends ConsumerState<AmenityListScreen> {
             itemBuilder: (context, index) {
               final doc = snapshot.docs[index];
               final data = doc.data() as Map<String, dynamic>;
-              final name = data['name'] ?? 'Amenity';
-              final iconKey = data['iconKey'] ?? 'pool';
-              final timing = data['timing'] ?? 'N/A';
-              final available = data['available'] ?? true;
-              final slots = data['availableSlots'] ?? 0;
+              final name = data['name'] as String? ?? 'Amenity';
+              final iconKey = data['iconKey'] as String? ?? 'pool';
+              final timing = data['timing'] as String? ?? data['timings'] as String? ?? '06:00 AM - 10:00 PM';
+              final isAvailableStatus = data['status'] == 'Available';
+              final available = data['available'] == true || isAvailableStatus;
+              final slots = (data['capacity'] as num?)?.toInt() ?? 
+                            (data['maxSlots'] as num?)?.toInt() ?? 
+                            (data['availableSlots'] as num?)?.toInt() ?? 10;
+              final feeLabel = data['fee'] as String? ?? 
+                              (data['pricePerHour'] != null && (data['pricePerHour'] as num) > 0 ? '₹${data['pricePerHour']}/hr' : 'Free');
 
               final icon = _iconMap[iconKey] ?? Icons.sports_rounded;
               final color = _colorMap[iconKey] ?? AppColors.primary;
@@ -138,7 +143,7 @@ class _AmenityListScreenState extends ConsumerState<AmenityListScreen> {
                     ),
                     child: Icon(icon, color: color, size: 24),
                   ),
-                  title: Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                  title: Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -147,13 +152,15 @@ class _AmenityListScreenState extends ConsumerState<AmenityListScreen> {
                         const Icon(Icons.access_time_rounded, size: 12, color: AppColors.textSecondary),
                         const SizedBox(width: 4),
                         Text(timing, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        const SizedBox(width: 8),
+                        Text('• $feeLabel', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary)),
                       ]),
                       const SizedBox(height: 4),
                       Text(
-                        available ? '$slots slots available' : 'Currently unavailable',
+                        available ? '● $slots Slots Quota per Session' : '● Currently Unavailable / Maintenance',
                         style: TextStyle(
                           fontSize: 12,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                           color: available ? AppColors.success : AppColors.error,
                         ),
                       ),

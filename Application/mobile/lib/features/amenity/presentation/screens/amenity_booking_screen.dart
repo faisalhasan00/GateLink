@@ -21,9 +21,37 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
   int _guestCount = 1;
   bool _isLoading = false;
 
+  Map<String, dynamic>? _amenityDocData;
+  bool _isLoadingAmenity = true;
+
   final List<String> _slots = ['6:00 AM', '7:00 AM', '8:00 AM', '9:00 AM', '10:00 AM', '4:00 PM', '5:00 PM', '6:00 PM', '7:00 PM', '8:00 PM'];
   Set<String> _bookedSlots = {};
   bool _isFetchingSlots = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchAmenityProfile();
+  }
+
+  Future<void> _fetchAmenityProfile() async {
+    try {
+      final profile = ref.read(userProfileProvider).value;
+      final activeSocId = profile?['societyId'] as String? ?? 'SOC-001';
+      final db = ref.read(firestoreProvider);
+      final docSnap = await db.collection('societies/$activeSocId/amenities').doc(widget.amenityId).get();
+      if (docSnap.exists && mounted) {
+        setState(() {
+          _amenityDocData = docSnap.data();
+          _isLoadingAmenity = false;
+        });
+      } else if (mounted) {
+        setState(() => _isLoadingAmenity = false);
+      }
+    } catch (_) {
+      if (mounted) setState(() => _isLoadingAmenity = false);
+    }
+  }
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
@@ -65,6 +93,13 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
   }
 
   Future<void> _bookSlot() async {
+    if (_selectedDate == null || _selectedSlot == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select both a date and a time slot')),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
     
     try {
@@ -77,30 +112,37 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
       }
 
       final userName = profile?['name'] ?? 'Unknown User';
+      final flatNumber = profile?['flatNumber'] as String? ?? '';
+      final phone = profile?['phone'] as String? ?? '';
+      final targetAmenityName = _amenityDocData?['name'] as String? ?? 'Society Amenity';
 
       await firestoreService.bookAmenity(
         amenityId: widget.amenityId,
-        amenityName: 'Swimming Pool', 
+        amenityName: targetAmenityName,
         uid: user.uid,
         userName: userName,
+        flatNumber: flatNumber,
+        phone: phone,
         date: '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
         timeSlot: _selectedSlot!,
+        guests: _guestCount,
       );
 
       if (!mounted) return;
       setState(() => _isLoading = false);
-      _showSuccessDialog();
+      _showSuccessDialog(targetAmenityName);
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
+        final cleanErr = e.toString().replaceAll('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text('❌ $cleanErr'), backgroundColor: AppColors.error),
         );
       }
     }
   }
 
-  void _showSuccessDialog() {
+  void _showSuccessDialog(String targetAmenityName) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -111,7 +153,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
           const SizedBox(height: AppSpacing.md),
           const Text('Booking Confirmed!', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
           const SizedBox(height: 8),
-          Text('Your swimming pool slot at $_selectedSlot has been booked.',
+          Text('Your slot for $targetAmenityName at $_selectedSlot has been booked.',
               style: const TextStyle(color: AppColors.textSecondary), textAlign: TextAlign.center),
         ]),
         actions: [
@@ -126,34 +168,45 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final amenityName = _amenityDocData?['name'] as String? ?? 'Society Facility';
+    final amenityTiming = _amenityDocData?['timing'] as String? ?? _amenityDocData?['timings'] as String? ?? 'Open Daily: 06:00 AM - 10:00 PM';
+    final maxCapacity = (_amenityDocData?['capacity'] as num?)?.toInt() ?? (_amenityDocData?['maxSlots'] as num?)?.toInt() ?? 10;
+    final feeText = _amenityDocData?['fee'] as String? ?? 'Free';
+
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('Book Amenity')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.pagePadding),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Amenity header
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [Color(0xFF06B6D4), Color(0xFF0891B2)],
-                  begin: Alignment.topLeft, end: Alignment.bottomRight),
-                borderRadius: BorderRadius.circular(AppRadius.xl),
-              ),
-              child: Row(children: [
-                Container(width: 52, height: 52,
-                  decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
-                  child: const Icon(Icons.pool_rounded, color: Colors.white, size: 28)),
-                const SizedBox(width: AppSpacing.md),
-                const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text('Society Amenity', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
-                  Text('Open Daily: 6:00 AM - 10:00 PM', style: TextStyle(color: Colors.white70, fontSize: 13)),
-                ]),
-              ]),
-            ),
+      appBar: AppBar(title: Text(amenityName)),
+      body: _isLoadingAmenity
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(AppSpacing.pagePadding),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Amenity header
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF06B6D4), Color(0xFF0891B2)],
+                        begin: Alignment.topLeft, end: Alignment.bottomRight),
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
+                    ),
+                    child: Row(children: [
+                      Container(width: 52, height: 52,
+                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
+                        child: const Icon(Icons.sports_tennis_rounded, color: Colors.white, size: 28)),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(amenityName, style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w800)),
+                          const SizedBox(height: 2),
+                          Text('$amenityTiming • $feeText', style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                          Text('Quota: $maxCapacity Slots / Session', style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700)),
+                        ]),
+                      ),
+                    ]),
+                  ),
             const SizedBox(height: AppSpacing.xl),
 
             // Date Picker
