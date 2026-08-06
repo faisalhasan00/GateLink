@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, CheckCircle, XCircle, Copy, Check, Trash2, Building2 } from 'lucide-react';
-import { collection, onSnapshot, query, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase';
 import SocietyOnboardingWizard from '../../components/superadmin/SocietyOnboardingWizard';
 
@@ -42,8 +42,34 @@ export default function SocietyManagement() {
   };
 
   const handleDeleteSociety = async (id, name) => {
-    if (window.confirm(`Are you sure you want to permanently delete ${name} (${id})?`)) {
+    if (!window.confirm(`Are you sure you want to permanently delete society "${name}" (ID: ${id})?\n\nThis action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      // 1. Delete all nested subcollection documents
+      const subcollections = [
+        'users', 'staff', 'visitors', 'complaints', 'notices', 
+        'maintenance', 'amenities', 'documents', 'helpers', 
+        'sos_alerts', 'user_sessions', 'roles'
+      ];
+
+      for (const sub of subcollections) {
+        try {
+          const subSnap = await getDocs(collection(db, `societies/${id}/${sub}`));
+          const deletePromises = subSnap.docs.map(document => deleteDoc(doc(db, `societies/${id}/${sub}`, document.id)));
+          await Promise.all(deletePromises);
+        } catch (subErr) {
+          console.warn(`Subcollection cleanup notice for ${sub}:`, subErr);
+        }
+      }
+
+      // 2. Delete top-level society document
       await deleteDoc(doc(db, 'societies', id));
+      alert(`Successfully deleted society "${name}" (${id})!`);
+    } catch (e) {
+      console.error('Error deleting society:', e);
+      alert('Error deleting society: ' + e.message);
     }
   };
 

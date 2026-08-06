@@ -5,6 +5,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/firebase_providers.dart';
+import '../../../../core/providers/auth_providers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AmenityListScreen extends ConsumerStatefulWidget {
@@ -84,7 +85,8 @@ class _AmenityListScreenState extends ConsumerState<AmenityListScreen> {
                           {'name': 'Community Garden', 'iconKey': 'garden', 'timing': '6:00 AM - 7:00 PM', 'available': true, 'availableSlots': 50, 'fee': 'Free', 'location': 'East Lawn'},
                         ];
 
-                        final activeSocId = userProfile?['societyId'] as String? ?? 'SOC-001';
+                        final profile = ref.read(userProfileProvider).value;
+                        final activeSocId = profile?['societyId'] as String? ?? 'SOC-001';
                         for (final item in items) {
                           final docRef = db.collection('societies/$activeSocId/amenities').doc();
                           batch.set(docRef, item);

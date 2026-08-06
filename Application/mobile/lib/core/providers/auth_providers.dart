@@ -50,7 +50,7 @@ final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
   try {
     final querySnap = await FirebaseFirestore.instance
         .collectionGroup('users')
-        .where('uid', '==', user.uid)
+        .where('uid', isEqualTo: user.uid)
         .limit(1)
         .get();
     if (querySnap.docs.isNotEmpty) {
