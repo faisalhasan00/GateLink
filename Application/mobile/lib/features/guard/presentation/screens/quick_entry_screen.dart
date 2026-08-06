@@ -32,7 +32,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
 
   String _selectedGender = 'Male';
   String _selectedVehicleType = '4-Wheeler';
-  String _selectedTower = 'Tower A';
+  String _selectedTower = 'Direct Input / All Blocks';
   File? _photoFile;
   final _picker = ImagePicker();
 
@@ -40,7 +40,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
   bool _isValidatingFlat = false;
   FlatValidationResult? _flatValidationResult;
 
-  final List<String> _towers = ['Tower A', 'Tower B', 'Tower C', 'Tower D'];
+  final List<String> _towers = ['Direct Input / All Blocks', 'Block A', 'Block B', 'Block C', 'Block D', 'Tower 1', 'Tower 2'];
   final List<String> _genders = ['Male', 'Female', 'Other'];
   final List<String> _vehicleTypes = ['2-Wheeler', '4-Wheeler', 'Auto/Rickshaw', 'None'];
 
@@ -55,6 +55,15 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
     super.dispose();
   }
 
+  String _getFormattedFlatNumber(String input) {
+    final clean = input.trim();
+    if (clean.isEmpty) return '';
+    if (_selectedTower == 'Direct Input / All Blocks' || clean.contains('-')) {
+      return clean;
+    }
+    return '$_selectedTower-$clean';
+  }
+
   Future<void> _pickPhoto() async {
     final picked = await _picker.pickImage(source: ImageSource.camera, imageQuality: 70);
     if (picked != null) {
@@ -63,16 +72,17 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
   }
 
   Future<void> _validateFlatNow(String val) async {
-    final flatNum = val.trim();
-    if (flatNum.isEmpty) {
+    final formattedFlat = _getFormattedFlatNumber(val);
+    if (formattedFlat.isEmpty) {
       setState(() => _flatValidationResult = null);
       return;
     }
 
     setState(() => _isValidatingFlat = true);
-    final targetFlat = '$_selectedTower-$flatNum';
-    final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: 'SOC-001');
-    final res = await firestoreService.validateFlat(targetFlat);
+    final profile = ref.read(userProfileProvider).value;
+    final societyId = profile?['societyId'] ?? 'SOC-001';
+    final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: societyId);
+    final res = await firestoreService.validateFlat(formattedFlat);
     if (mounted) {
       setState(() {
         _flatValidationResult = res;
@@ -85,8 +95,10 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_isSubmitting) return;
 
-    final targetFlat = '$_selectedTower-${_flatController.text.trim()}';
-    final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: 'SOC-001');
+    final targetFlat = _getFormattedFlatNumber(_flatController.text);
+    final profile = ref.read(userProfileProvider).value;
+    final societyId = profile?['societyId'] ?? 'SOC-001';
+    final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: societyId);
 
     // 1. Explicit Flat Validation
     final validation = await firestoreService.validateFlat(targetFlat);
@@ -114,7 +126,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
       if (_photoFile != null) {
         final storage = ref.read(storageServiceProvider);
         final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
-        photoUrl = await storage.uploadComplaintImage(_photoFile!, 'SOC-001', 'visitor_$uniqueId');
+        photoUrl = await storage.uploadComplaintImage(_photoFile!, societyId, 'visitor_$uniqueId');
         if (photoUrl.isEmpty) photoUrl = null;
       }
 

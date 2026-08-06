@@ -31,39 +31,54 @@ class FirestoreService {
 
   // ── FLAT VALIDATION ───────────────────────────────────────────────────────
 
-  /// Validates that a target flat exists in the society and has an assigned resident.
+  /// Validates that a target flat exists in the society and has an assigned resident with smart flex-matching.
   Future<FlatValidationResult> validateFlat(String hostFlat) async {
-    final trimmedFlat = hostFlat.trim();
-    if (trimmedFlat.isEmpty) {
+    final rawInput = hostFlat.trim();
+    if (rawInput.isEmpty) {
       return FlatValidationResult(isValid: false, error: 'Flat Number is required');
     }
 
     try {
-      final querySnapshot = await _db
-          .collection('societies/$societyId/users')
-          .where('flatNumber', isEqualTo: trimmedFlat)
-          .where('role', isEqualTo: 'resident')
-          .get();
-
-      if (querySnapshot.docs.isEmpty) {
-        // Check if flat exists at all or has no resident
-        final anyUserWithFlat = await _db
-            .collection('societies/$societyId/users')
-            .where('flatNumber', isEqualTo: trimmedFlat)
-            .get();
-
-        if (anyUserWithFlat.docs.isEmpty) {
-          return FlatValidationResult(isValid: false, error: 'Flat Number Not Found');
-        }
-        return FlatValidationResult(isValid: false, error: 'No Resident Assigned to this Flat');
+      final usersSnap = await _db.collection('societies/$societyId/users').get();
+      if (usersSnap.docs.isEmpty) {
+        return FlatValidationResult(isValid: false, error: 'No registered residents found in society');
       }
 
-      final residentData = querySnapshot.docs.first.data();
-      final residentName = residentData['name'] ?? 'Resident';
+      final cleanInput = rawInput.toLowerCase().replaceAll(' ', '').replaceAll('tower', '').replaceAll('block', '');
+
+      DocumentSnapshot? matchedDoc;
+      for (final doc in usersSnap.docs) {
+        final data = doc.data();
+        final flatNum = (data['flatNumber'] as String? ?? '').trim();
+        final unitNum = (data['unitNumber'] as String? ?? '').trim();
+
+        final cleanFlat = flatNum.toLowerCase().replaceAll(' ', '').replaceAll('tower', '').replaceAll('block', '');
+        final cleanUnit = unitNum.toLowerCase().replaceAll(' ', '').replaceAll('tower', '').replaceAll('block', '');
+
+        if (flatNum.toLowerCase() == rawInput.toLowerCase() ||
+            unitNum.toLowerCase() == rawInput.toLowerCase() ||
+            cleanFlat == cleanInput ||
+            cleanUnit == cleanInput ||
+            (cleanInput.length >= 2 && cleanFlat.endsWith(cleanInput)) ||
+            (cleanFlat.length >= 2 && cleanInput.endsWith(cleanFlat))) {
+          matchedDoc = doc;
+          break;
+        }
+      }
+
+      if (matchedDoc != null) {
+        final data = matchedDoc.data() as Map<String, dynamic>;
+        final residentName = data['name'] as String? ?? 'Resident';
+        return FlatValidationResult(
+          isValid: true,
+          residentName: residentName,
+          residentUid: matchedDoc.id,
+        );
+      }
+
       return FlatValidationResult(
-        isValid: true, 
-        residentName: residentName,
-        residentUid: querySnapshot.docs.first.id,
+        isValid: false,
+        error: 'Flat "$rawInput" not assigned to any resident',
       );
     } catch (e) {
       return FlatValidationResult(isValid: false, error: 'Flat validation error: $e');
