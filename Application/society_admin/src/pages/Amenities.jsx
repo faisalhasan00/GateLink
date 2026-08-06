@@ -140,6 +140,7 @@ export default function Amenities() {
       pricePerHour: 0,
       location: 'Clubhouse Ground Floor',
       status: 'Available',
+      approvalPolicy: 'auto',
       coverUrl: AMENITY_PRESET_IMAGES[0].url,
       iconKey: 'pool',
       rules: 'Proper attire required. Prior booking mandatory.'
@@ -159,6 +160,7 @@ export default function Amenities() {
       pricePerHour: amenity.pricePerHour || 0,
       location: amenity.location || 'Main Clubhouse',
       status: amenity.status || 'Available',
+      approvalPolicy: amenity.approvalPolicy || 'auto',
       coverUrl: amenity.coverUrl || amenity.imageUrl || AMENITY_PRESET_IMAGES[0].url,
       iconKey: amenity.iconKey || 'pool',
       rules: amenity.rules || 'Prior booking mandatory.'
@@ -182,6 +184,7 @@ export default function Amenities() {
         category: formData.category,
         description: formData.description.trim(),
         capacity: Number(formData.capacity) || 10,
+        maxSlots: Number(formData.capacity) || 10,
         timings: formData.timings.trim(),
         timing: formData.timings.trim(),
         fee: formData.fee.trim(),
@@ -189,6 +192,7 @@ export default function Amenities() {
         location: formData.location.trim(),
         status: formData.status,
         available: formData.status === 'Available',
+        approvalPolicy: formData.approvalPolicy || 'auto',
         coverUrl: formData.coverUrl,
         imageUrl: formData.coverUrl,
         iconKey: formData.iconKey,
@@ -562,9 +566,23 @@ export default function Amenities() {
                     {/* Card Content */}
                     <div style={{ padding: '18px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                       <div>
-                        <h4 style={{ fontSize: '17px', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 6px 0' }}>
+                        <h4 style={{ fontSize: '17px', fontWeight: 900, color: 'var(--text-primary)', margin: '0 0 4px 0' }}>
                           {item.name}
                         </h4>
+
+                        {/* Approval Policy & Available Quota Badge */}
+                        <div style={{ marginBottom: '10px' }}>
+                          {item.approvalPolicy === 'manual' ? (
+                            <span style={{ fontSize: '11px', background: '#FEF3C7', color: '#92400E', padding: '3px 8px', borderRadius: '6px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              🛡️ Manual Admin Review Required
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: '11px', background: '#D1FAE5', color: '#065F46', padding: '3px 8px', borderRadius: '6px', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                              ⚡ Instant Auto-Approve ({item.capacity || item.maxSlots || 10} Slots Quota)
+                            </span>
+                          )}
+                        </div>
+
                         <p style={{ fontSize: '12px', color: 'var(--text-secondary)', margin: '0 0 14px 0', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                           {item.description || 'No detailed description provided.'}
                         </p>
@@ -948,6 +966,24 @@ export default function Amenities() {
                     <option value="Maintenance">Maintenance (Closed)</option>
                   </select>
                 </div>
+              </div>
+
+              {/* Booking Approval & Slot Quota Policy */}
+              <div>
+                <label style={{ fontSize: '12px', fontWeight: 700, display: 'block', marginBottom: '6px' }}>Booking Approval Policy</label>
+                <select
+                  value={formData.approvalPolicy}
+                  onChange={e => handleInputChange('approvalPolicy', e.target.value)}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none', background: 'var(--surface-color)', fontWeight: 700 }}
+                >
+                  <option value="auto">⚡ Instant Auto-Approve (Capacity & Quota Based — Recommended for Pool/Gym/Sports)</option>
+                  <option value="manual">🛡️ Manual Admin Approval Required (Recommended for Party Lawn / Banquet Hall)</option>
+                </select>
+                <span style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px', display: 'block' }}>
+                  {formData.approvalPolicy === 'auto' 
+                    ? '● Bookings are automatically confirmed as long as available slot capacity > 0. Sold-out slots block automatically.'
+                    : '● Every resident booking requires explicit Society Admin approval or rejection from the dashboard.'}
+                </span>
               </div>
 
               {/* Rules & Guidelines */}

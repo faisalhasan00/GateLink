@@ -523,35 +523,80 @@ class FirestoreService {
     required String timeSlot,
     int guests = 1,
     String? specialNotes,
+    String? flatNumber,
+    String? phone,
   }) async {
-    // 1. Race Condition / Duplicate Check
+    // 1. Fetch Amenity Profile for Capacity & Approval Policy
+    DocumentSnapshot? amenityDoc;
+    try {
+      amenityDoc = await _db.collection('societies/$societyId/amenities').doc(amenityId).get();
+    } catch (_) {}
+
+    final amenityData = amenityDoc?.data() as Map<String, dynamic>? ?? {};
+    final approvalPolicy = amenityData['approvalPolicy'] as String? ?? 'auto';
+    final maxCapacity = (amenityData['capacity'] as num?)?.toInt() ?? (amenityData['maxSlots'] as num?)?.toInt() ?? 10;
+
+    // 2. Count Active Bookings for this Date & Time Slot
     final existingSnapshot = await _db
         .collection('societies/$societyId/amenity_bookings')
         .where('amenityId', isEqualTo: amenityId)
         .where('date', isEqualTo: date)
         .where('timeSlot', isEqualTo: timeSlot)
-        .where('status', isEqualTo: 'confirmed')
         .get();
 
-    if (existingSnapshot.docs.isNotEmpty) {
-      throw Exception('This time slot ($timeSlot) on $date is no longer available.');
+    final activeCount = existingSnapshot.docs.where((doc) {
+      final st = (doc.data()['status'] as String? ?? '').toLowerCase();
+      return st == 'approved' || st == 'confirmed' || st == 'pending';
+    }).length;
+
+    if (activeCount >= maxCapacity) {
+      throw Exception('Slot Sold Out! All $maxCapacity available slots for $timeSlot on $date are already booked.');
     }
 
-    // 2. Add Booking
-    await _db.collection('societies/$societyId/amenity_bookings').add({
+    // 3. Determine Initial Status (Auto-Approve vs Manual Admin Approval)
+    final initialStatus = (approvalPolicy == 'manual') ? 'pending' : 'approved';
+    final remainingSlots = maxCapacity - activeCount - 1;
+    final nowStr = DateTime.now().toIso8601String();
+
+    // 4. Add Booking Document
+    final docRef = await _db.collection('societies/$societyId/amenity_bookings').add({
       'amenityId': amenityId,
       'amenityName': amenityName,
       'bookedBy': uid,
+      'residentUid': uid,
+      'residentName': userName,
+      'flatNumber': flatNumber ?? '',
+      'phone': phone ?? '',
       'userName': userName,
       'uid': uid,
       'date': date,
+      'bookingDate': date,
       'timeSlot': timeSlot,
       'guests': guests,
       'specialNotes': specialNotes ?? '',
-      'status': 'confirmed',
+      'status': initialStatus,
+      'approvalPolicy': approvalPolicy,
+      'slotsRemaining': remainingSlots < 0 ? 0 : remainingSlots,
+      'capacityQuota': maxCapacity,
       'societyId': societyId,
-      'createdAt': DateTime.now().toIso8601String(),
+      'createdAt': nowStr,
     });
+
+    // 5. Alert Society Admin if Manual Approval Required
+    if (initialStatus == 'pending') {
+      try {
+        await _db.collection('societies/$societyId/notifications').add({
+          'title': '📅 New Amenity Booking Request',
+          'message': '$userName requested a booking for $amenityName on $date ($timeSlot).',
+          'type': 'amenity',
+          'bookingId': docRef.id,
+          'read': false,
+          'createdAt': nowStr,
+        });
+      } catch (err) {
+        print('Notification error: $err');
+      }
+    }
   }
 
   Future<void> cancelAmenityBooking(String bookingId, String userUid) async {
