@@ -106,84 +106,123 @@ class _AmenityListScreenState extends ConsumerState<AmenityListScreen> {
             );
           }
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(AppSpacing.pagePadding),
-            itemCount: snapshot.docs.length,
-            itemBuilder: (context, index) {
-              final doc = snapshot.docs[index];
-              final data = doc.data() as Map<String, dynamic>;
-              final name = data['name'] as String? ?? 'Amenity';
-              final iconKey = data['iconKey'] as String? ?? 'pool';
-              final timing = data['timing'] as String? ?? data['timings'] as String? ?? '06:00 AM - 10:00 PM';
-              final isAvailableStatus = data['status'] == 'Available';
-              final available = data['available'] == true || isAvailableStatus;
-              final slots = (data['capacity'] as num?)?.toInt() ?? 
-                            (data['maxSlots'] as num?)?.toInt() ?? 
-                            (data['availableSlots'] as num?)?.toInt() ?? 10;
-              final feeLabel = data['fee'] as String? ?? 
-                              (data['pricePerHour'] != null && (data['pricePerHour'] as num) > 0 ? '₹${data['pricePerHour']}/hr' : 'Free');
+          final profile = ref.watch(userProfileProvider).value;
+          final activeSocId = profile?['societyId'] as String? ?? 'SOC-001';
 
-              final icon = _iconMap[iconKey] ?? Icons.sports_rounded;
-              final color = _colorMap[iconKey] ?? AppColors.primary;
+          return StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance.collection('societies/$activeSocId/amenity_bookings').snapshots(),
+            builder: (context, bookingsSnap) {
+              final bookingsList = bookingsSnap.data?.docs ?? [];
+              
+              // Calculate active bookings count per amenity
+              final activeBookingsMap = <String, int>{};
+              for (final bDoc in bookingsList) {
+                final bData = bDoc.data() as Map<String, dynamic>;
+                final st = (bData['status'] as String? ?? '').toLowerCase();
+                if (st == 'approved' || st == 'confirmed' || st == 'pending') {
+                  final aId = bData['amenityId'] as String? ?? '';
+                  if (aId.isNotEmpty) {
+                    activeBookingsMap[aId] = (activeBookingsMap[aId] ?? 0) + 1;
+                  }
+                }
+              }
 
-              return Container(
-                margin: const EdgeInsets.only(bottom: AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppRadius.xl),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(AppSpacing.md),
-                  leading: Container(
-                    width: 48, height: 48,
+              return ListView.builder(
+                padding: const EdgeInsets.all(AppSpacing.pagePadding),
+                itemCount: snapshot.docs.length,
+                itemBuilder: (context, index) {
+                  final doc = snapshot.docs[index];
+                  final data = doc.data() as Map<String, dynamic>;
+                  final name = data['name'] as String? ?? 'Amenity';
+                  final iconKey = data['iconKey'] as String? ?? 'pool';
+                  final timing = data['timing'] as String? ?? data['timings'] as String? ?? '06:00 AM - 10:00 PM';
+                  final isAvailableStatus = data['status'] == 'Available';
+                  final isFacilityOpen = data['available'] == true || isAvailableStatus;
+                  
+                  final maxQuota = (data['capacity'] as num?)?.toInt() ?? 
+                                   (data['maxSlots'] as num?)?.toInt() ?? 10;
+                  final docSlots = (data['availableSlots'] as num?)?.toInt();
+
+                  // Live Remaining Slots Calculation
+                  final bookedCount = activeBookingsMap[doc.id] ?? 0;
+                  final computedSlots = docSlots != null ? docSlots : (maxQuota - bookedCount);
+                  final remainingSlots = computedSlots < 0 ? 0 : computedSlots;
+                  final isFullyBooked = remainingSlots <= 0;
+                  final canBook = isFacilityOpen && !isFullyBooked;
+
+                  final feeLabel = data['fee'] as String? ?? 
+                                  (data['pricePerHour'] != null && (data['pricePerHour'] as num) > 0 ? '₹${data['pricePerHour']}/hr' : 'Free');
+
+                  final icon = _iconMap[iconKey] ?? Icons.sports_rounded;
+                  final color = _colorMap[iconKey] ?? AppColors.primary;
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: AppSpacing.md),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(AppRadius.xl),
+                      border: Border.all(color: AppColors.border),
                     ),
-                    child: Icon(icon, color: color, size: 24),
-                  ),
-                  title: Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 4),
-                      Row(children: [
-                        const Icon(Icons.access_time_rounded, size: 12, color: AppColors.textSecondary),
-                        const SizedBox(width: 4),
-                        Text(timing, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                        const SizedBox(width: 8),
-                        Text('• $feeLabel', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary)),
-                      ]),
-                      const SizedBox(height: 4),
-                      Text(
-                        available ? '● $slots Slots Quota per Session' : '● Currently Unavailable / Maintenance',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: available ? AppColors.success : AppColors.error,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(AppSpacing.md),
+                      leading: Container(
+                        width: 48, height: 48,
+                        decoration: BoxDecoration(
+                          color: color.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
                         ),
+                        child: Icon(icon, color: color, size: 24),
                       ),
-                    ],
-                  ),
-                  trailing: available
-                      ? ElevatedButton(
-                          onPressed: () => context.go('${AppRoutes.amenities}/${doc.id}'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            minimumSize: Size.zero,
+                      title: Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const SizedBox(height: 4),
+                          Row(children: [
+                            const Icon(Icons.access_time_rounded, size: 12, color: AppColors.textSecondary),
+                            const SizedBox(width: 4),
+                            Text(timing, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                            const SizedBox(width: 8),
+                            Text('• $feeLabel', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                          ]),
+                          const SizedBox(height: 4),
+                          Text(
+                            !isFacilityOpen 
+                              ? '● Facility Maintenance / Closed'
+                              : isFullyBooked
+                                ? '● Fully Booked / Sold Out (0 Left)'
+                                : '● $remainingSlots Slots Available (Quota: $maxQuota)',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: canBook ? AppColors.success : AppColors.error,
+                            ),
                           ),
-                          child: const Text('Book', style: TextStyle(fontSize: 12)),
-                        )
-                      : Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: AppColors.error.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(AppRadius.full),
-                          ),
-                          child: const Text('Closed', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.error)),
-                        ),
-                ),
+                        ],
+                      ),
+                      trailing: canBook
+                          ? ElevatedButton(
+                              onPressed: () => context.go('${AppRoutes.amenities}/${doc.id}'),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                minimumSize: Size.zero,
+                              ),
+                              child: const Text('Book', style: TextStyle(fontSize: 12)),
+                            )
+                          : Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                              decoration: BoxDecoration(
+                                color: AppColors.error.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(AppRadius.full),
+                              ),
+                              child: Text(
+                                !isFacilityOpen ? 'Closed' : 'Sold Out',
+                                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.error),
+                              ),
+                            ),
+                    ),
+                  );
+                },
               );
             },
           );

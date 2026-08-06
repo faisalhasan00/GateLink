@@ -582,7 +582,16 @@ class FirestoreService {
       'createdAt': nowStr,
     });
 
-    // 5. Alert Society Admin if Manual Approval Required
+    // 5. Update live availableSlots on Amenity Document
+    try {
+      final remainingForDoc = remainingSlots < 0 ? 0 : remainingSlots;
+      await _db.collection('societies/$societyId/amenities').doc(amenityId).update({
+        'availableSlots': remainingForDoc,
+        'updatedAt': nowStr,
+      });
+    } catch (_) {}
+
+    // 6. Alert Society Admin if Manual Approval Required
     if (initialStatus == 'pending') {
       try {
         await _db.collection('societies/$societyId/notifications').add({
@@ -600,6 +609,9 @@ class FirestoreService {
   }
 
   Future<void> cancelAmenityBooking(String bookingId, String userUid) async {
+    final docSnap = await _db.collection('societies/$societyId/amenity_bookings').doc(bookingId).get();
+    final amenityId = docSnap.data()?['amenityId'] as String?;
+
     await _db
         .collection('societies/$societyId/amenity_bookings')
         .doc(bookingId)
@@ -608,6 +620,17 @@ class FirestoreService {
       'cancelledBy': userUid,
       'cancelledAt': DateTime.now().toIso8601String(),
     });
+
+    if (amenityId != null) {
+      try {
+        final amenityDoc = await _db.collection('societies/$societyId/amenities').doc(amenityId).get();
+        final currentCap = (amenityDoc.data()?['capacity'] as num?)?.toInt() ?? 10;
+        final currentSlots = (amenityDoc.data()?['availableSlots'] as num?)?.toInt() ?? currentCap;
+        await _db.collection('societies/$societyId/amenities').doc(amenityId).update({
+          'availableSlots': (currentSlots + 1) > currentCap ? currentCap : (currentSlots + 1),
+        });
+      } catch (_) {}
+    }
   }
 
   // ── PARKING ──────────────────────────────────────────────────────────────
