@@ -23,8 +23,20 @@ import {
   UserPlus,
   Sliders,
   Check,
-  AlertTriangle
+  AlertTriangle,
+  EyeOff,
+  RefreshCw,
+  Copy
 } from 'lucide-react';
+
+const generateSecurePassword = () => {
+  const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789@#$';
+  let pass = '';
+  for (let i = 0; i < 8; i++) {
+    pass += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return pass;
+};
 import { 
   collection, 
   onSnapshot, 
@@ -130,12 +142,15 @@ export default function Staff() {
     phone: '',
     department: 'Security',
     role: 'Security Guard',
+    customRoleText: '',
+    password: generateSecurePassword(),
     assignedGate: 'Gate 1 — Main Entry',
     joiningDate: new Date().toISOString().split('T')[0],
     emergencyContact: '',
     status: 'Active',
     notes: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
 
   // Role & RBAC State
   const [roleFormData, setRoleFormData] = useState({
@@ -196,6 +211,7 @@ export default function Staff() {
         phone: formData.phone.trim(),
         department: formData.department,
         role: finalRole,
+        password: formData.password || generateSecurePassword(),
         assignedGate: formData.assignedGate || 'Gate 1 — Main Entry',
         joiningDate: formData.joiningDate,
         emergencyContact: formData.emergencyContact.trim(),
@@ -218,7 +234,7 @@ export default function Staff() {
           timestamp: timestampStr
         });
 
-        alert(`Successfully onboarded ${formData.name}! Employee ID: ${empId}`);
+        alert(`Successfully onboarded ${formData.name}!\n\nEmployee ID: ${empId}\nLogin Password: ${staffPayload.password}`);
       }
 
       setIsAddModalOpen(false);
@@ -230,6 +246,7 @@ export default function Staff() {
         department: 'Security',
         role: 'Security Guard',
         customRoleText: '',
+        password: generateSecurePassword(),
         assignedGate: 'Gate 1 — Main Entry',
         joiningDate: new Date().toISOString().split('T')[0],
         emergencyContact: '',
@@ -671,6 +688,51 @@ export default function Staff() {
                   )}
                 </div>
               </div>
+              {/* Staff Login Password Section */}
+              <div style={{ background: 'var(--bg-color)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                    Staff Login Password *
+                  </label>
+                  <button 
+                    type="button" 
+                    onClick={() => setFormData({ ...formData, password: generateSecurePassword() })} 
+                    style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <RefreshCw size={12} /> Auto-Generate Password
+                  </button>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <div style={{ position: 'relative', flex: 1 }}>
+                    <input 
+                      required 
+                      type={showPassword ? 'text' : 'password'} 
+                      placeholder="Enter or generate staff password" 
+                      value={formData.password} 
+                      onChange={e => setFormData({ ...formData, password: e.target.value })} 
+                      style={{ width: '100%', padding: '10px 36px 10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }} 
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowPassword(!showPassword)} 
+                      style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      navigator.clipboard.writeText(formData.password);
+                      alert('Password copied to clipboard!');
+                    }} 
+                    className="btn btn-outline" 
+                    style={{ padding: '9px 12px', fontSize: '12px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <Copy size={13} /> Copy
+                  </button>
+                </div>
+              </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
                 <div>
@@ -811,6 +873,22 @@ export default function Staff() {
                 <div><span style={{ color: 'var(--text-secondary)' }}>Joining Date:</span> <br/><strong>{selectedStaffProfile.joiningDate || 'Jan 2025'}</strong></div>
                 <div><span style={{ color: 'var(--text-secondary)' }}>Status:</span> <br/><span className={`badge ${selectedStaffProfile.status === 'Active' ? 'success' : 'danger'}`}>{selectedStaffProfile.status}</span></div>
                 <div><span style={{ color: 'var(--text-secondary)' }}>Emergency Contact:</span> <br/><strong>{selectedStaffProfile.emergencyContact || 'N/A'}</strong></div>
+                <div style={{ gridColumn: 'span 2', paddingTop: '8px', borderTop: '1px dashed var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <span style={{ color: 'var(--text-secondary)' }}>Login Password:</span> <br/>
+                    <code style={{ fontSize: '13px', color: 'var(--primary)', fontWeight: 800 }}>{selectedStaffProfile.password || 'SecGuard@2026'}</code>
+                  </div>
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ padding: '4px 10px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    onClick={() => {
+                      navigator.clipboard.writeText(selectedStaffProfile.password || 'SecGuard@2026');
+                      alert('Password copied to clipboard!');
+                    }}
+                  >
+                    <Copy size={12} /> Copy Password
+                  </button>
+                </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '8px', paddingTop: '16px', borderTop: '1px solid var(--border-color)' }}>
