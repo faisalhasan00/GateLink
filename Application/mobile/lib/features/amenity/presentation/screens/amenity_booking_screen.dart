@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -38,7 +39,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
     try {
       final profile = ref.read(userProfileProvider).value;
       final activeSocId = profile?['societyId'] as String? ?? 'SOC-001';
-      final db = ref.read(firestoreProvider);
+      final db = FirebaseFirestore.instance;
       final docSnap = await db.collection('societies/$activeSocId/amenities').doc(widget.amenityId).get();
       if (docSnap.exists && mounted) {
         setState(() {
