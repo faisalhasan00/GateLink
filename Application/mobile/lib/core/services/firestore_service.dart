@@ -365,8 +365,12 @@ class FirestoreService {
     String? floor,
     String? priority,
     String? photoUrl,
+    String? residentName,
+    String? flatNumber,
   }) async {
     final ticketNum = 'CMP-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+    final nowStr = DateTime.now().toIso8601String();
+
     final docRef = await _db.collection('societies/$societyId/complaints').add({
       'ticketNumber': ticketNum,
       'title': title,
@@ -374,13 +378,45 @@ class FirestoreService {
       'category': category,
       'status': 'Open',
       'raisedBy': uid,
+      'residentUid': uid,
+      'residentName': residentName ?? 'Resident',
+      'flatNumber': flatNumber ?? '',
       'block': block ?? '',
       'floor': floor ?? '',
       'priority': priority ?? 'medium',
       'photoUrl': photoUrl,
-      'createdAt': DateTime.now().toIso8601String(),
-      'updatedAt': DateTime.now().toIso8601String(),
+      'createdAt': nowStr,
+      'updatedAt': nowStr,
     });
+
+    // Write Live Notification to Society Admin & Super Admin
+    try {
+      final senderName = residentName != null && residentName.isNotEmpty ? residentName : 'Resident';
+      final senderFlat = flatNumber != null && flatNumber.isNotEmpty ? ' (Flat $flatNumber)' : '';
+
+      await _db.collection('societies/$societyId/notifications').add({
+        'title': '🚨 New Complaint: $ticketNum',
+        'message': '$senderName$senderFlat raised a $category complaint: "$title"',
+        'category': category,
+        'type': 'complaint',
+        'ticketNumber': ticketNum,
+        'complaintId': docRef.id,
+        'read': false,
+        'createdAt': nowStr,
+      });
+
+      await _db.collection('notifications').add({
+        'title': '🚨 New Complaint: $ticketNum',
+        'message': '$category complaint raised by $senderName$senderFlat ($title)',
+        'societyId': societyId,
+        'type': 'complaint',
+        'read': false,
+        'createdAt': nowStr,
+      });
+    } catch (notifErr) {
+      print('Error pushing complaint notification to admin: $notifErr');
+    }
+
     return docRef.id;
   }
 

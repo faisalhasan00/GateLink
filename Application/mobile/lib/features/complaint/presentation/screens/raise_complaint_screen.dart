@@ -80,6 +80,9 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
         if (photoUrl.isEmpty) photoUrl = null;
       }
 
+      final resName = (userProfile?['name'] as String? ?? user.displayName ?? 'Resident').trim();
+      final flatNo = (userProfile?['flatNumber'] as String? ?? '').trim();
+
       await firestore.raiseComplaint(
         title: _titleController.text.trim(),
         description: _descController.text.trim(),
@@ -89,6 +92,8 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
         floor: _floorController.text.trim(),
         priority: _selectedPriority,
         photoUrl: photoUrl,
+        residentName: resName,
+        flatNumber: flatNo,
       );
       
       if (!mounted) return;
