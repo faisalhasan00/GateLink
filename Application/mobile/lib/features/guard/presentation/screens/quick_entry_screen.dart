@@ -32,7 +32,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
 
   String _selectedGender = 'Male';
   String _selectedVehicleType = '4-Wheeler';
-  String _selectedTower = 'Direct Input / All Blocks';
+  String _selectedTower = 'All Blocks / Direct';
   File? _photoFile;
   final _picker = ImagePicker();
 
@@ -40,7 +40,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
   bool _isValidatingFlat = false;
   FlatValidationResult? _flatValidationResult;
 
-  final List<String> _towers = ['Direct Input / All Blocks', 'Block A', 'Block B', 'Block C', 'Block D', 'Tower 1', 'Tower 2'];
+  final List<String> _towers = ['All Blocks / Direct', 'Block A', 'Block B', 'Block C', 'Block D', 'Tower 1', 'Tower 2'];
   final List<String> _genders = ['Male', 'Female', 'Other'];
   final List<String> _vehicleTypes = ['2-Wheeler', '4-Wheeler', 'Auto/Rickshaw', 'None'];
 
@@ -58,7 +58,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
   String _getFormattedFlatNumber(String input) {
     final clean = input.trim();
     if (clean.isEmpty) return '';
-    if (_selectedTower == 'Direct Input / All Blocks' || clean.contains('-')) {
+    if (_selectedTower == 'All Blocks / Direct' || clean.contains('-')) {
       return clean;
     }
     return '$_selectedTower-$clean';
@@ -398,9 +398,17 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
                   Expanded(
                     flex: 2,
                     child: DropdownButtonFormField<String>(
+                      isExpanded: true,
                       value: _selectedTower,
                       decoration: const InputDecoration(labelText: 'Block / Tower'),
-                      items: _towers.map((t) => DropdownMenuItem(value: t, child: Text(t))).toList(),
+                      items: _towers.map((t) => DropdownMenuItem(
+                        value: t, 
+                        child: Text(
+                          t, 
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12),
+                        )
+                      )).toList(),
                       onChanged: (v) {
                         setState(() => _selectedTower = v!);
                         _validateFlatNow(_flatController.text);
