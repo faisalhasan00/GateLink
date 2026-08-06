@@ -47,37 +47,28 @@ class _GuardLoginScreenState extends ConsumerState<GuardLoginScreen>
     if (!_formKey.currentState!.validate()) return;
     setState(() => _isLoading = true);
     try {
-      await ref.read(authServiceProvider).signInWithEmail(
-        _emailController.text,
-        _passwordController.text,
+      final cred = await ref.read(authServiceProvider).signInWithEmail(
+        _emailController.text.trim(),
+        _passwordController.text.trim(),
       );
-      if (mounted) context.go('/dashboard');
+      if (mounted && cred.user != null) {
+        context.go('/dashboard');
+      }
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'user-not-found' || e.code == 'invalid-credential') {
-        // Auto-create for testing
-        try {
-          await ref.read(authServiceProvider).registerWithEmail(
-            email: _emailController.text,
-            password: _passwordController.text,
-            name: 'Main Gate Guard',
-            flatNumber: '',
-            societyCode: 'GW-8492',
-            role: 'guard',
-          );
-          if (mounted) context.go('/dashboard');
-        } catch (innerE) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed to auto-create guard: $innerE'), backgroundColor: AppColors.error),
-            );
-          }
+      if (mounted) {
+        String msg = e.message ?? 'Login failed';
+        if (e.code == 'user-not-found' || e.code == 'invalid-credential') {
+          msg = 'Invalid email or password. Please verify with Society Admin.';
         }
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.message ?? 'Login failed'), backgroundColor: AppColors.error),
-          );
-        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(msg), backgroundColor: AppColors.error),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login Error: $e'), backgroundColor: AppColors.error),
+        );
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);

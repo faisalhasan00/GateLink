@@ -13,9 +13,9 @@ class AuthService {
 
   // ── EMAIL + PASSWORD ─────────────────────────────────────────────────────────
 
-  /// Sign in with email and password (with pre-provisioned account checks)
+  /// Sign in with email and password (with pre-provisioned account checks for residents and staff)
   Future<UserCredential> signInWithEmail(String email, String password) async {
-    final cleanEmail = email.trim();
+    final cleanEmail = email.trim().toLowerCase();
     final cleanPass = password.trim();
 
     try {
@@ -24,46 +24,93 @@ class AuthService {
         password: cleanPass,
       );
     } catch (e) {
-      // If user not in Firebase Auth, check if RWA Admin pre-added them in Firestore
+      // If user not in Firebase Auth yet, check if RWA Admin pre-added them in Firestore (staff or users)
       try {
-        final societiesSnap = await _db.collection('societies').get();
-        for (final socDoc in societiesSnap.docs) {
-          final query = await _db
-              .collection('societies/${socDoc.id}/users')
-              .where('email', isEqualTo: cleanEmail)
-              .get();
+        // 1. Check collectionGroup('staff')
+        final staffQuery = await _db.collectionGroup('staff').get();
+        for (final docSnap in staffQuery.docs) {
+          final docData = docSnap.data();
+          if ((docData['email'] as String? ?? '').trim().toLowerCase() == cleanEmail) {
+            final parentSocId = docSnap.reference.parent.parent?.id ?? docData['societyId'] ?? 'SOC-001';
 
-          if (query.docs.isNotEmpty) {
-            final docData = query.docs.first.data();
-            final oldDocId = query.docs.first.id;
-
-            // Auto-create Auth account for pre-added resident/staff
-            final cred = await _auth.createUserWithEmailAndPassword(
-              email: cleanEmail,
-              password: cleanPass,
-            );
+            UserCredential cred;
+            try {
+              cred = await _auth.createUserWithEmailAndPassword(
+                email: cleanEmail,
+                password: cleanPass,
+              );
+            } catch (authErr) {
+              if (authErr is FirebaseAuthException && authErr.code == 'email-already-in-use') {
+                cred = await _auth.signInWithEmailAndPassword(email: cleanEmail, password: cleanPass);
+              } else {
+                rethrow;
+              }
+            }
 
             if (cred.user != null) {
               final updatedData = Map<String, dynamic>.from(docData);
               updatedData['uid'] = cred.user!.uid;
-              // Remove legacy plaintext password field
               updatedData.remove('password');
-              
-              await _db.doc('societies/${socDoc.id}/users/${cred.user!.uid}').set(updatedData);
-              
-              // Also populate direct /users/{uid} index mapping
+
+              await docSnap.reference.set(updatedData, SetOptions(merge: true));
+
+              // Populate direct /users/{uid} index mapping for Auth & RBAC
               await _db.doc('users/${cred.user!.uid}').set({
                 'uid': cred.user!.uid,
                 'email': cleanEmail,
-                'societyId': socDoc.id,
-                'role': updatedData['role'] ?? 'resident',
-                'flatNumber': updatedData['flatNumber'] ?? '',
+                'societyId': parentSocId,
+                'role': 'guard',
+                'department': docData['department'] ?? 'Security',
+                'name': docData['name'] ?? 'Gate Guard',
+                'phone': docData['phone'] ?? '',
+                'status': 'active',
                 'createdAt': DateTime.now().toIso8601String(),
               }, SetOptions(merge: true));
 
-              if (oldDocId != cred.user!.uid) {
-                await _db.doc('societies/${socDoc.id}/users/$oldDocId').delete();
+              return cred;
+            }
+          }
+        }
+
+        // 2. Check collectionGroup('users')
+        final usersQuery = await _db.collectionGroup('users').get();
+        for (final docSnap in usersQuery.docs) {
+          final docData = docSnap.data();
+          if ((docData['email'] as String? ?? '').trim().toLowerCase() == cleanEmail) {
+            final parentSocId = docSnap.reference.parent.parent?.id ?? docData['societyId'] ?? 'SOC-001';
+
+            UserCredential cred;
+            try {
+              cred = await _auth.createUserWithEmailAndPassword(
+                email: cleanEmail,
+                password: cleanPass,
+              );
+            } catch (authErr) {
+              if (authErr is FirebaseAuthException && authErr.code == 'email-already-in-use') {
+                cred = await _auth.signInWithEmailAndPassword(email: cleanEmail, password: cleanPass);
+              } else {
+                rethrow;
               }
+            }
+
+            if (cred.user != null) {
+              final updatedData = Map<String, dynamic>.from(docData);
+              updatedData['uid'] = cred.user!.uid;
+              updatedData.remove('password');
+
+              await docSnap.reference.set(updatedData, SetOptions(merge: true));
+
+              await _db.doc('users/${cred.user!.uid}').set({
+                'uid': cred.user!.uid,
+                'email': cleanEmail,
+                'societyId': parentSocId,
+                'role': docData['role'] ?? 'resident',
+                'flatNumber': docData['flatNumber'] ?? '',
+                'name': docData['name'] ?? '',
+                'phone': docData['phone'] ?? '',
+                'createdAt': DateTime.now().toIso8601String(),
+              }, SetOptions(merge: true));
+
               return cred;
             }
           }
