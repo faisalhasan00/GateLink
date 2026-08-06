@@ -94,7 +94,7 @@ export default function Dashboard() {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    let unsubUsers, unsubVisitors, unsubComplaints, unsubBills, unsubDocs, unsubAmenity;
+    let unsubUsers, unsubVisitors, unsubComplaints, unsubBills, unsubDocs, unsubAmenity, unsubStaff;
 
     try {
       // 0. Fetch Society Metadata
