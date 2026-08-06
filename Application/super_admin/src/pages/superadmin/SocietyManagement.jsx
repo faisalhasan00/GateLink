@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Plus, CheckCircle, XCircle, Copy, Check, Trash2, Building2 } from 'lucide-react';
-import { collection, onSnapshot, query, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
+import { collection, onSnapshot, query, doc, updateDoc, deleteDoc, getDocs, where } from 'firebase/firestore';
 import { db } from '../../firebase';
 import SocietyOnboardingWizard from '../../components/superadmin/SocietyOnboardingWizard';
 
@@ -42,7 +42,7 @@ export default function SocietyManagement() {
   };
 
   const handleDeleteSociety = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to permanently delete society "${name}" (ID: ${id})?\n\nThis action cannot be undone.`)) {
+    if (!window.confirm(`Are you sure you want to permanently delete society "${name}" (ID: ${id})?\n\nThis action cannot be undone and will purge all associated residents, staff, and records.`)) {
       return;
     }
 
@@ -62,6 +62,15 @@ export default function SocietyManagement() {
         } catch (subErr) {
           console.warn(`Subcollection cleanup notice for ${sub}:`, subErr);
         }
+      }
+
+      // 2. Delete top-level user documents associated with this society
+      try {
+        const topUsersSnap = await getDocs(query(collection(db, 'users'), where('societyId', '==', id)));
+        const topUserDeletes = topUsersSnap.docs.map(uDoc => deleteDoc(doc(db, 'users', uDoc.id)));
+        await Promise.all(topUserDeletes);
+      } catch (topErr) {
+        console.warn('Top-level user cleanup notice:', topErr);
       }
 
       // 2. Delete top-level society document
