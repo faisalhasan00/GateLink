@@ -39,15 +39,16 @@ dependencies:
   # Image & File Picker
   image_picker: ^1.1.2
   file_picker: ^8.0.3
-  firebase_storage: ^12.4.10
-
   # QR Code
   qr_flutter: ^4.1.0
   mobile_scanner: ^5.1.1
 
-  # Notifications & Backend
+  # Firebase & Backend
   firebase_core: ^3.15.2
+  firebase_auth: ^5.7.0
+  cloud_firestore: ^5.6.12
   firebase_messaging: ^15.1.0
+  firebase_storage: ^12.4.10
   flutter_local_notifications: ^17.2.2
 
   # Date & Time
@@ -76,8 +77,6 @@ dependencies:
 
   # Badges
   badges: ^3.1.2
-  cloud_firestore: ^5.6.12
-  firebase_auth: ^5.7.0
   google_sign_in: ^6.2.1
 
   # Sharing
