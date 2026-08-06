@@ -1,8 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, CheckCircle, XCircle, ShieldCheck, ShieldAlert, FileText, UserCheck, Phone, Mail, Eye, ExternalLink } from 'lucide-react';
+import { Plus, CheckCircle, XCircle, ShieldCheck, ShieldAlert, FileText, UserCheck, Phone, Mail, Eye, EyeOff, ExternalLink, RefreshCw, Copy } from 'lucide-react';
 import { collection, onSnapshot, query, orderBy, doc, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getSocietyAdminSession } from '../services/sessionManager';
+
+/**
+ * Helper: Generate Random Alphanumeric Password
+ */
+const generateSecurePassword = () => {
+  const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789@#$';
+  let pass = '';
+  for (let i = 0; i < 8; i++) {
+    pass += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return pass;
+};
 
 export default function Residents() {
   const [residents, setResidents] = useState([]);
@@ -11,7 +23,16 @@ export default function Residents() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedResidentForView, setSelectedResidentForView] = useState(null);
   const [fullscreenImage, setFullscreenImage] = useState(null);
-  const [formData, setFormData] = useState({ name: '', flatNumber: '', phone: '', email: '', password: '', role: 'resident', ownershipType: 'Owner' });
+  const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({ 
+    name: '', 
+    flatNumber: '', 
+    phone: '', 
+    email: '', 
+    password: generateSecurePassword(), 
+    role: 'resident', 
+    ownershipType: 'Owner' 
+  });
 
   const session = getSocietyAdminSession();
   const societyId = session?.societyId || 'SOC-001';
@@ -303,49 +324,35 @@ export default function Residents() {
                     </tr>
                   ))
                 )}
-              </tbody>
-            </table>
-          </div>
+            </tbody>
+          </table>
         </div>
+      </div>
       )}
 
-      {/* Resident Details Modal */}
+      {/* View Details Drawer / Modal */}
       {selectedResidentForView && (
         <div className="modal-overlay" onClick={() => setSelectedResidentForView(null)}>
-          <div className="modal-content" style={{ maxWidth: '620px', width: '90%' }} onClick={e => e.stopPropagation()}>
-            <div className="modal-header" style={{ borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>Resident Access Details</h3>
-                <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>UID: <code>{selectedResidentForView.uid || selectedResidentForView.id}</code></span>
-              </div>
-              <button onClick={() => setSelectedResidentForView(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '20px' }}>✕</button>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '560px' }}>
+            <div className="modal-header">
+              <h3 style={{ margin: 0 }}>Resident Profile & Verification</h3>
+              <button onClick={() => setSelectedResidentForView(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px' }}>✕</button>
             </div>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px 0' }}>
-              {/* Flat & Status Box */}
-              <div style={{ background: '#F8FAFC', padding: '14px 16px', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '12px 0' }}>
+              {/* Main Profile Info */}
+              <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
-                  <div style={{ fontSize: '11px', textTransform: 'uppercase', fontWeight: 700, color: 'var(--text-muted)' }}>REQUESTED UNIT</div>
-                  <div style={{ fontSize: '20px', fontWeight: 900, color: '#2563EB' }}>
-                    {selectedResidentForView.societyName || 'Housing Society'} — Flat {selectedResidentForView.flatNumber || selectedResidentForView.unitNumber || 'N/A'}
-                  </div>
-                  {selectedResidentForView.buildingBlock && (
-                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>
-                      Building / Block: <strong>{selectedResidentForView.buildingBlock}</strong>
-                    </div>
-                  )}
+                  <h4 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>{selectedResidentForView.name}</h4>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>Flat: <strong>{selectedResidentForView.flatNumber}</strong></div>
                 </div>
-                <span className={`badge ${selectedResidentForView.status === 'active' || selectedResidentForView.status === 'approved' ? 'success' : 'warning'}`} style={{ fontSize: '13px', padding: '6px 12px' }}>
+                <span className={`badge ${selectedResidentForView.status === 'active' || selectedResidentForView.status === 'approved' ? 'success' : selectedResidentForView.status === 'pending' || selectedResidentForView.status === 'pending_approval' ? 'warning' : 'danger'}`}>
                   {selectedResidentForView.status}
                 </span>
               </div>
 
-              {/* Personal Contact Details */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
-                <div>
-                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)' }}>FULL NAME</label>
-                  <div style={{ fontSize: '15px', fontWeight: 800 }}>{selectedResidentForView.name}</div>
-                </div>
+              {/* Contact Grid */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '13px' }}>
                 <div>
                   <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)' }}>MOBILE PHONE</label>
                   <div style={{ fontSize: '14px', fontWeight: 700 }}>📞 {selectedResidentForView.phone || 'N/A'}</div>
@@ -354,14 +361,10 @@ export default function Residents() {
                   <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)' }}>EMAIL ADDRESS</label>
                   <div style={{ fontSize: '14px', color: '#2563EB', fontWeight: 600 }}>✉️ {selectedResidentForView.email || 'N/A'}</div>
                 </div>
-                <div>
-                  <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)' }}>LOCATION</label>
-                  <div style={{ fontSize: '14px', fontWeight: 600 }}>{selectedResidentForView.city || 'Hyderabad'}, {selectedResidentForView.country || 'India'}</div>
-                </div>
               </div>
 
               {/* Resident Role & Occupancy */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', background: '#FFFBEB', padding: '12px 16px', borderRadius: '8px', border: '1px solid #FDE68A' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', background: '#FFFBEB', padding: '12px 16px', borderRadius: '8px', border: '1px solid #FDE68A' }}>
                 <div>
                   <label style={{ fontSize: '11px', fontWeight: 700, color: '#B45309' }}>RESIDENT ROLE TYPE</label>
                   <div style={{ fontSize: '14px', fontWeight: 800, color: '#92400E' }}>{selectedResidentForView.residentRoleType || selectedResidentForView.ownershipType || 'Flat Owner'}</div>
@@ -372,105 +375,24 @@ export default function Residents() {
                 </div>
               </div>
 
-              {/* Proof Document Verification */}
-              <div style={{ background: '#F1F5F9', padding: '14px 16px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>ADDRESS PROOF DOCUMENT</label>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: selectedResidentForView.documentProofUrl ? '10px' : '0' }}>
+              {/* Login Password (if manually onboarded or available) */}
+              {selectedResidentForView.password && (
+                <div style={{ background: '#EFF6FF', padding: '12px 16px', borderRadius: '8px', border: '1px solid #BFDBFE', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontSize: '14px', fontWeight: 700 }}>📄 {selectedResidentForView.documentType || 'Rent Agreement / Utility Bill'}</div>
+                    <label style={{ fontSize: '11px', fontWeight: 700, color: '#1E40AF', display: 'block', marginBottom: '2px' }}>RESIDENT LOGIN PASSWORD</label>
+                    <code style={{ fontSize: '14px', color: 'var(--primary)', fontWeight: 800 }}>{selectedResidentForView.password}</code>
                   </div>
-                  <button
-                    type="button"
-                    className="btn btn-primary"
-                    style={{ padding: '6px 14px', fontSize: '12px' }}
-                    onClick={(e) => handleOpenDocument(e, selectedResidentForView.documentProofUrl, selectedResidentForView.documentType || 'Rent Agreement')}
+                  <button 
+                    className="btn btn-outline" 
+                    style={{ padding: '4px 10px', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                    onClick={() => {
+                      navigator.clipboard.writeText(selectedResidentForView.password);
+                      alert('Password copied to clipboard!');
+                    }}
                   >
-                    Open Full Image ➔
+                    <Copy size={12} /> Copy Password
                   </button>
                 </div>
-
-                {/* Live Document Image Preview Box */}
-                {selectedResidentForView.documentProofUrl && (selectedResidentForView.documentProofUrl.startsWith('data:image/') || selectedResidentForView.documentProofUrl.startsWith('http')) ? (
-                  <div 
-                    style={{ marginTop: '8px', textAlign: 'center', background: '#FFFFFF', padding: '8px', borderRadius: '8px', border: '1px solid var(--border-color)', cursor: 'pointer' }}
-                    onClick={(e) => handleOpenDocument(e, selectedResidentForView.documentProofUrl, selectedResidentForView.documentType || 'Rent Agreement')}
-                  >
-                    <img
-                      src={selectedResidentForView.documentProofUrl}
-                      alt="Verification Proof Document"
-                      style={{ maxWidth: '100%', maxHeight: '240px', borderRadius: '6px', objectFit: 'contain' }}
-                    />
-                  </div>
-                ) : selectedResidentForView.documentProofUrl ? (
-                  <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic', marginTop: '4px' }}>
-                    File path reference: <code>{selectedResidentForView.documentProofUrl}</code>
-                  </div>
-                ) : null}
-              </div>
-            </div>
-
-            {/* Modal Actions */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', paddingTop: '14px', borderTop: '1px solid var(--border-color)' }}>
-              <button className="btn btn-outline" onClick={() => setSelectedResidentForView(null)}>Close</button>
-              {selectedResidentForView.status === 'pending_approval' || selectedResidentForView.status === 'pending' ? (
-                <>
-                  <button className="btn btn-outline" style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={() => { handleReject(selectedResidentForView.id); setSelectedResidentForView(null); }}>
-                    Decline Registration
-                  </button>
-                  <button className="btn btn-primary" style={{ backgroundColor: '#00B589' }} onClick={() => { handleApprove(selectedResidentForView.id); setSelectedResidentForView(null); }}>
-                    Approve Access ➔
-                  </button>
-                </>
-              ) : null}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Fullscreen Image / PDF Lightbox (SAME TAB) */}
-      {fullscreenImage && (
-        <div
-          className="modal-overlay"
-          style={{ zIndex: 1200, backgroundColor: 'rgba(0,0,0,0.85)', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' }}
-          onClick={() => setFullscreenImage(null)}
-        >
-          <div
-            style={{ position: 'relative', width: '92vw', height: '92vh', background: '#0F172A', padding: '16px', borderRadius: '12px', textAlign: 'center', display: 'flex', flexDirection: 'column' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', color: '#FFFFFF' }}>
-              <h4 style={{ margin: 0, fontSize: '16px', color: '#FFFFFF' }}>📄 {fullscreenImage.title || 'Verification Proof Document'}</h4>
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                <a
-                  href={fullscreenImage.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  download="verification_document"
-                  style={{ color: '#60A5FA', fontSize: '13px', textDecoration: 'none', background: '#1E293B', padding: '4px 12px', borderRadius: '6px', border: '1px solid #334155' }}
-                >
-                  ⬇️ Download File
-                </a>
-                <button
-                  onClick={() => setFullscreenImage(null)}
-                  style={{ background: 'none', border: 'none', color: '#FFFFFF', fontSize: '24px', cursor: 'pointer', padding: '0 8px' }}
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-            <div style={{ flex: 1, overflow: 'hidden', background: '#1E293B', borderRadius: '8px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-              {fullscreenImage.url.includes('.pdf') || fullscreenImage.url.startsWith('data:application/pdf') ? (
-                <iframe
-                  src={fullscreenImage.url}
-                  title="PDF Verification Document"
-                  style={{ width: '100%', height: '100%', border: 'none', borderRadius: '8px' }}
-                />
-              ) : (
-                <img
-                  src={fullscreenImage.url}
-                  alt="Full Size Proof Document"
-                  style={{ maxWidth: '100%', maxHeight: '100%', borderRadius: '8px', objectFit: 'contain' }}
-                />
               )}
             </div>
           </div>
@@ -495,19 +417,58 @@ export default function Residents() {
                 <input required type="text" value={formData.flatNumber} onChange={e => setFormData({ ...formData, flatNumber: e.target.value })} placeholder="e.g. A-101" />
               </div>
               <div className="form-group">
-                <label>Ownership Type</label>
-                <select value={formData.ownershipType} onChange={e => setFormData({ ...formData, ownershipType: e.target.value })}>
-                  <option value="Owner">Owner</option>
-                  <option value="Tenant">Tenant</option>
-                </select>
-              </div>
-              <div className="form-group">
                 <label>Email Address *</label>
                 <input required type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })} placeholder="resident@email.com" />
               </div>
               <div className="form-group">
                 <label>Mobile Number *</label>
                 <input required type="tel" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="+91 98765 43210" />
+              </div>
+
+              {/* Password Configuration Box */}
+              <div style={{ background: 'var(--bg-color)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-color)', marginTop: '14px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>
+                    Resident Login Password *
+                  </label>
+                  <button 
+                    type="button" 
+                    onClick={() => setFormData({ ...formData, password: generateSecurePassword() })} 
+                    style={{ background: 'transparent', border: 'none', color: 'var(--primary)', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <RefreshCw size={12} /> Auto-Generate Password
+                  </button>
+                </div>
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <div style={{ position: 'relative', flex: 1 }}>
+                    <input 
+                      required 
+                      type={showPassword ? 'text' : 'password'} 
+                      placeholder="Enter or generate resident password" 
+                      value={formData.password} 
+                      onChange={e => setFormData({ ...formData, password: e.target.value })} 
+                      style={{ width: '100%', padding: '10px 36px 10px 14px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px', outline: 'none' }} 
+                    />
+                    <button 
+                      type="button" 
+                      onClick={() => setShowPassword(!showPassword)} 
+                      style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
+                    >
+                      {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => {
+                      navigator.clipboard.writeText(formData.password);
+                      alert('Password copied to clipboard!');
+                    }} 
+                    className="btn btn-outline" 
+                    style={{ padding: '9px 12px', fontSize: '12px', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: '4px' }}
+                  >
+                    <Copy size={13} /> Copy
+                  </button>
+                </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '24px' }}>
