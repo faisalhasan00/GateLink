@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, CheckCircle, XCircle, ShieldCheck, ShieldAlert, FileText, UserCheck, Phone, Mail, Eye, EyeOff, ExternalLink, RefreshCw, Copy } from 'lucide-react';
-import { collection, onSnapshot, query, orderBy, doc, updateDoc, setDoc } from 'firebase/firestore';
+import { Plus, CheckCircle, XCircle, ShieldCheck, ShieldAlert, FileText, UserCheck, Phone, Mail, Eye, EyeOff, ExternalLink, RefreshCw, Copy, Trash2 } from 'lucide-react';
+import { collection, onSnapshot, query, orderBy, doc, updateDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { getSocietyAdminSession } from '../services/sessionManager';
 
@@ -68,6 +68,18 @@ export default function Residents() {
   const toggleStatus = async (userId, currentStatus) => {
     const newStatus = currentStatus === 'active' || currentStatus === 'approved' ? 'suspended' : 'active';
     await updateDoc(doc(db, `societies/${societyId}/users`, userId), { status: newStatus });
+  };
+
+  const handleDeleteResident = async (userId, name, flatNumber) => {
+    if (!window.confirm(`Are you sure you want to permanently delete resident record for "${name}" (Flat: ${flatNumber || 'N/A'})?\n\nThis will remove their access permissions from the society directory.`)) {
+      return;
+    }
+    try {
+      await deleteDoc(doc(db, `societies/${societyId}/users`, userId));
+      alert(`Successfully deleted resident record for "${name}".`);
+    } catch (e) {
+      alert("Error deleting resident: " + e.message);
+    }
   };
 
   const handleOpenDocument = (e, url, typeName = 'Residence Document Proof') => {
@@ -216,7 +228,7 @@ export default function Residents() {
                         </span>
                       </td>
                       <td>
-                        <div style={{ display: 'flex', gap: '8px' }}>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                           <button
                             className="btn btn-outline"
                             style={{ padding: '4px 10px', fontSize: '12px', color: '#2563EB', borderColor: '#2563EB' }}
@@ -226,10 +238,18 @@ export default function Residents() {
                           </button>
                           <button
                             className="btn btn-outline"
-                            style={{ padding: '4px 10px', fontSize: '12px', color: (r.status === 'active' || r.status === 'approved') ? 'var(--danger)' : 'var(--secondary)' }}
+                            style={{ padding: '4px 10px', fontSize: '12px', color: (r.status === 'active' || r.status === 'approved') ? 'var(--warning)' : 'var(--secondary)' }}
                             onClick={() => toggleStatus(r.id, r.status)}
                           >
                             {(r.status === 'active' || r.status === 'approved') ? <><XCircle size={14} /> Suspend</> : <><CheckCircle size={14} /> Activate</>}
+                          </button>
+                          <button
+                            className="btn-icon"
+                            style={{ color: 'var(--danger)' }}
+                            onClick={() => handleDeleteResident(r.id, r.name, r.flatNumber)}
+                            title="Delete Resident Record"
+                          >
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </td>
@@ -297,7 +317,7 @@ export default function Residents() {
                         </button>
                       </td>
                       <td>
-                        <div style={{ display: 'flex', gap: '8px' }}>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                           <button
                             className="btn btn-outline"
                             style={{ padding: '6px 12px', fontSize: '12px', color: '#2563EB', borderColor: '#2563EB' }}
@@ -318,6 +338,14 @@ export default function Residents() {
                             onClick={() => handleReject(r.id)}
                           >
                             <XCircle size={14} /> Decline
+                          </button>
+                          <button
+                            className="btn-icon"
+                            style={{ color: 'var(--danger)' }}
+                            onClick={() => handleDeleteResident(r.id, r.name, r.flatNumber)}
+                            title="Delete Resident Record"
+                          >
+                            <Trash2 size={16} />
                           </button>
                         </div>
                       </td>
@@ -394,6 +422,20 @@ export default function Residents() {
                   </button>
                 </div>
               )}
+              {/* Modal Actions Footer */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', paddingTop: '16px', borderTop: '1px solid var(--border-color)' }}>
+                <button 
+                  type="button"
+                  className="btn btn-outline" 
+                  style={{ color: 'var(--danger)', borderColor: 'var(--danger)', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }} 
+                  onClick={() => { handleDeleteResident(selectedResidentForView.id, selectedResidentForView.name, selectedResidentForView.flatNumber); setSelectedResidentForView(null); }}
+                >
+                  <Trash2 size={14} /> Delete Resident
+                </button>
+                <button type="button" className="btn btn-primary" onClick={() => setSelectedResidentForView(null)}>
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
