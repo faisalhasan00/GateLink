@@ -22,43 +22,86 @@ final currentUserProvider = Provider<User?>((ref) {
 // ── USER PROFILE PROVIDER (BUG-02 OPTIMIZED DIRECT LOOKUP) ───────────────────────
 
 /// Directly fetches the user profile using the global /users/{uid} index mapping,
-/// with fallback to direct society document read if known.
+/// with fallback to direct society user/staff document read and real society name resolution.
 final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
   final user = ref.watch(currentUserProvider);
   if (user == null) return null;
+
+  Map<String, dynamic>? profileData;
+  String? societyId;
 
   try {
     // 1. Direct O(1) read from global user membership mapping
     final rootDoc = await FirebaseFirestore.instance.doc('users/${user.uid}').get();
     if (rootDoc.exists && rootDoc.data() != null) {
-      final data = rootDoc.data()!;
-      final societyId = data['societyId'] as String?;
+      profileData = Map<String, dynamic>.from(rootDoc.data()!);
+      societyId = profileData['societyId'] as String?;
+
       if (societyId != null && societyId.isNotEmpty) {
-        // Fetch full society profile
+        // Try user document first
         final socUserDoc = await FirebaseFirestore.instance
             .doc('societies/$societyId/users/${user.uid}')
             .get();
-        if (socUserDoc.exists) {
-          return socUserDoc.data();
+
+        if (socUserDoc.exists && socUserDoc.data() != null) {
+          profileData = Map<String, dynamic>.from(socUserDoc.data()!);
+        } else {
+          // Try staff document for Guards/Staff
+          final socStaffDoc = await FirebaseFirestore.instance
+              .doc('societies/$societyId/staff/${user.uid}')
+              .get();
+          if (socStaffDoc.exists && socStaffDoc.data() != null) {
+            profileData = Map<String, dynamic>.from(socStaffDoc.data()!);
+          }
         }
       }
-      return data;
     }
   } catch (_) {}
 
-  // 2. CollectionGroup fallback query across all societies
-  try {
-    final querySnap = await FirebaseFirestore.instance
-        .collectionGroup('users')
-        .where('uid', isEqualTo: user.uid)
-        .limit(1)
-        .get();
-    if (querySnap.docs.isNotEmpty) {
-      return querySnap.docs.first.data();
-    }
-  } catch (_) {}
+  // 2. CollectionGroup fallback queries across staff and users
+  if (profileData == null) {
+    try {
+      final staffQuery = await FirebaseFirestore.instance
+          .collectionGroup('staff')
+          .where('uid', isEqualTo: user.uid)
+          .limit(1)
+          .get();
 
-  return null;
+      if (staffQuery.docs.isNotEmpty) {
+        profileData = Map<String, dynamic>.from(staffQuery.docs.first.data());
+      } else {
+        final usersQuery = await FirebaseFirestore.instance
+            .collectionGroup('users')
+            .where('uid', isEqualTo: user.uid)
+            .limit(1)
+            .get();
+        if (usersQuery.docs.isNotEmpty) {
+          profileData = Map<String, dynamic>.from(usersQuery.docs.first.data());
+        }
+      }
+    } catch (_) {}
+  }
+
+  if (profileData != null) {
+    societyId = profileData['societyId'] as String? ?? societyId;
+
+    // 3. Dynamically fetch real Society Name from societies/{societyId} document if missing or generic
+    final currentSocName = profileData['societyName'] as String?;
+    if (societyId != null && societyId.isNotEmpty &&
+        (currentSocName == null || currentSocName.isEmpty || currentSocName == 'Housing Society' || currentSocName == 'SocietySphere Residency' || currentSocName == societyId)) {
+      try {
+        final socDoc = await FirebaseFirestore.instance.doc('societies/$societyId').get();
+        if (socDoc.exists && socDoc.data() != null) {
+          final realName = socDoc.data()!['name'] as String?;
+          if (realName != null && realName.isNotEmpty) {
+            profileData['societyName'] = realName;
+          }
+        }
+      } catch (_) {}
+    }
+  }
+
+  return profileData;
 });
 
 /// Convenience provider for user account status ('active', 'pending_approval', 'suspended', 'rejected')
