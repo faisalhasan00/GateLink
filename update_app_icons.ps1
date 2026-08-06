@@ -38,7 +38,7 @@ function Save-ResizedImage {
 }
 
 # 1. Android Mipmap App Icons
-$mobileResDir = "c:\Faisal\SocietySphere\Application\mobile\android\app\src\main\res"
+$mobileResDir = "c:\Faisal\SocietySphere\Application\Frontend\mobile\android\app\src\main\res"
 Save-ResizedImage "$mobileResDir\mipmap-mdpi\ic_launcher.png" 48 48
 Save-ResizedImage "$mobileResDir\mipmap-hdpi\ic_launcher.png" 72 72
 Save-ResizedImage "$mobileResDir\mipmap-xhdpi\ic_launcher.png" 96 96
@@ -46,22 +46,22 @@ Save-ResizedImage "$mobileResDir\mipmap-xxhdpi\ic_launcher.png" 144 144
 Save-ResizedImage "$mobileResDir\mipmap-xxxhdpi\ic_launcher.png" 192 192
 
 # 2. Mobile Assets
-$mobileAssetsDir = "c:\Faisal\SocietySphere\Application\mobile\assets\images"
+$mobileAssetsDir = "c:\Faisal\SocietySphere\Application\Frontend\mobile\assets\images"
 Save-ResizedImage "$mobileAssetsDir\app_logo.png" 512 512
 Save-ResizedImage "$mobileAssetsDir\logo.png" 512 512
 
 # 3. Website Assets
-$webPublicDir = "c:\Faisal\SocietySphere\Application\website\public"
+$webPublicDir = "c:\Faisal\SocietySphere\Application\Frontend\website\public"
 Save-ResizedImage "$webPublicDir\logo.png" 512 512
 Save-ResizedImage "$webPublicDir\favicon.png" 64 64
 
 # 4. Society Admin Assets
-$socAdminPublicDir = "c:\Faisal\SocietySphere\Application\society_admin\public"
+$socAdminPublicDir = "c:\Faisal\SocietySphere\Application\Frontend\society_admin\public"
 Save-ResizedImage "$socAdminPublicDir\logo.png" 512 512
 Save-ResizedImage "$socAdminPublicDir\favicon.png" 64 64
 
 # 5. Super Admin Assets
-$superAdminPublicDir = "c:\Faisal\SocietySphere\Application\super_admin\public"
+$superAdminPublicDir = "c:\Faisal\SocietySphere\Application\Frontend\super_admin\public"
 Save-ResizedImage "$superAdminPublicDir\logo.png" 512 512
 Save-ResizedImage "$superAdminPublicDir\favicon.png" 64 64
 
