@@ -147,7 +147,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => AlertDialog(
+      builder: (dialogCtx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
         content: Column(mainAxisSize: MainAxisSize.min, children: [
           const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 56),
@@ -159,7 +159,12 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
         ]),
         actions: [
           ElevatedButton(
-            onPressed: () { Navigator.pop(context); context.go(AppRoutes.myBookings); },
+            onPressed: () {
+              Navigator.of(dialogCtx).pop();
+              if (mounted) {
+                context.go(AppRoutes.myBookings);
+              }
+            },
             child: const Text('View My Bookings'),
           ),
         ],
