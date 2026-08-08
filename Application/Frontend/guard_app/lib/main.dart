@@ -46,25 +46,28 @@ Future<void> saveFcmToken() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Firebase
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // Initialize Firebase safely
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Firebase init error: $e');
+  }
 
-  // Initialize local notifications
-  await NotificationService.init();
+  // Initialize local notifications safely
+  try {
+    await NotificationService.init();
+  } catch (e) {
+    debugPrint('NotificationService init error: $e');
+  }
 
   // Register background FCM handler
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  // Request notification permission and save FCM token
-  await FirebaseMessaging.instance.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
-  await saveFcmToken();
-  FirebaseMessaging.instance.onTokenRefresh.listen((_) => saveFcmToken());
+  try {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  } catch (e) {
+    debugPrint('FCM background handler error: $e');
+  }
 
   // Lock to portrait orientation
   await SystemChrome.setPreferredOrientations([
@@ -84,6 +87,21 @@ void main() async {
       child: SocietySphereGuardApp(),
     ),
   );
+
+  // Non-blocking FCM background registration after UI mounts
+  Future.microtask(() async {
+    try {
+      await FirebaseMessaging.instance.requestPermission(
+        alert: true,
+        badge: true,
+        sound: true,
+      );
+      await saveFcmToken();
+      FirebaseMessaging.instance.onTokenRefresh.listen((_) => saveFcmToken());
+    } catch (e) {
+      debugPrint('FCM token setup error: $e');
+    }
+  });
 }
 
 class SocietySphereGuardApp extends ConsumerWidget {
