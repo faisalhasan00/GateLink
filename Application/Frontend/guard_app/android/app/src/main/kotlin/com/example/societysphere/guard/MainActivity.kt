@@ -1,4 +1,4 @@
-package com.example.societysphere
+package com.example.societysphere.guard
 
 import io.flutter.embedding.android.FlutterActivity
 
