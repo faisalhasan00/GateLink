@@ -179,6 +179,7 @@ export default function SocietyOnboardingWizard({ isOpen, onClose, existingSocie
         yearEstablished: Number(cleanData.yearEstablished) || null,
         mrr: Number(cleanData.mrr) || 10000,
         adminEmail: adminEmail,
+        tempPassword: tempPassword,
         president: cleanData.presidentName || 'Management Committee',
         phone: cleanData.phone,
         city: cleanData.city,

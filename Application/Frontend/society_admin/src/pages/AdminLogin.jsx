@@ -49,8 +49,11 @@ export default function AdminLogin() {
         setSocietyAdminSession({ email: cleanEmail, token: res.user?.uid, societyId: socId });
         navigate('/');
       } catch (authErr) {
-        // If Auth account not yet created, allow login if temporary onboarding password matches
-        if (socData.tempPassword && socData.tempPassword === password) {
+        // If Auth account not yet created in Firebase Auth, allow login & register account on first login
+        const isTempMatch = socData.tempPassword && socData.tempPassword === password;
+        const allowFallbackCreation = !socData.tempPassword && password.length >= 6;
+
+        if (isTempMatch || allowFallbackCreation) {
           try {
             const newRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
             setSocietyAdminSession({ email: cleanEmail, token: newRes.user?.uid, societyId: socId });
@@ -66,7 +69,15 @@ export default function AdminLogin() {
         throw authErr;
       }
     } catch (err) {
-      setError(err.message.replace('Firebase: ', '').replace(/\(.*\)\.?/, ''));
+      let msg = err.message || 'Authentication failed.';
+      if (err.code === 'auth/operation-not-allowed') {
+        msg = 'Email/Password sign-in is disabled in Firebase Console. Please enable Email/Password under Firebase Console -> Authentication -> Sign-in method.';
+      } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+        msg = 'Invalid email or password. Please verify your credentials.';
+      } else {
+        msg = msg.replace('Firebase: ', '').replace(/\(.*\)\.?/, '').trim();
+      }
+      setError(msg);
     } finally {
       setLoading(false);
     }

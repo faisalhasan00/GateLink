@@ -54,13 +54,15 @@ export default function SuperAdminLogin() {
         } catch (innerErr) {
           if (innerErr.code === 'auth/email-already-in-use' || innerErr.code === 'auth/wrong-password') {
             setError('Invalid password. Please enter your correct Super Admin password.');
+          } else if (innerErr.code === 'auth/operation-not-allowed') {
+            setError('Email/Password sign-in is disabled in Firebase Console. Enable Email/Password under Firebase Console -> Authentication -> Sign-in method.');
           } else {
             console.error("Super Admin auth setup error:", innerErr);
-            setError(innerErr.message.replace('Firebase: ', '').replace(/\(.*\)\.?/, ''));
+            setError(innerErr.message.replace('Firebase: ', '').replace(/\(.*\)\.?/, '').trim());
           }
         }
       } else {
-        setError('Invalid credentials or password too short.');
+        setError('Invalid credentials or password too short (minimum 6 characters).');
       }
     } finally {
       setLoading(false);

@@ -6,10 +6,6 @@ allprojects {
 }
 
 subprojects {
-    project.evaluationDependsOn(":app")
-}
-
-subprojects {
     val p = this
     val applyCompileSdk = {
         if (p.plugins.hasPlugin("com.android.application") || p.plugins.hasPlugin("com.android.library")) {

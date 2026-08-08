@@ -8,9 +8,10 @@ plugins {
 }
 
 android {
-    namespace = "com.example.societysphere"
-    compileSdk = 36
-    // ndkVersion = flutter.ndkVersion
+    namespace = "com.example.societysphere.guard"
+    compileSdk = 35
+    buildToolsVersion = "34.0.0"
+    ndkVersion = "28.2.13676358"
 
     buildFeatures {
         resValues = true
@@ -23,30 +24,17 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.societysphere"
+        applicationId = "com.example.societysphere.guard"
         minSdk = flutter.minSdkVersion
-        targetSdk = 36
+        targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        resValue("string", "app_name", "HomeHni Guard")
     }
 
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
-        }
-    }
-
-    flavorDimensions += "app"
-    productFlavors {
-        create("resident") {
-            dimension = "app"
-            applicationId = "com.example.societysphere"
-            resValue("string", "app_name", "HomeHni Residency")
-        }
-        create("guard") {
-            dimension = "app"
-            applicationId = "com.example.societysphere.guard"
-            resValue("string", "app_name", "HomeHni Guard")
         }
     }
 }
