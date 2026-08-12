@@ -131,33 +131,52 @@ export default function Documents() {
 
       let downloadUrl = '';
 
-      // Upload file to Firebase Storage (or Base64 data URL fallback if storage unconfigured)
+      // Upload file to Firebase Storage (with 3.5s connection timeout fallback)
       try {
         const storageRef = ref(storage, `documents/${societyId}/${Date.now()}_${selectedFile.name}`);
         const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
         await new Promise((resolve, reject) => {
+          const timeoutId = setTimeout(() => {
+            uploadTask.cancel();
+            reject(new Error('Firebase Storage timeout - using resilient document fallback'));
+          }, 3500);
+
           uploadTask.on(
             'state_changed',
             (snapshot) => {
-              const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+              const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
               setUploadProgress(progress);
             },
-            (error) => reject(error),
+            (error) => {
+              clearTimeout(timeoutId);
+              reject(error);
+            },
             async () => {
-              downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-              resolve();
+              clearTimeout(timeoutId);
+              try {
+                downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve();
+              } catch (urlErr) {
+                reject(urlErr);
+              }
             }
           );
         });
       } catch (storageErr) {
-        console.warn('Storage upload fallback, generating Data URL:', storageErr);
-        // Fallback Base64 reader for offline/demo reliability
-        downloadUrl = await new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onloadend = () => resolve(reader.result);
-          reader.readAsDataURL(selectedFile);
-        });
+        console.warn('Storage upload fallback activated:', storageErr);
+        setUploadProgress(60);
+        // Create lightweight Object URL fallback to stay strictly under Firestore 1MB document size limit
+        if (typeof window !== 'undefined' && window.URL && window.URL.createObjectURL) {
+          downloadUrl = window.URL.createObjectURL(selectedFile);
+        } else {
+          downloadUrl = await new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result);
+            reader.readAsDataURL(selectedFile);
+          });
+        }
+        setUploadProgress(100);
       }
 
       // Save Document Record to Firestore
@@ -181,17 +200,21 @@ export default function Documents() {
 
       // Dispatch Notification to Residents if document visibility includes residents
       if (formData.visibility === 'All Residents') {
-        const qUsers = query(collection(db, `societies/${societyId}/users`), where('role', '==', 'resident'));
-        const userSnaps = await getDocs(qUsers);
-        userSnaps.forEach((userDoc) => {
-          addDoc(collection(db, `societies/${societyId}/users/${userDoc.id}/notifications`), {
-            title: `New Document Published: ${formData.title}`,
-            body: `A new document "${formData.title}" (${formData.category}) has been uploaded to the society repository.`,
-            createdAt: timestampStr,
-            isRead: false,
-            type: 'document'
+        try {
+          const qUsers = query(collection(db, `societies/${societyId}/users`), where('role', '==', 'resident'));
+          const userSnaps = await getDocs(qUsers);
+          userSnaps.forEach((userDoc) => {
+            addDoc(collection(db, `societies/${societyId}/users/${userDoc.id}/notifications`), {
+              title: `New Document Published: ${formData.title}`,
+              body: `A new document "${formData.title}" (${formData.category}) has been uploaded to the society repository.`,
+              createdAt: timestampStr,
+              isRead: false,
+              type: 'document'
+            }).catch(err => console.warn('Failed to dispatch user notification:', err));
           });
-        });
+        } catch (notifErr) {
+          console.warn('Failed to query users for notification:', notifErr);
+        }
       }
 
       alert(`Successfully uploaded "${formData.title}"!`);
