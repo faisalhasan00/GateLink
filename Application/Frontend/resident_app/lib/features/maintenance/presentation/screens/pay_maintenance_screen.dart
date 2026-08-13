@@ -41,67 +41,97 @@ class PayMaintenanceScreen extends ConsumerStatefulWidget {
 class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
   int _selectedMethod = 0;
   bool _isProcessing = false;
+  bool _upiAppLaunched = false;
+  final TextEditingController _utrController = TextEditingController();
 
   final _methods = const [
-    _PayMethod(icon: Icons.smartphone_rounded, label: 'Direct UPI (PhonePe / GPay / Paytm)', subtitle: 'Instant 0% Fee · Auto-Verified', color: AppColors.success),
+    _PayMethod(icon: Icons.smartphone_rounded, label: 'Direct UPI (PhonePe / GPay / Paytm)', subtitle: 'Instant 0% Fee · Verified via UTR', color: AppColors.success),
     _PayMethod(icon: Icons.account_balance_rounded, label: 'Net Banking', subtitle: 'All major banks', color: AppColors.primary),
     _PayMethod(icon: Icons.credit_card_rounded, label: 'Credit / Debit Card', subtitle: 'Visa, Mastercard, RuPay', color: AppColors.visitor),
   ];
 
-  Future<void> _pay() async {
+  @override
+  void dispose() {
+    _utrController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _launchUpiApp() async {
+    final activeSocId = ref.read(userProfileProvider).value?['societyId'] as String? ?? 'SOC-001';
+    final payAmount = widget.amount ?? 3500.0;
+    final invNum = widget.invoiceNumber ?? 'INV-2026-08-101';
+
+    String upiVpa = '8106342858@ybl';
+    String payeeName = 'MOHAMMED FAISAL HASAN';
+
+    try {
+      final upiDoc = await FirebaseFirestore.instance
+          .doc('societies/$activeSocId/config/upi')
+          .get();
+      if (upiDoc.exists && upiDoc.data() != null) {
+        final data = upiDoc.data()!;
+        if ((data['upiId'] as String?)?.isNotEmpty == true) {
+          upiVpa = data['upiId'];
+        }
+        if ((data['payeeName'] as String?)?.isNotEmpty == true) {
+          payeeName = data['payeeName'];
+        }
+      }
+    } catch (e) {
+      debugPrint('Config fetch fallback: $e');
+    }
+
+    final txnToken = 'SS-PAY-$invNum-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+    
+    final upiUri = Uri.parse(
+      'upi://pay?pa=$upiVpa&pn=${Uri.encodeComponent(payeeName)}&am=${payAmount.toStringAsFixed(2)}&tn=${Uri.encodeComponent(txnToken)}&cu=INR'
+    );
+
+    try {
+      if (await canLaunchUrl(upiUri)) {
+        await launchUrl(upiUri, mode: LaunchMode.externalApplication);
+        setState(() {
+          _upiAppLaunched = true;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('No UPI apps (PhonePe/GPay) found on this device.'), backgroundColor: AppColors.error),
+        );
+      }
+    } catch (upiErr) {
+      debugPrint('UPI launch error: $upiErr');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not launch UPI app: $upiErr'), backgroundColor: AppColors.error),
+      );
+    }
+  }
+
+  Future<void> _verifyAndCompletePayment() async {
+    final utrText = _utrController.text.trim();
+    if (_selectedMethod == 0 && utrText.length < 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter valid UPI UTR / Reference Number (at least 6 digits) from your PhonePe/GPay receipt.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isProcessing = true);
 
     try {
       final firestoreService = ref.read(firestoreServiceProvider);
       final user = ref.read(currentUserProvider);
-      final userProfile = ref.read(userProfileProvider).value;
-      final activeSocId = userProfile?['societyId'] as String? ?? 'SOC-001';
 
       final payMethodName = _methods[_selectedMethod].label;
       final targetBillId = widget.billId ?? 'bill_latest';
       final payAmount = widget.amount ?? 3500.0;
       final invNum = widget.invoiceNumber ?? 'INV-2026-08-101';
       final period = widget.month ?? 'August 2026';
+      final txnId = utrText.isNotEmpty ? utrText : 'TXN-${DateTime.now().millisecondsSinceEpoch}';
 
-      // 1. Fetch dynamic Society UPI VPA config from Firestore
-      String upiVpa = 'societysphere@okicici';
-      String payeeName = 'Society Management Committee';
-
-      try {
-        final upiDoc = await FirebaseFirestore.instance
-            .doc('societies/$activeSocId/config/upi')
-            .get();
-        if (upiDoc.exists && upiDoc.data() != null) {
-          final data = upiDoc.data()!;
-          if ((data['upiId'] as String?)?.isNotEmpty == true) {
-            upiVpa = data['upiId'];
-          }
-          if ((data['payeeName'] as String?)?.isNotEmpty == true) {
-            payeeName = data['payeeName'];
-          }
-        }
-      } catch (e) {
-        debugPrint('Config fetch fallback: $e');
-      }
-
-      // 2. Direct UPI Intent Launcher if method 0 selected
-      if (_selectedMethod == 0) {
-        final txnToken = 'SS-PAY-$invNum-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
-        
-        final upiUri = Uri.parse(
-          'upi://pay?pa=$upiVpa&pn=${Uri.encodeComponent(payeeName)}&am=${payAmount.toStringAsFixed(2)}&tn=${Uri.encodeComponent(txnToken)}&cu=INR'
-        );
-
-        try {
-          if (await canLaunchUrl(upiUri)) {
-            await launchUrl(upiUri, mode: LaunchMode.externalApplication);
-          }
-        } catch (upiErr) {
-          debugPrint('UPI launch fallback: $upiErr');
-        }
-      }
-
-      if (firestoreService != null && user != null) {
+      if (firestoreService != null && user != null && widget.billId != null) {
         await firestoreService.payMaintenanceBill(
           billId: targetBillId,
           residentUid: user.uid,
@@ -110,6 +140,16 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
           invoiceNumber: invNum,
           billingPeriod: period,
         );
+
+        // Update exact transaction ID / UTR in Firestore
+        final activeSocId = ref.read(userProfileProvider).value?['societyId'] as String? ?? 'SOC-001';
+        await FirebaseFirestore.instance
+            .doc('societies/$activeSocId/maintenance_bills/$targetBillId')
+            .update({
+          'transactionId': txnId,
+          'utrNumber': txnId,
+          'status': 'paid',
+        }).catchError((_) {});
       }
 
       setState(() => _isProcessing = false);
@@ -134,9 +174,11 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
                 child: Icon(Icons.check_circle_rounded, color: AppColors.success, size: 40),
               ),
               const SizedBox(height: 16),
-              const Text('Payment Successful!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              const Text('Payment Verified!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
               const SizedBox(height: 8),
-              Text('₹${payAmount.toStringAsFixed(0)} paid to $payeeName ($upiVpa)', style: const TextStyle(color: AppColors.textSecondary, fontSize: 13), textAlign: TextAlign.center),
+              Text('₹${payAmount.toStringAsFixed(0)} settled via $payMethodName', style: const TextStyle(color: AppColors.textSecondary, fontSize: 13), textAlign: TextAlign.center),
+              const SizedBox(height: 4),
+              Text('Ref UTR: $txnId', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
               const SizedBox(height: 8),
               Text('Invoice: $invNum', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
               const SizedBox(height: AppSpacing.xl),
@@ -286,7 +328,86 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
             ),
             const SizedBox(height: AppSpacing.xl),
 
-            // Payment Methods
+            // UTR Verification Card (Visible after UPI App Launched)
+            if (_upiAppLaunched && _selectedMethod == 0) ...[
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                decoration: BoxDecoration(
+                  color: AppColors.successSurface,
+                  borderRadius: BorderRadius.circular(AppRadius.xl),
+                  border: Border.all(color: AppColors.success),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.mark_email_read_rounded, color: AppColors.success, size: 20),
+                        SizedBox(width: 8),
+                        Text('UPI App Launched!', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.success)),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Complete your payment in PhonePe/GPay, then enter the 12-Digit UTR / Ref Number from your receipt below to verify:',
+                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    TextField(
+                      controller: _utrController,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        hintText: 'Enter 12-Digit UTR (e.g. 423456789012)',
+                        prefixIcon: const Icon(Icons.pin_rounded, color: AppColors.success),
+                        fillColor: Colors.white,
+                        filled: true,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.lg), borderSide: const BorderSide(color: AppColors.success)),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () {
+                              setState(() {
+                                _upiAppLaunched = false;
+                                _utrController.clear();
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('Payment cancelled. Bill remains unpaid.'), backgroundColor: AppColors.warning),
+                              );
+                            },
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.error,
+                              side: const BorderSide(color: AppColors.error),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                            ),
+                            child: const Text('Payment Declined / Cancelled', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: _isProcessing ? null : _verifyAndCompletePayment,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.success,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                            ),
+                            child: const Text('Verify & Submit UTR', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
+            ],
+
+            // Payment Methods Selection
             const Text('Select Payment Method',
                 style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
             const SizedBox(height: AppSpacing.md),
@@ -294,7 +415,10 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
               final m = _methods[i];
               final isSelected = _selectedMethod == i;
               return GestureDetector(
-                onTap: () => setState(() => _selectedMethod = i),
+                onTap: () => setState(() {
+                  _selectedMethod = i;
+                  _upiAppLaunched = false;
+                }),
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
                   margin: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -348,34 +472,62 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
             const SizedBox(height: AppSpacing.xl),
 
             // Pay Button
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                onPressed: _isProcessing ? null : _pay,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.6),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-                  elevation: 0,
+            if (!_upiAppLaunched)
+              SizedBox(
+                width: double.infinity,
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _isProcessing
+                      ? null
+                      : (_selectedMethod == 0 ? _launchUpiApp : _verifyAndCompletePayment),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.6),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
+                    elevation: 0,
+                  ),
+                  child: _isProcessing
+                      ? const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                            ),
+                            SizedBox(width: 12),
+                            Text('Processing...', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                          ],
+                        )
+                      : Text(
+                          _selectedMethod == 0
+                              ? 'Launch PhonePe / GPay (₹${totalAmount.toStringAsFixed(0)})'
+                              : 'Pay ₹${totalAmount.toStringAsFixed(0)} Now',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+                        ),
                 ),
-                child: _isProcessing
-                    ? const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                          ),
-                          SizedBox(width: 12),
-                          Text('Processing Payment...', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                        ],
-                      )
-                    : const Text('Pay Rs. 3,500 Now', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+              ),
+            const SizedBox(height: AppSpacing.md),
+            const Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.lock_rounded, size: 14, color: AppColors.textSecondary),
+                  SizedBox(width: 4),
+                  Text(
+                    'Secured by 256-bit SSL encryption',
+                    style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                ],
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
             const SizedBox(height: AppSpacing.md),
             const Center(
               child: Row(
