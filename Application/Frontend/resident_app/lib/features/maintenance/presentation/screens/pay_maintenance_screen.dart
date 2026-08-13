@@ -212,9 +212,10 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
 
       // Launch Cashfree Web Checkout Session
       final cfCheckoutUrl = Uri.parse('https://payments-sandbox.cashfree.com/order/#$orderId');
-
-      if (await canLaunchUrl(cfCheckoutUrl)) {
+      try {
         await launchUrl(cfCheckoutUrl, mode: LaunchMode.externalApplication);
+      } catch (launchErr) {
+        debugPrint('Direct URL launch fallback error: $launchErr');
       }
 
       setState(() => _isProcessing = false);
