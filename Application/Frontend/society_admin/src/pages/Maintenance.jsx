@@ -75,6 +75,17 @@ export default function Maintenance() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // UPI Config Modal State
+  const [isUpiModalOpen, setIsUpiModalOpen] = useState(false);
+  const [upiConfig, setUpiConfig] = useState({
+    upiId: 'societysphere@okicici',
+    payeeName: 'Society Management Committee',
+    bankName: 'ICICI Bank',
+    accountNumber: '998877665544',
+    ifscCode: 'ICIC0001234',
+    mode: 'direct_upi'
+  });
+
   useEffect(() => {
     // 1. Fetch Maintenance Bills Stream
     const qBills = query(collection(db, `societies/${societyId}/maintenance_bills`), orderBy('createdAt', 'desc'));
@@ -84,15 +95,46 @@ export default function Maintenance() {
       setLoading(false);
     });
 
-    // 2. Fetch Residents for single bill dropdown
+    // 2. Fetch Society UPI VPA Config
+    const unsubUpi = onSnapshot(doc(db, `societies/${societyId}/config`, 'upi'), (docSnap) => {
+      if (docSnap.exists()) {
+        setUpiConfig(docSnap.data());
+      }
+    });
+
+    // 3. Fetch Residents for single bill dropdown
     const qUsers = query(collection(db, `societies/${societyId}/users`), where('role', '==', 'resident'));
     getDocs(qUsers).then((snap) => {
       const resList = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
       setResidents(resList);
     }).catch(e => console.error(e));
 
-    return () => unsubBills();
+    return () => {
+      unsubBills();
+      unsubUpi();
+    };
   }, [societyId]);
+
+  const handleSaveUpiConfig = async (e) => {
+    e.preventDefault();
+    try {
+      await updateDoc(doc(db, `societies/${societyId}/config`, 'upi'), {
+        ...upiConfig,
+        updatedAt: new Date().toISOString()
+      }).catch(async () => {
+        // If config doc doesn't exist yet, create it
+        const { setDoc } = await import('firebase/firestore');
+        await setDoc(doc(db, `societies/${societyId}/config`, 'upi'), {
+          ...upiConfig,
+          updatedAt: new Date().toISOString()
+        });
+      });
+      alert('Society UPI VPA & Bank settings saved successfully!');
+      setIsUpiModalOpen(false);
+    } catch (err) {
+      alert('Error saving UPI config: ' + err.message);
+    }
+  };
 
   // Compute Total Bill Amount dynamically
   const calculateTotal = (data) => {
@@ -394,14 +436,24 @@ export default function Maintenance() {
             </select>
           </div>
 
-          {/* Issue Bill Action */}
-          <button 
-            className="btn btn-primary" 
-            onClick={() => setIsGenerateModalOpen(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-          >
-            <Plus size={18} /> Generate Maintenance Bill
-          </button>
+          {/* Action Buttons */}
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <button 
+              className="btn btn-secondary" 
+              onClick={() => setIsUpiModalOpen(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'var(--bg-color)', border: '1px solid var(--border-color)', color: 'var(--text-color)' }}
+            >
+              <CreditCard size={16} color="var(--primary)" /> Configure Society UPI
+            </button>
+
+            <button 
+              className="btn btn-primary" 
+              onClick={() => setIsGenerateModalOpen(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
+              <Plus size={18} /> Generate Maintenance Bill
+            </button>
+          </div>
 
         </div>
       </div>
@@ -779,6 +831,109 @@ export default function Maintenance() {
 
             </div>
 
+          </div>
+        </div>
+      )}
+
+      {/* 6. Configure Society UPI VPA Modal */}
+      {isUpiModalOpen && (
+        <div className="modal-overlay" style={{ display: 'flex', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', zIndex: 1000, justifyContent: 'center', alignItems: 'center' }}>
+          <div className="modal-content card" style={{ maxWidth: '540px', width: '90%', borderRadius: '16px', padding: '24px' }}>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'var(--primary-light)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <CreditCard size={20} color="var(--primary)" />
+                </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>Society UPI VPA & Bank Settings</h3>
+                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Direct 0% fee payments sent straight to Society Bank Account</span>
+                </div>
+              </div>
+              <button className="icon-btn" onClick={() => setIsUpiModalOpen(false)}>
+                <XCircle size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveUpiConfig} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              
+              <div>
+                <label className="form-label" style={{ fontSize: '12px', fontWeight: 700 }}>Society Official UPI VPA ID (Virtual Payment Address) *</label>
+                <input 
+                  type="text" 
+                  className="form-control"
+                  placeholder="e.g. abcsociety@okicici or 9876543210@paytm"
+                  value={upiConfig.upiId || ''}
+                  onChange={(e) => setUpiConfig({ ...upiConfig, upiId: e.target.value })}
+                  required
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px', fontWeight: 600 }}
+                />
+                <span style={{ fontSize: '11px', color: 'var(--primary)', marginTop: '4px', display: 'block' }}>
+                  💡 Residents' PhonePe, Google Pay, and Paytm apps will pay directly to this UPI ID with 0% fee.
+                </span>
+              </div>
+
+              <div>
+                <label className="form-label" style={{ fontSize: '12px', fontWeight: 700 }}>Registered Society / Payee Name *</label>
+                <input 
+                  type="text" 
+                  className="form-control"
+                  placeholder="e.g. ABC Apartment RWA Maintenance Account"
+                  value={upiConfig.payeeName || ''}
+                  onChange={(e) => setUpiConfig({ ...upiConfig, payeeName: e.target.value })}
+                  required
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '14px' }}
+                />
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700 }}>Bank Name</label>
+                  <input 
+                    type="text" 
+                    className="form-control"
+                    placeholder="e.g. HDFC / ICICI / SBI"
+                    value={upiConfig.bankName || ''}
+                    onChange={(e) => setUpiConfig({ ...upiConfig, bankName: e.target.value })}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px' }}
+                  />
+                </div>
+
+                <div>
+                  <label className="form-label" style={{ fontSize: '12px', fontWeight: 700 }}>IFSC Code</label>
+                  <input 
+                    type="text" 
+                    className="form-control"
+                    placeholder="e.g. ICIC0001234"
+                    value={upiConfig.ifscCode || ''}
+                    onChange={(e) => setUpiConfig({ ...upiConfig, ifscCode: e.target.value })}
+                    style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="form-label" style={{ fontSize: '12px', fontWeight: 700 }}>Society Account Number (Optional)</label>
+                <input 
+                  type="text" 
+                  className="form-control"
+                  placeholder="Account Number for bank transfer verification"
+                  value={upiConfig.accountNumber || ''}
+                  onChange={(e) => setUpiConfig({ ...upiConfig, accountNumber: e.target.value })}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--border-color)', fontSize: '13px' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
+                <button type="button" className="btn btn-secondary" onClick={() => setIsUpiModalOpen(false)}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <ShieldCheck size={16} /> Save UPI Settings
+                </button>
+              </div>
+
+            </form>
           </div>
         </div>
       )}

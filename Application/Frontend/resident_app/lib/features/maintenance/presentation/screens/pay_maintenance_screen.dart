@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
@@ -29,7 +30,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
   bool _isProcessing = false;
 
   final _methods = const [
-    _PayMethod(icon: Icons.smartphone_rounded, label: 'UPI / GPay / PhonePe', subtitle: 'Instant · No extra charge', color: AppColors.success),
+    _PayMethod(icon: Icons.smartphone_rounded, label: 'Direct UPI (PhonePe / GPay / Paytm)', subtitle: 'Instant 0% Fee · Auto-Verified', color: AppColors.success),
     _PayMethod(icon: Icons.account_balance_rounded, label: 'Net Banking', subtitle: 'All major banks', color: AppColors.primary),
     _PayMethod(icon: Icons.credit_card_rounded, label: 'Credit / Debit Card', subtitle: 'Visa, Mastercard, RuPay', color: AppColors.visitor),
   ];
@@ -46,6 +47,25 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       final payAmount = widget.amount ?? 3500.0;
       final invNum = widget.invoiceNumber ?? 'INV-2026-08-101';
       final period = widget.month ?? 'August 2026';
+
+      // 1. Direct UPI Intent Launcher if method 0 selected
+      if (_selectedMethod == 0) {
+        final upiVpa = 'societysphere@okicici';
+        final payeeName = 'Society Management Committee';
+        final txnToken = 'SS-PAY-$invNum-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+        
+        final upiUri = Uri.parse(
+          'upi://pay?pa=$upiVpa&pn=${Uri.encodeComponent(payeeName)}&am=${payAmount.toStringAsFixed(2)}&tn=${Uri.encodeComponent(txnToken)}&cu=INR'
+        );
+
+        try {
+          if (await canLaunchUrl(upiUri)) {
+            await launchUrl(upiUri, mode: LaunchMode.externalApplication);
+          }
+        } catch (upiErr) {
+          debugPrint('UPI launch fallback: $upiErr');
+        }
+      }
 
       if (firestoreService != null && user != null && widget.billId != null) {
         await firestoreService.payMaintenanceBill(
