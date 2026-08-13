@@ -1,23 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../domain/models/notification_model.dart';
+import '../../providers/notification_providers.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
 
   @override
-  ConsumerState<NotificationsScreen> createState() => _NotificationsScreenState();
+  ConsumerState<NotificationsScreen> createState() =>
+      _NotificationsScreenState();
 }
 
 class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   String _selectedCategory = 'All';
 
-  final List<String> _categories = ['All', 'Visitors', 'Bills', 'Complaints', 'Amenities'];
+  final List<String> _categories = [
+    'All',
+    'Visitors',
+    'Bills',
+    'Complaints',
+    'Amenities'
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -31,14 +39,22 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             icon: const Icon(Icons.more_vert_rounded),
             onSelected: (value) async {
               final user = ref.read(currentUserProvider);
-              final svc = ref.read(firestoreServiceProvider);
-              if (user == null || svc == null) return;
+              final profile = ref.read(userProfileProvider).value;
+              final activeSocId = profile?.societyId ?? 'SOC-001';
+              if (user == null) return;
 
               if (value == 'mark_read') {
-                await svc.markAllNotificationsAsRead(user.uid);
-                if (context.mounted) {
+                final success = await ref
+                    .read(notificationControllerProvider.notifier)
+                    .markAllNotificationsAsRead(
+                      societyId: activeSocId,
+                      uid: user.uid,
+                    );
+
+                if (success && context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('All notifications marked as read.')),
+                    const SnackBar(
+                        content: Text('All notifications marked as read.')),
                   );
                 }
               } else if (value == 'clear_all') {
@@ -46,12 +62,16 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                   context: context,
                   builder: (ctx) => AlertDialog(
                     title: const Text('Clear All Notifications?'),
-                    content: const Text('Are you sure you want to clear all notifications? This cannot be undone.'),
+                    content: const Text(
+                        'Are you sure you want to clear all notifications? This cannot be undone.'),
                     actions: [
-                      TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                      TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: const Text('Cancel')),
                       ElevatedButton(
                         onPressed: () => Navigator.pop(ctx, true),
-                        style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+                        style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.error),
                         child: const Text('Clear All'),
                       ),
                     ],
@@ -59,10 +79,18 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                 );
 
                 if (confirm == true) {
-                  await svc.clearAllNotifications(user.uid);
-                  if (context.mounted) {
+                  final success = await ref
+                      .read(notificationControllerProvider.notifier)
+                      .clearAllNotifications(
+                        societyId: activeSocId,
+                        uid: user.uid,
+                      );
+
+                  if (success && context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('All notifications cleared.'), backgroundColor: AppColors.error),
+                      const SnackBar(
+                          content: Text('All notifications cleared.'),
+                          backgroundColor: AppColors.error),
                     );
                   }
                 }
@@ -73,7 +101,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                 value: 'mark_read',
                 child: Row(
                   children: [
-                    Icon(Icons.done_all_rounded, size: 18, color: AppColors.primary),
+                    Icon(Icons.done_all_rounded,
+                        size: 18, color: AppColors.primary),
                     SizedBox(width: 10),
                     Text('Mark all as read'),
                   ],
@@ -83,9 +112,11 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                 value: 'clear_all',
                 child: Row(
                   children: [
-                    Icon(Icons.delete_sweep_rounded, size: 18, color: AppColors.error),
+                    Icon(Icons.delete_sweep_rounded,
+                        size: 18, color: AppColors.error),
                     SizedBox(width: 10),
-                    Text('Clear all notifications', style: TextStyle(color: AppColors.error)),
+                    Text('Clear all notifications',
+                        style: TextStyle(color: AppColors.error)),
                   ],
                 ),
               ),
@@ -99,7 +130,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           // Filter Bar
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(AppSpacing.pagePadding, 0, AppSpacing.pagePadding, AppSpacing.sm),
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.pagePadding, 0, AppSpacing.pagePadding, AppSpacing.sm),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -112,8 +144,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                       selected: isSelected,
                       selectedColor: AppColors.primary,
                       labelStyle: TextStyle(
-                        color: isSelected ? Colors.white : AppColors.textSecondary,
-                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                        color:
+                            isSelected ? Colors.white : AppColors.textSecondary,
+                        fontWeight:
+                            isSelected ? FontWeight.w700 : FontWeight.w500,
                         fontSize: 12,
                       ),
                       onSelected: (selected) {
@@ -130,16 +164,14 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           // Notifications List
           Expanded(
             child: notificationsAsync.when(
-              data: (snapshot) {
-                final allDocs = snapshot.docs;
-
+              data: (notifications) {
                 final filtered = _selectedCategory == 'All'
-                    ? allDocs
-                    : allDocs.where((doc) {
-                        final data = doc.data() as Map<String, dynamic>;
-                        final type = (data['type'] ?? '').toString().toLowerCase();
+                    ? notifications
+                    : notifications.where((n) {
+                        final type = n.type.toLowerCase();
                         final catLower = _selectedCategory.toLowerCase();
-                        return type.contains(catLower) || type.startsWith(catLower);
+                        return type.contains(catLower) ||
+                            type.startsWith(catLower);
                       }).toList();
 
                 if (filtered.isEmpty) {
@@ -147,11 +179,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.notifications_off_rounded, size: 56, color: AppColors.textDisabled),
+                        Icon(Icons.notifications_off_rounded,
+                            size: 56, color: AppColors.textDisabled),
                         SizedBox(height: AppSpacing.md),
                         Text(
                           'No notifications in this category',
-                          style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+                          style: TextStyle(
+                              color: AppColors.textSecondary, fontSize: 15),
                         ),
                       ],
                     ),
@@ -161,26 +195,24 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                 return ListView.separated(
                   padding: const EdgeInsets.all(AppSpacing.pagePadding),
                   itemCount: filtered.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
+                  separatorBuilder: (_, __) =>
+                      const SizedBox(height: AppSpacing.md),
                   itemBuilder: (context, index) {
-                    final doc = filtered[index];
-                    final data = doc.data() as Map<String, dynamic>;
-
-                    final title = data['title'] as String? ?? 'Notification';
-                    final body = data['body'] as String? ?? '';
-                    final type = data['type'] as String? ?? 'info';
-                    final isRead = data['read'] as bool? ?? false;
+                    final notification = filtered[index];
+                    final isRead = notification.read;
+                    final type = notification.type;
 
                     String timeStr = 'Just now';
-                    if (data['createdAt'] != null) {
+                    if (notification.createdAt.isNotEmpty) {
                       try {
-                        final dt = DateTime.parse(data['createdAt']);
-                        timeStr = '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+                        final dt = DateTime.parse(notification.createdAt);
+                        timeStr =
+                            '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
                       } catch (_) {}
                     }
 
                     return Dismissible(
-                      key: Key(doc.id),
+                      key: Key(notification.id),
                       direction: DismissDirection.endToStart,
                       background: Container(
                         alignment: Alignment.centerRight,
@@ -192,20 +224,33 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                            Text('Delete',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13)),
                             SizedBox(width: 6),
-                            Icon(Icons.delete_outline_rounded, color: Colors.white),
+                            Icon(Icons.delete_outline_rounded,
+                                color: Colors.white),
                           ],
                         ),
                       ),
                       onDismissed: (_) async {
                         final user = ref.read(currentUserProvider);
-                        final svc = ref.read(firestoreServiceProvider);
-                        if (user != null && svc != null) {
-                          await svc.deleteNotification(doc.id, user.uid);
+                        final profile = ref.read(userProfileProvider).value;
+                        final activeSocId = profile?.societyId ?? 'SOC-001';
+                        if (user != null) {
+                          await ref
+                              .read(notificationControllerProvider.notifier)
+                              .deleteNotification(
+                                societyId: activeSocId,
+                                notificationId: notification.id,
+                                uid: user.uid,
+                              );
                           if (context.mounted) {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Notification deleted.')),
+                              const SnackBar(
+                                  content: Text('Notification deleted.')),
                             );
                           }
                         }
@@ -213,16 +258,25 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                       child: GestureDetector(
                         onTap: () async {
                           final user = ref.read(currentUserProvider);
-                          final svc = ref.read(firestoreServiceProvider);
-                          if (user != null && svc != null && !isRead) {
-                            await svc.markNotificationAsRead(doc.id, user.uid);
+                          final profile = ref.read(userProfileProvider).value;
+                          final activeSocId = profile?.societyId ?? 'SOC-001';
+
+                          if (user != null && !isRead) {
+                            await ref
+                                .read(notificationControllerProvider.notifier)
+                                .markNotificationAsRead(
+                                  societyId: activeSocId,
+                                  notificationId: notification.id,
+                                  uid: user.uid,
+                                );
                           }
 
                           // Deep Link Navigation
                           if (context.mounted) {
                             if (type.contains('visitor')) {
                               context.go(AppRoutes.visitors);
-                            } else if (type.contains('payment') || type.contains('bill')) {
+                            } else if (type.contains('payment') ||
+                                type.contains('bill')) {
                               context.go(AppRoutes.maintenanceHistory);
                             } else if (type.contains('complaint')) {
                               context.go(AppRoutes.complaints);
@@ -239,10 +293,15 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                           duration: const Duration(milliseconds: 200),
                           padding: const EdgeInsets.all(AppSpacing.md),
                           decoration: BoxDecoration(
-                            color: isRead ? Colors.white : AppColors.primarySurface.withValues(alpha: 0.3),
+                            color: isRead
+                                ? Colors.white
+                                : AppColors.primarySurface
+                                    .withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(AppRadius.lg),
                             border: Border.all(
-                              color: isRead ? AppColors.border : AppColors.primary.withValues(alpha: 0.4),
+                              color: isRead
+                                  ? AppColors.border
+                                  : AppColors.primary.withValues(alpha: 0.4),
                               width: isRead ? 1 : 1.5,
                             ),
                           ),
@@ -253,8 +312,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                 width: 40,
                                 height: 40,
                                 decoration: BoxDecoration(
-                                  color: _getIconColorForType(type).withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(AppRadius.md),
+                                  color: _getIconColorForType(type)
+                                      .withValues(alpha: 0.1),
+                                  borderRadius:
+                                      BorderRadius.circular(AppRadius.md),
                                 ),
                                 child: Icon(
                                   _getIconForType(type),
@@ -271,10 +332,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            title,
+                                            notification.title,
                                             style: TextStyle(
                                               fontSize: 14,
-                                              fontWeight: isRead ? FontWeight.w600 : FontWeight.w800,
+                                              fontWeight: isRead
+                                                  ? FontWeight.w600
+                                                  : FontWeight.w800,
                                               color: AppColors.textPrimary,
                                             ),
                                           ),
@@ -291,19 +354,36 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                       ],
                                     ),
                                     const SizedBox(height: 4),
-                                    Text(body, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                                    Text(notification.body,
+                                        style: const TextStyle(
+                                            fontSize: 13,
+                                            color: AppColors.textSecondary)),
                                     const SizedBox(height: 6),
-                                    Text(timeStr, style: const TextStyle(fontSize: 11, color: AppColors.textDisabled)),
+                                    Text(timeStr,
+                                        style: const TextStyle(
+                                            fontSize: 11,
+                                            color: AppColors.textDisabled)),
                                   ],
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.close_rounded, size: 18, color: AppColors.textDisabled),
+                                icon: const Icon(Icons.close_rounded,
+                                    size: 18, color: AppColors.textDisabled),
                                 onPressed: () async {
                                   final user = ref.read(currentUserProvider);
-                                  final svc = ref.read(firestoreServiceProvider);
-                                  if (user != null && svc != null) {
-                                    await svc.deleteNotification(doc.id, user.uid);
+                                  final profile =
+                                      ref.read(userProfileProvider).value;
+                                  final activeSocId =
+                                      profile?.societyId ?? 'SOC-001';
+                                  if (user != null) {
+                                    await ref
+                                        .read(notificationControllerProvider
+                                            .notifier)
+                                        .deleteNotification(
+                                          societyId: activeSocId,
+                                          notificationId: notification.id,
+                                          uid: user.uid,
+                                        );
                                   }
                                 },
                               ),
@@ -326,7 +406,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
   IconData _getIconForType(String type) {
     if (type.contains('visitor')) return Icons.person_rounded;
-    if (type.contains('payment') || type.contains('bill')) return Icons.receipt_long_rounded;
+    if (type.contains('payment') || type.contains('bill'))
+      return Icons.receipt_long_rounded;
     if (type.contains('complaint')) return Icons.engineering_rounded;
     if (type.contains('amenity')) return Icons.pool_rounded;
     if (type.contains('document')) return Icons.insert_drive_file_rounded;
@@ -336,7 +417,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
   Color _getIconColorForType(String type) {
     if (type.contains('visitor')) return AppColors.visitor;
-    if (type.contains('payment') || type.contains('bill')) return AppColors.success;
+    if (type.contains('payment') || type.contains('bill'))
+      return AppColors.success;
     if (type.contains('complaint')) return AppColors.complaint;
     if (type.contains('amenity')) return AppColors.amenity;
     if (type.contains('document')) return AppColors.info;

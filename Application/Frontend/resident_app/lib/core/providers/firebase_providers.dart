@@ -150,17 +150,4 @@ final documentsStreamProvider = StreamProvider<QuerySnapshot>((ref) {
 });
 
 // ── NOTIFICATIONS PROVIDERS ───────────────────────────────────────────────
-
-final notificationsStreamProvider = StreamProvider<QuerySnapshot>((ref) {
-  final service = ref.watch(firestoreServiceProvider);
-  final user = ref.watch(currentUserProvider);
-  if (user == null) return const Stream.empty();
-  return service.notificationsStream(user.uid);
-});
-
-final unreadNotificationsCountStreamProvider = StreamProvider<int>((ref) {
-  final service = ref.watch(firestoreServiceProvider);
-  final user = ref.watch(currentUserProvider);
-  if (user == null) return Stream.value(0);
-  return service.unreadNotificationsCountStream(user.uid);
-});
+export '../../features/notifications/providers/notification_providers.dart';
