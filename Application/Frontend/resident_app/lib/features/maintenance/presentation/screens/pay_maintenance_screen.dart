@@ -726,46 +726,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
               ),
               const SizedBox(height: AppSpacing.xl),
             ],
-            const SizedBox(height: AppSpacing.xl),
 
-            // Pay Button
-            if (!_upiAppLaunched)
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _isProcessing
-                      ? null
-                      : (_selectedMethod == 0 ? _launchUpiApp : _verifyAndCompletePayment),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.6),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-                    elevation: 0,
-                  ),
-                  child: _isProcessing
-                      ? const Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                            ),
-                            SizedBox(width: 12),
-                            Text('Processing...', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
-                          ],
-                        )
-                      : Text(
-                          _selectedMethod == 0
-                              ? 'Launch PhonePe / GPay (₹${totalAmount.toStringAsFixed(0)})'
-                              : 'Pay ₹${totalAmount.toStringAsFixed(0)} Now',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
-                        ),
-                ),
-              ),
-            const SizedBox(height: AppSpacing.md),
             const Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
