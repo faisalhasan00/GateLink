@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -68,20 +69,21 @@ class _AmenityListScreenState extends ConsumerState<AmenityListScreen> {
                   const Text('No amenities available',
                       style: TextStyle(color: AppColors.textSecondary)),
                   const SizedBox(height: AppSpacing.xl),
-                  if (controllerState.isLoading)
-                    const CircularProgressIndicator()
-                  else
-                    ElevatedButton.icon(
-                      onPressed: () async {
-                        final profile = ref.read(userProfileProvider).value;
-                        final activeSocId = profile?.societyId ?? 'SOC-001';
-                        await ref
-                            .read(amenityControllerProvider.notifier)
-                            .seedDefaultAmenities(activeSocId);
-                      },
-                      icon: const Icon(Icons.add_rounded),
-                      label: const Text('Seed Full Society Amenities'),
-                    ),
+                  if (kDebugMode)
+                    if (controllerState.isLoading)
+                      const CircularProgressIndicator()
+                    else
+                      ElevatedButton.icon(
+                        onPressed: () async {
+                          final profile = ref.read(userProfileProvider).value;
+                          final activeSocId = profile?.societyId ?? 'SOC-001';
+                          await ref
+                              .read(amenityControllerProvider.notifier)
+                              .seedDefaultAmenities(activeSocId);
+                        },
+                        icon: const Icon(Icons.add_rounded),
+                        label: const Text('Seed Full Society Amenities'),
+                      ),
                 ],
               ),
             );

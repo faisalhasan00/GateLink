@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FlatValidationResult {
@@ -704,8 +705,9 @@ class FirestoreService {
     required String expectedDate,
     required String expectedTime,
   }) async {
-    // Generate 6-digit numeric Pass Code (e.g. 784920)
-    final passCode = (100000 + (DateTime.now().microsecondsSinceEpoch % 900000)).toString();
+    // Generate cryptographically secure 6-digit numeric Pass Code with 24-hour expiration
+    final passCode = (100000 + Random.secure().nextInt(900000)).toString();
+    final expiresAt = DateTime.now().add(const Duration(hours: 24)).toIso8601String();
 
     final docRef = await _db
         .collection('societies/$societyId/visitors')
@@ -719,6 +721,7 @@ class FirestoreService {
       'expectedTime': expectedTime,
       'passCode': passCode,
       'qrCode': passCode,
+      'passCodeExpiresAt': expiresAt,
       'entryTime': null,
       'exitTime': null,
       'status': 'expected',

@@ -8,10 +8,9 @@ service cloud.firestore {
     }
 
     function isSuperAdmin() {
-      return isAuthenticated() && (
-        request.auth.token.email == 'mohammedfaisalhasan@gmail.com' ||
-        (request.auth.token.keys().hasAll(['role']) && request.auth.token.role == 'super_admin')
-      );
+      return isAuthenticated() &&
+        request.auth.token.keys().hasAll(['role']) &&
+        request.auth.token.role == 'super_admin';
     }
 
     // Direct root user lookup mapping

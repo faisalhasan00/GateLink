@@ -16,6 +16,7 @@ class ComplaintRepositoryImpl implements ComplaintRepository {
     return _firestore
         .collection('societies/$societyId/complaints')
         .where('raisedBy', isEqualTo: residentUid)
+        .limit(50)
         .snapshots()
         .map((snapshot) {
       final list = snapshot.docs

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/repositories/maintenance_repository.dart';
 import 'maintenance_state.dart';
@@ -115,6 +116,13 @@ class MaintenanceController extends StateNotifier<MaintenanceState> {
     required String residentUid,
     required String flatNumber,
   }) async {
+    if (!kDebugMode) {
+      state = state.copyWith(
+        status: MaintenanceActionStatus.error,
+        errorMessage: 'Seed operations are disabled in release builds.',
+      );
+      return false;
+    }
     // Duplicate submission prevention
     if (state.isSubmitting) return false;
 

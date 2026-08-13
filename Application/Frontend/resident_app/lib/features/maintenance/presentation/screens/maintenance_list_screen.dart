@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -87,7 +88,7 @@ class _BillsListView extends StatelessWidget {
           Text(isPaid ? 'No paid bills recorded' : 'No pending maintenance bills 🎉',
               style: const TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: AppSpacing.lg),
-          if (!isPaid)
+          if (kDebugMode && !isPaid)
             ElevatedButton.icon(
               onPressed: () async {
                 try {

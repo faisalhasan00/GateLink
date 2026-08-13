@@ -3,12 +3,13 @@ const crypto = require("crypto");
 /**
  * Cashfree Payment Gateway Platform Integration Service
  * Uses Cashfree PG v3 REST API (2023-08-01)
+ * SEC-P0: Hardcoded fallback credentials REMOVED. Environment / Secret Manager configuration strictly enforced.
  */
 class CashfreePaymentProvider {
   constructor() {
     this.env = process.env.CASHFREE_ENV || "sandbox";
-    this.clientId = process.env.CASHFREE_CLIENT_ID || "TEST_1048602692c8bdcf8998ef47d25e60268401";
-    this.clientSecret = process.env.CASHFREE_CLIENT_SECRET || "cfsk_ma_test_c4013ba0c3791054ee4ddbdbeeb61e38_eb3d2dd9";
+    this.clientId = process.env.CASHFREE_CLIENT_ID || "";
+    this.clientSecret = process.env.CASHFREE_CLIENT_SECRET || "";
     this.apiVersion = "2023-08-01";
     this.baseUrl =
       this.env === "production"
@@ -16,12 +17,25 @@ class CashfreePaymentProvider {
         : "https://sandbox.cashfree.com/pg";
   }
 
+  _verifyCredentials() {
+    const clientId = process.env.CASHFREE_CLIENT_ID || this.clientId;
+    const clientSecret = process.env.CASHFREE_CLIENT_SECRET || this.clientSecret;
+
+    if (!clientId || !clientSecret) {
+      throw new Error(
+        "Cashfree Configuration Error: CASHFREE_CLIENT_ID or CASHFREE_CLIENT_SECRET environment variable is missing. Hardcoded credentials are strictly prohibited."
+      );
+    }
+    return { clientId, clientSecret };
+  }
+
   getHeaders() {
+    const { clientId, clientSecret } = this._verifyCredentials();
     return {
       "Content-Type": "application/json",
       "x-api-version": this.apiVersion,
-      "x-client-id": this.clientId,
-      "x-client-secret": this.clientSecret,
+      "x-client-id": clientId,
+      "x-client-secret": clientSecret,
     };
   }
 
@@ -29,6 +43,8 @@ class CashfreePaymentProvider {
    * 1. Create Cashfree Order
    */
   async createPaymentOrder({ orderId, amount, customerId, customerName, customerPhone, customerEmail }) {
+    this._verifyCredentials();
+
     const payload = {
       order_id: orderId,
       order_amount: Number(amount),
@@ -66,6 +82,8 @@ class CashfreePaymentProvider {
    * 2. Query Cashfree Official API to verify actual successful payment for order
    */
   async verifyPaymentWithCashfree(orderId) {
+    this._verifyCredentials();
+
     const res = await fetch(`${this.baseUrl}/orders/${orderId}/payments`, {
       method: "GET",
       headers: this.getHeaders(),
@@ -78,65 +96,46 @@ class CashfreePaymentProvider {
 
     // Cashfree returns an array of payment attempts for the order
     if (!Array.isArray(data) || data.length === 0) {
-      return { isSuccess: false, reason: "No payment attempts found for order" };
+      return { isSuccess: false, message: "No payment attempts found for this order" };
     }
 
     const successPayment = data.find((p) => p.payment_status === "SUCCESS");
     if (!successPayment) {
-      return { isSuccess: false, reason: "No successful payment attempt found" };
+      return { isSuccess: false, message: "No successful payment attempt found" };
     }
 
     return {
       isSuccess: true,
       cashfreePaymentId: String(successPayment.cf_payment_id || successPayment.payment_id || ""),
-      paymentAmount: Number(successPayment.payment_amount),
-      paymentCurrency: successPayment.payment_currency || "INR",
-      paymentStatus: successPayment.payment_status,
-      paymentMethod: successPayment.payment_group || "ONLINE",
+      paymentAmount: Number(successPayment.order_amount || successPayment.payment_amount || 0),
+      paymentMethod: String(successPayment.payment_group || "ONLINE"),
+      paymentTime: String(successPayment.payment_completion_time || new Date().toISOString()),
+      raw: successPayment,
     };
   }
 
   /**
-   * 3. Verify Webhook Signature (HMAC SHA256)
+   * 3. Verify HMAC SHA256 Webhook Signature
    */
   verifyWebhookSignature(rawBody, timestamp, signature) {
-    if (!timestamp || !signature) return false;
+    const { clientSecret } = this._verifyCredentials();
+    if (!signature || !timestamp || !rawBody) return false;
+
     try {
       const dataToSign = timestamp + rawBody;
-      const computedSig = crypto
-        .createHmac("sha256", this.clientSecret)
+      const expectedSignature = crypto
+        .createHmac("sha256", clientSecret)
         .update(dataToSign)
         .digest("base64");
-      return computedSig === signature;
-    } catch (e) {
-      console.error("Signature compute error:", e);
+
+      return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+    } catch (err) {
+      console.error("Webhook signature verification error:", err);
       return false;
     }
-  }
-
-  /**
-   * 4. Refund Service Stubs (Prepared for future refund implementation)
-   */
-  async createRefund({ orderId, refundId, amount, remark }) {
-    return { refundId, status: "PENDING_STUB", message: "Refund abstraction stub initialized." };
-  }
-
-  async getRefundStatus(orderId, refundId) {
-    return { refundId, status: "STUB", message: "Refund status stub initialized." };
-  }
-}
-
-/**
- * Settlement Service Abstract Stub
- * Keeps society-wise settlement logic decoupled per requirement #6
- */
-class SettlementService {
-  async processSocietySettlement(societyId, paymentRecord) {
-    return { status: "STUB_PENDING_CONFIRMATION", societyId };
   }
 }
 
 module.exports = {
   CashfreePaymentProvider: new CashfreePaymentProvider(),
-  SettlementService: new SettlementService(),
 };

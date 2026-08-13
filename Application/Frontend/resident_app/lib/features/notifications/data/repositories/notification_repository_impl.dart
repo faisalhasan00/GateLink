@@ -13,6 +13,7 @@ class NotificationRepositoryImpl implements NotificationRepository {
     return _firestore
         .collection('societies/$societyId/users/$uid/notifications')
         .orderBy('createdAt', descending: true)
+        .limit(50)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs

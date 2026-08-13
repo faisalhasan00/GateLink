@@ -15,6 +15,7 @@ class NoticeRepositoryImpl implements NoticeRepository {
     return _firestore
         .collection('societies/$societyId/notices')
         .orderBy('createdAt', descending: true)
+        .limit(50)
         .snapshots()
         .map((snapshot) {
       return snapshot.docs

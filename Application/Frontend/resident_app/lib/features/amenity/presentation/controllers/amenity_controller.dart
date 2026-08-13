@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/repositories/amenity_repository.dart';
 import 'amenity_state.dart';
@@ -110,6 +111,14 @@ class AmenityController extends StateNotifier<AmenityState> {
   }
 
   Future<bool> seedDefaultAmenities(String societyId) async {
+    if (!kDebugMode) {
+      state = state.copyWith(
+        status: AmenityActionStatus.error,
+        errorMessage: 'Seed operations are disabled in release builds.',
+      );
+      return false;
+    }
+
     if (state.isLoading) return false;
 
     state = state.copyWith(status: AmenityActionStatus.loading);
