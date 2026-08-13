@@ -291,22 +291,20 @@ class _DynamicMaintenanceBanner extends ConsumerWidget {
               ),
               ElevatedButton(
                 onPressed: () {
-                  final firstDoc = pendingDocs.first;
-                  final fbData = firstDoc.data() as Map<String, dynamic>;
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (_) => PayMaintenanceScreen(
-                        billId: firstDoc.id,
-                        amount: (fbData['amount'] ?? 0).toDouble(),
-                        month: fbData['month'] ?? 'August 2026',
-                        invoiceNumber: fbData['invoiceNumber'] ?? fbData['billNumber'] ?? 'INV-${firstDoc.id.substring(0, 6)}',
-                        dueDate: fbData['dueDate'] ?? '10 Aug 2026',
-                        maintenanceCharge: (fbData['maintenanceCharge'] ?? fbData['maintenanceCharges'] ?? 0).toDouble(),
-                        waterCharge: (fbData['waterCharge'] ?? fbData['waterCharges'] ?? 0).toDouble(),
-                        parkingCharge: (fbData['parkingCharge'] ?? 0).toDouble(),
-                        sinkingFund: (fbData['sinkingFund'] ?? 0).toDouble(),
-                        penaltyFee: (fbData['penaltyFee'] ?? fbData['lateFee'] ?? 0).toDouble(),
+                        billId: firstBill.id,
+                        amount: firstBill.amount,
+                        month: firstBill.month,
+                        invoiceNumber: firstBill.invoiceNumber,
+                        dueDate: firstBill.dueDate,
+                        maintenanceCharge: firstBill.maintenanceCharge,
+                        waterCharge: firstBill.waterCharge,
+                        parkingCharge: firstBill.parkingCharge,
+                        sinkingFund: firstBill.sinkingFund,
+                        penaltyFee: firstBill.penaltyFee,
                       ),
                     ),
                   );

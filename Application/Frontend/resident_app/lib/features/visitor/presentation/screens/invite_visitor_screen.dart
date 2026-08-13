@@ -61,7 +61,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final visitorRepo = ref.read(visitorRepositoryProvider);
+      final controller = ref.read(visitorControllerProvider.notifier);
       final user = ref.read(currentUserProvider);
       final profile = ref.read(userProfileProvider).value;
 
@@ -73,7 +73,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
       final flatNumber = profile?['flatNumber'] ?? 'Unknown';
       final fullHostFlat = tower.isNotEmpty ? '$tower-$flatNumber' : flatNumber;
 
-      final inviteResult = await visitorRepo.inviteVisitor(
+      final inviteResult = await controller.inviteVisitor(
         name: _nameController.text.trim(),
         phone: _mobileController.text.trim(),
         purpose: _selectedPurpose,
@@ -89,7 +89,15 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
 
       if (!mounted) return;
       setState(() => _isLoading = false);
-      _showQrDialog(inviteResult['visitorId'] ?? '', inviteResult['passCode'] ?? '100000');
+
+      if (inviteResult != null) {
+        _showQrDialog(inviteResult['visitorId'] ?? '', inviteResult['passCode'] ?? '100000');
+      } else {
+        final errorMsg = ref.read(visitorControllerProvider).errorMessage ?? 'Failed to create visitor pass.';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMsg), backgroundColor: AppColors.error),
+        );
+      }
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {

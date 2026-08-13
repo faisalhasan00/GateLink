@@ -184,17 +184,24 @@ class _VisitorTabView extends ConsumerWidget {
                               ),
                             );
                             if (confirm == true) {
-                              final repo = ref.read(visitorRepositoryProvider);
+                              final controller = ref.read(visitorControllerProvider.notifier);
                               final user = ref.read(currentUserProvider);
-                              await repo.updateVisitorApproval(
+                              final success = await controller.updateVisitorApproval(
                                 visitorId: visitor.id, 
                                 status: 'rejected', 
                                 residentUid: user?.uid ?? 'resident_user',
                               );
                               if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('🛑 Visitor ${visitor.name} denied entry.'), backgroundColor: AppColors.error),
-                                );
+                                if (success) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('🛑 Visitor ${visitor.name} denied entry.'), backgroundColor: AppColors.error),
+                                  );
+                                } else {
+                                  final errorMsg = ref.read(visitorControllerProvider).errorMessage ?? 'Failed to deny visitor.';
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(errorMsg), backgroundColor: AppColors.error),
+                                  );
+                                }
                               }
                             }
                           },
@@ -209,17 +216,24 @@ class _VisitorTabView extends ConsumerWidget {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () async {
-                            final repo = ref.read(visitorRepositoryProvider);
+                            final controller = ref.read(visitorControllerProvider.notifier);
                             final user = ref.read(currentUserProvider);
-                            await repo.updateVisitorApproval(
+                            final success = await controller.updateVisitorApproval(
                               visitorId: visitor.id, 
                               status: 'approved', 
                               residentUid: user?.uid ?? 'resident_user',
                             );
                             if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('✅ Visitor ${visitor.name} approved for entry!'), backgroundColor: AppColors.success),
-                              );
+                              if (success) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('✅ Visitor ${visitor.name} approved for entry!'), backgroundColor: AppColors.success),
+                                );
+                              } else {
+                                final errorMsg = ref.read(visitorControllerProvider).errorMessage ?? 'Failed to approve visitor.';
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text(errorMsg), backgroundColor: AppColors.error),
+                                );
+                              }
                             }
                           },
                           style: ElevatedButton.styleFrom(

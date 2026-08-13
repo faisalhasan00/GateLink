@@ -9,7 +9,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/providers/auth_providers.dart';
-import '../../domain/models/visitor_model.dart';
+import '../../../visitor/domain/models/visitor_model.dart';
 import '../../../../core/services/firestore_service.dart';
 
 class GuardDashboardScreen extends ConsumerStatefulWidget {
@@ -410,7 +410,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                           Expanded(
                             child: _StatCard(
                               title: 'Total Today',
-                              value: '${docs.length}',
+                              value: '${visitors.length}',
                               icon: Icons.groups_rounded,
                               color: AppColors.info,
                               trend: 'Total entries',
