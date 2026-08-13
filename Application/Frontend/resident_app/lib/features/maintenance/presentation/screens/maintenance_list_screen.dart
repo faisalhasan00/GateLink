@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/providers/auth_providers.dart';
+import 'pay_maintenance_screen.dart';
 
 class MaintenanceListScreen extends ConsumerStatefulWidget {
   const MaintenanceListScreen({super.key});
@@ -111,10 +112,11 @@ class _BillsListView extends StatelessWidget {
                       'month': 'August 2026',
                       'invoiceNumber': 'INV-2026-08-101',
                       'amount': 3500.0,
-                      'maintenanceCharges': 2500.0,
-                      'waterCharges': 400.0,
-                      'electricityCharges': 600.0,
-                      'lateFee': 0.0,
+                      'maintenanceCharge': 2500.0,
+                      'waterCharge': 400.0,
+                      'parkingCharge': 400.0,
+                      'sinkingFund': 200.0,
+                      'penaltyFee': 0.0,
                       'dueDate': '10 Aug 2026',
                       'status': 'pending',
                       'residentUid': user?.uid ?? '',
@@ -125,10 +127,11 @@ class _BillsListView extends StatelessWidget {
                       'month': 'July 2026',
                       'invoiceNumber': 'INV-2026-07-101',
                       'amount': 3700.0,
-                      'maintenanceCharges': 2500.0,
-                      'waterCharges': 450.0,
-                      'electricityCharges': 550.0,
-                      'lateFee': 200.0,
+                      'maintenanceCharge': 2500.0,
+                      'waterCharge': 450.0,
+                      'parkingCharge': 350.0,
+                      'sinkingFund': 200.0,
+                      'penaltyFee': 200.0,
                       'dueDate': '10 Jul 2026',
                       'status': 'overdue',
                       'residentUid': user?.uid ?? '',
@@ -167,6 +170,12 @@ class _BillsListView extends StatelessWidget {
           amount: (data['amount'] ?? 0).toDouble(),
           dueDate: data['dueDate'] ?? '',
           status: data['status'] ?? 'pending',
+          invoiceNumber: data['invoiceNumber'] ?? data['billNumber'] ?? 'INV-${doc.id.substring(0, 6)}',
+          maintenanceCharge: (data['maintenanceCharge'] ?? data['maintenanceCharges'] ?? 0).toDouble(),
+          waterCharge: (data['waterCharge'] ?? data['waterCharges'] ?? 0).toDouble(),
+          parkingCharge: (data['parkingCharge'] ?? 0).toDouble(),
+          sinkingFund: (data['sinkingFund'] ?? 0).toDouble(),
+          penaltyFee: (data['penaltyFee'] ?? data['lateFee'] ?? 0).toDouble(),
           ref: ref,
         );
       },
@@ -175,12 +184,23 @@ class _BillsListView extends StatelessWidget {
 }
 
 class _BillCard extends StatelessWidget {
-  final String docId, month, dueDate, status;
-  final double amount;
+  final String docId, month, dueDate, status, invoiceNumber;
+  final double amount, maintenanceCharge, waterCharge, parkingCharge, sinkingFund, penaltyFee;
   final WidgetRef ref;
+
   const _BillCard({
-    required this.docId, required this.month, required this.amount,
-    required this.dueDate, required this.status, required this.ref,
+    required this.docId,
+    required this.month,
+    required this.amount,
+    required this.dueDate,
+    required this.status,
+    required this.invoiceNumber,
+    required this.maintenanceCharge,
+    required this.waterCharge,
+    required this.parkingCharge,
+    required this.sinkingFund,
+    required this.penaltyFee,
+    required this.ref,
   });
 
   Color get _statusColor {
@@ -215,7 +235,7 @@ class _BillCard extends StatelessWidget {
               Container(
                 width: 44, height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.maintenance.withOpacity(0.1),
+                  color: AppColors.maintenance.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
                 child: const Icon(Icons.receipt_long_rounded, color: AppColors.maintenance, size: 22),
@@ -226,7 +246,7 @@ class _BillCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(month, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                    Text('Due: $dueDate', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    Text('Due: $dueDate · $invoiceNumber', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                   ],
                 ),
               ),
@@ -237,7 +257,7 @@ class _BillCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: _statusColor.withOpacity(0.1),
+                      color: _statusColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(AppRadius.full),
                     ),
                     child: Text(_statusLabel, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _statusColor)),
@@ -251,31 +271,24 @@ class _BillCard extends StatelessWidget {
             const Divider(height: 0),
             const SizedBox(height: AppSpacing.md),
             ElevatedButton(
-              onPressed: () async {
-                final firestoreService = ref.read(firestoreServiceProvider);
-                final user = ref.read(currentUserProvider);
-                if (firestoreService == null || user == null) return;
-                try {
-                  await firestoreService.payMaintenanceBill(
-                    billId: docId,
-                    residentUid: user.uid,
-                    amount: amount,
-                    paymentMethod: 'UPI / Card',
-                    invoiceNumber: 'INV-$month',
-                    billingPeriod: month,
-                  );
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('✅ Payment recorded!'), backgroundColor: AppColors.success),
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
-                    );
-                  }
-                }
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PayMaintenanceScreen(
+                      billId: docId,
+                      amount: amount,
+                      month: month,
+                      invoiceNumber: invoiceNumber,
+                      dueDate: dueDate,
+                      maintenanceCharge: maintenanceCharge,
+                      waterCharge: waterCharge,
+                      parkingCharge: parkingCharge,
+                      sinkingFund: sinkingFund,
+                      penaltyFee: penaltyFee,
+                    ),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 44)),
               child: const Text('Pay Now'),

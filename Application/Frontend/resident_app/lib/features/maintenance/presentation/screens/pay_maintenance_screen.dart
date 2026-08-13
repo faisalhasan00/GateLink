@@ -12,6 +12,12 @@ class PayMaintenanceScreen extends ConsumerStatefulWidget {
   final double? amount;
   final String? month;
   final String? invoiceNumber;
+  final String? dueDate;
+  final double? maintenanceCharge;
+  final double? waterCharge;
+  final double? parkingCharge;
+  final double? sinkingFund;
+  final double? penaltyFee;
 
   const PayMaintenanceScreen({
     super.key,
@@ -19,6 +25,12 @@ class PayMaintenanceScreen extends ConsumerStatefulWidget {
     this.amount,
     this.month,
     this.invoiceNumber,
+    this.dueDate,
+    this.maintenanceCharge,
+    this.waterCharge,
+    this.parkingCharge,
+    this.sinkingFund,
+    this.penaltyFee,
   });
 
   @override
@@ -41,6 +53,8 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
     try {
       final firestoreService = ref.read(firestoreServiceProvider);
       final user = ref.read(currentUserProvider);
+      final userProfile = ref.read(userProfileProvider).value;
+      final activeSocId = userProfile?['societyId'] as String? ?? 'SOC-001';
 
       final payMethodName = _methods[_selectedMethod].label;
       final targetBillId = widget.billId ?? 'bill_latest';
@@ -48,10 +62,29 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       final invNum = widget.invoiceNumber ?? 'INV-2026-08-101';
       final period = widget.month ?? 'August 2026';
 
-      // 1. Direct UPI Intent Launcher if method 0 selected
+      // 1. Fetch dynamic Society UPI VPA config from Firestore
+      String upiVpa = 'societysphere@okicici';
+      String payeeName = 'Society Management Committee';
+
+      try {
+        final upiDoc = await FirebaseFirestore.instance
+            .doc('societies/$activeSocId/config/upi')
+            .get();
+        if (upiDoc.exists && upiDoc.data() != null) {
+          final data = upiDoc.data()!;
+          if ((data['upiId'] as String?)?.isNotEmpty == true) {
+            upiVpa = data['upiId'];
+          }
+          if ((data['payeeName'] as String?)?.isNotEmpty == true) {
+            payeeName = data['payeeName'];
+          }
+        }
+      } catch (e) {
+        debugPrint('Config fetch fallback: $e');
+      }
+
+      // 2. Direct UPI Intent Launcher if method 0 selected
       if (_selectedMethod == 0) {
-        const upiVpa = 'societysphere@okicici';
-        const payeeName = 'Society Management Committee';
         final txnToken = 'SS-PAY-$invNum-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
         
         final upiUri = Uri.parse(
@@ -102,7 +135,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
               const SizedBox(height: 16),
               const Text('Payment Successful!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
               const SizedBox(height: 8),
-              Text('₹${payAmount.toStringAsFixed(0)} paid via $payMethodName', style: const TextStyle(color: AppColors.textSecondary)),
+              Text('₹${payAmount.toStringAsFixed(0)} paid to $payeeName ($upiVpa)', style: const TextStyle(color: AppColors.textSecondary, fontSize: 13), textAlign: TextAlign.center),
               const SizedBox(height: 8),
               Text('Invoice: $invNum', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
               const SizedBox(height: AppSpacing.xl),
@@ -138,9 +171,18 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final displayMonth = widget.month ?? 'August 2026';
+    final totalAmount = widget.amount ?? 3500.0;
+    final displayDueDate = widget.dueDate ?? '10 Aug 2026';
+    final maintCharge = widget.maintenanceCharge ?? (totalAmount * 0.7);
+    final waterCharge = widget.waterCharge ?? (totalAmount * 0.15);
+    final parkingCharge = widget.parkingCharge ?? 0.0;
+    final sinkingFund = widget.sinkingFund ?? 0.0;
+    final penaltyFee = widget.penaltyFee ?? 0.0;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Pay Maintenance'),
+        title: Text('Pay Bill: ${widget.invoiceNumber ?? 'Invoice'}'),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -188,24 +230,30 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
                     ],
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    'August 2026',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Colors.white),
+                  Text(
+                    displayMonth,
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Colors.white),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   const Divider(color: Colors.white24),
                   const SizedBox(height: AppSpacing.sm),
-                  _BillLine(label: 'Base Maintenance', value: 'Rs. 3,000', white: true),
-                  _BillLine(label: 'Water Charges', value: 'Rs. 200', white: true),
-                  _BillLine(label: 'Late Penalty', value: 'Rs. 300', isRed: true),
+                  _BillLine(label: 'Base Maintenance', value: '₹${maintCharge.toStringAsFixed(0)}', white: true),
+                  if (waterCharge > 0)
+                    _BillLine(label: 'Water Supply', value: '₹${waterCharge.toStringAsFixed(0)}', white: true),
+                  if (parkingCharge > 0)
+                    _BillLine(label: 'Parking Slot', value: '₹${parkingCharge.toStringAsFixed(0)}', white: true),
+                  if (sinkingFund > 0)
+                    _BillLine(label: 'Sinking Fund', value: '₹${sinkingFund.toStringAsFixed(0)}', white: true),
+                  if (penaltyFee > 0)
+                    _BillLine(label: 'Late Penalty', value: '₹${penaltyFee.toStringAsFixed(0)}', isRed: true),
                   const Divider(color: Colors.white24, height: AppSpacing.lg),
                   Row(
                     children: [
                       const Text('Total Payable', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white)),
                       const Spacer(),
-                      const Text(
-                        'Rs. 3,500',
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white),
+                      Text(
+                        '₹${totalAmount.toStringAsFixed(0)}',
+                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: Colors.white),
                       ),
                     ],
                   ),
@@ -222,14 +270,14 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
                 borderRadius: BorderRadius.circular(AppRadius.lg),
                 border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
               ),
-              child: const Row(
+              child: Row(
                 children: [
-                  Icon(Icons.calendar_today_rounded, color: AppColors.warning, size: 18),
-                  SizedBox(width: 10),
+                  const Icon(Icons.calendar_today_rounded, color: AppColors.warning, size: 18),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      'Due date: 10 Aug 2026 · Late penalty of Rs. 300 has been applied.',
-                      style: TextStyle(fontSize: 12, color: AppColors.warning, fontWeight: FontWeight.w500, height: 1.4),
+                      'Due date: $displayDueDate${penaltyFee > 0 ? ' · Late penalty has been applied.' : ''}',
+                      style: const TextStyle(fontSize: 12, color: AppColors.warning, fontWeight: FontWeight.w500, height: 1.4),
                     ),
                   ),
                 ],
