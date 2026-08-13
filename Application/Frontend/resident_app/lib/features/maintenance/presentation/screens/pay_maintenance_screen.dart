@@ -41,14 +41,121 @@ class PayMaintenanceScreen extends ConsumerStatefulWidget {
 class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
   int _selectedMethod = 0;
   bool _isProcessing = false;
+  bool _isLoadingBill = false;
   bool _upiAppLaunched = false;
   final TextEditingController _utrController = TextEditingController();
+
+  String? _effectiveBillId;
+  double? _effectiveAmount;
+  String? _effectiveMonth;
+  String? _effectiveInvoiceNumber;
+  String? _effectiveDueDate;
+  double? _effectiveMaintCharge;
+  double? _effectiveWaterCharge;
+  double? _effectiveParkingCharge;
+  double? _effectiveSinkingFund;
+  double? _effectivePenaltyFee;
 
   final _methods = const [
     _PayMethod(icon: Icons.smartphone_rounded, label: 'Direct UPI (PhonePe / GPay / Paytm)', subtitle: 'Instant 0% Fee · Verified via UTR', color: AppColors.success),
     _PayMethod(icon: Icons.account_balance_rounded, label: 'Net Banking', subtitle: 'All major banks', color: AppColors.primary),
     _PayMethod(icon: Icons.credit_card_rounded, label: 'Credit / Debit Card', subtitle: 'Visa, Mastercard, RuPay', color: AppColors.visitor),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _initBillData();
+  }
+
+  Future<void> _initBillData() async {
+    if (widget.billId != null) {
+      setState(() {
+        _effectiveBillId = widget.billId;
+        _effectiveAmount = widget.amount ?? 3500.0;
+        _effectiveMonth = widget.month ?? 'August 2026';
+        _effectiveInvoiceNumber = widget.invoiceNumber ?? 'INV-2026-9305';
+        _effectiveDueDate = widget.dueDate ?? '10 Aug 2026';
+        _effectiveMaintCharge = widget.maintenanceCharge ?? 2500.0;
+        _effectiveWaterCharge = widget.waterCharge ?? 400.0;
+        _effectiveParkingCharge = widget.parkingCharge ?? 400.0;
+        _effectiveSinkingFund = widget.sinkingFund ?? 200.0;
+        _effectivePenaltyFee = widget.penaltyFee ?? 0.0;
+      });
+      return;
+    }
+
+    setState(() => _isLoadingBill = true);
+
+    try {
+      final user = ref.read(currentUserProvider);
+      final activeSocId = ref.read(userProfileProvider).value?['societyId'] as String? ?? 'SOC-001';
+
+      if (user != null) {
+        final snap = await FirebaseFirestore.instance
+            .collection('societies/$activeSocId/maintenance_bills')
+            .where('residentUid', isEqualTo: user.uid)
+            .get();
+
+        final pendingDocs = snap.docs.where((d) => (d.data()['status'] ?? '') != 'paid').toList();
+
+        if (pendingDocs.isNotEmpty) {
+          final first = pendingDocs.first;
+          final d = first.data();
+          setState(() {
+            _effectiveBillId = first.id;
+            _effectiveAmount = (d['amount'] ?? 3500.0).toDouble();
+            _effectiveMonth = d['month'] ?? 'August 2026';
+            _effectiveInvoiceNumber = d['invoiceNumber'] ?? d['billNumber'] ?? 'INV-${first.id.substring(0, 6)}';
+            _effectiveDueDate = d['dueDate'] ?? '10 Aug 2026';
+            _effectiveMaintCharge = (d['maintenanceCharge'] ?? d['maintenanceCharges'] ?? 2500.0).toDouble();
+            _effectiveWaterCharge = (d['waterCharge'] ?? d['waterCharges'] ?? 400.0).toDouble();
+            _effectiveParkingCharge = (d['parkingCharge'] ?? 400.0).toDouble();
+            _effectiveSinkingFund = (d['sinkingFund'] ?? 200.0).toDouble();
+            _effectivePenaltyFee = (d['penaltyFee'] ?? d['lateFee'] ?? 0.0).toDouble();
+          });
+        } else {
+          // Auto-generate a pending bill doc in Firestore if none found
+          final newRef = FirebaseFirestore.instance.collection('societies/$activeSocId/maintenance_bills').doc();
+          final invNum = 'INV-2026-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}';
+          final newBill = {
+            'month': 'August 2026',
+            'invoiceNumber': invNum,
+            'amount': 3500.0,
+            'maintenanceCharge': 2500.0,
+            'waterCharge': 400.0,
+            'parkingCharge': 400.0,
+            'sinkingFund': 200.0,
+            'penaltyFee': 0.0,
+            'dueDate': '10 Aug 2026',
+            'status': 'pending',
+            'residentUid': user.uid,
+            'societyId': activeSocId,
+            'createdAt': DateTime.now().toIso8601String(),
+          };
+
+          await newRef.set(newBill);
+
+          setState(() {
+            _effectiveBillId = newRef.id;
+            _effectiveAmount = 3500.0;
+            _effectiveMonth = 'August 2026';
+            _effectiveInvoiceNumber = invNum;
+            _effectiveDueDate = '10 Aug 2026';
+            _effectiveMaintCharge = 2500.0;
+            _effectiveWaterCharge = 400.0;
+            _effectiveParkingCharge = 400.0;
+            _effectiveSinkingFund = 200.0;
+            _effectivePenaltyFee = 0.0;
+          });
+        }
+      }
+    } catch (e) {
+      debugPrint('Auto-fetch bill error: $e');
+    } finally {
+      if (mounted) setState(() => _isLoadingBill = false);
+    }
+  }
 
   @override
   void dispose() {
@@ -58,8 +165,8 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
 
   Future<void> _launchUpiApp() async {
     final activeSocId = ref.read(userProfileProvider).value?['societyId'] as String? ?? 'SOC-001';
-    final payAmount = widget.amount ?? 3500.0;
-    final invNum = widget.invoiceNumber ?? 'INV-2026-08-101';
+    final payAmount = _effectiveAmount ?? widget.amount ?? 3500.0;
+    final invNum = _effectiveInvoiceNumber ?? widget.invoiceNumber ?? 'INV-2026-9305';
 
     String upiVpa = '8106342858@ybl';
     String payeeName = 'MOHAMMED FAISAL HASAN';
@@ -125,13 +232,13 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       final user = ref.read(currentUserProvider);
 
       final payMethodName = _methods[_selectedMethod].label;
-      final targetBillId = widget.billId ?? 'bill_latest';
-      final payAmount = widget.amount ?? 3500.0;
-      final invNum = widget.invoiceNumber ?? 'INV-2026-08-101';
-      final period = widget.month ?? 'August 2026';
+      final targetBillId = _effectiveBillId ?? widget.billId ?? 'bill_latest';
+      final payAmount = _effectiveAmount ?? widget.amount ?? 3500.0;
+      final invNum = _effectiveInvoiceNumber ?? widget.invoiceNumber ?? 'INV-2026-9305';
+      final period = _effectiveMonth ?? widget.month ?? 'August 2026';
       final txnId = utrText.isNotEmpty ? utrText : 'TXN-${DateTime.now().millisecondsSinceEpoch}';
 
-      if (firestoreService != null && user != null && widget.billId != null) {
+      if (firestoreService != null && user != null) {
         await firestoreService.payMaintenanceBill(
           billId: targetBillId,
           residentUid: user.uid,
@@ -145,11 +252,12 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
         final activeSocId = ref.read(userProfileProvider).value?['societyId'] as String? ?? 'SOC-001';
         await FirebaseFirestore.instance
             .doc('societies/$activeSocId/maintenance_bills/$targetBillId')
-            .update({
+            .set({
           'transactionId': txnId,
           'utrNumber': txnId,
           'status': 'paid',
-        }).catchError((_) {});
+          'paidAt': DateTime.now().toIso8601String(),
+        }, SetOptions(merge: true)).catchError((_) {});
       }
 
       setState(() => _isProcessing = false);
@@ -214,18 +322,26 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final displayMonth = widget.month ?? 'August 2026';
-    final totalAmount = widget.amount ?? 3500.0;
-    final displayDueDate = widget.dueDate ?? '10 Aug 2026';
-    final maintCharge = widget.maintenanceCharge ?? (totalAmount * 0.7);
-    final waterCharge = widget.waterCharge ?? (totalAmount * 0.15);
-    final parkingCharge = widget.parkingCharge ?? 0.0;
-    final sinkingFund = widget.sinkingFund ?? 0.0;
-    final penaltyFee = widget.penaltyFee ?? 0.0;
+    if (_isLoadingBill) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Pay Maintenance'), backgroundColor: Colors.white, foregroundColor: AppColors.textPrimary),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    final displayMonth = _effectiveMonth ?? widget.month ?? 'August 2026';
+    final totalAmount = _effectiveAmount ?? widget.amount ?? 3500.0;
+    final displayDueDate = _effectiveDueDate ?? widget.dueDate ?? '10 Aug 2026';
+    final invNumber = _effectiveInvoiceNumber ?? widget.invoiceNumber ?? 'Invoice';
+    final maintCharge = _effectiveMaintCharge ?? widget.maintenanceCharge ?? 2500.0;
+    final waterCharge = _effectiveWaterCharge ?? widget.waterCharge ?? 400.0;
+    final parkingCharge = _effectiveParkingCharge ?? widget.parkingCharge ?? 0.0;
+    final sinkingFund = _effectiveSinkingFund ?? widget.sinkingFund ?? 0.0;
+    final penaltyFee = _effectivePenaltyFee ?? widget.penaltyFee ?? 0.0;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pay Bill: ${widget.invoiceNumber ?? 'Invoice'}'),
+        title: Text('Pay Bill: $invNumber'),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,

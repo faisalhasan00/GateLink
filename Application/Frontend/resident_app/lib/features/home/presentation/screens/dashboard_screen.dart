@@ -9,7 +9,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/ad_banner_carousel.dart';
-import '../../../advertisement/models/ad_model.dart';
+import '../../../maintenance/presentation/screens/pay_maintenance_screen.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -299,7 +299,27 @@ class _DynamicMaintenanceBanner extends ConsumerWidget {
                 ),
               ),
               ElevatedButton(
-                onPressed: () => context.go(AppRoutes.payMaintenance),
+                onPressed: () {
+                  final firstDoc = pendingDocs.first;
+                  final fbData = firstDoc.data() as Map<String, dynamic>;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => PayMaintenanceScreen(
+                        billId: firstDoc.id,
+                        amount: (fbData['amount'] ?? 0).toDouble(),
+                        month: fbData['month'] ?? 'August 2026',
+                        invoiceNumber: fbData['invoiceNumber'] ?? fbData['billNumber'] ?? 'INV-${firstDoc.id.substring(0, 6)}',
+                        dueDate: fbData['dueDate'] ?? '10 Aug 2026',
+                        maintenanceCharge: (fbData['maintenanceCharge'] ?? fbData['maintenanceCharges'] ?? 0).toDouble(),
+                        waterCharge: (fbData['waterCharge'] ?? fbData['waterCharges'] ?? 0).toDouble(),
+                        parkingCharge: (fbData['parkingCharge'] ?? 0).toDouble(),
+                        sinkingFund: (fbData['sinkingFund'] ?? 0).toDouble(),
+                        penaltyFee: (fbData['penaltyFee'] ?? fbData['lateFee'] ?? 0).toDouble(),
+                      ),
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: AppColors.primary,

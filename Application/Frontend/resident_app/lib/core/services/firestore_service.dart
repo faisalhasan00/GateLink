@@ -456,16 +456,16 @@ class FirestoreService {
     final nowStr = DateTime.now().toIso8601String();
     final txnId = 'TXN${DateTime.now().millisecondsSinceEpoch}';
 
-    // 1. Update Bill Document
+    // 1. Update/Merge Bill Document
     await _db
         .collection('societies/$societyId/maintenance_bills')
         .doc(billId)
-        .update({
+        .set({
       'status': 'paid',
       'paidAt': nowStr,
       'paymentMethod': paymentMethod,
       'transactionId': txnId,
-    });
+    }, SetOptions(merge: true));
 
     // 2. Create Normalized Payment Receipt Document
     await _db.collection('societies/$societyId/payment_receipts').add({
