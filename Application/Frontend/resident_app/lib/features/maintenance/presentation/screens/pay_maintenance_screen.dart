@@ -462,78 +462,130 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
             ),
             const SizedBox(height: AppSpacing.xl),
 
-            // UTR Verification Card (Visible after UPI App Launched)
-            if (_upiAppLaunched && _selectedMethod == 0) ...[
+            // 3-Step Direct UPI Payment Guide & UTR Submission Card
+            if (_selectedMethod == 0) ...[
               Container(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 decoration: BoxDecoration(
-                  color: AppColors.successSurface,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(AppRadius.xl),
-                  border: Border.all(color: AppColors.success),
+                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.05),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Row(
+                    Row(
                       children: [
-                        Icon(Icons.mark_email_read_rounded, color: AppColors.success, size: 20),
-                        SizedBox(width: 8),
-                        Text('UPI App Launched!', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.success)),
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.touch_app_rounded, color: AppColors.primary, size: 20),
+                        ),
+                        const SizedBox(width: 10),
+                        const Text(
+                          'Direct UPI Payment Guide',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 6),
-                    const Text(
-                      'Complete your payment in PhonePe/GPay, then enter the 12-Digit UTR / Ref Number from your receipt below to verify:',
-                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4),
+                    const SizedBox(height: AppSpacing.md),
+                    
+                    // Step 1: Copy UPI VPA
+                    Container(
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      decoration: BoxDecoration(
+                        color: AppColors.background,
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Row(
+                        children: [
+                          const Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Step 1: Copy Society UPI ID', style: TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+                                Text('8106342858@ybl', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                              ],
+                            ),
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              Clipboard.setData(const ClipboardData(text: '8106342858@ybl'));
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('📋 UPI VPA (8106342858@ybl) copied! Paste in PhonePe/GPay.'), backgroundColor: AppColors.success),
+                              );
+                            },
+                            icon: const Icon(Icons.copy_rounded, size: 14),
+                            label: const Text('Copy ID', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+
+                    // Step 2: Open App Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        onPressed: _launchUpiApp,
+                        icon: const Icon(Icons.launch_rounded, size: 16),
+                        label: Text('Open PhonePe / GPay (₹${totalAmount.toStringAsFixed(0)})', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.success,
+                          side: const BorderSide(color: AppColors.success),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                        ),
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.md),
+
+                    // Step 3: Enter UTR Box
+                    const Text('Step 2: Enter 12-Digit UTR from Receipt', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                    const SizedBox(height: 6),
                     TextField(
                       controller: _utrController,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
                         hintText: 'Enter 12-Digit UTR (e.g. 423456789012)',
-                        prefixIcon: const Icon(Icons.pin_rounded, color: AppColors.success),
-                        fillColor: Colors.white,
+                        prefixIcon: const Icon(Icons.pin_rounded, color: AppColors.primary),
+                        fillColor: AppColors.background,
                         filled: true,
                         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.lg), borderSide: const BorderSide(color: AppColors.success)),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.lg), borderSide: const BorderSide(color: AppColors.border)),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () {
-                              setState(() {
-                                _upiAppLaunched = false;
-                                _utrController.clear();
-                              });
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Payment cancelled. Bill remains unpaid.'), backgroundColor: AppColors.warning),
-                              );
-                            },
-                            style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.error,
-                              side: const BorderSide(color: AppColors.error),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-                            ),
-                            child: const Text('Payment Declined / Cancelled', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
-                          ),
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: _isProcessing ? null : _verifyAndCompletePayment,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.success,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: _isProcessing ? null : _verifyAndCompletePayment,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.success,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-                            ),
-                            child: const Text('Verify & Submit UTR', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
-                          ),
-                        ),
-                      ],
+                        child: _isProcessing
+                            ? const CircularProgressIndicator(color: Colors.white)
+                            : const Text('Submit UTR for Treasurer Verification', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800)),
+                      ),
                     ),
                   ],
                 ),
