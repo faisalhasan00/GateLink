@@ -12,6 +12,9 @@ import '../../../../core/providers/auth_providers.dart';
 import '../../../visitor/domain/models/visitor_model.dart';
 import '../../../../core/services/firestore_service.dart';
 
+import '../../../sos/providers/alert_providers.dart';
+import '../../../visitor/providers/visitor_providers.dart';
+
 class GuardDashboardScreen extends ConsumerStatefulWidget {
   const GuardDashboardScreen({super.key});
 
@@ -72,9 +75,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
 
   Future<void> _approveEntry(String docId) async {
     try {
-      await FirebaseFirestore.instance
-          .doc('societies/${_service.societyId}/visitors/$docId')
-          .update({'status': 'inside', 'entryTime': DateTime.now().toIso8601String()});
+      await ref.read(visitorRepositoryProvider).updateVisitorStatus(docId, 'inside');
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -108,18 +109,14 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              // Write SOS alert to Firestore
+              // Write SOS alert via AlertRepository
               final messenger = ScaffoldMessenger.of(context);
               try {
-                await FirebaseFirestore.instance
-                    .collection('societies/${_service.societyId}/alerts')
-                    .add({
-                  'type': 'SOS',
-                  'guardEmail': FirebaseAuth.instance.currentUser?.email ?? 'Guard',
-                  'message': 'Emergency SOS triggered by Guard at Gate 1',
-                  'createdAt': DateTime.now().toIso8601String(),
-                  'status': 'active',
-                });
+                await ref.read(alertRepositoryProvider).triggerEmergencySos(
+                  societyId: _service.societyId,
+                  guardEmail: FirebaseAuth.instance.currentUser?.email ?? 'Guard',
+                  message: 'Emergency SOS triggered by Guard at Gate 1',
+                );
               } catch (_) {}
               messenger.showSnackBar(
                 SnackBar(
@@ -174,9 +171,9 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
     final user = FirebaseAuth.instance.currentUser;
     final profile = ref.watch(userProfileProvider).value;
     
-    final guardName = profile?['name'] ?? user?.displayName ?? user?.email ?? 'Security Guard';
-    final societyName = profile?['societyName'] ?? 'Housing Society';
-    final gateName = profile?['gateName'] ?? 'Gate 1 — Main Entry';
+    final guardName = profile?.name ?? user?.displayName ?? user?.email ?? 'Security Guard';
+    final societyName = profile?.societyName ?? 'Housing Society';
+    final gateName = profile?.gateName ?? 'Gate 1 — Main Entry';
 
     return visitorsAsync.when(
       loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),

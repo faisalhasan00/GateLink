@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/auth_service.dart';
+import '../models/user_profile_model.dart';
 
 // ── SERVICE PROVIDER ──────────────────────────────────────────────────────────
 
@@ -23,7 +24,7 @@ final currentUserProvider = Provider<User?>((ref) {
 
 /// Directly fetches the user profile using the global /users/{uid} index mapping,
 /// with fallback to direct society user/staff document read and real society name resolution.
-final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+final userProfileProvider = FutureProvider<UserProfileModel?>((ref) async {
   final user = ref.watch(currentUserProvider);
   if (user == null) return null;
 
@@ -101,11 +102,13 @@ final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
     }
   }
 
-  return profileData;
+  return profileData != null
+      ? UserProfileModel.fromMap(profileData, defaultUid: user.uid)
+      : null;
 });
 
 /// Convenience provider for user account status ('active', 'pending_approval', 'suspended', 'rejected')
 final userStatusProvider = FutureProvider<String?>((ref) async {
   final profile = await ref.watch(userProfileProvider.future);
-  return profile?['status'] as String?;
+  return profile?.status;
 });

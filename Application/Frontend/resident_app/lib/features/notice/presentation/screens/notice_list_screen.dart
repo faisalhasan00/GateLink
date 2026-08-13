@@ -16,30 +16,28 @@ class NoticeListScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Society Notices')),
       backgroundColor: AppColors.background,
       body: noticesAsync.when(
-        data: (snapshot) {
-          if (snapshot.docs.isEmpty) {
+        data: (noticesList) {
+          if (noticesList.isEmpty) {
             return const Center(
               child: Text('No notices available', style: TextStyle(color: AppColors.textSecondary)),
             );
           }
 
-          final notices = snapshot.docs.map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            
-            String dateStr = '';
-            if (data['createdAt'] != null) {
+          final notices = noticesList.map((notice) {
+            String dateStr = notice.date;
+            if (dateStr.isEmpty && notice.createdAt.isNotEmpty) {
               try {
-                final dt = DateTime.parse(data['createdAt']);
+                final dt = DateTime.parse(notice.createdAt);
                 dateStr = '${dt.day}/${dt.month}/${dt.year}';
               } catch (_) {}
             }
 
             return _NoticeItem(
-              id: doc.id,
-              title: data['title'] ?? 'Notice',
+              id: notice.id,
+              title: notice.title,
               date: dateStr,
-              category: data['category'] ?? 'General',
-              isNew: data['isNew'] ?? false,
+              category: notice.category,
+              isNew: false,
             );
           }).toList();
 

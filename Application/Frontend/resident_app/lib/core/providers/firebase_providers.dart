@@ -7,13 +7,22 @@ import '../../features/visitor/providers/visitor_providers.dart';
 import '../../features/maintenance/providers/maintenance_providers.dart';
 import '../../features/visitor/domain/models/visitor_model.dart';
 import '../../features/maintenance/domain/models/maintenance_bill_model.dart';
+import '../../features/complaint/data/repositories/complaint_repository_impl.dart';
+import '../../features/complaint/domain/models/complaint_model.dart';
+import '../../features/complaint/domain/repositories/complaint_repository.dart';
+import '../../features/notice/data/repositories/notice_repository_impl.dart';
+import '../../features/notice/domain/models/notice_model.dart';
+import '../../features/notice/domain/repositories/notice_repository.dart';
+import '../../features/advertisement/models/ad_model.dart';
+import '../../features/advertisement/repositories/ad_repository.dart';
+import '../../features/advertisement/repositories/ad_repository_impl.dart';
 
 // ── SERVICE PROVIDER ─────────────────────────────────────────────────────────
 
 final firestoreServiceProvider = Provider<FirestoreService>((ref) {
   final profile = ref.watch(userProfileProvider).value;
-  final societyId = (profile?['societyId'] as String?)?.isNotEmpty == true
-      ? profile!['societyId'] as String
+  final societyId = profile?.societyId.isNotEmpty == true
+      ? profile!.societyId
       : 'SOC-001';
   return FirestoreService(societyId: societyId);
 });
@@ -33,12 +42,12 @@ final pendingVisitorsForFlatStreamProvider = StreamProvider<List<VisitorModel>>(
 /// Notification watcher — ref.watch this high in the widget tree to start alerts.
 final visitorNotificationWatcherProvider = StreamProvider<int>((ref) async* {
   final profile = ref.watch(userProfileProvider).value;
-  if (profile == null || profile['role'] != 'resident') return;
+  if (profile == null || profile.role != 'resident') return;
 
   final seenIds = <String>{};
   final visitorRepo = ref.watch(visitorRepositoryProvider);
-  final flatNumber = profile['flatNumber'] as String? ?? '';
-  final tower = profile['tower'] as String? ?? '';
+  final flatNumber = profile.flatNumber;
+  final tower = profile.tower;
   if (flatNumber.isEmpty || tower.isEmpty) return;
 
   final hostFlat = '$tower-$flatNumber';
@@ -65,7 +74,6 @@ final visitorNotificationWatcherProvider = StreamProvider<int>((ref) async* {
   }
 });
 
-
 // ── RESIDENT PROVIDERS ────────────────────────────────────────────────────────
 
 /// A real-time stream provider for all residents in the current society.
@@ -76,28 +84,44 @@ final residentsStreamProvider = StreamProvider<QuerySnapshot>((ref) {
 
 // ── AD CAMPAIGN PROVIDERS ─────────────────────────────────────────────────────
 
+final adRepositoryProvider = Provider<AdRepository>((ref) {
+  return AdRepositoryImpl(FirebaseFirestore.instance);
+});
+
 /// A real-time stream provider for active ad campaigns.
-final adCampaignsStreamProvider = StreamProvider<QuerySnapshot>((ref) {
-  final service = ref.watch(firestoreServiceProvider);
-  return service.adCampaignsStream();
+final adCampaignsStreamProvider = StreamProvider<List<AdModel>>((ref) {
+  final profile = ref.watch(userProfileProvider).value;
+  final societyId = profile?.societyId ?? 'SOC-001';
+  final repository = ref.watch(adRepositoryProvider);
+  return repository.watchAdCampaigns(societyId);
 });
 
 // ── COMPLAINTS PROVIDERS ──────────────────────────────────────────────────────
 
-/// A real-time stream provider for complaints of the current user.
-final complaintsStreamProvider = StreamProvider<QuerySnapshot>((ref) {
-  final service = ref.watch(firestoreServiceProvider);
-  final user = ref.watch(currentUserProvider);
-  if (user == null) return const Stream.empty();
-  return service.complaintsStream(user.uid);
+final complaintRepositoryProvider = Provider<ComplaintRepository>((ref) {
+  return ComplaintRepositoryImpl(FirebaseFirestore.instance);
+});
+
+/// A real-time stream provider for complaints.
+final complaintsStreamProvider = StreamProvider<List<ComplaintModel>>((ref) {
+  final profile = ref.watch(userProfileProvider).value;
+  final societyId = profile?.societyId ?? 'SOC-001';
+  final repository = ref.watch(complaintRepositoryProvider);
+  return repository.watchComplaints(societyId);
 });
 
 // ── NOTICES PROVIDERS ─────────────────────────────────────────────────────────
 
+final noticeRepositoryProvider = Provider<NoticeRepository>((ref) {
+  return NoticeRepositoryImpl(FirebaseFirestore.instance);
+});
+
 /// A real-time stream provider for all notices in the current society.
-final noticesStreamProvider = StreamProvider<QuerySnapshot>((ref) {
-  final service = ref.watch(firestoreServiceProvider);
-  return service.noticesStream();
+final noticesStreamProvider = StreamProvider<List<NoticeModel>>((ref) {
+  final profile = ref.watch(userProfileProvider).value;
+  final societyId = profile?.societyId ?? 'SOC-001';
+  final repository = ref.watch(noticeRepositoryProvider);
+  return repository.watchNotices(societyId);
 });
 
 // ── MAINTENANCE BILLS PROVIDERS ───────────────────────────────────────────
