@@ -5,8 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/providers/auth_providers.dart';
+import '../../providers/visitor_providers.dart';
 import '../../../../core/services/qr_share_service.dart';
 
 class InviteVisitorScreen extends ConsumerStatefulWidget {
@@ -61,11 +61,11 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
     setState(() => _isLoading = true);
 
     try {
-      final firestoreService = ref.read(firestoreServiceProvider);
+      final visitorRepo = ref.read(visitorRepositoryProvider);
       final user = ref.read(currentUserProvider);
       final profile = ref.read(userProfileProvider).value;
 
-      if (firestoreService == null || user == null) {
+      if (user == null) {
         throw Exception('Not logged in');
       }
 
@@ -73,7 +73,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
       final flatNumber = profile?['flatNumber'] ?? 'Unknown';
       final fullHostFlat = tower.isNotEmpty ? '$tower-$flatNumber' : flatNumber;
 
-      final inviteResult = await firestoreService.inviteVisitor(
+      final inviteResult = await visitorRepo.inviteVisitor(
         name: _nameController.text.trim(),
         phone: _mobileController.text.trim(),
         purpose: _selectedPurpose,

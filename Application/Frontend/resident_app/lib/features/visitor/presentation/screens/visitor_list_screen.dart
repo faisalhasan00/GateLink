@@ -7,6 +7,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/providers/auth_providers.dart';
+import '../../domain/models/visitor_model.dart';
+import '../../domain/models/visitor_status.dart';
+import '../../providers/visitor_providers.dart';
 import '../../../../core/services/qr_share_service.dart';
 
 class VisitorListScreen extends ConsumerStatefulWidget {
@@ -55,33 +58,17 @@ class _VisitorListScreenState extends ConsumerState<VisitorListScreen> with Sing
         label: const Text('Invite Visitor'),
       ),
       body: visitorsAsync.when(
-        data: (snapshot) {
-          final allDocs = snapshot.docs;
-
-          // Filter to only this flat's visitors
-          final myDocs = allDocs;
-
-          final pending = myDocs.where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            return data['status'] == 'pending';
-          }).toList();
-
-          final expected = myDocs.where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            return data['status'] == 'expected';
-          }).toList();
-
-          final history = myDocs.where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            return data['status'] != 'expected' && data['status'] != 'pending';
-          }).toList();
+        data: (visitors) {
+          final pending = visitors.where((v) => v.isPending).toList();
+          final expected = visitors.where((v) => v.isExpected).toList();
+          final history = visitors.where((v) => !v.isPending && !v.isExpected).toList();
 
           return TabBarView(
             controller: _tabController,
             children: [
-              _VisitorTabView(docs: pending, isPending: true),
-              _VisitorTabView(docs: expected),
-              _VisitorTabView(docs: history, isHistory: true),
+              _VisitorTabView(visitors: pending, isPending: true),
+              _VisitorTabView(visitors: expected),
+              _VisitorTabView(visitors: history, isHistory: true),
             ],
           );
         },
@@ -93,19 +80,19 @@ class _VisitorListScreenState extends ConsumerState<VisitorListScreen> with Sing
 }
 
 class _VisitorTabView extends ConsumerWidget {
-  final List<dynamic> docs;
+  final List<VisitorModel> visitors;
   final bool isHistory;
   final bool isPending;
-  
+
   const _VisitorTabView({
-    required this.docs, 
+    required this.visitors, 
     this.isHistory = false, 
     this.isPending = false,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    if (docs.isEmpty) {
+    if (visitors.isEmpty) {
       return Center(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.person_off_rounded, size: 56, color: AppColors.textDisabled),
@@ -118,30 +105,23 @@ class _VisitorTabView extends ConsumerWidget {
 
     return ListView.separated(
       padding: const EdgeInsets.all(AppSpacing.pagePadding),
-      itemCount: docs.length,
+      itemCount: visitors.length,
       separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
       itemBuilder: (context, i) {
-        final doc = docs[i];
-        final data = doc.data() as Map<String, dynamic>;
-        final name = data['name'] ?? 'Unknown';
-        final type = data['type'] ?? 'Visit';
-        final status = data['status'] ?? 'expected';
-        final initials = name.length >= 2
-            ? name.split(' ').map((w) => w.isNotEmpty ? w[0] : '').take(2).join().toUpperCase()
-            : name[0].toUpperCase();
+        final visitor = visitors[i];
 
         String timeStr = '';
-        if (data['entryTime'] != null) {
+        if (visitor.entryTime != null) {
           try {
-            final dt = DateTime.parse(data['entryTime']);
+            final dt = DateTime.parse(visitor.entryTime!);
             timeStr = '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
           } catch (_) {}
-        } else if (data['expectedDate'] != null) {
-          timeStr = '${data['expectedDate']} ${data['expectedTime'] ?? ''}';
+        } else if (visitor.expectedDate != null) {
+          timeStr = '${visitor.expectedDate} ${visitor.expectedTime ?? ''}';
         }
 
         return GestureDetector(
-          onTap: () => context.go('/home/visitors/${doc.id}'),
+          onTap: () => context.go('/home/visitors/${visitor.id}'),
           child: Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
@@ -157,15 +137,15 @@ class _VisitorTabView extends ConsumerWidget {
                     CircleAvatar(
                       radius: 24,
                       backgroundColor: AppColors.visitor.withValues(alpha: 0.12),
-                      child: Text(initials, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.visitor)),
+                      child: Text(visitor.initials, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.visitor)),
                     ),
                     const SizedBox(width: AppSpacing.md),
                     Expanded(child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                        Text(visitor.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
                         const SizedBox(height: 2),
-                        Text(type, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        Text(visitor.type, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                         const SizedBox(height: 2),
                         Row(children: [
                           const Icon(Icons.access_time_rounded, size: 12, color: AppColors.textSecondary),
@@ -175,7 +155,7 @@ class _VisitorTabView extends ConsumerWidget {
                       ],
                     )),
                     Column(children: [
-                      _StatusBadge(status: status),
+                      _StatusBadge(status: visitor.status),
                       const SizedBox(height: 8),
                       const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: AppColors.textSecondary),
                     ]),
@@ -192,7 +172,7 @@ class _VisitorTabView extends ConsumerWidget {
                               context: context,
                               builder: (ctx) => AlertDialog(
                                 title: const Text('Reject Visitor?'),
-                                content: Text('Are you sure you want to deny entry to $name?'),
+                                content: Text('Are you sure you want to deny entry to ${visitor.name}?'),
                                 actions: [
                                   TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
                                   ElevatedButton(
@@ -204,16 +184,16 @@ class _VisitorTabView extends ConsumerWidget {
                               ),
                             );
                             if (confirm == true) {
-                              final svc = ref.read(firestoreServiceProvider);
+                              final repo = ref.read(visitorRepositoryProvider);
                               final user = ref.read(currentUserProvider);
-                              await svc.updateVisitorApproval(
-                                visitorId: doc.id, 
+                              await repo.updateVisitorApproval(
+                                visitorId: visitor.id, 
                                 status: 'rejected', 
                                 residentUid: user?.uid ?? 'resident_user',
                               );
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('🛑 Visitor $name denied entry.'), backgroundColor: AppColors.error),
+                                  SnackBar(content: Text('🛑 Visitor ${visitor.name} denied entry.'), backgroundColor: AppColors.error),
                                 );
                               }
                             }
@@ -229,16 +209,16 @@ class _VisitorTabView extends ConsumerWidget {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () async {
-                            final svc = ref.read(firestoreServiceProvider);
+                            final repo = ref.read(visitorRepositoryProvider);
                             final user = ref.read(currentUserProvider);
-                            await svc.updateVisitorApproval(
-                              visitorId: doc.id, 
+                            await repo.updateVisitorApproval(
+                              visitorId: visitor.id, 
                               status: 'approved', 
                               residentUid: user?.uid ?? 'resident_user',
                             );
                             if (context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text('✅ Visitor $name approved for entry!'), backgroundColor: AppColors.success),
+                                SnackBar(content: Text('✅ Visitor ${visitor.name} approved for entry!'), backgroundColor: AppColors.success),
                               );
                             }
                           },
@@ -252,16 +232,18 @@ class _VisitorTabView extends ConsumerWidget {
                     ],
                   ),
                 ],
-                if (!isPending && !isHistory && status == 'expected') ...[
+                if (visitor.isExpected && (visitor.passCode != null || visitor.qrCode != null)) ...[
                   const SizedBox(height: AppSpacing.md),
-                  OutlinedButton.icon(
-                    onPressed: () => _showQrDialog(context, doc.id, name),
-                    icon: const Icon(Icons.qr_code_rounded, size: 16),
-                    label: const Text('View QR Pass'),
-                    style: OutlinedButton.styleFrom(
-                      minimumSize: const Size.fromHeight(40),
-                      foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _showQrDialog(context, visitor.id, visitor.passCode ?? '100000', visitor.name),
+                      icon: const Icon(Icons.qr_code_rounded, size: 16),
+                      label: const Text('View / Share Pass QR'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: AppColors.primary,
+                        side: const BorderSide(color: AppColors.primary),
+                      ),
                     ),
                   ),
                 ],
@@ -273,7 +255,7 @@ class _VisitorTabView extends ConsumerWidget {
     );
   }
 
-  void _showQrDialog(BuildContext context, String visitorId, String name) {
+  void _showQrDialog(BuildContext context, String visitorId, String passCode, String visitorName) {
     final qrKey = GlobalKey();
     showModalBottomSheet(
       context: context,
@@ -282,65 +264,48 @@ class _VisitorTabView extends ConsumerWidget {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (ctx) => Consumer(
-        builder: (context, ref, _) => Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(width: 40, height: 4,
-                decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2))),
-              const SizedBox(height: AppSpacing.lg),
-              const Text('QR Pass',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-              const SizedBox(height: AppSpacing.sm),
-              Text('Scan this pass at the gate for $name.',
-                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
-                  textAlign: TextAlign.center),
-              const SizedBox(height: AppSpacing.xl),
-              RepaintBoundary(
-                key: qrKey,
-                child: Container(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: QrImageView(
-                    data: visitorId,
-                    version: QrVersions.auto,
-                    size: 180.0,
-                  ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(width: 40, height: 4, decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: AppSpacing.lg),
+            Text('Entry Pass for $visitorName', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+            const SizedBox(height: AppSpacing.md),
+            RepaintBoundary(
+              key: qrKey,
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                child: Column(
+                  children: [
+                    QrImageView(data: passCode, version: QrVersions.auto, size: 180),
+                    const SizedBox(height: 8),
+                    Text('Pass Code: $passCode', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                  ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.xl),
-              ElevatedButton.icon(
-                onPressed: () {
-                  final profile = ref.read(userProfileProvider).value;
-                  final tower = profile?['tower'] ?? '';
-                  final flat = profile?['flatNumber'] ?? '';
-                  final societyId = profile?['societyId'] ?? 'SOC-001';
-                  final hostFlat = tower.isNotEmpty ? '$tower-$flat' : flat;
-                  QrShareService.shareQrPass(
-                    qrKey: qrKey,
-                    visitorName: name,
-                    societyId: societyId,
-                    flatNumber: hostFlat,
-                    visitTime: 'As scheduled',
-                  );
-                },
-                icon: const Icon(Icons.share_rounded, size: 18),
-                label: const Text('Share Pass with Visitor'),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            ElevatedButton.icon(
+              onPressed: () => QrShareService.shareQrPass(
+                qrKey: qrKey,
+                visitorName: visitorName,
+                societyId: 'HomeHniHood',
+                flatNumber: 'Resident Flat',
+                visitTime: 'Today',
               ),
-              const SizedBox(height: AppSpacing.md),
-              OutlinedButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Close'),
+              icon: const Icon(Icons.share_rounded),
+              label: const Text('Share Pass with Visitor'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 48),
               ),
-              const SizedBox(height: AppSpacing.md),
-            ],
-          ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
         ),
       ),
     );
@@ -348,25 +313,49 @@ class _VisitorTabView extends ConsumerWidget {
 }
 
 class _StatusBadge extends StatelessWidget {
-  final String status;
+  final VisitorStatus status;
   const _StatusBadge({required this.status});
 
   @override
   Widget build(BuildContext context) {
-    Color color;
-    String label;
+    Color bg;
+    Color fg;
+
     switch (status) {
-      case 'inside': color = AppColors.success; label = 'In'; break;
-      case 'left': color = AppColors.textSecondary; label = 'Out'; break;
-      case 'approved': color = AppColors.success; label = 'Approved'; break;
-      case 'denied': color = AppColors.error; label = 'Denied'; break;
-      case 'pending': color = AppColors.warning; label = 'Pending'; break;
-      default: color = AppColors.warning; label = 'Expected'; break;
+      case VisitorStatus.approved:
+        bg = AppColors.successSurface;
+        fg = AppColors.success;
+        break;
+      case VisitorStatus.rejected:
+        bg = AppColors.error.withValues(alpha: 0.12);
+        fg = AppColors.error;
+        break;
+      case VisitorStatus.expected:
+        bg = AppColors.infoSurface;
+        fg = AppColors.info;
+        break;
+      case VisitorStatus.inside:
+        bg = AppColors.visitor.withValues(alpha: 0.12);
+        fg = AppColors.visitor;
+        break;
+      case VisitorStatus.checkedOut:
+        bg = Colors.grey.shade100;
+        fg = AppColors.textSecondary;
+        break;
+      case VisitorStatus.pending:
+      case VisitorStatus.unknown:
+      default:
+        bg = AppColors.warningSurface;
+        fg = AppColors.warning;
     }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(AppRadius.full)),
-      child: Text(label, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color)),
+      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(AppRadius.full)),
+      child: Text(
+        status.displayName,
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: fg),
+      ),
     );
   }
 }

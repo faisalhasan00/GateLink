@@ -23,31 +23,26 @@ class VisitorDetailScreen extends ConsumerWidget {
         surfaceTintColor: Colors.white,
       ),
       body: visitorsAsync.when(
-        data: (snapshot) {
-          final matchingDocs = snapshot.docs.where((d) => d.id == visitorId).toList();
-          if (matchingDocs.isEmpty) {
+        data: (visitors) {
+          final matchingVisitors = visitors.where((v) => v.id == visitorId).toList();
+          if (matchingVisitors.isEmpty) {
             return const Center(
               child: Text('Visitor details not found or removed.', style: TextStyle(color: AppColors.textSecondary)),
             );
           }
 
-          final data = matchingDocs.first.data() as Map<String, dynamic>;
-          final name = data['name'] ?? 'Unknown Visitor';
-          final phone = data['phone'] ?? 'N/A';
-          final type = data['type'] ?? 'Guest';
-          final hostFlat = data['hostFlat'] ?? 'N/A';
-          final status = data['status'] ?? 'pending';
-          final vehicleNumber = data['vehicleNumber'] ?? 'None';
-          final company = data['company'] ?? '';
-          final createdDate = data['createdDate'] ?? '';
-          final approvedAt = data['approvedAt'];
-          final rejectedAt = data['rejectedAt'];
-          final entryTime = data['entryTime'];
-          final exitTime = data['exitTime'];
-
-          final initials = name.length >= 2
-              ? name.split(' ').map((w) => w.isNotEmpty ? w[0] : '').take(2).join().toUpperCase()
-              : name[0].toUpperCase();
+          final visitor = matchingVisitors.first;
+          final name = visitor.name;
+          final phone = visitor.phone;
+          final type = visitor.type;
+          final hostFlat = visitor.hostFlat;
+          final vehicleNumber = visitor.vehicleNumber ?? 'None';
+          final company = visitor.company ?? '';
+          final createdDate = visitor.createdDate ?? '';
+          final approvedAt = visitor.approvedAt;
+          final rejectedAt = visitor.rejectedAt;
+          final entryTime = visitor.entryTime;
+          final exitTime = visitor.exitTime;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
@@ -59,9 +54,9 @@ class VisitorDetailScreen extends ConsumerWidget {
                   padding: const EdgeInsets.all(AppSpacing.lg),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: status == 'rejected'
+                      colors: visitor.isRejected
                           ? [AppColors.error, const Color(0xFF991B1B)]
-                          : status == 'approved'
+                          : visitor.isApproved
                               ? [AppColors.success, const Color(0xFF047857)]
                               : [AppColors.visitor, const Color(0xFF059669)],
                       begin: Alignment.topLeft,
@@ -80,7 +75,7 @@ class VisitorDetailScreen extends ConsumerWidget {
                         ),
                         child: Center(
                           child: Text(
-                            initials,
+                            visitor.initials,
                             style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white),
                           ),
                         ),
@@ -102,7 +97,7 @@ class VisitorDetailScreen extends ConsumerWidget {
                           borderRadius: BorderRadius.circular(AppRadius.full),
                         ),
                         child: Text(
-                          status.toUpperCase(),
+                          visitor.status.displayName.toUpperCase(),
                           style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
                         ),
                       ),
@@ -153,26 +148,26 @@ class VisitorDetailScreen extends ConsumerWidget {
                         title: 'Visitor Request Logged',
                         time: createdDate.isNotEmpty ? createdDate : 'System Recorded',
                         isDone: true,
-                        isCurrent: status == 'pending',
+                        isCurrent: visitor.isPending,
                       ),
                       _TimelineStep(
-                        title: status == 'rejected' ? 'Resident Rejected Entry' : 'Resident Approved Entry',
+                        title: visitor.isRejected ? 'Resident Rejected Entry' : 'Resident Approved Entry',
                         time: approvedAt ?? rejectedAt ?? 'Pending Resident Action',
                         isDone: approvedAt != null || rejectedAt != null,
                         isCurrent: false,
-                        isError: status == 'rejected',
+                        isError: visitor.isRejected,
                       ),
                       _TimelineStep(
                         title: 'Gate Check-In',
                         time: entryTime ?? 'Awaiting Gate Entry',
                         isDone: entryTime != null,
-                        isCurrent: status == 'checked_in',
+                        isCurrent: visitor.isInside,
                       ),
                       _TimelineStep(
                         title: 'Gate Check-Out',
                         time: exitTime ?? 'Awaiting Gate Exit',
                         isDone: exitTime != null,
-                        isCurrent: status == 'checked_out',
+                        isCurrent: visitor.isCheckedOut,
                         isLast: true,
                       ),
                     ],
@@ -181,7 +176,7 @@ class VisitorDetailScreen extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.md),
 
                 // QR Pass Card
-                if (status == 'approved' || status == 'expected') ...[
+                if (visitor.isApproved || visitor.isExpected) ...[
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(AppSpacing.lg),

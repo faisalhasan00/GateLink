@@ -143,12 +143,8 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
             child: visitorsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, st) => Center(child: Text('Error loading history: $e')),
-              data: (snapshot) {
-                var docs = snapshot.docs.map((d) {
-                  final data = d.data() as Map<String, dynamic>;
-                  data['_id'] = d.id;
-                  return data;
-                }).toList();
+              data: (visitors) {
+                var docs = visitors.map((v) => v.toMap()..['_id'] = v.id).toList();
 
                 // 1. Apply Search Filter
                 if (_searchQuery.isNotEmpty) {

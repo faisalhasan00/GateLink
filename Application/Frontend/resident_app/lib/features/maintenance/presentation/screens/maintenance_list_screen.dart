@@ -1,10 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/providers/auth_providers.dart';
+import '../../domain/models/maintenance_bill_model.dart';
+import '../../domain/models/payment_status.dart';
+import '../../providers/maintenance_providers.dart';
 import 'pay_maintenance_screen.dart';
 
 class MaintenanceListScreen extends ConsumerStatefulWidget {
@@ -32,7 +33,7 @@ class _MaintenanceListScreenState extends ConsumerState<MaintenanceListScreen>
 
   @override
   Widget build(BuildContext context) {
-    final billsAsync = ref.watch(maintenanceBillsStreamProvider);
+    final billsAsync = ref.watch(maintenanceBillsProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -50,24 +51,15 @@ class _MaintenanceListScreenState extends ConsumerState<MaintenanceListScreen>
         ),
       ),
       body: billsAsync.when(
-        data: (snapshot) {
-          final allDocs = snapshot.docs;
-
-          final pending = allDocs.where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            return data['status'] != 'paid';
-          }).toList();
-
-          final paid = allDocs.where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            return data['status'] == 'paid';
-          }).toList();
+        data: (bills) {
+          final pending = bills.where((b) => !b.isPaid).toList();
+          final paid = bills.where((b) => b.isPaid).toList();
 
           return TabBarView(
             controller: _tabController,
             children: [
-              _BillsListView(docs: pending, isPaid: false, ref: ref),
-              _BillsListView(docs: paid, isPaid: true, ref: ref),
+              _BillsListView(bills: pending, isPaid: false, ref: ref),
+              _BillsListView(bills: paid, isPaid: true, ref: ref),
             ],
           );
         },
@@ -79,14 +71,14 @@ class _MaintenanceListScreenState extends ConsumerState<MaintenanceListScreen>
 }
 
 class _BillsListView extends StatelessWidget {
-  final List<dynamic> docs;
+  final List<MaintenanceBillModel> bills;
   final bool isPaid;
   final WidgetRef ref;
-  const _BillsListView({required this.docs, required this.isPaid, required this.ref});
+  const _BillsListView({required this.bills, required this.isPaid, required this.ref});
 
   @override
   Widget build(BuildContext context) {
-    if (docs.isEmpty) {
+    if (bills.isEmpty) {
       return Center(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Icon(isPaid ? Icons.check_circle_outline_rounded : Icons.receipt_long_rounded,
@@ -100,52 +92,16 @@ class _BillsListView extends StatelessWidget {
               onPressed: () async {
                 try {
                   final user = ref.read(currentUserProvider);
-                  final db = FirebaseFirestore.instance;
-                  final batch = db.batch();
-
                   final userProfile = ref.read(userProfileProvider).value;
                   final activeSocId = userProfile?['societyId'] as String? ?? '';
-                  if (activeSocId.isEmpty) return;
+                  final flatNum = userProfile?['flatNumber'] ?? 'A-101';
+                  if (activeSocId.isEmpty || user == null) return;
 
-                  final bills = [
-                    {
-                      'month': 'August 2026',
-                      'invoiceNumber': 'INV-2026-08-101',
-                      'amount': 3500.0,
-                      'maintenanceCharge': 2500.0,
-                      'waterCharge': 400.0,
-                      'parkingCharge': 400.0,
-                      'sinkingFund': 200.0,
-                      'penaltyFee': 0.0,
-                      'dueDate': '10 Aug 2026',
-                      'status': 'pending',
-                      'residentUid': user?.uid ?? '',
-                      'societyId': activeSocId,
-                      'createdAt': DateTime.now().toIso8601String(),
-                    },
-                    {
-                      'month': 'July 2026',
-                      'invoiceNumber': 'INV-2026-07-101',
-                      'amount': 3700.0,
-                      'maintenanceCharge': 2500.0,
-                      'waterCharge': 450.0,
-                      'parkingCharge': 350.0,
-                      'sinkingFund': 200.0,
-                      'penaltyFee': 200.0,
-                      'dueDate': '10 Jul 2026',
-                      'status': 'overdue',
-                      'residentUid': user?.uid ?? '',
-                      'societyId': activeSocId,
-                      'createdAt': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
-                    },
-                  ];
-
-                  for (final b in bills) {
-                    final docRef = db.collection('societies/$activeSocId/maintenance_bills').doc();
-                    batch.set(docRef, b);
-                  }
-
-                  await batch.commit();
+                  await ref.read(maintenanceControllerProvider.notifier).seedDemoBills(
+                    societyId: activeSocId,
+                    residentUid: user.uid,
+                    flatNumber: flatNum,
+                  );
                 } catch (e) {
                   debugPrint('Seeding error: $e');
                 }
@@ -159,141 +115,178 @@ class _BillsListView extends StatelessWidget {
 
     return ListView.separated(
       padding: const EdgeInsets.all(AppSpacing.pagePadding),
-      itemCount: docs.length,
+      itemCount: bills.length,
       separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
       itemBuilder: (context, index) {
-        final doc = docs[index];
-        final data = doc.data() as Map<String, dynamic>;
-        return _BillCard(
-          docId: doc.id,
-          month: data['month'] ?? 'Unknown',
-          amount: (data['amount'] ?? 0).toDouble(),
-          dueDate: data['dueDate'] ?? '',
-          status: data['status'] ?? 'pending',
-          invoiceNumber: data['invoiceNumber'] ?? data['billNumber'] ?? 'INV-${doc.id.substring(0, 6)}',
-          maintenanceCharge: (data['maintenanceCharge'] ?? data['maintenanceCharges'] ?? 0).toDouble(),
-          waterCharge: (data['waterCharge'] ?? data['waterCharges'] ?? 0).toDouble(),
-          parkingCharge: (data['parkingCharge'] ?? 0).toDouble(),
-          sinkingFund: (data['sinkingFund'] ?? 0).toDouble(),
-          penaltyFee: (data['penaltyFee'] ?? data['lateFee'] ?? 0).toDouble(),
-          ref: ref,
-        );
+        final bill = bills[index];
+        return _BillCard(bill: bill, ref: ref);
       },
     );
   }
 }
 
 class _BillCard extends StatelessWidget {
-  final String docId, month, dueDate, status, invoiceNumber;
-  final double amount, maintenanceCharge, waterCharge, parkingCharge, sinkingFund, penaltyFee;
+  final MaintenanceBillModel bill;
   final WidgetRef ref;
 
   const _BillCard({
-    required this.docId,
-    required this.month,
-    required this.amount,
-    required this.dueDate,
-    required this.status,
-    required this.invoiceNumber,
-    required this.maintenanceCharge,
-    required this.waterCharge,
-    required this.parkingCharge,
-    required this.sinkingFund,
-    required this.penaltyFee,
+    required this.bill,
     required this.ref,
   });
 
   Color get _statusColor {
-    switch (status) {
-      case 'paid': return AppColors.success;
-      case 'overdue': return AppColors.error;
+    switch (bill.status) {
+      case PaymentStatus.paid: return AppColors.success;
+      case PaymentStatus.overdue: return AppColors.error;
+      case PaymentStatus.pendingVerification: return AppColors.warning;
+      case PaymentStatus.pending:
+      case PaymentStatus.unknown:
       default: return AppColors.warning;
     }
   }
 
   String get _statusLabel {
-    switch (status) {
-      case 'paid': return 'Paid';
-      case 'overdue': return 'Overdue';
-      default: return 'Pending';
-    }
+    return bill.status.displayName;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Colors.white,
+    return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: AppColors.border),
+        side: const BorderSide(color: AppColors.border),
       ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44, height: 44,
-                decoration: BoxDecoration(
-                  color: AppColors.maintenance.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppRadius.md),
-                ),
-                child: const Icon(Icons.receipt_long_rounded, color: AppColors.maintenance, size: 22),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(month, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                    Text('Due: $dueDate · $invoiceNumber', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                    Text(bill.month,
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                    const SizedBox(height: 2),
+                    Text(bill.invoiceNumber,
+                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                   ],
                 ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text('₹${amount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: _statusColor.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppRadius.full),
-                    ),
-                    child: Text(_statusLabel, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _statusColor)),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _statusColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppRadius.full),
                   ),
-                ],
+                  child: Text(
+                    _statusLabel,
+                    style: TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.bold, color: _statusColor),
+                  ),
+                ),
+              ],
+            ),
+            const Divider(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text('Due Date',
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    const SizedBox(height: 2),
+                    Text(bill.dueDate,
+                        style: const TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                  ],
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text('Total Amount',
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    const SizedBox(height: 2),
+                    Text('₹${bill.amount.toStringAsFixed(0)}',
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                  ],
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.md),
+            ExpansionTile(
+              tilePadding: EdgeInsets.zero,
+              title: const Text('View Charge Breakdown',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary)),
+              children: [
+                _breakdownRow('Maintenance Charge', bill.maintenanceCharge),
+                _breakdownRow('Water Supply Charge', bill.waterCharge),
+                _breakdownRow('Parking Slot Fee', bill.parkingCharge),
+                _breakdownRow('Sinking Fund', bill.sinkingFund),
+                if (bill.penaltyFee > 0)
+                  _breakdownRow('Late Payment Penalty', bill.penaltyFee, isWarning: true),
+              ],
+            ),
+            if (!bill.isPaid) ...[
+              const SizedBox(height: AppSpacing.md),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => PayMaintenanceScreen(
+                          billId: bill.id,
+                          amount: bill.amount,
+                          month: bill.month,
+                          invoiceNumber: bill.invoiceNumber,
+                          dueDate: bill.dueDate,
+                          maintenanceCharge: bill.maintenanceCharge,
+                          waterCharge: bill.waterCharge,
+                          parkingCharge: bill.parkingCharge,
+                          sinkingFund: bill.sinkingFund,
+                          penaltyFee: bill.penaltyFee,
+                        ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                  ),
+                  child: Text('Pay Now  •  ₹${bill.amount.toStringAsFixed(0)}'),
+                ),
               ),
             ],
-          ),
-          if (status != 'paid') ...[
-            const SizedBox(height: AppSpacing.md),
-            const Divider(height: 0),
-            const SizedBox(height: AppSpacing.md),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => PayMaintenanceScreen(
-                      billId: docId,
-                      amount: amount,
-                      month: month,
-                      invoiceNumber: invoiceNumber,
-                      dueDate: dueDate,
-                      maintenanceCharge: maintenanceCharge,
-                      waterCharge: waterCharge,
-                      parkingCharge: parkingCharge,
-                      sinkingFund: sinkingFund,
-                      penaltyFee: penaltyFee,
-                    ),
-                  ),
-                );
-              },
-              style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 44)),
-              child: const Text('Pay Now'),
-            ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _breakdownRow(String label, double amount, {bool isWarning = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label,
+              style: TextStyle(
+                  fontSize: 13,
+                  color: isWarning ? AppColors.error : AppColors.textSecondary)),
+          Text('₹${amount.toStringAsFixed(0)}',
+              style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: isWarning ? AppColors.error : AppColors.textPrimary)),
         ],
       ),
     );

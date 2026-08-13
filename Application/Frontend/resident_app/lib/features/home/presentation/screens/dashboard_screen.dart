@@ -222,13 +222,10 @@ class _DynamicMaintenanceBanner extends ConsumerWidget {
     final billsAsync = ref.watch(maintenanceBillsStreamProvider);
 
     return billsAsync.when(
-      data: (snapshot) {
-        final pendingDocs = snapshot.docs.where((doc) {
-          final data = doc.data() as Map<String, dynamic>;
-          return data['status'] == 'pending';
-        }).toList();
+      data: (bills) {
+        final pendingBills = bills.where((b) => !b.isPaid).toList();
 
-        if (pendingDocs.isEmpty) {
+        if (pendingBills.isEmpty) {
           // No pending dues state
           return Container(
             padding: const EdgeInsets.all(AppSpacing.md),
@@ -239,14 +236,7 @@ class _DynamicMaintenanceBanner extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF10B981),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.check_circle_rounded, color: Colors.white, size: 24),
-                ),
+                const Icon(Icons.check_circle_rounded, color: Color(0xFF059669), size: 32),
                 const SizedBox(width: AppSpacing.md),
                 const Expanded(
                   child: Column(
@@ -262,9 +252,9 @@ class _DynamicMaintenanceBanner extends ConsumerWidget {
           );
         }
 
-        final firstBillData = pendingDocs.first.data() as Map<String, dynamic>;
-        final amount = firstBillData['amount'] ?? 0;
-        final dueDateStr = firstBillData['dueDate'] ?? firstBillData['month'] ?? 'Due Soon';
+        final firstBill = pendingBills.first;
+        final amount = firstBill.amount;
+        final dueDateStr = firstBill.dueDate.isNotEmpty ? firstBill.dueDate : firstBill.month;
 
         return Container(
           padding: const EdgeInsets.all(AppSpacing.md),
@@ -417,24 +407,22 @@ class _PendingVisitorsList extends ConsumerWidget {
     final visitorsAsync = ref.watch(pendingVisitorsForFlatStreamProvider);
 
     return visitorsAsync.when(
-      data: (snapshot) {
-        final visitors = snapshot.docs.where((doc) => doc['status'] == 'pending').take(3).toList();
+      data: (visitorsList) {
+        final pendingVisitors = visitorsList.where((v) => v.isPending).take(3).toList();
         
-        if (visitors.isEmpty) {
+        if (pendingVisitors.isEmpty) {
           return const _EmptyStateSmall(message: 'No pending visitor approvals 👋');
         }
 
         return Column(
-          children: visitors.map((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            final name = data['name'] ?? 'Unknown Visitor';
-            final initials = name.isNotEmpty ? name[0].toUpperCase() : '?';
-            final purpose = data['type'] ?? 'Guest';
+          children: pendingVisitors.map((visitor) {
+            final name = visitor.name;
+            final purpose = visitor.type;
             
             String timeStr = 'Just now';
-            if (data['entryTime'] != null) {
+            if (visitor.entryTime != null) {
               try {
-                final dt = DateTime.parse(data['entryTime']);
+                final dt = DateTime.parse(visitor.entryTime!);
                 timeStr = DateFormat('h:mm a').format(dt);
               } catch (_) {}
             }
@@ -443,11 +431,11 @@ class _PendingVisitorsList extends ConsumerWidget {
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
               child: _VisitorCard(
                 visitor: _VisitorPreview(
-                  id: doc.id,
+                  id: visitor.id,
                   name: name,
                   purpose: purpose,
                   time: timeStr,
-                  initials: initials,
+                  initials: visitor.initials,
                 ),
               ),
             );

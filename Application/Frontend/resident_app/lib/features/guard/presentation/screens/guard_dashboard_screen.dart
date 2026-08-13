@@ -9,6 +9,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/providers/auth_providers.dart';
+import '../../domain/models/visitor_model.dart';
 import '../../../../core/services/firestore_service.dart';
 
 class GuardDashboardScreen extends ConsumerStatefulWidget {
@@ -147,19 +148,19 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
     );
   }
 
-  List<QueryDocumentSnapshot> _filterDocs(List<QueryDocumentSnapshot> docs) {
+  List<dynamic> _filterDocs(List<dynamic> docs) {
     switch (_selectedFilter) {
       case 'Inside':
-        return docs.where((d) => (d.data() as Map)['status'] == 'inside').toList();
+        return docs.where((d) => (d is VisitorModel ? d.status.toFirestore() : (d.data() as Map)['status']) == 'inside').toList();
       case 'Pending':
         return docs.where((d) {
-          final s = (d.data() as Map)['status'];
+          final s = d is VisitorModel ? d.status.toFirestore() : (d.data() as Map)['status'];
           return s == 'pending' || s == 'approved' || s == 'denied';
         }).toList();
       case 'Delivery':
-        return docs.where((d) => (d.data() as Map)['type'] == 'Delivery').toList();
+        return docs.where((d) => (d is VisitorModel ? d.type : (d.data() as Map)['type']) == 'Delivery').toList();
       case 'Cab':
-        return docs.where((d) => (d.data() as Map)['type'] == 'Cab').toList();
+        return docs.where((d) => (d is VisitorModel ? d.type : (d.data() as Map)['type']) == 'Cab').toList();
       default:
         return docs;
     }
@@ -180,13 +181,12 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
     return visitorsAsync.when(
       loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (e, _) => Scaffold(body: Center(child: Text('Error: $e'))),
-      data: (snapshot) {
-        final docs = snapshot.docs;
-        final insideCount = docs.where((d) => (d.data() as Map)['status'] == 'inside').length;
-        final pendingCount = docs.where((d) => (d.data() as Map)['status'] == 'pending').length;
-        final approvedCount = docs.where((d) => (d.data() as Map)['status'] == 'approved').length;
-        final exitedCount = docs.where((d) => (d.data() as Map)['status'] == 'left').length;
-        final filtered = _filterDocs(docs);
+      data: (visitors) {
+        final insideCount = visitors.where((d) => d.isInside).length;
+        final pendingCount = visitors.where((d) => d.isPending).length;
+        final approvedCount = visitors.where((d) => d.isApproved).length;
+        final exitedCount = visitors.where((d) => d.isCheckedOut).length;
+        final filtered = _filterDocs(visitors);
 
         return Scaffold(
           backgroundColor: AppColors.background,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -7,8 +6,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/providers/auth_providers.dart';
+import '../../providers/maintenance_providers.dart';
 
 class PayMaintenanceScreen extends ConsumerStatefulWidget {
   final String? billId;
@@ -103,62 +102,46 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       final activeSocId = ref.read(userProfileProvider).value?['societyId'] as String? ?? 'SOC-001';
 
       if (user != null) {
-        final snap = await FirebaseFirestore.instance
-            .collection('societies/$activeSocId/maintenance_bills')
-            .where('residentUid', isEqualTo: user.uid)
-            .get();
+        final maintController = ref.read(maintenanceControllerProvider.notifier);
+        final pendingBill = await maintController.getPendingBill(user.uid);
 
-        final pendingDocs = snap.docs.where((d) => (d.data()['status'] ?? '') != 'paid').toList();
-
-        if (pendingDocs.isNotEmpty) {
-          final first = pendingDocs.first;
-          final d = first.data();
+        if (pendingBill != null) {
           setState(() {
-            _effectiveBillId = first.id;
-            _effectiveAmount = (d['amount'] ?? 3500.0).toDouble();
-            _effectiveMonth = d['month'] ?? 'August 2026';
-            _effectiveInvoiceNumber = d['invoiceNumber'] ?? d['billNumber'] ?? 'INV-${first.id.substring(0, 6)}';
-            _effectiveDueDate = d['dueDate'] ?? '10 Aug 2026';
-            _effectiveMaintCharge = (d['maintenanceCharge'] ?? d['maintenanceCharges'] ?? 2500.0).toDouble();
-            _effectiveWaterCharge = (d['waterCharge'] ?? d['waterCharges'] ?? 400.0).toDouble();
-            _effectiveParkingCharge = (d['parkingCharge'] ?? 400.0).toDouble();
-            _effectiveSinkingFund = (d['sinkingFund'] ?? 200.0).toDouble();
-            _effectivePenaltyFee = (d['penaltyFee'] ?? d['lateFee'] ?? 0.0).toDouble();
+            _effectiveBillId = pendingBill.id;
+            _effectiveAmount = pendingBill.amount;
+            _effectiveMonth = pendingBill.month;
+            _effectiveInvoiceNumber = pendingBill.invoiceNumber;
+            _effectiveDueDate = pendingBill.dueDate;
+            _effectiveMaintCharge = pendingBill.maintenanceCharge;
+            _effectiveWaterCharge = pendingBill.waterCharge;
+            _effectiveParkingCharge = pendingBill.parkingCharge;
+            _effectiveSinkingFund = pendingBill.sinkingFund;
+            _effectivePenaltyFee = pendingBill.penaltyFee;
           });
         } else {
-          // Auto-generate a pending bill doc in Firestore if none found
-          final newRef = FirebaseFirestore.instance.collection('societies/$activeSocId/maintenance_bills').doc();
-          final invNum = 'INV-2026-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}';
-          final newBill = {
-            'month': 'August 2026',
-            'invoiceNumber': invNum,
-            'amount': 3500.0,
-            'maintenanceCharge': 2500.0,
-            'waterCharge': 400.0,
-            'parkingCharge': 400.0,
-            'sinkingFund': 200.0,
-            'penaltyFee': 0.0,
-            'dueDate': '10 Aug 2026',
-            'status': 'pending',
-            'residentUid': user.uid,
-            'societyId': activeSocId,
-            'createdAt': DateTime.now().toIso8601String(),
-          };
-
-          await newRef.set(newBill);
-
-          setState(() {
-            _effectiveBillId = newRef.id;
-            _effectiveAmount = 3500.0;
-            _effectiveMonth = 'August 2026';
-            _effectiveInvoiceNumber = invNum;
-            _effectiveDueDate = '10 Aug 2026';
-            _effectiveMaintCharge = 2500.0;
-            _effectiveWaterCharge = 400.0;
-            _effectiveParkingCharge = 400.0;
-            _effectiveSinkingFund = 200.0;
-            _effectivePenaltyFee = 0.0;
-          });
+          // Seed initial bill via controller if none found
+          final userProfile = ref.read(userProfileProvider).value;
+          final flatNum = userProfile?['flatNumber'] ?? 'A-101';
+          await maintController.seedDemoBills(
+            societyId: activeSocId,
+            residentUid: user.uid,
+            flatNumber: flatNum,
+          );
+          final newlyCreated = await maintController.getPendingBill(user.uid);
+          if (newlyCreated != null) {
+            setState(() {
+              _effectiveBillId = newlyCreated.id;
+              _effectiveAmount = newlyCreated.amount;
+              _effectiveMonth = newlyCreated.month;
+              _effectiveInvoiceNumber = newlyCreated.invoiceNumber;
+              _effectiveDueDate = newlyCreated.dueDate;
+              _effectiveMaintCharge = newlyCreated.maintenanceCharge;
+              _effectiveWaterCharge = newlyCreated.waterCharge;
+              _effectiveParkingCharge = newlyCreated.parkingCharge;
+              _effectiveSinkingFund = newlyCreated.sinkingFund;
+              _effectivePenaltyFee = newlyCreated.penaltyFee;
+            });
+          }
         }
       }
     } catch (e) {
@@ -186,29 +169,18 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
 
       if (user == null) throw Exception('User not logged in');
 
-      // Create Payment Order Session via Backend Endpoint (Server Amount Validation)
       final internalPaymentId = 'PAY-${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(9000) + 1000}';
       final orderId = 'order_${DateTime.now().millisecondsSinceEpoch}_${targetBillId.substring(0, 6)}';
 
-      final paymentRecord = {
-        'internalPaymentId': internalPaymentId,
-        'cashfreeOrderId': orderId,
-        'cashfreePaymentId': null,
-        'cashfreeRefundId': null,
-        'societyId': activeSocId,
-        'maintenanceBillId': targetBillId,
-        'residentUid': user.uid,
-        'flatNumber': userProfile?['flatNumber'] ?? 'A-101',
-        'amount': payAmount,
-        'currency': 'INR',
-        'status': 'PENDING',
-        'webhookVerified': false,
-        'apiVerified': false,
-        'createdAt': DateTime.now().toIso8601String(),
-        'updatedAt': DateTime.now().toIso8601String(),
-      };
-
-      await FirebaseFirestore.instance.collection('payments').doc(internalPaymentId).set(paymentRecord);
+      await ref.read(maintenanceRepositoryProvider).createPendingPaymentRecord(
+        internalPaymentId: internalPaymentId,
+        orderId: orderId,
+        societyId: activeSocId,
+        billId: targetBillId,
+        residentUid: user.uid,
+        flatNumber: userProfile?['flatNumber'] ?? 'A-101',
+        amount: payAmount,
+      );
 
       // Launch Cashfree Web Checkout Session
       final cfCheckoutUrl = Uri.parse('https://payments-sandbox.cashfree.com/order/#$orderId');
@@ -321,32 +293,19 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       final flatNumber = userProfile?['flatNumber'] ?? 'A-101';
 
       if (user != null) {
-        // Secure Backend Verification Submission (Requirement #3)
-        await FirebaseFirestore.instance
-            .doc('societies/$activeSocId/maintenance_bills/$targetBillId')
-            .set({
-          'status': 'pending_verification',
-          'utrNumber': utrText,
-          'transactionId': utrText,
-          'paymentMethod': 'Offline Payment',
-          'submittedAt': DateTime.now().toIso8601String(),
-          'residentUid': user.uid,
-          'residentName': residentName,
-          'flatNumber': flatNumber,
-        }, SetOptions(merge: true));
-
-        // Create Admin Notification
-        await FirebaseFirestore.instance
-            .collection('societies/$activeSocId/notifications')
-            .add({
-          'title': 'New Offline Payment Submitted',
-          'body': 'Flat $flatNumber ($residentName) submitted ref $utrText for Bill $invNum. Treasurer verification required.',
-          'type': 'billing_verification',
-          'billId': targetBillId,
-          'utrNumber': utrText,
-          'createdAt': DateTime.now().toIso8601String(),
-          'isRead': false,
-        }).catchError((_) {});
+        final success = await ref.read(maintenanceControllerProvider.notifier).submitOfflinePayment(
+          societyId: activeSocId,
+          billId: targetBillId,
+          residentUid: user.uid,
+          referenceNumber: utrText,
+          residentName: residentName,
+          flatNumber: flatNumber,
+          invoiceNumber: invNum,
+        );
+        if (!success) {
+          setState(() => _isProcessing = false);
+          return;
+        }
       }
 
       setState(() => _isProcessing = false);

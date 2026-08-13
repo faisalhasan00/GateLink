@@ -2,40 +2,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/providers/firebase_providers.dart';
-import '../../../../core/providers/auth_providers.dart';
+import '../../domain/models/payment_receipt_model.dart';
+import '../../providers/maintenance_providers.dart';
 
 class MaintenanceHistoryScreen extends ConsumerWidget {
   const MaintenanceHistoryScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(currentUserProvider);
-    final firestoreService = ref.watch(firestoreServiceProvider);
-
-    if (user == null || firestoreService == null) {
-      return Scaffold(
-        appBar: AppBar(title: const Text('Payment History')),
-        body: const Center(child: Text('Please log in to view payment history.')),
-      );
-    }
+    final receiptsAsync = ref.watch(paymentReceiptsProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Payment History')),
       backgroundColor: AppColors.background,
-      body: StreamBuilder(
-        stream: firestoreService.paymentReceiptsStream(user.uid),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) {
-            return Center(child: Text('Error loading history: ${snapshot.error}'));
-          }
-
-          final docs = snapshot.data?.docs ?? [];
-          if (docs.isEmpty) {
+      body: receiptsAsync.when(
+        data: (receipts) {
+          if (receipts.isEmpty) {
             return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -50,18 +32,10 @@ class MaintenanceHistoryScreen extends ConsumerWidget {
 
           return ListView.separated(
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
-            itemCount: docs.length,
+            itemCount: receipts.length,
             separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
             itemBuilder: (context, index) {
-              final data = docs[index].data() as Map<String, dynamic>;
-              final period = data['billingPeriod'] ?? 'Monthly Maintenance';
-              final amount = (data['amount'] ?? 0.0).toDouble();
-              final paidAt = data['paidAt'] ?? data['createdAt'] ?? '';
-              final txnId = data['transactionId'] ?? 'TXN000000';
-              final invoiceNum = data['invoiceNumber'] ?? 'INV-001';
-              final payMethod = data['paymentMethod'] ?? 'UPI';
-
-              final dateStr = paidAt.length >= 10 ? paidAt.substring(0, 10) : paidAt;
+              final receipt = receipts[index];
 
               return Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
@@ -88,12 +62,15 @@ class MaintenanceHistoryScreen extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(period, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                              Text('Paid on $dateStr  •  $payMethod', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                              Text(receipt.billingPeriod,
+                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                              Text('Paid on ${receipt.formattedDate}  •  ${receipt.paymentMethod}',
+                                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                             ],
                           ),
                         ),
-                        Text('₹${amount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                        Text('₹${receipt.amount.toStringAsFixed(0)}',
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                       ],
                     ),
                     const Divider(height: 20),
@@ -101,7 +78,8 @@ class MaintenanceHistoryScreen extends ConsumerWidget {
                       children: [
                         const Text('Txn ID:', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                         const SizedBox(width: 6),
-                        Text(txnId, style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontFamily: 'monospace')),
+                        Text(receipt.transactionId,
+                            style: const TextStyle(fontSize: 11, color: AppColors.textPrimary, fontFamily: 'monospace')),
                         const Spacer(),
                         GestureDetector(
                           onTap: () {
@@ -113,15 +91,16 @@ class MaintenanceHistoryScreen extends ConsumerWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Invoice #: $invoiceNum', style: const TextStyle(fontWeight: FontWeight.bold)),
+                                    Text('Invoice #: ${receipt.invoiceNumber}', style: const TextStyle(fontWeight: FontWeight.bold)),
                                     const SizedBox(height: 4),
-                                    Text('Billing Period: $period'),
-                                    Text('Amount Paid: ₹${amount.toStringAsFixed(0)}'),
-                                    Text('Payment Method: $payMethod'),
-                                    Text('Transaction ID: $txnId'),
-                                    Text('Timestamp: $dateStr'),
+                                    Text('Billing Period: ${receipt.billingPeriod}'),
+                                    Text('Amount Paid: ₹${receipt.amount.toStringAsFixed(0)}'),
+                                    Text('Payment Method: ${receipt.paymentMethod}'),
+                                    Text('Transaction ID: ${receipt.transactionId}'),
+                                    Text('Timestamp: ${receipt.formattedDate}'),
                                     const Divider(height: 16),
-                                    const Text('Authorized by SocietySphere System', style: TextStyle(fontSize: 11, color: AppColors.textSecondary, fontStyle: FontStyle.italic)),
+                                    const Text('Authorized by SocietySphere System',
+                                        style: TextStyle(fontSize: 11, color: AppColors.textSecondary, fontStyle: FontStyle.italic)),
                                   ],
                                 ),
                                 actions: [
@@ -144,6 +123,8 @@ class MaintenanceHistoryScreen extends ConsumerWidget {
             },
           );
         },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, st) => Center(child: Text('Error loading history: $e')),
       ),
     );
   }

@@ -24,36 +24,35 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
       body: visitorsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('Error: $e')),
-        data: (snapshot) {
-          final matchingDocs = snapshot.docs.where((d) => d.id == visitorId).toList();
-          if (matchingDocs.isEmpty) {
+        data: (visitors) {
+          final matchingVisitors = visitors.where((d) => d.id == visitorId).toList();
+          if (matchingVisitors.isEmpty) {
             return const Center(
               child: Text('Visitor details not found or removed.', style: TextStyle(color: AppColors.textSecondary)),
             );
           }
 
-          final doc = matchingDocs.first;
-          final data = doc.data() as Map<String, dynamic>;
-          final name = data['name'] ?? 'Unknown Visitor';
-          final phone = data['phone'] ?? 'N/A';
-          final type = data['type'] ?? 'Guest';
-          final hostFlat = data['hostFlat'] ?? 'N/A';
-          final residentName = data['hostResidentName'] ?? 'Resident';
-          final status = data['status'] ?? 'pending';
-          final vehicleNumber = data['vehicleNumber'] ?? 'None';
-          final vehicleType = data['vehicleType'] ?? '4-Wheeler';
-          final gender = data['gender'] ?? 'Not Specified';
-          final company = data['company'] ?? '';
-          final photoUrl = data['photoUrl'] as String?;
-          final gateName = data['gateName'] ?? 'Gate 1 — Main Entry';
-          final createdDate = data['createdDate'] ?? '';
-          final entryTime = data['entryTime'];
-          final exitTime = data['exitTime'];
+          final visitor = matchingVisitors.first;
+          final name = visitor.name;
+          final phone = visitor.phone;
+          final type = visitor.type;
+          final hostFlat = visitor.hostFlat;
+          final residentName = visitor.hostResidentName ?? 'Resident';
+          final status = visitor.status.toFirestore();
+          final vehicleNumber = visitor.vehicleNumber ?? 'None';
+          final vehicleType = visitor.vehicleType ?? '4-Wheeler';
+          final gender = visitor.gender ?? 'Not Specified';
+          final company = visitor.company ?? '';
+          final photoUrl = visitor.photoUrl;
+          final gateName = visitor.gateName ?? 'Gate 1 — Main Entry';
+          final createdDate = visitor.createdDate ?? '';
+          final entryTime = visitor.entryTime;
+          final exitTime = visitor.exitTime;
 
-          final isInside = status == 'inside';
-          final isPending = status == 'pending';
-          final isApproved = status == 'approved';
-          final isRejected = status == 'rejected' || status == 'denied';
+          final isInside = visitor.isInside;
+          final isPending = visitor.isPending;
+          final isApproved = visitor.isApproved;
+          final isRejected = visitor.isRejected;
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.pagePadding),

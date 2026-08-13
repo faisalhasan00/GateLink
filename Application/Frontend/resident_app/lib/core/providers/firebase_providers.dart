@@ -2,8 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/firestore_service.dart';
 import '../services/notification_service.dart';
-
 import 'auth_providers.dart';
+import '../../features/visitor/providers/visitor_providers.dart';
+import '../../features/maintenance/providers/maintenance_providers.dart';
+import '../../features/visitor/domain/models/visitor_model.dart';
+import '../../features/maintenance/domain/models/maintenance_bill_model.dart';
 
 // ── SERVICE PROVIDER ─────────────────────────────────────────────────────────
 
@@ -18,22 +21,13 @@ final firestoreServiceProvider = Provider<FirestoreService>((ref) {
 // ── VISITOR PROVIDERS ─────────────────────────────────────────────────────────
 
 /// A real-time stream provider for the live visitor log.
-final visitorsStreamProvider = StreamProvider<QuerySnapshot>((ref) {
-  final service = ref.watch(firestoreServiceProvider);
-  return service.visitorsStream();
+final visitorsStreamProvider = StreamProvider<List<VisitorModel>>((ref) {
+  return ref.watch(visitorsProvider.stream);
 });
 
 /// Stream of pending visitors for the currently logged-in resident's flat.
-final pendingVisitorsForFlatStreamProvider = StreamProvider<QuerySnapshot>((ref) {
-  final service = ref.watch(firestoreServiceProvider);
-  final profile = ref.watch(userProfileProvider).value;
-  final flatNumber = profile?['flatNumber'] as String? ?? '';
-  final tower = profile?['tower'] as String? ?? '';
-  if (flatNumber.isEmpty || tower.isEmpty) return const Stream.empty();
-  
-  // Guard app saves hostFlat as "Tower-FlatNumber" (e.g., "A-101")
-  final hostFlat = '$tower-$flatNumber';
-  return service.pendingVisitorsForFlatStream(hostFlat);
+final pendingVisitorsForFlatStreamProvider = StreamProvider<List<VisitorModel>>((ref) {
+  return ref.watch(pendingVisitorsForFlatProvider.stream);
 });
 
 /// Notification watcher — ref.watch this high in the widget tree to start alerts.
@@ -42,36 +36,32 @@ final visitorNotificationWatcherProvider = StreamProvider<int>((ref) async* {
   if (profile == null || profile['role'] != 'resident') return;
 
   final seenIds = <String>{};
-  final service = ref.watch(firestoreServiceProvider);
+  final visitorRepo = ref.watch(visitorRepositoryProvider);
   final flatNumber = profile['flatNumber'] as String? ?? '';
   final tower = profile['tower'] as String? ?? '';
   if (flatNumber.isEmpty || tower.isEmpty) return;
 
   final hostFlat = '$tower-$flatNumber';
 
-  await for (final snapshot in service.pendingVisitorsForFlatStream(hostFlat)) {
-    for (final doc in snapshot.docs) {
-      if (!seenIds.contains(doc.id)) {
-        seenIds.add(doc.id);
-        final data = doc.data() as Map<String, dynamic>;
-        // Skip documents older than 30 seconds (avoid triggering on old data at login)
-        final entryTime = data['entryTime'] as String?;
+  await for (final visitors in visitorRepo.watchPendingVisitorsForFlat(hostFlat)) {
+    for (final visitor in visitors) {
+      if (!seenIds.contains(visitor.id)) {
+        seenIds.add(visitor.id);
+        final entryTime = visitor.entryTime;
         if (entryTime != null) {
           try {
             final dt = DateTime.parse(entryTime);
             if (DateTime.now().difference(dt).inSeconds > 30) continue;
           } catch (_) {}
         }
-        final name = data['name'] as String? ?? 'Someone';
-        final type = data['type'] as String? ?? 'Visitor';
         NotificationService.showVisitorAlert(
-          visitorName: name,
-          visitorType: type,
+          visitorName: visitor.name,
+          visitorType: visitor.type,
           flatNumber: flatNumber,
         );
       }
     }
-    yield snapshot.docs.length;
+    yield visitors.length;
   }
 });
 
@@ -112,11 +102,8 @@ final noticesStreamProvider = StreamProvider<QuerySnapshot>((ref) {
 
 // ── MAINTENANCE BILLS PROVIDERS ───────────────────────────────────────────
 
-final maintenanceBillsStreamProvider = StreamProvider<QuerySnapshot>((ref) {
-  final service = ref.watch(firestoreServiceProvider);
-  final user = ref.watch(currentUserProvider);
-  if (user == null) return const Stream.empty();
-  return service.maintenanceBillsStream(user.uid);
+final maintenanceBillsStreamProvider = StreamProvider<List<MaintenanceBillModel>>((ref) {
+  return ref.watch(maintenanceBillsProvider.stream);
 });
 
 // ── AMENITIES PROVIDERS ───────────────────────────────────────────────────
