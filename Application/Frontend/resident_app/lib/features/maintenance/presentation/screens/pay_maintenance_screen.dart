@@ -68,7 +68,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
     _PayMethod(
       icon: Icons.account_balance_wallet_rounded,
       label: 'Option 2: Offline Payment',
-      subtitle: 'Direct UPI VPA, Bank Transfer, Cash / Cheque · Treasurer Verification',
+      subtitle: 'Bank Transfer, Cash, or Cheque · Treasurer Verification',
       color: AppColors.success,
     ),
   ];
