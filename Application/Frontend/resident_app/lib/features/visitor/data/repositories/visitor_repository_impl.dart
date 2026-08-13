@@ -1,4 +1,5 @@
 import '../../../../core/services/firestore_service.dart';
+import '../../domain/models/visitor_action_result.dart';
 import '../../domain/models/visitor_model.dart';
 import '../../domain/repositories/visitor_repository.dart';
 
@@ -58,7 +59,7 @@ class VisitorRepositoryImpl implements VisitorRepository {
   }
 
   @override
-  Future<Map<String, String>> inviteVisitor({
+  Future<VisitorInviteResult> inviteVisitor({
     required String name,
     required String phone,
     required String purpose,
@@ -66,8 +67,8 @@ class VisitorRepositoryImpl implements VisitorRepository {
     required String invitedBy,
     required String expectedDate,
     required String expectedTime,
-  }) {
-    return _firestoreService.inviteVisitor(
+  }) async {
+    final map = await _firestoreService.inviteVisitor(
       name: name,
       phone: phone,
       purpose: purpose,
@@ -75,6 +76,10 @@ class VisitorRepositoryImpl implements VisitorRepository {
       invitedBy: invitedBy,
       expectedDate: expectedDate,
       expectedTime: expectedTime,
+    );
+    return VisitorInviteResult(
+      visitorId: map['visitorId'] ?? '',
+      passCode: map['passCode'] ?? '100000',
     );
   }
 
@@ -104,7 +109,8 @@ class VisitorRepositoryImpl implements VisitorRepository {
   }
 
   @override
-  Future<Map<String, dynamic>> validateAndProcessQrScan(String code) {
-    return _firestoreService.validateAndProcessQrScan(code);
+  Future<VisitorScanResult> validateAndProcessQrScan(String code) async {
+    final rawMap = await _firestoreService.validateAndProcessQrScan(code);
+    return VisitorScanResult.fromMap(rawMap);
   }
 }

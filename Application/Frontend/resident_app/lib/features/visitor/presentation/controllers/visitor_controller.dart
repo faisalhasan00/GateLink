@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../domain/models/visitor_action_result.dart';
 import '../../domain/repositories/visitor_repository.dart';
 import 'visitor_state.dart';
 
@@ -13,7 +14,7 @@ class VisitorController extends StateNotifier<VisitorState> {
   }
 
   /// Resident invites a visitor and generates a pre-approved gate pass.
-  Future<Map<String, String>?> inviteVisitor({
+  Future<VisitorInviteResult?> inviteVisitor({
     required String name,
     required String phone,
     required String purpose,
@@ -60,7 +61,6 @@ class VisitorController extends StateNotifier<VisitorState> {
       state = state.copyWith(
         status: VisitorActionStatus.success,
         successMessage: 'Visitor pass created successfully.',
-        data: result,
       );
       return result;
     } catch (e) {
@@ -204,7 +204,7 @@ class VisitorController extends StateNotifier<VisitorState> {
   }
 
   /// Validate and process QR / pass code scan at gate.
-  Future<Map<String, dynamic>?> validateAndProcessQrScan(String code) async {
+  Future<VisitorScanResult?> validateAndProcessQrScan(String code) async {
     if (state.isSubmitting) return null;
 
     if (code.trim().isEmpty) {
@@ -222,7 +222,6 @@ class VisitorController extends StateNotifier<VisitorState> {
 
       state = state.copyWith(
         status: VisitorActionStatus.success,
-        data: result,
       );
       return result;
     } catch (e) {

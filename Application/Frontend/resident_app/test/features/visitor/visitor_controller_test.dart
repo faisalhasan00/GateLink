@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:societysphere/core/services/firestore_service.dart';
+import 'package:societysphere/features/visitor/domain/models/visitor_action_result.dart';
 import 'package:societysphere/features/visitor/domain/models/visitor_model.dart';
 import 'package:societysphere/features/visitor/domain/repositories/visitor_repository.dart';
 import 'package:societysphere/features/visitor/presentation/controllers/visitor_controller.dart';
@@ -25,7 +26,7 @@ class MockVisitorRepository implements VisitorRepository {
   }
 
   @override
-  Future<Map<String, String>> inviteVisitor({
+  Future<VisitorInviteResult> inviteVisitor({
     required String name,
     required String phone,
     required String purpose,
@@ -36,7 +37,7 @@ class MockVisitorRepository implements VisitorRepository {
   }) async {
     inviteVisitorCalls++;
     if (shouldFail) throw Exception('Invite error');
-    return {'visitorId': 'vis-101', 'passCode': '654321'};
+    return const VisitorInviteResult(visitorId: 'vis-101', passCode: '654321');
   }
 
   @override
@@ -80,10 +81,10 @@ class MockVisitorRepository implements VisitorRepository {
   Future<void> updateVisitorStatus(String visitorId, String status) async {}
 
   @override
-  Future<Map<String, dynamic>> validateAndProcessQrScan(String code) async {
+  Future<VisitorScanResult> validateAndProcessQrScan(String code) async {
     validateAndProcessQrScanCalls++;
     if (shouldFail) throw Exception('QR scan error');
-    return {'valid': true, 'visitorName': 'John Doe'};
+    return const VisitorScanResult(isValid: true, visitorName: 'John Doe');
   }
 }
 
@@ -137,7 +138,7 @@ void main() {
       expect(mockRepository.inviteVisitorCalls, 0);
     });
 
-    test('inviteVisitor succeeds with valid input', () async {
+    test('inviteVisitor succeeds with valid input returning VisitorInviteResult', () async {
       final result = await controller.inviteVisitor(
         name: 'John Doe',
         phone: '9876543210',
@@ -149,7 +150,8 @@ void main() {
       );
 
       expect(result, isNotNull);
-      expect(result!['passCode'], '654321');
+      expect(result!.passCode, '654321');
+      expect(result.visitorId, 'vis-101');
       expect(controller.state.status, VisitorActionStatus.success);
       expect(mockRepository.inviteVisitorCalls, 1);
     });
@@ -218,11 +220,12 @@ void main() {
       expect(mockRepository.markVisitorExitCalls, 1);
     });
 
-    test('validateAndProcessQrScan succeeds with valid pass code', () async {
+    test('validateAndProcessQrScan succeeds returning VisitorScanResult', () async {
       final result = await controller.validateAndProcessQrScan('654321');
 
       expect(result, isNotNull);
-      expect(result!['valid'], true);
+      expect(result!.isValid, true);
+      expect(result.visitorName, 'John Doe');
       expect(controller.state.status, VisitorActionStatus.success);
       expect(mockRepository.validateAndProcessQrScanCalls, 1);
     });

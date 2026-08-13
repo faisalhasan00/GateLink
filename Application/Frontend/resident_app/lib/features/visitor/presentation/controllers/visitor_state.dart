@@ -4,13 +4,11 @@ class VisitorState {
   final VisitorActionStatus status;
   final String? errorMessage;
   final String? successMessage;
-  final Map<String, dynamic>? data;
 
   const VisitorState({
     this.status = VisitorActionStatus.initial,
     this.errorMessage,
     this.successMessage,
-    this.data,
   });
 
   bool get isSubmitting => status == VisitorActionStatus.loading;
@@ -21,13 +19,11 @@ class VisitorState {
     VisitorActionStatus? status,
     String? errorMessage,
     String? successMessage,
-    Map<String, dynamic>? data,
   }) {
     return VisitorState(
       status: status ?? this.status,
       errorMessage: errorMessage,
       successMessage: successMessage,
-      data: data ?? this.data,
     );
   }
 

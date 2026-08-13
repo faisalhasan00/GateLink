@@ -91,7 +91,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
       setState(() => _isLoading = false);
 
       if (inviteResult != null) {
-        _showQrDialog(inviteResult['visitorId'] ?? '', inviteResult['passCode'] ?? '100000');
+        _showQrDialog(inviteResult.visitorId, inviteResult.passCode);
       } else {
         final errorMsg = ref.read(visitorControllerProvider).errorMessage ?? 'Failed to create visitor pass.';
         ScaffoldMessenger.of(context).showSnackBar(

@@ -1,4 +1,5 @@
 import '../../../../core/services/firestore_service.dart';
+import '../models/visitor_action_result.dart';
 import '../models/visitor_model.dart';
 
 abstract class VisitorRepository {
@@ -28,7 +29,7 @@ abstract class VisitorRepository {
   });
 
   /// Invite a visitor and create a pre-approved pass code.
-  Future<Map<String, String>> inviteVisitor({
+  Future<VisitorInviteResult> inviteVisitor({
     required String name,
     required String phone,
     required String purpose,
@@ -53,5 +54,5 @@ abstract class VisitorRepository {
   });
 
   /// Validate and process a QR code or pass code scan.
-  Future<Map<String, dynamic>> validateAndProcessQrScan(String code);
+  Future<VisitorScanResult> validateAndProcessQrScan(String code);
 }
