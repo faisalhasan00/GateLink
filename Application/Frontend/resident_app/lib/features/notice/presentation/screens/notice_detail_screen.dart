@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/providers/auth_providers.dart';
+import '../../providers/notice_providers.dart';
 
 class NoticeDetailScreen extends ConsumerWidget {
   final String noticeId;
@@ -11,80 +10,130 @@ class NoticeDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userProfileAsync = ref.watch(userProfileProvider);
-    final societyId = userProfileAsync.value?['societyId'] as String? ?? '';
+    final noticeAsync = ref.watch(noticeDetailStreamProvider(noticeId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Notice Details')),
       backgroundColor: AppColors.background,
-      body: FutureBuilder<DocumentSnapshot>(
-        future: societyId.isNotEmpty 
-            ? FirebaseFirestore.instance.doc('societies/$societyId/notices/$noticeId').get()
-            : FirebaseFirestore.instance.collectionGroup('notices').where(FieldPath.documentId, isEqualTo: noticeId).get().then((snap) => snap.docs.first),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.exists) {
-            return const Center(child: Text('Notice not found', style: TextStyle(color: AppColors.textSecondary)));
+      appBar: AppBar(title: const Text('Notice Details')),
+      body: noticeAsync.when(
+        data: (notice) {
+          if (notice == null) {
+            return const Center(
+              child: Text('Notice not found',
+                  style: TextStyle(color: AppColors.textSecondary)),
+            );
           }
 
-          final data = snapshot.data!.data() as Map<String, dynamic>;
-          final title = data['title'] ?? 'Notice';
-          final body = data['body'] ?? '';
-          final category = data['category'] ?? 'General';
+          final title = notice.title;
+          final description = notice.description;
+          final category = notice.category;
+          final author = notice.author;
+          final authorRole = notice.authorRole;
 
-          String dateStr = '';
-          if (data['createdAt'] != null) {
+          String dateStr = notice.date;
+          if (dateStr.isEmpty && notice.createdAt.isNotEmpty) {
             try {
-              final dt = DateTime.parse(data['createdAt']);
+              final dt = DateTime.parse(notice.createdAt).toLocal();
               dateStr = '${dt.day}/${dt.month}/${dt.year}';
             } catch (_) {}
           }
+          if (dateStr.isEmpty) dateStr = 'Today';
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
-            child: Container(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(AppRadius.xl),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header card
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.notice.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(AppRadius.sm),
-                        ),
-                        child: Text(category, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.notice)),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.notice.withValues(alpha: 0.12),
+                              borderRadius:
+                                  BorderRadius.circular(AppRadius.full),
+                            ),
+                            child: Text(category,
+                                style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.notice)),
+                          ),
+                          const Spacer(),
+                          Text(
+                            dateStr,
+                            style: const TextStyle(
+                                fontSize: 12, color: AppColors.textSecondary),
+                          ),
+                        ],
                       ),
-                      const Spacer(),
-                      Text(dateStr, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        title,
+                        style: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        'Issued by: $author ($authorRole)',
+                        style: const TextStyle(
+                            fontSize: 12, color: AppColors.textSecondary),
+                      ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(
-                    title,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary, height: 1.3),
+                ),
+                const SizedBox(height: AppSpacing.md),
+
+                // Content card
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    border: Border.all(color: AppColors.border),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  const Text('Issued by: Management Committee', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary)),
-                  const Divider(height: AppSpacing.xl),
-                  Text(
-                    body,
-                    style: const TextStyle(fontSize: 14, color: AppColors.textPrimary, height: 1.6),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Official Announcement',
+                        style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textSecondary),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        description.isNotEmpty
+                            ? description
+                            : 'No additional details provided.',
+                        style: const TextStyle(
+                            fontSize: 14,
+                            color: AppColors.textPrimary,
+                            height: 1.5),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, st) => Center(child: Text('Error: $e')),
       ),
     );
   }

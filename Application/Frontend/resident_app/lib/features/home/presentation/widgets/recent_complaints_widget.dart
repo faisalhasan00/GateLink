@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/providers/firebase_providers.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../complaint/providers/complaint_providers.dart';
 
 class RecentComplaintsWidget extends ConsumerWidget {
   const RecentComplaintsWidget({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final complaintsAsync = ref.watch(complaintsStreamProvider);
+    final complaintsAsync = ref.watch(myComplaintsStreamProvider);
 
     return complaintsAsync.when(
       data: (complaints) {
@@ -22,12 +23,7 @@ class RecentComplaintsWidget extends ConsumerWidget {
         final status = complaint.status;
         final category = complaint.category;
 
-        Color statusColor = AppColors.warning;
-        if (status.toLowerCase() == 'resolved') {
-          statusColor = AppColors.success;
-        } else if (status.toLowerCase() == 'in progress') {
-          statusColor = AppColors.primary;
-        }
+        final isResolved = complaint.isResolved;
 
         return Container(
           padding: const EdgeInsets.all(AppSpacing.md),
@@ -39,40 +35,49 @@ class RecentComplaintsWidget extends ConsumerWidget {
           child: Row(
             children: [
               Container(
-                width: 40,
-                height: 40,
+                width: 44,
+                height: 44,
                 decoration: BoxDecoration(
-                  color: AppColors.complaint.withOpacity(0.1),
+                  color: AppColors.complaint.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(AppRadius.md),
                 ),
-                child: const Icon(Icons.support_agent_rounded, color: AppColors.complaint, size: 22),
+                child: const Icon(Icons.support_agent_rounded,
+                    color: AppColors.complaint, size: 22),
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                    Text('Category: $category', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '$category • Status: $status',
+                      style: const TextStyle(
+                          fontSize: 12, color: AppColors.textSecondary),
+                    ),
                   ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                ),
+              TextButton(
+                onPressed: () => context.go('/home/complaints/${complaint.id}'),
                 child: Text(
-                  status.toUpperCase(),
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: statusColor),
+                  isResolved ? 'View' : 'Track',
+                  style: const TextStyle(
+                      color: AppColors.primary, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
           ),
         );
       },
-      loading: () => const _SkeletonCardList(),
+      loading: () => const _SkeletonCard(),
       error: (e, st) => const SizedBox.shrink(),
     );
   }
@@ -85,21 +90,25 @@ class _EmptyStateSmall extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(color: AppColors.border),
       ),
       child: Center(
-        child: Text(message, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500)),
+        child: Text(
+          message,
+          style:
+              const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+        ),
       ),
     );
   }
 }
 
-class _SkeletonCardList extends StatelessWidget {
-  const _SkeletonCardList();
+class _SkeletonCard extends StatelessWidget {
+  const _SkeletonCard();
 
   @override
   Widget build(BuildContext context) {

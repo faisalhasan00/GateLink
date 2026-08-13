@@ -7,15 +7,15 @@ import '../../features/visitor/providers/visitor_providers.dart';
 import '../../features/maintenance/providers/maintenance_providers.dart';
 import '../../features/visitor/domain/models/visitor_model.dart';
 import '../../features/maintenance/domain/models/maintenance_bill_model.dart';
-import '../../features/complaint/data/repositories/complaint_repository_impl.dart';
-import '../../features/complaint/domain/models/complaint_model.dart';
-import '../../features/complaint/domain/repositories/complaint_repository.dart';
-import '../../features/notice/data/repositories/notice_repository_impl.dart';
-import '../../features/notice/domain/models/notice_model.dart';
-import '../../features/notice/domain/repositories/notice_repository.dart';
 import '../../features/advertisement/models/ad_model.dart';
 import '../../features/advertisement/repositories/ad_repository.dart';
 import '../../features/advertisement/repositories/ad_repository_impl.dart';
+
+export '../../features/complaint/providers/complaint_providers.dart';
+export '../../features/notice/providers/notice_providers.dart';
+export '../../features/amenity/providers/amenity_providers.dart';
+export '../../features/parking/providers/parking_providers.dart';
+export '../../features/notifications/providers/notification_providers.dart';
 
 // ── SERVICE PROVIDER ─────────────────────────────────────────────────────────
 
@@ -35,7 +35,8 @@ final visitorsStreamProvider = StreamProvider<List<VisitorModel>>((ref) {
 });
 
 /// Stream of pending visitors for the currently logged-in resident's flat.
-final pendingVisitorsForFlatStreamProvider = StreamProvider<List<VisitorModel>>((ref) {
+final pendingVisitorsForFlatStreamProvider =
+    StreamProvider<List<VisitorModel>>((ref) {
   return ref.watch(pendingVisitorsForFlatProvider.stream);
 });
 
@@ -52,7 +53,8 @@ final visitorNotificationWatcherProvider = StreamProvider<int>((ref) async* {
 
   final hostFlat = '$tower-$flatNumber';
 
-  await for (final visitors in visitorRepo.watchPendingVisitorsForFlat(hostFlat)) {
+  await for (final visitors
+      in visitorRepo.watchPendingVisitorsForFlat(hostFlat)) {
     for (final visitor in visitors) {
       if (!seenIds.contains(visitor.id)) {
         seenIds.add(visitor.id);
@@ -96,45 +98,12 @@ final adCampaignsStreamProvider = StreamProvider<List<AdModel>>((ref) {
   return repository.watchAdCampaigns(societyId);
 });
 
-// ── COMPLAINTS PROVIDERS ──────────────────────────────────────────────────────
-
-final complaintRepositoryProvider = Provider<ComplaintRepository>((ref) {
-  return ComplaintRepositoryImpl(FirebaseFirestore.instance);
-});
-
-/// A real-time stream provider for complaints.
-final complaintsStreamProvider = StreamProvider<List<ComplaintModel>>((ref) {
-  final profile = ref.watch(userProfileProvider).value;
-  final societyId = profile?.societyId ?? 'SOC-001';
-  final repository = ref.watch(complaintRepositoryProvider);
-  return repository.watchComplaints(societyId);
-});
-
-// ── NOTICES PROVIDERS ─────────────────────────────────────────────────────────
-
-final noticeRepositoryProvider = Provider<NoticeRepository>((ref) {
-  return NoticeRepositoryImpl(FirebaseFirestore.instance);
-});
-
-/// A real-time stream provider for all notices in the current society.
-final noticesStreamProvider = StreamProvider<List<NoticeModel>>((ref) {
-  final profile = ref.watch(userProfileProvider).value;
-  final societyId = profile?.societyId ?? 'SOC-001';
-  final repository = ref.watch(noticeRepositoryProvider);
-  return repository.watchNotices(societyId);
-});
-
 // ── MAINTENANCE BILLS PROVIDERS ───────────────────────────────────────────
 
-final maintenanceBillsStreamProvider = StreamProvider<List<MaintenanceBillModel>>((ref) {
+final maintenanceBillsStreamProvider =
+    StreamProvider<List<MaintenanceBillModel>>((ref) {
   return ref.watch(maintenanceBillsProvider.stream);
 });
-
-// ── AMENITIES & AMENITY BOOKINGS PROVIDERS ───────────────────────────────
-export '../../features/amenity/providers/amenity_providers.dart';
-
-// ── PARKING PROVIDERS ─────────────────────────────────────────────────────
-export '../../features/parking/providers/parking_providers.dart';
 
 // ── DOCUMENTS PROVIDERS ───────────────────────────────────────────────────
 
@@ -142,6 +111,3 @@ final documentsStreamProvider = StreamProvider<QuerySnapshot>((ref) {
   final service = ref.watch(firestoreServiceProvider);
   return service.documentsStream();
 });
-
-// ── NOTIFICATIONS PROVIDERS ───────────────────────────────────────────────
-export '../../features/notifications/providers/notification_providers.dart';

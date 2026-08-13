@@ -1,20 +1,21 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/providers/auth_providers.dart';
-import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/router/app_router.dart';
+import '../../../../core/services/storage_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/services/storage_service.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+import '../providers/complaint_providers.dart';
 
 class RaiseComplaintScreen extends ConsumerStatefulWidget {
   const RaiseComplaintScreen({super.key});
 
   @override
-  ConsumerState<RaiseComplaintScreen> createState() => _RaiseComplaintScreenState();
+  ConsumerState<RaiseComplaintScreen> createState() =>
+      _RaiseComplaintScreenState();
 }
 
 class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
@@ -23,15 +24,23 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
   final _descController = TextEditingController();
   String? _selectedCategory;
   String _selectedPriority = 'medium';
-  bool _isLoading = false;
   File? _imageFile;
   final _picker = ImagePicker();
   final _blockController = TextEditingController();
   final _floorController = TextEditingController();
 
   final List<String> _categories = [
-    'Plumbing', 'Electrical', 'Housekeeping', 'Security', 'Lift / Elevator',
-    'Parking', 'Water Supply', 'Internet / Cable', 'Common Area', 'Pest Control', 'Other',
+    'Plumbing',
+    'Electrical',
+    'Housekeeping',
+    'Security',
+    'Lift / Elevator',
+    'Parking',
+    'Water Supply',
+    'Internet / Cable',
+    'Common Area',
+    'Pest Control',
+    'Other',
   ];
 
   @override
@@ -44,7 +53,8 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
   }
 
   Future<void> _pickImage() async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+    final pickedFile =
+        await _picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
     if (pickedFile != null) {
       setState(() => _imageFile = File(pickedFile.path));
     }
@@ -54,56 +64,75 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a category')));
+        const SnackBar(content: Text('Please select a category')),
+      );
       return;
     }
 
     final user = ref.read(currentUserProvider);
     final userProfile = ref.read(userProfileProvider).value;
-    final firestore = ref.read(firestoreServiceProvider);
 
-    if (user == null || firestore == null) {
+    if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Error: Not authenticated or service unavailable.')));
+        const SnackBar(
+            content: Text('Error: Not authenticated. Please login again.')),
+      );
       return;
     }
-
-    setState(() => _isLoading = true);
 
     try {
       String? photoUrl;
       if (_imageFile != null) {
-        final societyId = userProfile?['societyId'] as String? ?? 'SOC-001';
+        final societyId = userProfile?.societyId ?? 'SOC-001';
         final storage = ref.read(storageServiceProvider);
         final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
-        photoUrl = await storage.uploadComplaintImage(_imageFile!, societyId, uniqueId);
+        photoUrl =
+            await storage.uploadComplaintImage(_imageFile!, societyId, uniqueId);
         if (photoUrl.isEmpty) photoUrl = null;
       }
 
-      final resName = (userProfile?['name'] as String? ?? user.displayName ?? 'Resident').trim();
-      final flatNo = (userProfile?['flatNumber'] as String? ?? '').trim();
+      final resName = userProfile?.name.isNotEmpty == true
+          ? userProfile!.name
+          : (user.displayName ?? 'Resident');
+      final flatNo = userProfile?.flatNumber ?? '';
+      final societyId = userProfile?.societyId ?? 'SOC-001';
 
-      await firestore.raiseComplaint(
-        title: _titleController.text.trim(),
-        description: _descController.text.trim(),
-        category: _selectedCategory!,
-        uid: user.uid,
-        block: _blockController.text.trim(),
-        floor: _floorController.text.trim(),
-        priority: _selectedPriority,
-        photoUrl: photoUrl,
-        residentName: resName,
-        flatNumber: flatNo,
-      );
-      
+      final success = await ref
+          .read(complaintControllerProvider.notifier)
+          .raiseComplaint(
+            societyId: societyId,
+            residentUid: user.uid,
+            residentName: resName,
+            flatNumber: flatNo,
+            title: _titleController.text,
+            description: _descController.text,
+            category: _selectedCategory!,
+            block: _blockController.text,
+            floor: _floorController.text,
+            priority: _selectedPriority,
+            photoUrl: photoUrl,
+          );
+
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Complaint raised successfully!'),
-          backgroundColor: AppColors.success,
-        ),
-      );
-      context.go(AppRoutes.complaints);
+
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Complaint raised successfully!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        context.go(AppRoutes.complaints);
+      } else {
+        final errorMsg = ref.read(complaintControllerProvider).errorMessage ??
+            'Failed to raise complaint.';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMsg),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -112,27 +141,29 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
           backgroundColor: AppColors.error,
         ),
       );
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(userProfileProvider).value;
-    final resName = profile?['name'] ?? 'Resident';
-    final flatNum = profile?['flatNumber'] ?? 'A-101';
-    final block = profile?['block'] ?? profile?['tower'] ?? 'Tower A';
-    final floor = profile?['floor'] ?? '1st Floor';
-    final societyId = profile?['societyId'] ?? 'SOC-001';
+    final resName = profile?.name.isNotEmpty == true ? profile!.name : 'Resident';
+    final flatNum =
+        profile?.flatNumber.isNotEmpty == true ? profile!.flatNumber : 'A-101';
+    final block = profile?.block.isNotEmpty == true
+        ? profile!.block
+        : (profile?.tower.isNotEmpty == true ? profile!.tower : 'Tower A');
+    final floor =
+        profile?.floor.isNotEmpty == true ? profile!.floor : '1st Floor';
 
-    // Auto-fill controllers if not touched yet
     if (_blockController.text.isEmpty && block.isNotEmpty) {
       _blockController.text = block;
     }
     if (_floorController.text.isEmpty && floor.isNotEmpty) {
       _floorController.text = floor;
     }
+
+    final controllerState = ref.watch(complaintControllerProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -144,41 +175,38 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Auto-linked Resident Information Card
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
                   color: AppColors.primarySurface,
                   borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                  border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [
                     CircleAvatar(
-                      radius: 20,
-                      backgroundColor: AppColors.primary.withValues(alpha: 0.2),
-                      child: const Icon(Icons.person_rounded, color: AppColors.primary, size: 22),
+                      backgroundColor: AppColors.primary,
+                      child: Text(
+                        resName.substring(0, 1).toUpperCase(),
+                        style: const TextStyle(
+                            color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
                     ),
                     const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Text(resName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.primary)),
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(4)),
-                                child: const Text('AUTO-LINKED', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w800, color: Colors.white)),
-                              ),
-                            ],
-                          ),
+                          Text(resName,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 15)),
                           const SizedBox(height: 2),
-                          Text('Flat $flatNum  •  $block ($floor)', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                          Text('Society Code: $societyId', style: const TextStyle(fontSize: 11, color: AppColors.textDisabled)),
+                          Text('Flat: $flatNum • $block, $floor',
+                              style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary)),
                         ],
                       ),
                     ),
@@ -187,133 +215,141 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Category
-              const _FieldLabel(label: 'Category'),
-              const SizedBox(height: 6),
+              const _FieldLabel(label: 'Category *'),
+              const SizedBox(height: AppSpacing.xs),
               DropdownButtonFormField<String>(
                 value: _selectedCategory,
-                decoration: const InputDecoration(hintText: 'Select complaint category'),
-                items: _categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                onChanged: (v) => setState(() => _selectedCategory = v),
+                hint: const Text('Select category'),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md)),
+                ),
+                items: _categories
+                    .map((cat) =>
+                        DropdownMenuItem(value: cat, child: Text(cat)))
+                    .toList(),
+                onChanged: (val) => setState(() => _selectedCategory = val),
               ),
               const SizedBox(height: AppSpacing.md),
 
-              // Title
-              const _FieldLabel(label: 'Complaint Title'),
-              const SizedBox(height: 6),
+              const _FieldLabel(label: 'Complaint Title *'),
+              const SizedBox(height: AppSpacing.xs),
               TextFormField(
                 controller: _titleController,
-                decoration: const InputDecoration(hintText: 'Brief title of the issue'),
-                validator: (v) => (v == null || v.isEmpty) ? 'Title is required' : null,
+                decoration: InputDecoration(
+                  hintText: 'Brief summary of the issue',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md)),
+                ),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Title is required' : null,
               ),
               const SizedBox(height: AppSpacing.md),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const _FieldLabel(label: 'Block Name'),
-                        const SizedBox(height: 6),
-                        TextFormField(
-                          controller: _blockController,
-                          decoration: const InputDecoration(hintText: 'e.g. A, B'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const _FieldLabel(label: 'Floor'),
-                        const SizedBox(height: 6),
-                        TextFormField(
-                          controller: _floorController,
-                          decoration: const InputDecoration(hintText: 'e.g. 1st, 2nd'),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-
-              // Description
-              const _FieldLabel(label: 'Description'),
-              const SizedBox(height: 6),
+              const _FieldLabel(label: 'Detailed Description *'),
+              const SizedBox(height: AppSpacing.xs),
               TextFormField(
                 controller: _descController,
                 maxLines: 4,
-                decoration: const InputDecoration(
-                  hintText: 'Describe the issue in detail...',
-                  alignLabelWithHint: true,
+                decoration: InputDecoration(
+                  hintText:
+                      'Provide exact details (location, timing, problem)...',
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md)),
                 ),
-                validator: (v) => (v == null || v.length < 10) ? 'Please describe the issue (min 10 characters)' : null,
+                validator: (v) => v == null || v.trim().isEmpty
+                    ? 'Description is required'
+                    : null,
               ),
               const SizedBox(height: AppSpacing.md),
 
-              // Priority
-              const _FieldLabel(label: 'Priority'),
-              const SizedBox(height: 10),
+              const _FieldLabel(label: 'Priority Level'),
+              const SizedBox(height: AppSpacing.xs),
               Row(
                 children: [
-                  _PriorityChip(label: 'Low', value: 'low', color: AppColors.success,
-                      selected: _selectedPriority == 'low', onTap: () => setState(() => _selectedPriority = 'low')),
+                  _PriorityChip(
+                    label: 'Low',
+                    selected: _selectedPriority == 'low',
+                    color: AppColors.info,
+                    onTap: () => setState(() => _selectedPriority = 'low'),
+                  ),
                   const SizedBox(width: AppSpacing.sm),
-                  _PriorityChip(label: 'Medium', value: 'medium', color: AppColors.warning,
-                      selected: _selectedPriority == 'medium', onTap: () => setState(() => _selectedPriority = 'medium')),
+                  _PriorityChip(
+                    label: 'Medium',
+                    selected: _selectedPriority == 'medium',
+                    color: AppColors.warning,
+                    onTap: () => setState(() => _selectedPriority = 'medium'),
+                  ),
                   const SizedBox(width: AppSpacing.sm),
-                  _PriorityChip(label: 'High', value: 'high', color: AppColors.error,
-                      selected: _selectedPriority == 'high', onTap: () => setState(() => _selectedPriority = 'high')),
+                  _PriorityChip(
+                    label: 'Urgent',
+                    selected: _selectedPriority == 'high',
+                    color: AppColors.error,
+                    onTap: () => setState(() => _selectedPriority = 'high'),
+                  ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.lg),
 
-              // Photo attachment
-              const _FieldLabel(label: 'Attach Photos (Optional)'),
-              const SizedBox(height: 6),
+              const _FieldLabel(label: 'Attach Photo (Optional)'),
+              const SizedBox(height: AppSpacing.xs),
               GestureDetector(
                 onTap: _pickImage,
                 child: Container(
-                  height: 120,
                   width: double.infinity,
+                  height: 120,
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                    border: Border.all(color: AppColors.border, style: BorderStyle.solid),
-                    image: _imageFile != null
-                        ? DecorationImage(
-                            image: FileImage(_imageFile!),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
+                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    border: Border.all(color: AppColors.border),
                   ),
-                  child: _imageFile == null
-                      ? const Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-                          Icon(Icons.camera_alt_rounded, color: AppColors.textSecondary, size: 28),
-                          SizedBox(height: 6),
-                          Text('Tap to attach a photo', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-                        ])
-                      : Align(
-                          alignment: Alignment.topRight,
-                          child: IconButton(
-                            icon: const Icon(Icons.cancel, color: Colors.white, shadows: [Shadow(color: Colors.black54, blurRadius: 4)]),
-                            onPressed: () => setState(() => _imageFile = null),
-                          ),
+                  child: _imageFile != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          child: Image.file(_imageFile!, fit: BoxFit.cover),
+                        )
+                      : const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add_a_photo_outlined,
+                                color: AppColors.textSecondary, size: 32),
+                            SizedBox(height: 6),
+                            Text('Tap to take or pick photo',
+                                style: TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 12)),
+                          ],
                         ),
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _submit,
-                child: _isLoading
-                    ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                    : const Text('Submit Complaint'),
+
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: controllerState.isLoading ? null : _submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.lg)),
+                  ),
+                  child: controllerState.isLoading
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                              color: Colors.white, strokeWidth: 2.5),
+                        )
+                      : const Text(
+                          'Submit Complaint',
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white),
+                        ),
+                ),
               ),
-              const SizedBox(height: AppSpacing.lg),
             ],
           ),
         ),
@@ -325,35 +361,51 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
 class _FieldLabel extends StatelessWidget {
   final String label;
   const _FieldLabel({required this.label});
+
   @override
-  Widget build(BuildContext context) => Text(label,
-    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary));
+  Widget build(BuildContext context) {
+    return Text(label,
+        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold));
+  }
 }
 
 class _PriorityChip extends StatelessWidget {
-  final String label, value;
-  final Color color;
+  final String label;
   final bool selected;
+  final Color color;
   final VoidCallback onTap;
-  const _PriorityChip({required this.label, required this.value, required this.color, required this.selected, required this.onTap});
+
+  const _PriorityChip({
+    required this.label,
+    required this.selected,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: selected ? color.withOpacity(0.12) : Colors.white,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: selected ? color : AppColors.border, width: selected ? 1.5 : 1),
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: selected ? color.withValues(alpha: 0.15) : Colors.white,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            border: Border.all(color: selected ? color : AppColors.border),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
+                color: selected ? color : AppColors.textSecondary,
+              ),
+            ),
+          ),
+        ),
       ),
-      child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Container(width: 8, height: 8, decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
-        const SizedBox(width: 6),
-        Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500,
-            color: selected ? color : AppColors.textSecondary)),
-      ]),
-    ),
-  );
+    );
+  }
 }
