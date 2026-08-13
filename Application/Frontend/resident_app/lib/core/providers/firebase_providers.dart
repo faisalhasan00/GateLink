@@ -16,6 +16,8 @@ export '../../features/notice/providers/notice_providers.dart';
 export '../../features/amenity/providers/amenity_providers.dart';
 export '../../features/parking/providers/parking_providers.dart';
 export '../../features/notifications/providers/notification_providers.dart';
+export '../../features/maintenance/providers/maintenance_providers.dart';
+export '../../features/payment/providers/payment_providers.dart';
 
 // ── SERVICE PROVIDER ─────────────────────────────────────────────────────────
 

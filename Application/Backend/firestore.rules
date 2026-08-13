@@ -124,10 +124,15 @@ service cloud.firestore {
         allow delete: if isSocietyAdmin(societyId) || resource.data.raisedBy == request.auth.uid;
       }
 
-      // Maintenance Bills Sub-collection (BUG-001)
+      // Maintenance Bills Sub-collection
       match /maintenance_bills/{billId} {
         allow read: if isAuthenticated() && belongsToSociety(societyId);
-        allow write: if isSocietyAdmin(societyId);
+        allow update: if isSocietyAdmin(societyId) || (
+          isAuthenticated() && belongsToSociety(societyId) &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'paymentMethod', 'referenceNumber', 'residentName', 'flatNumber', 'invoiceNumber', 'updatedAt']) &&
+          request.resource.data.status == 'pending_verification'
+        );
+        allow create, delete: if isSocietyAdmin(societyId);
       }
 
       match /maintenance/{billId} {
@@ -184,6 +189,20 @@ service cloud.firestore {
     match /ad_campaigns/{adId} {
       allow read: if isAuthenticated();
       allow write: if isSuperAdmin();
+    }
+
+    // Payments Collection (SEC-P0: Locked to Cloud Functions / Admin SDK writes)
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated() && (
+        resource.data.residentUid == request.auth.uid ||
+        isSocietyAdmin(resource.data.societyId)
+      );
+      allow write: if false;
+
+      match /receipts/{receiptId} {
+        allow read: if isAuthenticated();
+        allow write: if false;
+      }
     }
   }
 }

@@ -8,6 +8,7 @@ import '../../../../core/theme/app_spacing.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../providers/maintenance_providers.dart';
+import '../../../payment/providers/payment_providers.dart';
 
 class PayMaintenanceScreen extends ConsumerStatefulWidget {
   final String? billId;
@@ -145,7 +146,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
         }
       }
     } catch (e) {
-      debugPrint('Auto-fetch bill error: $e');
+      debugPrint('Error fetching latest bill for pay screen: $e');
     } finally {
       if (mounted) setState(() => _isLoadingBill = false);
     }
@@ -164,26 +165,24 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       final userProfile = ref.read(userProfileProvider).value;
       final activeSocId = userProfile?['societyId'] as String? ?? 'SOC-001';
       final targetBillId = _effectiveBillId ?? widget.billId ?? 'bill_latest';
-      final payAmount = _effectiveAmount ?? widget.amount ?? 3500.0;
       final invNum = _effectiveInvoiceNumber ?? widget.invoiceNumber ?? 'INV-2026-9305';
 
       if (user == null) throw Exception('User not logged in');
 
-      final internalPaymentId = 'PAY-${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(9000) + 1000}';
-      final orderId = 'order_${DateTime.now().millisecondsSinceEpoch}_${targetBillId.substring(0, 6)}';
-
-      await ref.read(maintenanceRepositoryProvider).createPendingPaymentRecord(
-        internalPaymentId: internalPaymentId,
-        orderId: orderId,
+      // Call Clean Architecture PaymentController to get official Cashfree session
+      final order = await ref.read(paymentControllerProvider.notifier).initiateCashfreeOrder(
         societyId: activeSocId,
-        billId: targetBillId,
+        maintenanceBillId: targetBillId,
         residentUid: user.uid,
-        flatNumber: userProfile?['flatNumber'] ?? 'A-101',
-        amount: payAmount,
       );
 
-      // Launch Cashfree Web Checkout Session
-      final cfCheckoutUrl = Uri.parse('https://payments-sandbox.cashfree.com/order/#$orderId');
+      if (order == null || order.cashfreePaymentSessionId == null) {
+        final err = ref.read(paymentControllerProvider).errorMessage ?? 'Could not create Cashfree payment order';
+        throw Exception(err);
+      }
+
+      // Launch Cashfree Web Checkout Session with valid session token
+      final cfCheckoutUrl = Uri.parse('https://payments-sandbox.cashfree.com/order/#${order.cashfreePaymentSessionId}');
       try {
         await launchUrl(cfCheckoutUrl, mode: LaunchMode.externalApplication);
       } catch (launchErr) {
@@ -194,7 +193,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       if (!mounted) return;
 
       // Listen for Real-Time Payment Success from Webhook
-      _listenForPaymentCompletion(activeSocId, targetBillId, invNum, payAmount);
+      _listenForPaymentCompletion(activeSocId, targetBillId, invNum, order.amount);
     } catch (e) {
       setState(() => _isProcessing = false);
       if (mounted) {
@@ -293,7 +292,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       final flatNumber = userProfile?['flatNumber'] ?? 'A-101';
 
       if (user != null) {
-        final success = await ref.read(maintenanceControllerProvider.notifier).submitOfflinePayment(
+        final success = await ref.read(paymentControllerProvider.notifier).submitOfflinePayment(
           societyId: activeSocId,
           billId: targetBillId,
           residentUid: user.uid,
@@ -305,7 +304,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
         if (!success) {
           setState(() => _isProcessing = false);
           if (mounted) {
-            final errorMsg = ref.read(maintenanceControllerProvider).errorMessage ?? 'Offline payment submission failed.';
+            final errorMsg = ref.read(paymentControllerProvider).errorMessage ?? 'Offline payment submission failed.';
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(errorMsg), backgroundColor: AppColors.error),
             );

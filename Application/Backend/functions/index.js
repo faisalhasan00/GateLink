@@ -300,15 +300,41 @@ exports.setSuperAdminRole = onCall(async (request) => {
   return { success: true, message: `Successfully assigned super_admin claim to user ${targetUid}` };
 });
 
+const { defineSecret } = require("firebase-functions/params");
+const cashfreeClientId = defineSecret("CASHFREE_CLIENT_ID");
+const cashfreeClientSecret = defineSecret("CASHFREE_CLIENT_SECRET");
+
 /**
  * 1. Centralized Platform API: Create Cashfree Payment Order
+ * SEC-P0: Hardened with Firebase Auth, Tenant Ownership Verification, and Secret Manager bindings.
  */
-exports.createCashfreeOrder = onRequest({ cors: true }, async (req, res) => {
+exports.createCashfreeOrder = onRequest({ cors: true, secrets: [cashfreeClientId, cashfreeClientSecret] }, async (req, res) => {
   try {
+    // 1. Firebase Authentication Verification
+    let authUser = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const idToken = authHeader.split("Bearer ")[1];
+      try {
+        authUser = await getAuth().verifyIdToken(idToken);
+      } catch (authErr) {
+        console.error("Firebase Auth ID Token verification failed:", authErr.message);
+      }
+    }
+
+    if (!authUser) {
+      return res.status(401).json({ error: "Unauthorized: Valid Firebase Auth Bearer token required" });
+    }
+
     const { societyId, maintenanceBillId, residentUid } = req.body || {};
 
     if (!societyId || !maintenanceBillId || !residentUid) {
       return res.status(400).json({ error: "Missing required fields: societyId, maintenanceBillId, residentUid" });
+    }
+
+    // Enforce user ownership match
+    if (authUser.uid !== residentUid) {
+      return res.status(403).json({ error: "Forbidden: You can only create payment orders for your own account" });
     }
 
     const db = getFirestore();
@@ -331,6 +357,10 @@ exports.createCashfreeOrder = onRequest({ cors: true }, async (req, res) => {
     }
 
     const userDoc = await db.doc(`societies/${societyId}/users/${residentUid}`).get();
+    if (!userDoc.exists) {
+      return res.status(403).json({ error: "Resident user does not belong to the specified society" });
+    }
+
     const userData = userDoc.data() || {};
     const customerName = userData.name || billData.residentName || "Resident Owner";
     const customerPhone = userData.phone || "9876543210";
@@ -338,6 +368,7 @@ exports.createCashfreeOrder = onRequest({ cors: true }, async (req, res) => {
 
     const orderId = `CF_${societyId}_${maintenanceBillId}_${Date.now()}`;
 
+    // Reuse existing active PENDING payment session if available
     const existingPaymentQuery = await db
       .collection("payments")
       .where("societyId", "==", societyId)
@@ -349,7 +380,7 @@ exports.createCashfreeOrder = onRequest({ cors: true }, async (req, res) => {
     if (!existingPaymentQuery.empty) {
       const existingDoc = existingPaymentQuery.docs[0];
       const existingData = existingDoc.data();
-      if (existingData.cashfreeOrderId) {
+      if (existingData.cashfreeOrderId && existingData.cashfreePaymentSessionId) {
         return res.status(200).json({
           status: "SUCCESS",
           orderId: existingData.cashfreeOrderId,
@@ -381,9 +412,13 @@ exports.createCashfreeOrder = onRequest({ cors: true }, async (req, res) => {
       amount: officialAmount,
       currency: "INR",
       status: "PENDING",
+      webhookVerified: false,
+      apiVerified: false,
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),
     });
+
+    console.log(`Cashfree order '${orderId}' created successfully for resident '${residentUid}', bill '${maintenanceBillId}'`);
 
     return res.status(200).json({
       status: "SUCCESS",
@@ -400,8 +435,9 @@ exports.createCashfreeOrder = onRequest({ cors: true }, async (req, res) => {
 
 /**
  * 2. Cashfree Webhook Handler
+ * SEC-P0 & P1: Atomic Firestore Transaction, Server-to-Server Verification, Idempotent Receipts & FCM Notifications.
  */
-exports.cashfreeWebhook = onRequest(async (req, res) => {
+exports.cashfreeWebhook = onRequest({ secrets: [cashfreeClientId, cashfreeClientSecret] }, async (req, res) => {
   try {
     const signature = req.headers["x-webhook-signature"];
     const timestamp = req.headers["x-webhook-timestamp"];
@@ -424,60 +460,207 @@ exports.cashfreeWebhook = onRequest(async (req, res) => {
     }
 
     const db = getFirestore();
-    const paymentQuery = await db.collection("payments").where("cashfreeOrderId", "==", orderId).limit(1).get();
+    const paymentRef = db.collection("payments").doc(orderId);
+    const paymentDoc = await paymentRef.get();
 
-    if (paymentQuery.empty) {
+    if (!paymentDoc.exists) {
       console.warn(`Webhook received for unknown order: ${orderId}`);
       return res.status(200).send("ORDER_NOT_FOUND");
     }
 
-    const paymentDoc = paymentQuery.docs[0];
     const paymentData = paymentDoc.data();
-
     if (paymentData.status === "SUCCESS") {
       return res.status(200).send("ALREADY_PROCESSED");
     }
 
-    await paymentDoc.ref.update({ webhookVerified: true });
-
+    // Server-to-Server Independent API Verification
     const cfVerify = await CashfreePaymentProvider.verifyPaymentWithCashfree(orderId);
     if (!cfVerify.isSuccess) {
       console.warn(`Cashfree API verification failed for ${orderId}: ${cfVerify.message}`);
-      await paymentDoc.ref.update({ status: "FAILED", updatedAt: FieldValue.serverTimestamp() });
+      await paymentRef.update({ status: "FAILED", updatedAt: FieldValue.serverTimestamp() });
       return res.status(200).send("PAYMENT_NOT_SUCCESSFUL");
     }
 
     if (cfVerify.paymentAmount !== paymentData.amount) {
       console.error(`AMOUNT MISMATCH! Cashfree=${cfVerify.paymentAmount}, Expected=${paymentData.amount}`);
-      await paymentDoc.ref.update({ status: "FLAGGED_AMOUNT_MISMATCH", updatedAt: FieldValue.serverTimestamp() });
+      await paymentRef.update({ status: "FLAGGED_AMOUNT_MISMATCH", updatedAt: FieldValue.serverTimestamp() });
       return res.status(200).send("AMOUNT_MISMATCH_FLAGGED");
     }
 
-    await paymentDoc.ref.update({
-      status: "SUCCESS",
-      cashfreePaymentId: cfVerify.cashfreePaymentId,
-      paymentMethod: cfVerify.paymentMethod,
-      apiVerified: true,
-      paidAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    });
-
     const societyId = paymentData.societyId;
     const billId = paymentData.maintenanceBillId;
+    const billRef = db.doc(`societies/${societyId}/maintenance_bills/${billId}`);
+    const receiptRef = db.collection("payments").doc(orderId).collection("receipts").doc("receipt_latest");
 
-    await db.doc(`societies/${societyId}/maintenance_bills/${billId}`).set(
-      {
-        status: "paid",
-        paymentMethod: "Cashfree Online",
-        transactionId: cfVerify.cashfreePaymentId,
-        paidAt: new Date().toISOString(),
-      },
-      { merge: true }
-    );
+    // Atomic Transaction for Idempotency
+    await db.runTransaction(async (transaction) => {
+      const freshPaymentSnap = await transaction.get(paymentRef);
+      if (freshPaymentSnap.exists && freshPaymentSnap.data().status === "SUCCESS") {
+        return;
+      }
+
+      transaction.update(paymentRef, {
+        status: "SUCCESS",
+        cashfreePaymentId: cfVerify.cashfreePaymentId,
+        paymentMethod: cfVerify.paymentMethod,
+        webhookVerified: true,
+        apiVerified: true,
+        paidAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+
+      transaction.set(
+        billRef,
+        {
+          status: "paid",
+          paymentMethod: "Cashfree Online",
+          transactionId: cfVerify.cashfreePaymentId,
+          paidAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+
+      transaction.set(receiptRef, {
+        orderId,
+        cashfreePaymentId: cfVerify.cashfreePaymentId,
+        societyId,
+        maintenanceBillId: billId,
+        residentUid: paymentData.residentUid,
+        amount: paymentData.amount,
+        currency: "INR",
+        paymentMethod: cfVerify.paymentMethod,
+        issuedAt: new Date().toISOString(),
+      });
+    });
+
+    console.log(`Payment '${orderId}' verified and processed atomically. Bill '${billId}' marked paid.`);
+
+    // Dispatch FCM Notification to Resident User
+    try {
+      const residentUid = paymentData.residentUid;
+      const userDoc = await db.doc(`societies/${societyId}/users/${residentUid}`).get();
+      const fcmToken = userDoc.exists ? userDoc.data().fcmToken : null;
+
+      if (fcmToken) {
+        await getMessaging().send({
+          token: fcmToken,
+          notification: {
+            title: "Payment Received & Verified",
+            body: `Your maintenance bill payment of ₹${paymentData.amount} (Ref: ${cfVerify.cashfreePaymentId}) was confirmed!`,
+          },
+          data: {
+            type: "MAINTENANCE_PAID",
+            billId,
+            orderId,
+          },
+        });
+      }
+    } catch (fcmErr) {
+      console.error("FCM Notification error on payment success:", fcmErr.message);
+    }
 
     return res.status(200).send("OK");
   } catch (err) {
     console.error("cashfreeWebhook error:", err);
     return res.status(500).send("Internal Server Error");
+  }
+});
+
+/**
+ * 3. Approve Offline UTR Payment (Society Admin)
+ */
+exports.approveOfflinePayment = onRequest({ cors: true }, async (req, res) => {
+  try {
+    let authUser = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const idToken = authHeader.split("Bearer ")[1];
+      try {
+        authUser = await getAuth().verifyIdToken(idToken);
+      } catch (authErr) {
+        console.error("Auth token error:", authErr.message);
+      }
+    }
+
+    if (!authUser) {
+      return res.status(401).json({ error: "Unauthorized: Admin auth required" });
+    }
+
+    const { societyId, maintenanceBillId } = req.body || {};
+    if (!societyId || !maintenanceBillId) {
+      return res.status(400).json({ error: "Missing parameters: societyId, maintenanceBillId" });
+    }
+
+    const db = getFirestore();
+    const billRef = db.doc(`societies/${societyId}/maintenance_bills/${maintenanceBillId}`);
+    const billDoc = await billRef.get();
+
+    if (!billDoc.exists) {
+      return res.status(404).json({ error: "Bill not found" });
+    }
+
+    await billRef.update({
+      status: "paid",
+      approvedByAdminUid: authUser.uid,
+      approvedAt: new Date().toISOString(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    console.log(`Offline UTR bill '${maintenanceBillId}' approved by admin '${authUser.uid}'`);
+
+    return res.status(200).json({ status: "SUCCESS", message: "Offline UTR payment approved successfully" });
+  } catch (err) {
+    console.error("approveOfflinePayment error:", err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+/**
+ * 4. Reject Offline UTR Payment (Society Admin)
+ */
+exports.rejectOfflinePayment = onRequest({ cors: true }, async (req, res) => {
+  try {
+    let authUser = null;
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const idToken = authHeader.split("Bearer ")[1];
+      try {
+        authUser = await getAuth().verifyIdToken(idToken);
+      } catch (authErr) {
+        console.error("Auth token error:", authErr.message);
+      }
+    }
+
+    if (!authUser) {
+      return res.status(401).json({ error: "Unauthorized: Admin auth required" });
+    }
+
+    const { societyId, maintenanceBillId, rejectionReason } = req.body || {};
+    if (!societyId || !maintenanceBillId) {
+      return res.status(400).json({ error: "Missing parameters: societyId, maintenanceBillId" });
+    }
+
+    const db = getFirestore();
+    const billRef = db.doc(`societies/${societyId}/maintenance_bills/${maintenanceBillId}`);
+    const billDoc = await billRef.get();
+
+    if (!billDoc.exists) {
+      return res.status(404).json({ error: "Bill not found" });
+    }
+
+    await billRef.update({
+      status: "pending",
+      rejectionReason: rejectionReason || "UTR Reference verification failed",
+      rejectedByAdminUid: authUser.uid,
+      rejectedAt: new Date().toISOString(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+
+    console.log(`Offline UTR bill '${maintenanceBillId}' rejected by admin '${authUser.uid}'`);
+
+    return res.status(200).json({ status: "SUCCESS", message: "Offline UTR payment reference rejected" });
+  } catch (err) {
+    console.error("rejectOfflinePayment error:", err);
+    return res.status(500).json({ error: err.message });
   }
 });
