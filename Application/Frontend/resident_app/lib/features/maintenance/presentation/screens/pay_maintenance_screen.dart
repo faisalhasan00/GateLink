@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -234,8 +235,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       if (user == null) throw Exception('User not logged in');
 
       // Create Payment Order Session via Backend Endpoint (Server Amount Validation)
-      final createOrderRef = await FirebaseFirestore.instance.collection('payments').doc();
-      final internalPaymentId = 'PAY-${DateTime.now().millisecondsSinceEpoch}-${Math.floor(1000 + Math.random() * 9000)}';
+      final internalPaymentId = 'PAY-${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(9000) + 1000}';
       final orderId = 'order_${DateTime.now().millisecondsSinceEpoch}_${targetBillId.substring(0, 6)}';
 
       final paymentRecord = {
