@@ -102,8 +102,8 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       final activeSocId = ref.read(userProfileProvider).value?['societyId'] as String? ?? 'SOC-001';
 
       if (user != null) {
-        final maintController = ref.read(maintenanceControllerProvider.notifier);
-        final pendingBill = await maintController.getPendingBill(user.uid);
+        final repo = ref.read(maintenanceRepositoryProvider);
+        final pendingBill = await repo.getPendingBill(user.uid);
 
         if (pendingBill != null) {
           setState(() {
@@ -122,12 +122,12 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
           // Seed initial bill via controller if none found
           final userProfile = ref.read(userProfileProvider).value;
           final flatNum = userProfile?['flatNumber'] ?? 'A-101';
-          await maintController.seedDemoBills(
+          await ref.read(maintenanceControllerProvider.notifier).seedDemoBills(
             societyId: activeSocId,
             residentUid: user.uid,
             flatNumber: flatNum,
           );
-          final newlyCreated = await maintController.getPendingBill(user.uid);
+          final newlyCreated = await repo.getPendingBill(user.uid);
           if (newlyCreated != null) {
             setState(() {
               _effectiveBillId = newlyCreated.id;
@@ -304,6 +304,12 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
         );
         if (!success) {
           setState(() => _isProcessing = false);
+          if (mounted) {
+            final errorMsg = ref.read(maintenanceControllerProvider).errorMessage ?? 'Offline payment submission failed.';
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(errorMsg), backgroundColor: AppColors.error),
+            );
+          }
           return;
         }
       }

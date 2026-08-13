@@ -1,23 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../domain/models/maintenance_bill_model.dart';
 import '../../domain/repositories/maintenance_repository.dart';
+import 'maintenance_state.dart';
 
-class MaintenanceController extends StateNotifier<AsyncValue<void>> {
+class MaintenanceController extends StateNotifier<MaintenanceState> {
   final MaintenanceRepository _repository;
 
-  MaintenanceController(this._repository) : super(const AsyncValue.data(null));
+  MaintenanceController(this._repository) : super(MaintenanceState.initial());
 
-  /// Fetch active pending maintenance bill for a resident.
-  Future<MaintenanceBillModel?> getPendingBill(String residentUid) async {
-    state = const AsyncValue.loading();
-    try {
-      final bill = await _repository.getPendingBill(residentUid);
-      state = const AsyncValue.data(null);
-      return bill;
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-      rethrow;
-    }
+  /// Reset state back to initial.
+  void resetState() {
+    state = MaintenanceState.initial();
   }
 
   /// Submit an offline payment reference (UTR / Cheque / Bank Transfer) for Treasurer verification.
@@ -30,16 +22,28 @@ class MaintenanceController extends StateNotifier<AsyncValue<void>> {
     required String flatNumber,
     required String invoiceNumber,
   }) async {
+    // Duplicate submission prevention
+    if (state.isSubmitting) return false;
+
     final refNum = referenceNumber.trim();
     if (refNum.isEmpty) {
-      state = AsyncValue.error(
-        ArgumentError('UTR / Reference number is required for offline payments.'),
-        StackTrace.current,
+      state = state.copyWith(
+        status: MaintenanceActionStatus.error,
+        errorMessage: 'Transaction reference number (UTR / Cheque) is required.',
       );
       return false;
     }
 
-    state = const AsyncValue.loading();
+    if (refNum.length < 4) {
+      state = state.copyWith(
+        status: MaintenanceActionStatus.error,
+        errorMessage: 'Please enter a valid reference number (at least 4 characters).',
+      );
+      return false;
+    }
+
+    state = state.copyWith(status: MaintenanceActionStatus.loading);
+
     try {
       await _repository.submitOfflinePayment(
         societyId: societyId,
@@ -50,16 +54,23 @@ class MaintenanceController extends StateNotifier<AsyncValue<void>> {
         flatNumber: flatNumber,
         invoiceNumber: invoiceNumber,
       );
-      state = const AsyncValue.data(null);
+
+      state = state.copyWith(
+        status: MaintenanceActionStatus.success,
+        successMessage: 'Offline payment reference submitted successfully for Treasurer verification.',
+      );
       return true;
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
+    } catch (e) {
+      state = state.copyWith(
+        status: MaintenanceActionStatus.error,
+        errorMessage: 'Failed to submit offline payment reference. Please try again.',
+      );
       return false;
     }
   }
 
   /// Create a pending payment session record in Firestore for Cashfree tracking.
-  Future<void> createPendingPaymentRecord({
+  Future<bool> createPendingPaymentRecord({
     required String internalPaymentId,
     required String orderId,
     required String societyId,
@@ -68,7 +79,11 @@ class MaintenanceController extends StateNotifier<AsyncValue<void>> {
     required String flatNumber,
     required double amount,
   }) async {
-    state = const AsyncValue.loading();
+    // Duplicate submission prevention
+    if (state.isSubmitting) return false;
+
+    state = state.copyWith(status: MaintenanceActionStatus.loading);
+
     try {
       await _repository.createPendingPaymentRecord(
         internalPaymentId: internalPaymentId,
@@ -79,30 +94,50 @@ class MaintenanceController extends StateNotifier<AsyncValue<void>> {
         flatNumber: flatNumber,
         amount: amount,
       );
-      state = const AsyncValue.data(null);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-      rethrow;
+
+      state = state.copyWith(
+        status: MaintenanceActionStatus.success,
+        successMessage: 'Payment session initiated successfully.',
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        status: MaintenanceActionStatus.error,
+        errorMessage: 'Failed to initiate payment session. Please try again.',
+      );
+      return false;
     }
   }
 
-  /// Seed demo maintenance bills for initial setup or testing.
-  Future<void> seedDemoBills({
+  /// Seed demo maintenance bills for initial setup or development testing.
+  Future<bool> seedDemoBills({
     required String societyId,
     required String residentUid,
     required String flatNumber,
   }) async {
-    state = const AsyncValue.loading();
+    // Duplicate submission prevention
+    if (state.isSubmitting) return false;
+
+    state = state.copyWith(status: MaintenanceActionStatus.loading);
+
     try {
       await _repository.seedDemoBills(
         societyId: societyId,
         residentUid: residentUid,
         flatNumber: flatNumber,
       );
-      state = const AsyncValue.data(null);
-    } catch (e, st) {
-      state = AsyncValue.error(e, st);
-      rethrow;
+
+      state = state.copyWith(
+        status: MaintenanceActionStatus.success,
+        successMessage: 'Demo maintenance bills created.',
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        status: MaintenanceActionStatus.error,
+        errorMessage: 'Failed to generate demo bills. Please try again.',
+      );
+      return false;
     }
   }
 }
