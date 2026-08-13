@@ -229,5 +229,20 @@ void main() {
       expect(controller.state.status, VisitorActionStatus.success);
       expect(mockRepository.validateAndProcessQrScanCalls, 1);
     });
+
+    test('updateVisitorStatus succeeds when guard approves entry status to inside', () async {
+      final success = await controller.updateVisitorStatus('vis-101', 'inside');
+
+      expect(success, true);
+      expect(controller.state.status, VisitorActionStatus.success);
+      expect(controller.state.successMessage, contains('inside'));
+    });
+
+    test('updateVisitorStatus fails when visitorId is empty', () async {
+      final success = await controller.updateVisitorStatus('', 'inside');
+
+      expect(success, false);
+      expect(controller.state.status, VisitorActionStatus.error);
+    });
   });
 }

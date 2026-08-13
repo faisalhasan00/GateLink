@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/services/firestore_service.dart';
+import '../../visitor/providers/visitor_providers.dart';
 
 class QrScannerScreen extends ConsumerStatefulWidget {
   const QrScannerScreen({super.key});
@@ -85,21 +86,15 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
   }
 
   Future<void> _allowEntry(String docId) async {
-    final firestoreService = ref.read(firestoreServiceProvider);
-    await firestoreService.updateVisitorStatus(docId, 'inside');
-    await FirebaseFirestore.instance.doc('societies/${firestoreService.societyId}/visitors/$docId').update({
-      'entryTime': DateTime.now().toIso8601String(),
-    });
+    await ref.read(visitorControllerProvider.notifier).updateVisitorStatus(docId, 'inside');
   }
 
   Future<void> _denyEntry(String docId) async {
-    final firestoreService = ref.read(firestoreServiceProvider);
-    await firestoreService.updateVisitorStatus(docId, 'denied');
+    await ref.read(visitorControllerProvider.notifier).updateVisitorStatus(docId, 'denied');
   }
 
   Future<void> _markExit(String docId) async {
-    final firestoreService = ref.read(firestoreServiceProvider);
-    await firestoreService.markVisitorExit(docId);
+    await ref.read(visitorControllerProvider.notifier).markVisitorExit(docId);
   }
 
   void _showValidationModal({

@@ -232,4 +232,35 @@ class VisitorController extends StateNotifier<VisitorState> {
       return null;
     }
   }
+
+  /// Guard or system updates visitor status (e.g. 'inside', 'denied', etc.).
+  Future<bool> updateVisitorStatus(String visitorId, String status) async {
+    if (state.isSubmitting) return false;
+
+    if (visitorId.isEmpty) {
+      state = state.copyWith(
+        status: VisitorActionStatus.error,
+        errorMessage: 'Invalid visitor ID.',
+      );
+      return false;
+    }
+
+    state = state.copyWith(status: VisitorActionStatus.loading);
+
+    try {
+      await _repository.updateVisitorStatus(visitorId, status);
+
+      state = state.copyWith(
+        status: VisitorActionStatus.success,
+        successMessage: 'Visitor status updated to $status.',
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        status: VisitorActionStatus.error,
+        errorMessage: 'Failed to update visitor status.',
+      );
+      return false;
+    }
+  }
 }

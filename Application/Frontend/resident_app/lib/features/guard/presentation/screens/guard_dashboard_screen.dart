@@ -45,43 +45,38 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
       ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: 'SOC-001');
 
   Future<void> _markCheckedOut(String docId) async {
-    try {
-      await _service.markVisitorExit(docId);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Row(
-              children: [
-                Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
-                SizedBox(width: 8),
-                Text('Visitor marked as exited'),
-              ],
-            ),
-            backgroundColor: AppColors.success,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            duration: const Duration(seconds: 2),
+    final success = await ref.read(visitorControllerProvider.notifier).markVisitorExit(docId);
+    if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Row(
+            children: [
+              Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+              SizedBox(width: 8),
+              Text('Visitor marked as exited'),
+            ],
           ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
-        );
-      }
+          backgroundColor: AppColors.success,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } else if (mounted) {
+      final errorMsg = ref.read(visitorControllerProvider).errorMessage ?? 'Error marking exit';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMsg), backgroundColor: AppColors.error),
+      );
     }
   }
 
   Future<void> _approveEntry(String docId) async {
-    try {
-      await ref.read(visitorRepositoryProvider).updateVisitorStatus(docId, 'inside');
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
-        );
-      }
+    final success = await ref.read(visitorControllerProvider.notifier).updateVisitorStatus(docId, 'inside');
+    if (!success && mounted) {
+      final errorMsg = ref.read(visitorControllerProvider).errorMessage ?? 'Failed to approve entry.';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMsg), backgroundColor: AppColors.error),
+      );
     }
   }
 
