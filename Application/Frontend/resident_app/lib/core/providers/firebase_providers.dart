@@ -134,13 +134,7 @@ final maintenanceBillsStreamProvider = StreamProvider<List<MaintenanceBillModel>
 export '../../features/amenity/providers/amenity_providers.dart';
 
 // ── PARKING PROVIDERS ─────────────────────────────────────────────────────
-
-final parkingStreamProvider = StreamProvider<QuerySnapshot>((ref) {
-  final service = ref.watch(firestoreServiceProvider);
-  final user = ref.watch(currentUserProvider);
-  if (user == null) return const Stream.empty();
-  return service.parkingStream(user.uid);
-});
+export '../../features/parking/providers/parking_providers.dart';
 
 // ── DOCUMENTS PROVIDERS ───────────────────────────────────────────────────
 
