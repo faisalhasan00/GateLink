@@ -130,21 +130,8 @@ final maintenanceBillsStreamProvider = StreamProvider<List<MaintenanceBillModel>
   return ref.watch(maintenanceBillsProvider.stream);
 });
 
-// ── AMENITIES PROVIDERS ───────────────────────────────────────────────────
-
-final amenitiesStreamProvider = StreamProvider<QuerySnapshot>((ref) {
-  final service = ref.watch(firestoreServiceProvider);
-  return service.amenitiesStream();
-});
-
-// ── AMENITY BOOKINGS PROVIDERS ────────────────────────────────────────────
-
-final myBookingsStreamProvider = StreamProvider<QuerySnapshot>((ref) {
-  final service = ref.watch(firestoreServiceProvider);
-  final user = ref.watch(currentUserProvider);
-  if (user == null) return const Stream.empty();
-  return service.myBookingsStream(user.uid);
-});
+// ── AMENITIES & AMENITY BOOKINGS PROVIDERS ───────────────────────────────
+export '../../features/amenity/providers/amenity_providers.dart';
 
 // ── PARKING PROVIDERS ─────────────────────────────────────────────────────
 
