@@ -50,8 +50,8 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
 
       // 1. Direct UPI Intent Launcher if method 0 selected
       if (_selectedMethod == 0) {
-        final upiVpa = 'societysphere@okicici';
-        final payeeName = 'Society Management Committee';
+        const upiVpa = 'societysphere@okicici';
+        const payeeName = 'Society Management Committee';
         final txnToken = 'SS-PAY-$invNum-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
         
         final upiUri = Uri.parse(
@@ -67,7 +67,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
         }
       }
 
-      if (firestoreService != null && user != null && widget.billId != null) {
+      if (firestoreService != null && user != null) {
         await firestoreService.payMaintenanceBill(
           billId: targetBillId,
           residentUid: user.uid,
