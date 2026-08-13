@@ -322,6 +322,60 @@ export default function Maintenance() {
   const pendingAmount = pendingBills.reduce((acc, b) => acc + (Number(b.amount) || 0), 0);
   const overdueAmount = overdueBills.reduce((acc, b) => acc + (Number(b.amount) || 0), 0);
 
+  // Approve Pending UTR Verification
+  const handleApproveVerification = async (bill) => {
+    try {
+      const timestampStr = new Date().toISOString();
+      await updateDoc(doc(db, `societies/${societyId}/maintenance_bills`, bill.id), {
+        status: 'paid',
+        paidAt: timestampStr,
+        paymentDate: timestampStr,
+        verifiedBy: session?.adminName || 'Society Admin',
+      });
+
+      if (bill.residentUid) {
+        await addDoc(collection(db, `societies/${societyId}/users/${bill.residentUid}/notifications`), {
+          title: '✅ Payment Approved & Verified!',
+          body: `Your maintenance payment of ₹${bill.amount} for Bill ${bill.invoiceNumber || bill.billNumber || bill.id} (UTR: ${bill.utrNumber}) has been approved by your Treasurer.`,
+          createdAt: timestampStr,
+          isRead: false,
+          type: 'billing'
+        });
+      }
+      alert(`Payment for ${bill.invoiceNumber || bill.id} approved successfully!`);
+    } catch (e) {
+      alert('Error approving payment: ' + e.message);
+    }
+  };
+
+  // Reject Pending UTR Verification
+  const handleRejectVerification = async (bill) => {
+    if (!window.confirm('Reject this UTR submission and revert bill to pending status?')) return;
+    try {
+      const timestampStr = new Date().toISOString();
+      await updateDoc(doc(db, `societies/${societyId}/maintenance_bills`, bill.id), {
+        status: 'pending',
+        rejectionReason: 'Invalid or unverified UTR reference number',
+        rejectedAt: timestampStr
+      });
+
+      if (bill.residentUid) {
+        await addDoc(collection(db, `societies/${societyId}/users/${bill.residentUid}/notifications`), {
+          title: '❌ Payment UTR Rejected',
+          body: `Your submitted UTR (${bill.utrNumber}) for Bill ${bill.invoiceNumber || bill.billNumber || bill.id} was rejected by your Treasurer. Please submit a valid payment receipt.`,
+          createdAt: timestampStr,
+          isRead: false,
+          type: 'billing'
+        });
+      }
+      alert(`UTR submission rejected. Bill reverted to pending.`);
+    } catch (e) {
+      alert('Error rejecting payment: ' + e.message);
+    }
+  };
+
+  const pendingVerifications = bills.filter(b => b.status === 'pending_verification');
+
   if (loading) {
     return (
       <div style={{ padding: '32px', textAlign: 'center' }}>
@@ -380,6 +434,82 @@ export default function Maintenance() {
           </div>
         </div>
       </div>
+
+      {/* 2. Pending Payment Verifications Queue Card */}
+      {pendingVerifications.length > 0 && (
+        <div className="card" style={{ padding: '20px', borderLeft: '4px solid #F59E0B', backgroundColor: '#FFFBEB' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '50%', backgroundColor: '#FEF3C7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldCheck size={20} color="#D97706" />
+              </div>
+              <div>
+                <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#92400E' }}>
+                  Pending Payment Verifications Queue ({pendingVerifications.length})
+                </h4>
+                <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: '#B45309' }}>
+                  Residents have submitted payment UTR reference numbers. Please verify bank deposits and approve or reject.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ overflowX: 'auto' }}>
+            <table className="data-table" style={{ width: '100%', backgroundColor: '#FFFFFF', borderRadius: '8px' }}>
+              <thead>
+                <tr>
+                  <th>Invoice & Resident</th>
+                  <th>Submitted UTR / Ref</th>
+                  <th>Amount</th>
+                  <th>Submission Date</th>
+                  <th style={{ textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendingVerifications.map(b => (
+                  <tr key={b.id}>
+                    <td>
+                      <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{b.invoiceNumber || b.billNumber || b.id}</div>
+                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                        {b.residentName || 'Resident'} ({b.flatNumber || 'Flat'})
+                      </div>
+                    </td>
+                    <td>
+                      <span className="badge" style={{ backgroundColor: '#EEF2FF', color: '#4F46E5', fontWeight: 700, letterSpacing: '0.5px' }}>
+                        {b.utrNumber || b.transactionId || 'No UTR'}
+                      </span>
+                    </td>
+                    <td style={{ fontWeight: 700, color: '#10B981' }}>₹{b.amount}</td>
+                    <td style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                      {b.submittedAt ? new Date(b.submittedAt).toLocaleDateString() : 'Today'}
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
+                        <button
+                          onClick={() => handleApproveVerification(b)}
+                          className="btn"
+                          style={{ backgroundColor: '#10B981', color: 'white', padding: '6px 12px', fontSize: '12px', fontWeight: 600, borderRadius: '6px' }}
+                        >
+                          <CheckCircle size={14} style={{ marginRight: '4px' }} />
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => handleRejectVerification(b)}
+                          className="btn"
+                          style={{ backgroundColor: '#EF4444', color: 'white', padding: '6px 12px', fontSize: '12px', fontWeight: 600, borderRadius: '6px' }}
+                        >
+                          <XCircle size={14} style={{ marginRight: '4px' }} />
+                          Reject
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
 
       {/* 2. Search & Multi-Filter Control Panel */}
       <div className="card" style={{ padding: '16px 20px' }}>

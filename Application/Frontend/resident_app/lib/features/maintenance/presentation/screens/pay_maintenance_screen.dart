@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -166,7 +167,6 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
   Future<void> _launchUpiApp() async {
     final activeSocId = ref.read(userProfileProvider).value?['societyId'] as String? ?? 'SOC-001';
     final payAmount = _effectiveAmount ?? widget.amount ?? 3500.0;
-    final invNum = _effectiveInvoiceNumber ?? widget.invoiceNumber ?? 'INV-2026-9305';
 
     String upiVpa = '8106342858@ybl';
     String payeeName = 'MOHAMMED FAISAL HASAN';
@@ -188,10 +188,9 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       debugPrint('Config fetch fallback: $e');
     }
 
-    final txnToken = 'SS-PAY-$invNum-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
-    
+    // Standard NPCI Intent Format without custom transaction notes that trigger bank risk blocks
     final upiUri = Uri.parse(
-      'upi://pay?pa=$upiVpa&pn=${Uri.encodeComponent(payeeName)}&am=${payAmount.toStringAsFixed(2)}&tn=${Uri.encodeComponent(txnToken)}&cu=INR'
+      'upi://pay?pa=$upiVpa&pn=${Uri.encodeComponent(payeeName)}&am=${payAmount.toStringAsFixed(2)}&cu=INR'
     );
 
     try {
@@ -218,7 +217,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
     if (_selectedMethod == 0 && utrText.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter valid UPI UTR / Reference Number (at least 6 digits) from your PhonePe/GPay receipt.'),
+          content: Text('Please enter valid 12-digit UPI UTR / Reference Number from your receipt.'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -228,8 +227,8 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
     setState(() => _isProcessing = true);
 
     try {
-      final firestoreService = ref.read(firestoreServiceProvider);
       final user = ref.read(currentUserProvider);
+      final userProfile = ref.read(userProfileProvider).value;
 
       final payMethodName = _methods[_selectedMethod].label;
       final targetBillId = _effectiveBillId ?? widget.billId ?? 'bill_latest';
@@ -237,27 +236,40 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       final invNum = _effectiveInvoiceNumber ?? widget.invoiceNumber ?? 'INV-2026-9305';
       final period = _effectiveMonth ?? widget.month ?? 'August 2026';
       final txnId = utrText.isNotEmpty ? utrText : 'TXN-${DateTime.now().millisecondsSinceEpoch}';
+      final activeSocId = userProfile?['societyId'] as String? ?? 'SOC-001';
+      final residentName = userProfile?['name'] ?? user?.displayName ?? 'Flat Owner';
+      final flatNumber = userProfile?['flatNumber'] ?? 'A-101';
 
-      if (firestoreService != null && user != null) {
-        await firestoreService.payMaintenanceBill(
-          billId: targetBillId,
-          residentUid: user.uid,
-          amount: payAmount,
-          paymentMethod: payMethodName,
-          invoiceNumber: invNum,
-          billingPeriod: period,
-        );
-
-        // Update exact transaction ID / UTR in Firestore
-        final activeSocId = ref.read(userProfileProvider).value?['societyId'] as String? ?? 'SOC-001';
+      if (user != null) {
+        // Update bill status to pending_verification (Requires Treasurer Approval)
         await FirebaseFirestore.instance
             .doc('societies/$activeSocId/maintenance_bills/$targetBillId')
             .set({
-          'transactionId': txnId,
+          'status': 'pending_verification',
           'utrNumber': txnId,
-          'status': 'paid',
-          'paidAt': DateTime.now().toIso8601String(),
-        }, SetOptions(merge: true)).catchError((_) {});
+          'transactionId': txnId,
+          'paymentMethod': payMethodName,
+          'submittedAt': DateTime.now().toIso8601String(),
+          'amount': payAmount,
+          'invoiceNumber': invNum,
+          'billingPeriod': period,
+          'residentUid': user.uid,
+          'residentName': residentName,
+          'flatNumber': flatNumber,
+        }, SetOptions(merge: true));
+
+        // Create Admin Pending Verification Alert Notification
+        await FirebaseFirestore.instance
+            .collection('societies/$activeSocId/notifications')
+            .add({
+          'title': 'New UTR Payment Submitted',
+          'body': 'Flat $flatNumber ($residentName) submitted UTR $txnId for Bill $invNum (₹$payAmount). Verification required.',
+          'type': 'billing_verification',
+          'billId': targetBillId,
+          'utrNumber': txnId,
+          'createdAt': DateTime.now().toIso8601String(),
+          'isRead': false,
+        }).catchError((_) {});
       }
 
       setState(() => _isProcessing = false);
@@ -278,17 +290,23 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
             children: [
               const CircleAvatar(
                 radius: 36,
-                backgroundColor: AppColors.successSurface,
-                child: Icon(Icons.check_circle_rounded, color: AppColors.success, size: 40),
+                backgroundColor: Color(0xFFFEF3C7),
+                child: Icon(Icons.hourglass_top_rounded, color: AppColors.warning, size: 40),
               ),
               const SizedBox(height: 16),
-              const Text('Payment Verified!', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              const Text('UTR Submitted for Verification!', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary), textAlign: TextAlign.center),
               const SizedBox(height: 8),
-              Text('₹${payAmount.toStringAsFixed(0)} settled via $payMethodName', style: const TextStyle(color: AppColors.textSecondary, fontSize: 13), textAlign: TextAlign.center),
-              const SizedBox(height: 4),
-              Text('Ref UTR: $txnId', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
-              const SizedBox(height: 8),
-              Text('Invoice: $invNum', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+              Text(
+                'Your reference UTR: $txnId for $invNum has been sent to Society Management.',
+                style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(color: AppColors.warningSurface, borderRadius: BorderRadius.circular(AppRadius.full)),
+                child: const Text('Status: Pending Admin Approval', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.warning)),
+              ),
               const SizedBox(height: AppSpacing.xl),
               SizedBox(
                 width: double.infinity,
@@ -299,11 +317,11 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
                     Navigator.pop(context);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.success,
+                    backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
                   ),
-                  child: const Text('Done', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+                  child: const Text('Understand & Close', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
                 ),
               ),
             ],
@@ -314,7 +332,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       setState(() => _isProcessing = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Payment Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text('Submission Error: $e'), backgroundColor: AppColors.error),
         );
       }
     }
@@ -585,6 +603,47 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
                 ),
               );
             }),
+            const SizedBox(height: AppSpacing.md),
+
+            // Quick Copy Official Society UPI VPA Card
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(AppRadius.lg),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.qr_code_2_rounded, color: AppColors.primary, size: 28),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Official Society UPI VPA', style: TextStyle(fontSize: 11, color: AppColors.textSecondary, fontWeight: FontWeight.w500)),
+                        Text('8106342858@ybl', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                      ],
+                    ),
+                  ),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      Clipboard.setData(const ClipboardData(text: '8106342858@ybl'));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('📋 UPI VPA (8106342858@ybl) copied to clipboard!'), backgroundColor: AppColors.success),
+                      );
+                    },
+                    icon: const Icon(Icons.copy_rounded, size: 14),
+                    label: const Text('Copy VPA', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: const BorderSide(color: AppColors.primary),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             const SizedBox(height: AppSpacing.xl),
 
             // Pay Button

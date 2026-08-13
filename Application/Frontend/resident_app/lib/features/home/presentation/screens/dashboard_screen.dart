@@ -10,6 +10,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/ad_banner_carousel.dart';
 import '../../../maintenance/presentation/screens/pay_maintenance_screen.dart';
+import '../../../advertisement/models/ad_model.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
