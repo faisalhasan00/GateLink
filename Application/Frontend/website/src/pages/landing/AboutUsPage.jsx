@@ -138,9 +138,9 @@ export default function AboutUsPage() {
             <button
               onClick={() => setIsDemoModalOpen(true)}
               style={{
-                padding: '12px 28px',
-                borderRadius: '2px',
-                backgroundColor: '#00B589',
+                padding: '14px 28px',
+                borderRadius: '12px',
+                backgroundColor: '#1E3A8A',
                 color: '#FFFFFF',
                 fontSize: '14px',
                 fontWeight: 700,
@@ -148,8 +148,11 @@ export default function AboutUsPage() {
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '8px',
+                transition: 'background-color 0.2s ease'
               }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
             >
               <span>Enroll Your Society Now</span>
               <ArrowRight size={16} />

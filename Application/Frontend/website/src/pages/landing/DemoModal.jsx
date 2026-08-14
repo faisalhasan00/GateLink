@@ -64,21 +64,36 @@ export default function DemoModal({ isOpen, onClose }) {
 
           {submitted ? (
             <div style={{ textAlign: 'center', padding: '24px 10px' }}>
-              <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#ECFDF5', border: '2px solid #00B589', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
-                <CheckCircle2 size={32} color="#00B589" />
+              <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#EFF6FF', border: '2px solid #1E3A8A', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px auto' }}>
+                <CheckCircle2 size={32} color="#1E3A8A" />
               </div>
               <h3 style={{ fontSize: '22px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: '0 0 8px 0' }}>Request Received!</h3>
               <p style={{ color: isDark ? '#94A3B8' : '#666666', fontSize: '14px', lineHeight: 1.5, margin: '0 0 20px 0' }}>
                 Our onboarding team will contact you within 2 hours with full details.
               </p>
-              <button onClick={onClose} style={{ padding: '10px 24px', borderRadius: '2px', background: '#00B589', color: 'white', fontWeight: 700, border: 'none', cursor: 'pointer', fontSize: '14px' }}>
+              <button 
+                onClick={onClose} 
+                style={{ 
+                  padding: '10px 24px', 
+                  borderRadius: '12px', 
+                  background: '#1E3A8A', 
+                  color: 'white', 
+                  fontWeight: 700, 
+                  border: 'none', 
+                  cursor: 'pointer', 
+                  fontSize: '14px',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
+              >
                 Done
               </button>
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               <div style={{ borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #F1F5F9', paddingBottom: '12px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 900, background: '#ECFDF5', color: '#00B589', padding: '3px 8px', borderRadius: '2px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+                <span style={{ fontSize: '11px', fontWeight: 900, background: '#EFF6FF', color: '#1E3A8A', padding: '3px 8px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
                   24-HOUR SOCIETY ONBOARDING
                 </span>
                 <h3 style={{ fontSize: '22px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: '8px 0 0 0' }}>
@@ -88,22 +103,22 @@ export default function DemoModal({ isOpen, onClose }) {
               
               <div>
                 <label style={{ fontSize: '12px', color: isDark ? '#CBD5E1' : '#444444', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Your Full Name *</label>
-                <input required type="text" placeholder="e.g. Rajesh Kumar" value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '13px', outline: 'none' }} />
+                <input required type="text" placeholder="e.g. Rajesh Kumar" value={formData.fullName} onChange={e => setFormData({...formData, fullName: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '13px', outline: 'none' }} />
               </div>
 
               <div>
                 <label style={{ fontSize: '12px', color: isDark ? '#CBD5E1' : '#444444', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Mobile Phone *</label>
-                <input required type="tel" placeholder="10-Digit Mobile Number" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '13px', outline: 'none' }} />
+                <input required type="tel" placeholder="10-Digit Mobile Number" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '13px', outline: 'none' }} />
               </div>
 
               <div>
                 <label style={{ fontSize: '12px', color: isDark ? '#CBD5E1' : '#444444', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Email Address *</label>
-                <input required type="email" placeholder="admin@society.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '13px', outline: 'none' }} />
+                <input required type="email" placeholder="admin@society.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '13px', outline: 'none' }} />
               </div>
 
               <div>
                 <label style={{ fontSize: '12px', color: isDark ? '#CBD5E1' : '#444444', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Society / Building Name *</label>
-                <input required type="text" placeholder="Skyline Heights" value={formData.societyName} onChange={e => setFormData({...formData, societyName: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '13px', outline: 'none' }} />
+                <input required type="text" placeholder="Skyline Heights" value={formData.societyName} onChange={e => setFormData({...formData, societyName: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '13px', outline: 'none' }} />
               </div>
 
               <button
@@ -112,8 +127,8 @@ export default function DemoModal({ isOpen, onClose }) {
                 style={{
                   marginTop: '8px',
                   padding: '12px',
-                  borderRadius: '2px',
-                  backgroundColor: '#00B589',
+                  borderRadius: '12px',
+                  backgroundColor: '#1E3A8A',
                   color: '#FFFFFF',
                   fontWeight: 700,
                   fontSize: '14px',
@@ -122,8 +137,11 @@ export default function DemoModal({ isOpen, onClose }) {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px'
+                  gap: '8px',
+                  transition: 'background-color 0.2s ease'
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
               >
                 <Send size={15} />
                 <span>{submitting ? 'Submitting...' : 'Submit Enrollment Request'}</span>

@@ -241,7 +241,19 @@ export default function LeadGenerationPage() {
                 </p>
                 <button
                   onClick={resetForm}
-                  style={{ padding: '10px 24px', borderRadius: '2px', background: '#00B589', color: 'white', fontWeight: 700, border: 'none', cursor: 'pointer', fontSize: '14px' }}
+                  style={{ 
+                    padding: '10px 24px', 
+                    borderRadius: '12px', 
+                    background: '#1E3A8A', 
+                    color: 'white', 
+                    fontWeight: 700, 
+                    border: 'none', 
+                    cursor: 'pointer', 
+                    fontSize: '14px',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
                 >
                   Submit Another Request
                 </button>
@@ -365,8 +377,8 @@ export default function LeadGenerationPage() {
                   disabled={submitting}
                   style={{
                     padding: '14px',
-                    borderRadius: '2px',
-                    backgroundColor: '#00B589',
+                    borderRadius: '12px',
+                    backgroundColor: '#1E3A8A',
                     color: '#FFFFFF',
                     fontWeight: 700,
                     fontSize: '15px',
@@ -378,8 +390,8 @@ export default function LeadGenerationPage() {
                     gap: '8px',
                     transition: 'background-color 0.2s ease'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#009E77'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#00B589'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
                 >
                   <Send size={16} />
                   <span>{submitting ? 'Submitting...' : 'Submit Request'}</span>

@@ -241,8 +241,8 @@ export default function HeroSection({ onOpenDemo }) {
               style={{
                 width: '100%',
                 padding: '14px 24px',
-                borderRadius: '4px',
-                backgroundColor: '#00B589',
+                borderRadius: '12px',
+                backgroundColor: '#1E3A8A',
                 color: '#FFFFFF',
                 border: 'none',
                 fontSize: '15px',
@@ -252,8 +252,11 @@ export default function HeroSection({ onOpenDemo }) {
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '10px',
-                marginBottom: '28px'
+                marginBottom: '28px',
+                transition: 'background-color 0.2s ease'
               }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
             >
               <span>Enroll your society</span>
               <ArrowRight size={18} />

@@ -361,7 +361,20 @@ export default function FeaturesPage() {
 
             <button
               onClick={() => { setSelectedFeatureDetail(null); setIsDemoModalOpen(true); }}
-              style={{ width: '100%', padding: '12px', borderRadius: '2px', backgroundColor: '#00B589', color: '#FFFFFF', border: 'none', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}
+              style={{ 
+                width: '100%', 
+                padding: '14px', 
+                borderRadius: '12px', 
+                backgroundColor: '#1E3A8A', 
+                color: '#FFFFFF', 
+                border: 'none', 
+                fontSize: '14px', 
+                fontWeight: 700, 
+                cursor: 'pointer',
+                transition: 'background-color 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
             >
               Request Onboarding Proposal for {selectedFeatureDetail.title}
             </button>

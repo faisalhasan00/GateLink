@@ -176,17 +176,25 @@ export default function PricingSection({ onOpenDemo }) {
                   width: '100%',
                   padding: '14px',
                   borderRadius: '12px',
-                  background: p.popular ? 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)' : 'rgba(255, 255, 255, 0.1)',
+                  background: p.popular ? '#1E3A8A' : 'rgba(255, 255, 255, 0.1)',
                   color: 'white',
                   fontWeight: 800,
                   fontSize: '14px',
                   border: p.popular ? 'none' : '1px solid rgba(255, 255, 255, 0.2)',
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease',
+                  transition: 'background-color 0.2s ease',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   gap: '8px'
+                }}
+                onMouseEnter={(e) => {
+                  if (p.popular) e.currentTarget.style.backgroundColor = '#172554';
+                  else e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  if (p.popular) e.currentTarget.style.backgroundColor = '#1E3A8A';
+                  else e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
                 }}
               >
                 <span>Get Started</span>

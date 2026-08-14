@@ -215,18 +215,21 @@ export default function ContactSection() {
                     marginTop: '8px',
                     padding: '14px',
                     borderRadius: '12px',
-                    background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+                    backgroundColor: '#1E3A8A',
                     color: 'white',
                     fontWeight: 800,
                     fontSize: '15px',
                     border: 'none',
                     cursor: 'pointer',
-                    boxShadow: '0 4px 20px rgba(79, 70, 229, 0.5)',
+                    boxShadow: '0 4px 14px rgba(30, 58, 138, 0.4)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '8px'
+                    gap: '8px',
+                    transition: 'background-color 0.2s ease'
                   }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
                 >
                   <Send size={16} />
                   <span>{submitting ? 'Submitting...' : 'Submit Demo Request'}</span>

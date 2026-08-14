@@ -121,7 +121,20 @@ export default function ProposalSection({ onOpenDemo }) {
                 </p>
                 <button
                   onClick={() => setSubmitted(false)}
-                  style={{ marginTop: '20px', padding: '10px 20px', borderRadius: '2px', background: '#00B589', color: 'white', fontWeight: 700, border: 'none', cursor: 'pointer', fontSize: '13px' }}
+                  style={{ 
+                    marginTop: '20px', 
+                    padding: '10px 20px', 
+                    borderRadius: '12px', 
+                    background: '#1E3A8A', 
+                    color: 'white', 
+                    fontWeight: 700, 
+                    border: 'none', 
+                    cursor: 'pointer', 
+                    fontSize: '13px',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
                 >
                   Generate Another Proposal
                 </button>
@@ -213,8 +226,8 @@ export default function ProposalSection({ onOpenDemo }) {
                   style={{
                     width: '100%',
                     padding: '14px',
-                    borderRadius: '2px',
-                    backgroundColor: '#00B589',
+                    borderRadius: '12px',
+                    backgroundColor: '#1E3A8A',
                     color: '#FFFFFF',
                     fontWeight: 700,
                     fontSize: '14px',
@@ -227,8 +240,8 @@ export default function ProposalSection({ onOpenDemo }) {
                     boxSizing: 'border-box',
                     transition: 'background-color 0.2s ease'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#009E77'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#00B589'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
                 >
                   <Send size={16} />
                   <span>{submitting ? 'Generating Proposal...' : 'Request Onboarding Proposal'}</span>

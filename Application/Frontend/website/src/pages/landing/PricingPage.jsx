@@ -281,16 +281,25 @@ export default function PricingPage() {
                     width: '100%',
                     padding: '14px',
                     borderRadius: '12px',
-                    background: p.popular ? 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)' : 'rgba(255, 255, 255, 0.1)',
+                    background: p.popular ? '#1E3A8A' : 'rgba(255, 255, 255, 0.1)',
                     color: 'white',
                     fontWeight: 800,
                     fontSize: '14px',
                     border: p.popular ? 'none' : '1px solid rgba(255, 255, 255, 0.2)',
                     cursor: 'pointer',
+                    transition: 'background-color 0.2s ease',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '8px'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (p.popular) e.currentTarget.style.backgroundColor = '#172554';
+                    else e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                  }}
+                  onMouseLeave={(e) => {
+                    if (p.popular) e.currentTarget.style.backgroundColor = '#1E3A8A';
+                    else e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
                   }}
                 >
                   <span>Book Demo & Get Started</span>
@@ -449,18 +458,21 @@ export default function PricingPage() {
                   width: '100%',
                   padding: '14px',
                   borderRadius: '12px',
-                  background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                  backgroundColor: '#1E3A8A',
                   color: 'white',
                   fontWeight: 900,
                   fontSize: '14px',
                   border: 'none',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 20px rgba(16, 185, 129, 0.4)',
+                  boxShadow: '0 4px 14px rgba(30, 58, 138, 0.4)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: '8px'
+                  gap: '8px',
+                  transition: 'background-color 0.2s ease'
                 }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
               >
                 <span>Claim Your Society Savings</span>
                 <ArrowRight size={16} />

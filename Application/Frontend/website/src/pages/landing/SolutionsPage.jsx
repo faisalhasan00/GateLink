@@ -388,11 +388,22 @@ export default function SolutionsPage() {
               </div>
             </div>
 
-            {/* CTA Button */}
             <div style={{ textAlign: 'center', paddingTop: '16px' }}>
               <button
                 onClick={() => setIsDemoModalOpen(true)}
-                style={{ padding: '12px 32px', borderRadius: '2px', backgroundColor: '#00B589', color: '#FFFFFF', border: 'none', fontSize: '15px', fontWeight: 700, cursor: 'pointer' }}
+                style={{ 
+                  padding: '12px 32px', 
+                  borderRadius: '12px', 
+                  backgroundColor: '#1E3A8A', 
+                  color: '#FFFFFF', 
+                  border: 'none', 
+                  fontSize: '15px', 
+                  fontWeight: 700, 
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
               >
                 Schedule Onboarding Proposal for {currentPersona.title}
               </button>
