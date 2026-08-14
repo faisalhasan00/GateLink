@@ -157,7 +157,6 @@ class _BillCard extends StatelessWidget {
         return AppColors.warning;
       case PaymentStatus.pending:
       case PaymentStatus.unknown:
-      default:
         return AppColors.warning;
     }
   }

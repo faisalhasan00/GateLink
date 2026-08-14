@@ -432,7 +432,6 @@ class _StatusBadge extends StatelessWidget {
         break;
       case VisitorStatus.pending:
       case VisitorStatus.unknown:
-      default:
         bg = AppColors.warningSurface;
         fg = AppColors.warning;
     }

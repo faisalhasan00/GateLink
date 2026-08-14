@@ -63,7 +63,7 @@ class CashfreeNativeService {
       _gatewayService.doPayment(webCheckoutPayment);
     } on CFException catch (e) {
       debugPrint('[CashfreeNativeSDK] CFException caught: ${e.message}');
-      onError(e.message ?? 'Cashfree SDK Exception', orderId);
+      onError(e.message, orderId);
     } catch (e) {
       debugPrint('[CashfreeNativeSDK] Unknown Exception caught: $e');
       onError(e.toString(), orderId);
