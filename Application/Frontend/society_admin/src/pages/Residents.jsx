@@ -118,10 +118,14 @@ export default function Residents() {
     }
   };
 
-  // Exclude system administrators from the resident directory
+  // Filter residents: Only hide pure super_admin and the currently active society admin session
+  const currentAdminEmail = (session?.email || '').toLowerCase();
   const nonAdminResidents = residents.filter(r => {
     const role = (r.role || '').toLowerCase();
-    return role !== 'admin' && role !== 'society_admin' && role !== 'super_admin';
+    const email = (r.email || '').toLowerCase();
+    if (role === 'super_admin') return false;
+    if (currentAdminEmail && email === currentAdminEmail && (role === 'admin' || role === 'society_admin') && !r.flatNumber) return false;
+    return true;
   });
 
   const pendingList = nonAdminResidents.filter(r => {
