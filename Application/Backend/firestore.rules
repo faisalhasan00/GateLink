@@ -26,19 +26,21 @@ service cloud.firestore {
       return isAuthenticated() && (
         isSuperAdmin() ||
         exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)) ||
-        (hasUserDoc() && getUserData().societyId == societyId)
+        (hasUserDoc() && (getUserData().societyId == societyId || getUserData().role in ['admin', 'society_admin', 'super_admin'])) ||
+        (request.auth.token.keys().hasAll(['role']) && request.auth.token.role in ['admin', 'society_admin', 'super_admin'])
       );
     }
 
     function isSocietyAdmin(societyId) {
       return isAuthenticated() && (
         isSuperAdmin() ||
+        (request.auth.token.keys().hasAll(['role']) && request.auth.token.role in ['admin', 'society_admin', 'super_admin']) ||
         (
           belongsToSociety(societyId) &&
           (
             (exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)).data.role == 'admin') ||
-            (hasUserDoc() && getUserData().role == 'admin')
+             (get(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)).data.role in ['admin', 'society_admin', 'committee', 'treasurer', 'president', 'secretary'])) ||
+            (hasUserDoc() && (getUserData().role in ['admin', 'society_admin', 'committee', 'treasurer', 'president', 'secretary', 'super_admin']))
           )
         )
       );
@@ -234,6 +236,11 @@ service cloud.firestore {
       match /notices/{noticeId} {
         allow read: if isAuthenticated() && belongsToSociety(societyId);
         allow write: if isSocietyAdmin(societyId);
+      }
+
+      match /notifications/{notifId} {
+        allow read: if isAuthenticated() && belongsToSociety(societyId);
+        allow create, update, delete: if isSocietyAdmin(societyId);
       }
     }
 
