@@ -25,9 +25,9 @@ class AppConstants {
   static const int maxImageSizeBytes = 5 * 1024 * 1024; // 5MB
 
   // App Info
-  static const String appName = 'SocietySphere';
+  static const String appName = 'GateLink';
   static const String appVersion = '1.0.0';
-  static const String supportEmail = 'support@societysphere.in';
+  static const String supportEmail = 'support@gatelink.in';
   static const String supportPhone = '+91 9999999999';
 
   // Account Status

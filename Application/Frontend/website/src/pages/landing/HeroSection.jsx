@@ -204,7 +204,7 @@ export default function HeroSection({ onOpenDemo }) {
                     }}
                   >
                     <option value="Interested for demo">Interested for demo</option>
-                    <option value="Existing user of HomeHniHood">Existing user of HomeHniHood</option>
+                    <option value="Existing user of GateLink">Existing user of GateLink</option>
                   </select>
 
                   <button
