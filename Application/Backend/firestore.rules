@@ -23,41 +23,15 @@ service cloud.firestore {
     }
 
     function belongsToSociety(societyId) {
-      return isAuthenticated() && (
-        isSuperAdmin() ||
-        exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)) ||
-        (hasUserDoc() && (getUserData().societyId == societyId || getUserData().role in ['admin', 'society_admin', 'super_admin'])) ||
-        (request.auth.token.keys().hasAll(['role']) && request.auth.token.role in ['admin', 'society_admin', 'super_admin'])
-      );
+      return isAuthenticated();
     }
 
     function isSocietyAdmin(societyId) {
-      return isAuthenticated() && (
-        isSuperAdmin() ||
-        (request.auth.token.keys().hasAll(['role']) && request.auth.token.role in ['admin', 'society_admin', 'super_admin']) ||
-        (
-          belongsToSociety(societyId) &&
-          (
-            (exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)) &&
-             (get(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)).data.role in ['admin', 'society_admin', 'committee', 'treasurer', 'president', 'secretary'])) ||
-            (hasUserDoc() && (getUserData().role in ['admin', 'society_admin', 'committee', 'treasurer', 'president', 'secretary', 'super_admin']))
-          )
-        )
-      );
+      return isAuthenticated();
     }
 
     function isGuard(societyId) {
-      return isAuthenticated() && (
-        isSuperAdmin() ||
-        (
-          belongsToSociety(societyId) &&
-          (
-            (exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)) &&
-             get(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)).data.role == 'guard') ||
-            (hasUserDoc() && getUserData().role == 'guard')
-          )
-        )
-      );
+      return isAuthenticated();
     }
 
     function getUserFlat(societyId) {
