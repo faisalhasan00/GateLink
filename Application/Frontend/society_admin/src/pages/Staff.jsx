@@ -107,16 +107,28 @@ export default function Staff() {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await societyAdminService.addResident(societyId, {
-        name: formData.name.trim(),
-        email: formData.email.trim(),
-        phone: formData.phone.trim(),
-        department: formData.department,
-        role: 'guard',
-        status: formData.status
-      });
+      if (editingStaff) {
+        await societyAdminService.updateResident(societyId, editingStaff.id, {
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          department: formData.department,
+          role: 'guard',
+          status: formData.status
+        });
+      } else {
+        await societyAdminService.addStaff(societyId, {
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          department: formData.department,
+          password: formData.password.trim(),
+          role: 'guard',
+          status: formData.status
+        });
+      }
 
-      alert(`Successfully onboarded ${formData.name}!`);
+      alert(`Successfully saved ${formData.name}!`);
       setIsAddModalOpen(false);
       setEditingStaff(null);
       setSubmitting(false);

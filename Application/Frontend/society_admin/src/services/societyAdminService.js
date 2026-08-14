@@ -23,7 +23,9 @@ import {
   orderBy, 
   writeBatch
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { initializeApp, deleteApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { db, firebaseConfig } from '../firebase';
 import { generateUUID } from '../utils/security';
 
 export const societyAdminService = {
@@ -473,6 +475,58 @@ export const societyAdminService = {
       const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       callback(data);
     }, onError);
+  },
+
+  async addStaff(societyId, staffData) {
+    if (!societyId) throw new Error('Society ID is required');
+    const email = (staffData.email || '').trim().toLowerCase();
+    const password = (staffData.password || '').trim() || 'SecGuard@2026';
+    const name = staffData.name || 'Security Guard';
+
+    // 1. Auto-provision Firebase Auth Account
+    let staffUid = null;
+    let provisionApp = null;
+    if (email && password) {
+      try {
+        const appName = `StaffProvisioner-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+        provisionApp = initializeApp(firebaseConfig, appName);
+        const provisionAuth = getAuth(provisionApp);
+        const userCredential = await createUserWithEmailAndPassword(provisionAuth, email, password);
+        staffUid = userCredential.user?.uid;
+      } catch (authErr) {
+        console.warn("Staff Auth user provisioning info:", authErr?.message || authErr);
+      } finally {
+        if (provisionApp) {
+          try {
+            await deleteApp(provisionApp);
+          } catch (e) {
+            console.error("Secondary app cleanup error:", e);
+          }
+        }
+      }
+    }
+
+    const docId = staffUid || generateUUID();
+    const payload = {
+      uid: docId,
+      name: name,
+      email: email,
+      phone: staffData.phone || '',
+      department: staffData.department || 'Security & Gate',
+      role: 'guard',
+      status: staffData.status || 'Active',
+      societyId: societyId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    // Save to both societies/{societyId}/users and root /users
+    const batch = writeBatch(db);
+    batch.set(doc(db, `societies/${societyId}/users`, docId), payload, { merge: true });
+    batch.set(doc(db, 'users', docId), payload, { merge: true });
+    await batch.commit();
+
+    return docId;
   },
 
   // ── SOS ALERTS ─────────────────────────────────────────────────────────
