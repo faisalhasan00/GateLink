@@ -225,6 +225,11 @@ service cloud.firestore {
       allow read, write: if isAuthenticated();
     }
 
+    // Root System Notifications (Super Admin & Platform Alerts)
+    match /notifications/{notifId} {
+      allow read, write: if isAuthenticated();
+    }
+
     // Payments Collection (SEC-P0: Locked to Cloud Functions / Admin SDK writes)
     match /payments/{paymentId} {
       allow read: if isAuthenticated() && (
