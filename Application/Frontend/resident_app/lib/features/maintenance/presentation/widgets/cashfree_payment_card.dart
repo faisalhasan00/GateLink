@@ -6,12 +6,16 @@ class CashfreePaymentCard extends StatelessWidget {
   final double totalAmount;
   final bool isProcessing;
   final VoidCallback onPayPressed;
+  final VoidCallback? onVerifyPressed;
+  final String? activeOrderId;
 
   const CashfreePaymentCard({
     super.key,
     required this.totalAmount,
     required this.isProcessing,
     required this.onPayPressed,
+    this.onVerifyPressed,
+    this.activeOrderId,
   });
 
   @override
@@ -66,7 +70,14 @@ class CashfreePaymentCard extends StatelessWidget {
                   ? const SizedBox()
                   : const Icon(Icons.lock_outline_rounded, size: 18),
               label: isProcessing
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? const SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.5,
+                      ),
+                    )
                   : Text(
                       'Proceed to Cashfree Checkout (₹${totalAmount.toStringAsFixed(0)})',
                       style: const TextStyle(
@@ -83,6 +94,31 @@ class CashfreePaymentCard extends StatelessWidget {
               ),
             ),
           ),
+          if (activeOrderId != null && onVerifyPressed != null) ...[
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: OutlinedButton.icon(
+                onPressed: isProcessing ? null : onVerifyPressed,
+                icon: const Icon(Icons.sync_rounded, size: 16),
+                label: const Text(
+                  'Verify Payment Status',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

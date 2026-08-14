@@ -40,6 +40,63 @@ class PaymentController extends StateNotifier<PaymentState> {
     }
   }
 
+  /// Manually verify on-demand payment status with Cashfree via S2S backend endpoint
+  Future<PaymentOrderModel?> verifyPaymentStatus({
+    required String societyId,
+    required String orderId,
+  }) async {
+    if (state.isLoading) return null;
+
+    state = state.copyWith(status: PaymentActionStatus.loading);
+
+    try {
+      final order = await _repository.verifyPaymentStatus(
+        societyId: societyId,
+        orderId: orderId,
+      );
+
+      if (order?.status == 'SUCCESS') {
+        state = state.copyWith(
+          status: PaymentActionStatus.success,
+          activeOrder: order,
+          successMessage: 'Payment verified successfully.',
+        );
+      } else if (order?.status == 'OVERPAYMENT_RECORDED') {
+        state = state.copyWith(
+          status: PaymentActionStatus.success,
+          activeOrder: order,
+          successMessage:
+              'Payment received as duplicate/overpayment and logged for review.',
+        );
+      } else if (order?.status == 'FLAGGED_AMOUNT_MISMATCH') {
+        state = state.copyWith(
+          status: PaymentActionStatus.error,
+          activeOrder: order,
+          errorMessage: 'Payment amount mismatch flagged. Contact admin.',
+        );
+      } else if (order?.status == 'FAILED') {
+        state = state.copyWith(
+          status: PaymentActionStatus.error,
+          activeOrder: order,
+          errorMessage: 'Cashfree reported payment failure.',
+        );
+      } else {
+        state = state.copyWith(
+          status: PaymentActionStatus.initial,
+          activeOrder: order,
+          successMessage: 'Payment status is still pending.',
+        );
+      }
+      return order;
+    } catch (e) {
+      state = state.copyWith(
+        status: PaymentActionStatus.error,
+        errorMessage: 'Unable to verify payment status. Please try again.',
+      );
+      return null;
+    }
+  }
+
   /// Submit an offline UTR payment reference for Treasurer verification
   Future<bool> submitOfflinePayment({
     required String societyId,

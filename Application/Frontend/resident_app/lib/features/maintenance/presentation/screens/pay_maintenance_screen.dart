@@ -145,6 +145,8 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
     }
   }
 
+  String? _activeOrderId;
+
   @override
   void dispose() {
     _utrController.dispose();
@@ -178,6 +180,8 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
         throw Exception(err);
       }
 
+      setState(() => _activeOrderId = order.orderId);
+
       debugPrint(
           '[PaymentFlow] Initiating Native Cashfree Checkout for billId: $targetBillId, societyId: $activeSocId, orderId: ${order.orderId}');
 
@@ -194,6 +198,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
           debugPrint('[PaymentFlow] Native SDK reported success for order: $orderId');
           if (mounted) {
             setState(() => _isProcessing = false);
+            _verifyPaymentStatusManually();
           }
         },
         onError: (errorMessage, orderId) {
@@ -214,8 +219,9 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content: Text('Cashfree Payment Error: $e'),
-              backgroundColor: AppColors.error),
+            content: Text('Cashfree Payment Error: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
@@ -244,6 +250,68 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
         );
       }
     });
+  }
+
+  Future<void> _verifyPaymentStatusManually() async {
+    if (_activeOrderId == null || _activeOrderId!.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'No active payment session to verify. Please proceed to checkout first.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isProcessing = true);
+    try {
+      final userProfile = ref.read(userProfileProvider).value;
+      final activeSocId = userProfile?['societyId'] as String? ?? 'SOC-001';
+      final invNum =
+          _effectiveInvoiceNumber ?? widget.invoiceNumber ?? 'INV-2026-9305';
+
+      final verifiedOrder = await ref
+          .read(paymentControllerProvider.notifier)
+          .verifyPaymentStatus(
+            societyId: activeSocId,
+            orderId: _activeOrderId!,
+          );
+
+      setState(() => _isProcessing = false);
+
+      if (mounted) {
+        if (verifiedOrder?.status == 'SUCCESS') {
+          PaymentSuccessBottomSheet.show(
+            context,
+            amount: verifiedOrder?.amount ?? _effectiveAmount ?? 1.0,
+            transactionId: _activeOrderId ?? 'CF-PAID-SUCCESS',
+            invoiceNumber: invNum,
+          );
+        } else {
+          final msg = ref.read(paymentControllerProvider).successMessage ??
+              ref.read(paymentControllerProvider).errorMessage ??
+              'Status: ${verifiedOrder?.status ?? "Unknown"}';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(msg),
+              backgroundColor: (verifiedOrder?.status == 'OVERPAYMENT_RECORDED')
+                  ? AppColors.success
+                  : AppColors.primary,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      setState(() => _isProcessing = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Verification error: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
   }
 
   Future<void> _verifyAndCompletePayment() async {
@@ -389,6 +457,8 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
                 totalAmount: totalAmount,
                 isProcessing: _isProcessing,
                 onPayPressed: _verifyAndCompletePayment,
+                onVerifyPressed: _verifyPaymentStatusManually,
+                activeOrderId: _activeOrderId,
               ),
               const SizedBox(height: AppSpacing.xl),
             ],

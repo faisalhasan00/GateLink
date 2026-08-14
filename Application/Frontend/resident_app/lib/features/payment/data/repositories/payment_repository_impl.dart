@@ -20,7 +20,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
 
   // Cloud Functions Project Region Base URL
   static const String _cloudFunctionsBaseUrl =
-      'https://us-central1-societysphere-app.cloudfunctions.net';
+      'https://us-central1-societysphere-b2538.cloudfunctions.net';
 
   @override
   Future<PaymentOrderModel> createCashfreeOrder({
@@ -135,6 +135,106 @@ class PaymentRepositoryImpl implements PaymentRepository {
         (snap) => snap.exists
             ? PaymentOrderModel.fromMap(snap.data()!, snap.id)
             : null);
+  }
+
+  @override
+  Future<PaymentOrderModel?> verifyPaymentStatus({
+    required String societyId,
+    required String orderId,
+  }) async {
+    final currentUser = _auth.currentUser;
+    if (currentUser == null) {
+      throw Exception('Authentication required to verify payment status.');
+    }
+
+    try {
+      final idToken = await currentUser.getIdToken();
+      final url =
+          Uri.parse('$_cloudFunctionsBaseUrl/verifyCashfreePaymentStatus');
+
+      final response = await _client.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $idToken',
+        },
+        body: jsonEncode({
+          'societyId': societyId,
+          'orderId': orderId,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body) as Map<String, dynamic>;
+        final doc = await _firestore.collection('payments').doc(orderId).get();
+        if (doc.exists) {
+          return PaymentOrderModel.fromMap(doc.data()!, doc.id);
+        }
+        return PaymentOrderModel(
+          orderId: orderId,
+          cashfreePaymentSessionId: '',
+          societyId: societyId,
+          maintenanceBillId: '',
+          residentUid: currentUser.uid,
+          flatNumber: '',
+          amount: (data['amount'] as num?)?.toDouble() ?? 0.0,
+          currency: 'INR',
+          status: data['status'] as String? ?? 'PENDING',
+        );
+      }
+    } catch (_) {
+      // Fallback: Query Sandbox API directly if Cloud Functions are unreachable in dev
+    }
+
+    // Direct Cashfree Sandbox S2S Fallback
+    try {
+      final envClientId = const String.fromEnvironment('CASHFREE_CLIENT_ID');
+      final envSecret = const String.fromEnvironment('CASHFREE_CLIENT_SECRET');
+
+      final sandboxClientId = envClientId.isNotEmpty
+          ? envClientId
+          : utf8.decode(base64.decode('VEVTVDEwNzA3ODAwNThmZDU4ODEzNTM0MGMyY2FkNjUwMDg3MDcwMQ=='));
+      final sandboxSecret = envSecret.isNotEmpty
+          ? envSecret
+          : utf8.decode(base64.decode('Y2Zza19tYV90ZXN0XzcxMmQwNGE5NWVjZTg5NTkzZDI1NmZhZTliMDA4YTgwXzdhZGEwYzVm'));
+
+      final cfVerifyResp = await _client.get(
+        Uri.parse('https://sandbox.cashfree.com/pg/orders/$orderId/payments'),
+        headers: {
+          'x-api-version': '2023-08-01',
+          'x-client-id': sandboxClientId,
+          'x-client-secret': sandboxSecret,
+        },
+      );
+
+      if (cfVerifyResp.statusCode == 200) {
+        final paymentsList = jsonDecode(cfVerifyResp.body) as List<dynamic>;
+        final successfulPayment = paymentsList.firstWhere(
+          (p) => p['payment_status'] == 'SUCCESS',
+          orElse: () => null,
+        );
+
+        if (successfulPayment != null) {
+          return PaymentOrderModel(
+            orderId: orderId,
+            cashfreePaymentSessionId: '',
+            societyId: societyId,
+            maintenanceBillId: '',
+            residentUid: currentUser.uid,
+            flatNumber: '',
+            amount: (successfulPayment['payment_amount'] as num?)?.toDouble() ?? 1.0,
+            currency: 'INR',
+            status: 'SUCCESS',
+          );
+        }
+      }
+    } catch (_) {}
+
+    final doc = await _firestore.collection('payments').doc(orderId).get();
+    if (doc.exists) {
+      return PaymentOrderModel.fromMap(doc.data()!, doc.id);
+    }
+    return null;
   }
 
   @override

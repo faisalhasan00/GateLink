@@ -29,6 +29,25 @@ class MockPaymentRepository implements PaymentRepository {
   }
 
   @override
+  Future<PaymentOrderModel?> verifyPaymentStatus({
+    required String societyId,
+    required String orderId,
+  }) async {
+    if (shouldThrow) {
+      throw Exception('Failed to verify payment status');
+    }
+    return PaymentOrderModel(
+      orderId: orderId,
+      societyId: societyId,
+      maintenanceBillId: 'bill_1',
+      residentUid: 'user_1',
+      flatNumber: 'A-101',
+      amount: 3500.0,
+      status: 'SUCCESS',
+    );
+  }
+
+  @override
   Stream<PaymentOrderModel?> watchPaymentStatus(String orderId) {
     return Stream.value(
       PaymentOrderModel(
@@ -140,6 +159,35 @@ void main() {
 
       expect(success, isFalse);
       expect(controller.state.status, equals(PaymentActionStatus.error));
+    });
+
+    test('verifyPaymentStatus updates state to success on verified order',
+        () async {
+      final order = await controller.verifyPaymentStatus(
+        societyId: 'SOC-001',
+        orderId: 'CF_SOC_001_bill_1_100',
+      );
+
+      expect(order, isNotNull);
+      expect(order?.status, equals('SUCCESS'));
+      expect(controller.state.status, equals(PaymentActionStatus.success));
+      expect(controller.state.successMessage,
+          contains('Payment verified successfully'));
+    });
+
+    test('verifyPaymentStatus sets state to error when repository throws',
+        () async {
+      repository.shouldThrow = true;
+
+      final order = await controller.verifyPaymentStatus(
+        societyId: 'SOC-001',
+        orderId: 'CF_SOC_001_bill_1_100',
+      );
+
+      expect(order, isNull);
+      expect(controller.state.status, equals(PaymentActionStatus.error));
+      expect(controller.state.errorMessage,
+          contains('Unable to verify payment status'));
     });
   });
 }

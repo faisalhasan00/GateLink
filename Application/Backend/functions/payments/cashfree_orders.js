@@ -164,6 +164,267 @@ const createCashfreeOrder = onRequest(
   }
 );
 
+/**
+ * 2. Centralized Platform API: On-Demand Cashfree S2S Payment Verification
+ * SEC-P0: Authenticated, Tenant Isolated, Direct S2S Query & Atomic Ledger Reconciliation.
+ */
+const verifyCashfreePaymentStatus = onRequest(
+  { cors: true, secrets: [cashfreeClientId, cashfreeClientSecret] },
+  async (req, res) => {
+    try {
+      // 1. Firebase Authentication Verification
+      let authUser = null;
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        const idToken = authHeader.split("Bearer ")[1];
+        try {
+          authUser = await auth.verifyIdToken(idToken);
+        } catch (authErr) {
+          logger.error("Firebase Auth ID Token verification failed", {
+            functionName: "verifyCashfreePaymentStatus",
+            error: authErr.message,
+          });
+        }
+      }
+
+      if (!authUser) {
+        return res.status(401).json({ error: "Unauthorized: Valid Firebase Auth Bearer token required" });
+      }
+
+      const { societyId, orderId } = req.body || {};
+
+      if (!societyId || !orderId) {
+        return res.status(400).json({ error: "Missing required fields: societyId, orderId" });
+      }
+
+      const paymentRef = db.collection("payments").doc(orderId);
+      const paymentDoc = await paymentRef.get();
+
+      if (!paymentDoc.exists) {
+        return res.status(404).json({ error: "Payment record not found" });
+      }
+
+      const paymentData = paymentDoc.data() || {};
+
+      // 2. Authorization & Ownership Checks
+      if (paymentData.residentUid !== authUser.uid) {
+        logger.warn("Forbidden verify payment attempt for different user", {
+          functionName: "verifyCashfreePaymentStatus",
+          authUserUid: authUser.uid,
+          paymentResidentUid: paymentData.residentUid,
+          orderId,
+        });
+        return res.status(403).json({ error: "Forbidden: You can only verify your own payment orders" });
+      }
+
+      if (paymentData.societyId !== societyId) {
+        logger.warn("Forbidden verify payment attempt for wrong society", {
+          functionName: "verifyCashfreePaymentStatus",
+          societyId,
+          paymentSocietyId: paymentData.societyId,
+          orderId,
+        });
+        return res.status(403).json({ error: "Forbidden: Society ID mismatch" });
+      }
+
+      // 3. Check existing terminal states
+      if (paymentData.status === "SUCCESS") {
+        return res.status(200).json({
+          status: "SUCCESS",
+          orderId,
+          paymentId: paymentData.cashfreePaymentId,
+          amount: paymentData.amount,
+          message: "Payment already confirmed",
+        });
+      }
+
+      if (paymentData.status === "OVERPAYMENT_RECORDED") {
+        return res.status(200).json({
+          status: "OVERPAYMENT_RECORDED",
+          orderId,
+          paymentId: paymentData.cashfreePaymentId,
+          amount: paymentData.amount,
+          message: "Payment recorded as duplicate/overpayment",
+        });
+      }
+
+      if (paymentData.status === "FLAGGED_AMOUNT_MISMATCH") {
+        return res.status(200).json({
+          status: "FLAGGED_AMOUNT_MISMATCH",
+          orderId,
+          amount: paymentData.amount,
+          message: "Payment amount could not be verified",
+        });
+      }
+
+      // 4. Query Cashfree Official API (S2S)
+      const cfVerify = await CashfreePaymentProvider.verifyPaymentWithCashfree(orderId);
+
+      if (!cfVerify.isSuccess) {
+        // If no payment attempts have been made yet, keep the payment record as PENDING
+        if (cfVerify.message === "No payment attempts found for this order") {
+          return res.status(200).json({
+            status: "PENDING",
+            orderId,
+            message: "No payment attempt has been recorded yet.",
+          });
+        }
+
+        await paymentRef.update({
+          status: "FAILED",
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+        return res.status(200).json({
+          status: "FAILED",
+          orderId,
+          message: cfVerify.message || "Payment attempt failed or not found",
+        });
+      }
+
+      // 5. Amount Anti-Tamper Verification
+      if (cfVerify.paymentAmount !== paymentData.amount) {
+        logger.error("Cashfree S2S payment amount mismatch flagged", {
+          functionName: "verifyCashfreePaymentStatus",
+          orderId,
+          receivedAmount: cfVerify.paymentAmount,
+          expectedAmount: paymentData.amount,
+        });
+        await paymentRef.update({
+          status: "FLAGGED_AMOUNT_MISMATCH",
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+        return res.status(200).json({
+          status: "FLAGGED_AMOUNT_MISMATCH",
+          orderId,
+          message: "Payment amount mismatch flagged",
+        });
+      }
+
+      // 6. Atomic Ledger Reconciliation & Overpayment Guard
+      const billId = paymentData.maintenanceBillId;
+      const billRef = db.doc(`societies/${societyId}/maintenance_bills/${billId}`);
+      const receiptRef = db.collection("payments").doc(orderId).collection("receipts").doc("receipt_latest");
+
+      let isOverpayment = false;
+
+      await db.runTransaction(async (transaction) => {
+        const freshPaymentSnap = await transaction.get(paymentRef);
+        if (
+          freshPaymentSnap.exists &&
+          (freshPaymentSnap.data().status === "SUCCESS" ||
+            freshPaymentSnap.data().status === "OVERPAYMENT_RECORDED")
+        ) {
+          return;
+        }
+
+        const billSnap = await transaction.get(billRef);
+        const isBillAlreadyPaid =
+          billSnap.exists && billSnap.data().status === "paid";
+
+        if (isBillAlreadyPaid) {
+          isOverpayment = true;
+          transaction.update(paymentRef, {
+            status: "OVERPAYMENT_RECORDED",
+            cashfreePaymentId: cfVerify.cashfreePaymentId,
+            paymentMethod: cfVerify.paymentMethod,
+            webhookVerified: false,
+            apiVerified: true,
+            verificationSource: "MANUAL_S2S",
+            overpaymentReason: "DUPLICATE_ORDER_ALREADY_PAID",
+            originalBillTransactionId: billSnap.data().transactionId || null,
+            paidAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
+          });
+
+          transaction.set(receiptRef, {
+            orderId,
+            cashfreePaymentId: cfVerify.cashfreePaymentId,
+            societyId,
+            maintenanceBillId: billId,
+            residentUid: paymentData.residentUid,
+            amount: paymentData.amount,
+            currency: "INR",
+            paymentMethod: cfVerify.paymentMethod,
+            isOverpayment: true,
+            overpaymentReason: "DUPLICATE_ORDER_ALREADY_PAID",
+            verificationSource: "MANUAL_S2S",
+            issuedAt: new Date().toISOString(),
+          });
+        } else {
+          transaction.update(paymentRef, {
+            status: "SUCCESS",
+            cashfreePaymentId: cfVerify.cashfreePaymentId,
+            paymentMethod: cfVerify.paymentMethod,
+            webhookVerified: false,
+            apiVerified: true,
+            verificationSource: "MANUAL_S2S",
+            paidAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
+          });
+
+          transaction.set(
+            billRef,
+            {
+              status: "paid",
+              paymentMethod: "Cashfree Online",
+              transactionId: cfVerify.cashfreePaymentId,
+              paidAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
+
+          transaction.set(receiptRef, {
+            orderId,
+            cashfreePaymentId: cfVerify.cashfreePaymentId,
+            societyId,
+            maintenanceBillId: billId,
+            residentUid: paymentData.residentUid,
+            amount: paymentData.amount,
+            currency: "INR",
+            paymentMethod: cfVerify.paymentMethod,
+            isOverpayment: false,
+            verificationSource: "MANUAL_S2S",
+            issuedAt: new Date().toISOString(),
+          });
+        }
+      });
+
+      logger.info(
+        isOverpayment
+          ? "On-Demand verification: Overpayment recorded"
+          : "On-Demand verification: Payment confirmed and reconciled",
+        {
+          functionName: "verifyCashfreePaymentStatus",
+          orderId,
+          societyId,
+          maintenanceBillId: billId,
+          residentUid: paymentData.residentUid,
+          isOverpayment,
+        }
+      );
+
+      return res.status(200).json({
+        status: isOverpayment ? "OVERPAYMENT_RECORDED" : "SUCCESS",
+        orderId,
+        paymentId: cfVerify.cashfreePaymentId,
+        amount: paymentData.amount,
+        isOverpayment,
+        message: isOverpayment
+          ? "Payment recorded as duplicate/overpayment"
+          : "Payment verified successfully",
+      });
+    } catch (err) {
+      logger.error("verifyCashfreePaymentStatus error", {
+        functionName: "verifyCashfreePaymentStatus",
+        error: err.message,
+        stack: err.stack,
+      });
+      return res.status(500).json({ error: err.message || "Internal Server Error" });
+    }
+  }
+);
+
 module.exports = {
   createCashfreeOrder,
+  verifyCashfreePaymentStatus,
 };

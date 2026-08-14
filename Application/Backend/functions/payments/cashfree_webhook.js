@@ -81,54 +81,103 @@ const cashfreeWebhook = onRequest(
       const billRef = db.doc(`societies/${societyId}/maintenance_bills/${billId}`);
       const receiptRef = db.collection("payments").doc(orderId).collection("receipts").doc("receipt_latest");
 
-      // Atomic Transaction for Idempotency
+      let isOverpayment = false;
+
+      // Atomic Transaction for Idempotency & Overpayment Protection
       await db.runTransaction(async (transaction) => {
         const freshPaymentSnap = await transaction.get(paymentRef);
-        if (freshPaymentSnap.exists && freshPaymentSnap.data().status === "SUCCESS") {
+        if (
+          freshPaymentSnap.exists &&
+          (freshPaymentSnap.data().status === "SUCCESS" ||
+            freshPaymentSnap.data().status === "OVERPAYMENT_RECORDED")
+        ) {
           return;
         }
 
-        transaction.update(paymentRef, {
-          status: "SUCCESS",
-          cashfreePaymentId: cfVerify.cashfreePaymentId,
-          paymentMethod: cfVerify.paymentMethod,
-          webhookVerified: true,
-          apiVerified: true,
-          paidAt: FieldValue.serverTimestamp(),
-          updatedAt: FieldValue.serverTimestamp(),
-        });
+        const billSnap = await transaction.get(billRef);
+        const isBillAlreadyPaid =
+          billSnap.exists && billSnap.data().status === "paid";
 
-        transaction.set(
-          billRef,
-          {
-            status: "paid",
-            paymentMethod: "Cashfree Online",
-            transactionId: cfVerify.cashfreePaymentId,
-            paidAt: new Date().toISOString(),
-          },
-          { merge: true }
-        );
+        if (isBillAlreadyPaid) {
+          isOverpayment = true;
+          // Step 4: Bill is ALREADY paid - Do NOT overwrite bill.transactionId, bill.paidAt, or bill.status
+          transaction.update(paymentRef, {
+            status: "OVERPAYMENT_RECORDED",
+            cashfreePaymentId: cfVerify.cashfreePaymentId,
+            paymentMethod: cfVerify.paymentMethod,
+            webhookVerified: true,
+            apiVerified: true,
+            overpaymentReason: "DUPLICATE_ORDER_ALREADY_PAID",
+            originalBillTransactionId: billSnap.data().transactionId || null,
+            paidAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
+          });
 
-        transaction.set(receiptRef, {
+          // Create overpayment audit receipt
+          transaction.set(receiptRef, {
+            orderId,
+            cashfreePaymentId: cfVerify.cashfreePaymentId,
+            societyId,
+            maintenanceBillId: billId,
+            residentUid: paymentData.residentUid,
+            amount: paymentData.amount,
+            currency: "INR",
+            paymentMethod: cfVerify.paymentMethod,
+            isOverpayment: true,
+            overpaymentReason: "DUPLICATE_ORDER_ALREADY_PAID",
+            issuedAt: new Date().toISOString(),
+          });
+        } else {
+          // Step 3: Normal primary settlement path
+          transaction.update(paymentRef, {
+            status: "SUCCESS",
+            cashfreePaymentId: cfVerify.cashfreePaymentId,
+            paymentMethod: cfVerify.paymentMethod,
+            webhookVerified: true,
+            apiVerified: true,
+            paidAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
+          });
+
+          transaction.set(
+            billRef,
+            {
+              status: "paid",
+              paymentMethod: "Cashfree Online",
+              transactionId: cfVerify.cashfreePaymentId,
+              paidAt: new Date().toISOString(),
+            },
+            { merge: true }
+          );
+
+          transaction.set(receiptRef, {
+            orderId,
+            cashfreePaymentId: cfVerify.cashfreePaymentId,
+            societyId,
+            maintenanceBillId: billId,
+            residentUid: paymentData.residentUid,
+            amount: paymentData.amount,
+            currency: "INR",
+            paymentMethod: cfVerify.paymentMethod,
+            isOverpayment: false,
+            issuedAt: new Date().toISOString(),
+          });
+        }
+      });
+
+      logger.info(
+        isOverpayment
+          ? "Duplicate/overpayment processed and flagged as OVERPAYMENT_RECORDED"
+          : "Payment verified and processed atomically",
+        {
+          functionName: "cashfreeWebhook",
           orderId,
-          cashfreePaymentId: cfVerify.cashfreePaymentId,
           societyId,
           maintenanceBillId: billId,
           residentUid: paymentData.residentUid,
-          amount: paymentData.amount,
-          currency: "INR",
-          paymentMethod: cfVerify.paymentMethod,
-          issuedAt: new Date().toISOString(),
-        });
-      });
-
-      logger.info("Payment verified and processed atomically", {
-        functionName: "cashfreeWebhook",
-        orderId,
-        societyId,
-        maintenanceBillId: billId,
-        residentUid: paymentData.residentUid,
-      });
+          isOverpayment,
+        }
+      );
 
       // Dispatch FCM Notification to Resident User
       try {
@@ -137,21 +186,36 @@ const cashfreeWebhook = onRequest(
         const fcmToken = userDoc.exists ? userDoc.data().fcmToken : null;
 
         if (fcmToken) {
-          await messaging.send({
-            token: fcmToken,
-            notification: {
-              title: "Payment Received & Verified",
-              body: `Your maintenance bill payment of ₹${paymentData.amount} (Ref: ${cfVerify.cashfreePaymentId}) was confirmed!`,
-            },
-            data: {
-              type: "MAINTENANCE_PAID",
-              billId,
-              orderId,
-            },
-          });
+          if (isOverpayment) {
+            await messaging.send({
+              token: fcmToken,
+              notification: {
+                title: "Duplicate Payment Logged",
+                body: `A payment of ₹${paymentData.amount} (Ref: ${cfVerify.cashfreePaymentId}) was captured for bill ${billId}, which is already settled. Logged for administrator review/refund.`,
+              },
+              data: {
+                type: "PAYMENT_OVERPAYMENT_RECORDED",
+                billId,
+                orderId,
+              },
+            });
+          } else {
+            await messaging.send({
+              token: fcmToken,
+              notification: {
+                title: "Payment Received & Verified",
+                body: `Your maintenance bill payment of ₹${paymentData.amount} (Ref: ${cfVerify.cashfreePaymentId}) was confirmed!`,
+              },
+              data: {
+                type: "MAINTENANCE_PAID",
+                billId,
+                orderId,
+              },
+            });
+          }
         }
       } catch (fcmErr) {
-        logger.error("FCM Notification error on payment success", {
+        logger.error("FCM Notification error on payment processing", {
           functionName: "cashfreeWebhook",
           orderId,
           societyId,

@@ -18,12 +18,18 @@ const {
 const { setSuperAdminRole } = require("./admin/super_admin");
 
 // 3. Payment Gateway & Webhook Handlers
-const { createCashfreeOrder } = require("./payments/cashfree_orders");
+const {
+  createCashfreeOrder,
+  verifyCashfreePaymentStatus,
+} = require("./payments/cashfree_orders");
 const { cashfreeWebhook } = require("./payments/cashfree_webhook");
 const {
   approveOfflinePayment,
   rejectOfflinePayment,
 } = require("./payments/offline_payments");
+const {
+  reconcilePendingPayments,
+} = require("./payments/payment_reconciliation");
 
 module.exports = {
   // Visitor Management
@@ -37,7 +43,9 @@ module.exports = {
 
   // Payment Processing
   createCashfreeOrder,
+  verifyCashfreePaymentStatus,
   cashfreeWebhook,
   approveOfflinePayment,
   rejectOfflinePayment,
+  reconcilePendingPayments,
 };
