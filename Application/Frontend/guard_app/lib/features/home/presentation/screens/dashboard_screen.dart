@@ -947,3 +947,4 @@ class _AdsBannerSection extends ConsumerWidget {
     );
   }
 }
+

@@ -88,17 +88,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return AppRoutes.login;
       }
 
-      if (isAuth) {
-        final status = userProfile?['status'] ?? 'active';
-        final isApproved = status == 'active' || status == 'approved';
-
-        if (!isApproved && !isPendingRoute) {
-          return AppRoutes.pendingApproval;
-        }
-
-        if (isApproved && (isLoggingIn || isPendingRoute)) {
-          return AppRoutes.guardDashboard;
-        }
+      if (isAuth && isLoggingIn) {
+        return AppRoutes.guardDashboard;
       }
 
       return null;

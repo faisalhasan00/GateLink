@@ -503,9 +503,17 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
                   Expanded(
                     flex: 2,
                     child: DropdownButtonFormField<String>(
+                      isExpanded: true,
                       value: _selectedVehicleType,
                       decoration: const InputDecoration(labelText: 'Type'),
-                      items: _vehicleTypes.map((v) => DropdownMenuItem(value: v, child: Text(v))).toList(),
+                      items: _vehicleTypes.map((v) => DropdownMenuItem(
+                        value: v, 
+                        child: Text(
+                          v, 
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12),
+                        )
+                      )).toList(),
                       onChanged: (v) => setState(() => _selectedVehicleType = v!),
                     ),
                   ),

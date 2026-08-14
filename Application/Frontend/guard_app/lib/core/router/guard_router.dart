@@ -13,12 +13,12 @@ import '../providers/auth_providers.dart';
 
 class GuardRoutes {
   static const String login = '/login';
-  static const String dashboard = '/dashboard';
-  static const String scan = '/scan';
-  static const String quickEntry = '/quick-entry';
-  static const String vehicles = '/vehicles';
-  static const String history = '/history';
-  static const String profile = '/profile';
+  static const String dashboard = '/guard/dashboard';
+  static const String scan = '/guard/scan';
+  static const String quickEntry = '/guard/quick-entry';
+  static const String vehicles = '/guard/vehicles';
+  static const String history = '/guard/history';
+  static const String profile = '/guard/profile';
 }
 
 final guardRouterProvider = Provider<GoRouter>((ref) {
@@ -27,6 +27,7 @@ final guardRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: GuardRoutes.login,
     debugLogDiagnostics: true,
+    errorBuilder: (context, state) => const GuardDashboardScreen(),
     redirect: (context, state) {
       final isLoading = authState.isLoading;
       if (isLoading) return null;
@@ -44,6 +45,54 @@ final guardRouterProvider = Provider<GoRouter>((ref) {
         path: GuardRoutes.login,
         builder: (context, state) => const GuardLoginScreen(),
       ),
+
+      // Direct Aliases / Shortcuts
+      GoRoute(
+        path: '/dashboard',
+        redirect: (context, state) => GuardRoutes.dashboard,
+      ),
+      GoRoute(
+        path: '/scan',
+        redirect: (context, state) => GuardRoutes.scan,
+      ),
+      GoRoute(
+        path: '/quick-entry',
+        redirect: (context, state) => GuardRoutes.quickEntry,
+      ),
+      GoRoute(
+        path: '/vehicles',
+        redirect: (context, state) => GuardRoutes.vehicles,
+      ),
+      GoRoute(
+        path: '/history',
+        redirect: (context, state) => GuardRoutes.history,
+      ),
+      GoRoute(
+        path: '/profile',
+        redirect: (context, state) => GuardRoutes.profile,
+      ),
+      GoRoute(
+        path: '/home/profile',
+        redirect: (context, state) => GuardRoutes.profile,
+      ),
+      GoRoute(
+        path: '/home',
+        redirect: (context, state) => GuardRoutes.dashboard,
+      ),
+      GoRoute(
+        path: '/home/dashboard',
+        redirect: (context, state) => GuardRoutes.dashboard,
+      ),
+      GoRoute(
+        path: '/all',
+        redirect: (context, state) => GuardRoutes.dashboard,
+      ),
+      GoRoute(
+        path: '/home/visitors/:id',
+        redirect: (context, state) => '/visitors/${state.pathParameters['id']}',
+      ),
+
+      // Guard Shell Navigation
       ShellRoute(
         builder: (context, state, child) => GuardShell(child: child),
         routes: [
@@ -71,14 +120,16 @@ final guardRouterProvider = Provider<GoRouter>((ref) {
             path: GuardRoutes.profile,
             builder: (context, state) => const GuardProfileScreen(),
           ),
-          GoRoute(
-            path: '/visitors/:id',
-            builder: (context, state) {
-              final id = state.pathParameters['id']!;
-              return GuardVisitorDetailScreen(visitorId: id);
-            },
-          ),
         ],
+      ),
+
+      // Detail Screen outside Shell
+      GoRoute(
+        path: '/visitors/:id',
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return GuardVisitorDetailScreen(visitorId: id);
+        },
       ),
     ],
   );

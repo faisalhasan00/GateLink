@@ -7,7 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'firebase_options.dart';
-import 'core/router/guard_router.dart';
+import 'core/router/app_router.dart';
 import 'core/theme/app_colors.dart';
 import 'core/services/notification_service.dart';
 
@@ -109,7 +109,7 @@ class SocietySphereGuardApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(guardRouterProvider);
+    final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
       title: 'HomeHni Guard',

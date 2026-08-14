@@ -35,7 +35,7 @@ class GuardShell extends StatelessWidget {
       label: 'Profile',
       icon: Icons.person_outline_rounded,
       activeIcon: Icons.person_rounded,
-      route: '/home/profile',
+      route: '/guard/profile',
     ),
   ];
 
