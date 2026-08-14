@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../domain/models/complaint_model.dart';
-import '../providers/complaint_providers.dart';
+import '../../domain/models/complaint_model.dart';
+import '../../providers/complaint_providers.dart';
 
 class ComplaintDetailScreen extends ConsumerWidget {
   final String complaintId;
@@ -11,7 +11,8 @@ class ComplaintDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final complaintAsync = ref.watch(complaintDetailStreamProvider(complaintId));
+    final complaintAsync =
+        ref.watch(complaintDetailStreamProvider(complaintId));
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -43,8 +44,8 @@ class ComplaintDetailScreen extends ConsumerWidget {
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppRadius.lg),
-                    border: Border.all(
-                        color: statusColor.withValues(alpha: 0.3)),
+                    border:
+                        Border.all(color: statusColor.withValues(alpha: 0.3)),
                   ),
                   child: Row(children: [
                     Icon(
@@ -65,8 +66,8 @@ class ComplaintDetailScreen extends ConsumerWidget {
                                   color: statusColor)),
                           Text(
                               'Assigned: ${complaint.assignedTo ?? "Unassigned"}',
-                              style: TextStyle(
-                                  fontSize: 12, color: statusColor)),
+                              style:
+                                  TextStyle(fontSize: 12, color: statusColor)),
                         ]),
                   ]),
                 ),
@@ -89,8 +90,7 @@ class ComplaintDetailScreen extends ConsumerWidget {
                               horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: AppColors.primarySurface,
-                            borderRadius:
-                                BorderRadius.circular(AppRadius.full),
+                            borderRadius: BorderRadius.circular(AppRadius.full),
                           ),
                           child: Text(complaint.category,
                               style: const TextStyle(
@@ -104,8 +104,7 @@ class ComplaintDetailScreen extends ConsumerWidget {
                               horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: AppColors.warning.withValues(alpha: 0.1),
-                            borderRadius:
-                                BorderRadius.circular(AppRadius.full),
+                            borderRadius: BorderRadius.circular(AppRadius.full),
                           ),
                           child: Text(
                             'Priority: ${complaint.priority.toUpperCase()}',

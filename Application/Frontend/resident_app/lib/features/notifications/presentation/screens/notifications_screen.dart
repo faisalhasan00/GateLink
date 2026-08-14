@@ -130,8 +130,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           // Filter Bar
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(
-                AppSpacing.pagePadding, 0, AppSpacing.pagePadding, AppSpacing.sm),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.pagePadding, 0,
+                AppSpacing.pagePadding, AppSpacing.sm),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(

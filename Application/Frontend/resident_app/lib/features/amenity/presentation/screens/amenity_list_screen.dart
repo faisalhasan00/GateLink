@@ -6,7 +6,8 @@ import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../providers/amenity_providers.dart';
+import '../../providers/amenity_providers.dart';
+import '../controllers/amenity_controller.dart';
 
 class AmenityListScreen extends ConsumerStatefulWidget {
   const AmenityListScreen({super.key});
@@ -176,8 +177,8 @@ class _AmenityListScreenState extends ConsumerState<AmenityListScreen> {
                   ),
                   trailing: canBook
                       ? ElevatedButton(
-                          onPressed: () =>
-                              context.go('${AppRoutes.amenities}/${amenity.id}'),
+                          onPressed: () => context
+                              .go('${AppRoutes.amenities}/${amenity.id}'),
                           style: ElevatedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 8),
@@ -191,8 +192,7 @@ class _AmenityListScreenState extends ConsumerState<AmenityListScreen> {
                               horizontal: 10, vertical: 5),
                           decoration: BoxDecoration(
                             color: AppColors.error.withValues(alpha: 0.1),
-                            borderRadius:
-                                BorderRadius.circular(AppRadius.full),
+                            borderRadius: BorderRadius.circular(AppRadius.full),
                           ),
                           child: Text(
                             !isFacilityOpen ? 'Closed' : 'Sold Out',

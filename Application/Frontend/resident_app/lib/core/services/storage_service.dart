@@ -10,11 +10,14 @@ class StorageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
   /// Uploads an image to Firebase Storage and returns the download URL
-  Future<String> uploadComplaintImage(File imageFile, String societyId, String complaintId) async {
+  Future<String> uploadComplaintImage(
+      File imageFile, String societyId, String complaintId) async {
     try {
       final fileName = 'image_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final ref = _storage.ref().child('societies/$societyId/complaints/$complaintId/$fileName');
-      
+      final ref = _storage
+          .ref()
+          .child('societies/$societyId/complaints/$complaintId/$fileName');
+
       final uploadTask = await ref.putFile(imageFile);
       return await uploadTask.ref.getDownloadURL();
     } catch (e) {

@@ -38,7 +38,8 @@ class PaymentOrderModel {
     this.paidAt,
   });
 
-  factory PaymentOrderModel.fromMap(Map<String, dynamic> map, String documentId) {
+  factory PaymentOrderModel.fromMap(
+      Map<String, dynamic> map, String documentId) {
     DateTime? parseDate(dynamic value) {
       if (value == null) return null;
       if (value is DateTime) return value;
@@ -113,7 +114,8 @@ class PaymentOrderModel {
     return PaymentOrderModel(
       orderId: orderId ?? this.orderId,
       cashfreePaymentId: cashfreePaymentId ?? this.cashfreePaymentId,
-      cashfreePaymentSessionId: cashfreePaymentSessionId ?? this.cashfreePaymentSessionId,
+      cashfreePaymentSessionId:
+          cashfreePaymentSessionId ?? this.cashfreePaymentSessionId,
       societyId: societyId ?? this.societyId,
       maintenanceBillId: maintenanceBillId ?? this.maintenanceBillId,
       residentUid: residentUid ?? this.residentUid,

@@ -31,7 +31,9 @@ void main() {
       expect(model.societyId, 'SOC-001');
     });
 
-    test('ParkingSlotModel handles fallback defaults when map fields are missing', () {
+    test(
+        'ParkingSlotModel handles fallback defaults when map fields are missing',
+        () {
       final model = ParkingSlotModel.fromMap({});
 
       expect(model.id, '');

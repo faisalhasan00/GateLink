@@ -2,7 +2,8 @@ import '../models/helper_log_model.dart';
 import '../models/helper_model.dart';
 
 abstract class HelperRepository {
-  Stream<List<HelperModel>> watchMyHelpers(String societyId, String residentUid);
+  Stream<List<HelperModel>> watchMyHelpers(
+      String societyId, String residentUid);
   Stream<List<HelperLogModel>> watchTodayHelperLogs(String societyId);
   Future<void> registerHelper({
     required String societyId,

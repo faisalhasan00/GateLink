@@ -28,7 +28,8 @@ final pendingBillProvider = FutureProvider<MaintenanceBillModel?>((ref) async {
 });
 
 /// Real-time stream provider of all maintenance bills for the current resident.
-final maintenanceBillsProvider = StreamProvider<List<MaintenanceBillModel>>((ref) {
+final maintenanceBillsProvider =
+    StreamProvider<List<MaintenanceBillModel>>((ref) {
   final repo = ref.watch(maintenanceRepositoryProvider);
   final user = ref.watch(currentUserProvider);
   if (user == null) return const Stream.empty();
@@ -36,7 +37,8 @@ final maintenanceBillsProvider = StreamProvider<List<MaintenanceBillModel>>((ref
 });
 
 /// Real-time stream provider of payment receipts for the current resident.
-final paymentReceiptsProvider = StreamProvider<List<PaymentReceiptModel>>((ref) {
+final paymentReceiptsProvider =
+    StreamProvider<List<PaymentReceiptModel>>((ref) {
   final repo = ref.watch(maintenanceRepositoryProvider);
   final user = ref.watch(currentUserProvider);
   if (user == null) return const Stream.empty();

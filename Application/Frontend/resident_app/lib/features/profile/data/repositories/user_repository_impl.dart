@@ -105,7 +105,8 @@ class UserRepositoryImpl implements UserRepository {
         .snapshots()
         .map((snapshot) {
       if (snapshot.docs.isEmpty) return null;
-      return UserProfileModel.fromMap(snapshot.docs.first.data(), defaultUid: uid);
+      return UserProfileModel.fromMap(snapshot.docs.first.data(),
+          defaultUid: uid);
     });
   }
 

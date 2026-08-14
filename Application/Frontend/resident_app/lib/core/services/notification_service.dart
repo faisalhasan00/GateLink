@@ -45,7 +45,8 @@ class NotificationService {
         android: AndroidNotificationDetails(
           'visitors',
           'Visitor Alerts',
-          channelDescription: 'Notifications when a visitor arrives at the gate',
+          channelDescription:
+              'Notifications when a visitor arrives at the gate',
           importance: Importance.max,
           priority: Priority.high,
           playSound: true,

@@ -85,34 +85,38 @@ class _GuardShellState extends State<GuardShell> {
                     behavior: HitTestBehavior.opaque,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 6),
                       decoration: BoxDecoration(
-                        color: isActive ? AppColors.primary : Colors.transparent,
+                        color:
+                            isActive ? AppColors.primary : Colors.transparent,
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                        Icon(
-                          isActive ? item.activeIcon : item.icon,
-                          color: isActive ? Colors.white : AppColors.gray400,
-                          size: 22,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          item.label,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                          Icon(
+                            isActive ? item.activeIcon : item.icon,
                             color: isActive ? Colors.white : AppColors.gray400,
+                            size: 22,
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          Text(
+                            item.label,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight:
+                                  isActive ? FontWeight.w600 : FontWeight.w400,
+                              color:
+                                  isActive ? Colors.white : AppColors.gray400,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            }),
+                );
+              }),
             ),
           ),
         ),

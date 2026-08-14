@@ -5,8 +5,9 @@ import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../domain/models/amenity_model.dart';
-import '../providers/amenity_providers.dart';
+import '../../domain/models/amenity_model.dart';
+import '../../providers/amenity_providers.dart';
+import '../controllers/amenity_controller.dart';
 
 class AmenityBookingScreen extends ConsumerStatefulWidget {
   final String amenityId;
@@ -189,7 +190,8 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
   @override
   Widget build(BuildContext context) {
     final amenityName = _amenityModel?.name ?? 'Society Facility';
-    final amenityTiming = _amenityModel?.timing ?? 'Open Daily: 06:00 AM - 10:00 PM';
+    final amenityTiming =
+        _amenityModel?.timing ?? 'Open Daily: 06:00 AM - 10:00 PM';
     final maxCapacity = _amenityModel?.capacity ?? 10;
     final feeText = _amenityModel?.fee ?? 'Free';
     final controllerState = ref.watch(amenityControllerProvider);
@@ -365,8 +367,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
                           backgroundColor: Colors.white,
                           disabledColor: AppColors.background,
                           shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(AppRadius.full),
+                            borderRadius: BorderRadius.circular(AppRadius.full),
                             side: BorderSide(
                               color: isSelected
                                   ? AppColors.primary
@@ -407,7 +408,8 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
                               onPressed: _guestCount > 1
                                   ? () => setState(() => _guestCount--)
                                   : null,
-                              icon: const Icon(Icons.remove_circle_outline_rounded),
+                              icon: const Icon(
+                                  Icons.remove_circle_outline_rounded),
                               color: AppColors.primary,
                             ),
                             Text('$_guestCount',
@@ -417,7 +419,8 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
                               onPressed: _guestCount < maxCapacity
                                   ? () => setState(() => _guestCount++)
                                   : null,
-                              icon: const Icon(Icons.add_circle_outline_rounded),
+                              icon:
+                                  const Icon(Icons.add_circle_outline_rounded),
                               color: AppColors.primary,
                             ),
                           ],

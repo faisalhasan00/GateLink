@@ -27,12 +27,13 @@ class SocietyModel {
 
   factory SocietyModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
-    
+
     // Parse blocks dynamically from Firestore document ONLY
     List<String> parsedBlocks = [];
     if (data['blocksList'] is List && (data['blocksList'] as List).isNotEmpty) {
       parsedBlocks = List<String>.from(data['blocksList']);
-    } else if (data['buildings'] is String && (data['buildings'] as String).trim().isNotEmpty) {
+    } else if (data['buildings'] is String &&
+        (data['buildings'] as String).trim().isNotEmpty) {
       parsedBlocks = (data['buildings'] as String)
           .split(',')
           .map((s) => s.trim())
@@ -52,10 +53,14 @@ class SocietyModel {
       country: data['country'] ?? 'India',
       city: data['city'] ?? 'Hyderabad',
       blocks: parsedBlocks,
-      totalFlats: int.tryParse(data['flats']?.toString() ?? '') ?? int.tryParse(data['totalFlats']?.toString() ?? '') ?? 200,
+      totalFlats: int.tryParse(data['flats']?.toString() ?? '') ??
+          int.tryParse(data['totalFlats']?.toString() ?? '') ??
+          200,
       floors: int.tryParse(data['floors']?.toString() ?? '') ?? 14,
-      flatsPerBlock: int.tryParse(data['flatsPerBlock']?.toString() ?? '') ?? 50,
-      startFlatNumber: int.tryParse(data['startFlatNumber']?.toString() ?? '') ?? 101,
+      flatsPerBlock:
+          int.tryParse(data['flatsPerBlock']?.toString() ?? '') ?? 50,
+      startFlatNumber:
+          int.tryParse(data['startFlatNumber']?.toString() ?? '') ?? 101,
     );
   }
 }
@@ -70,14 +75,17 @@ class SocietyService {
       if (snapshot.docs.isEmpty) {
         return _getFallbackDatabaseSocieties();
       }
-      return snapshot.docs.map((doc) => SocietyModel.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => SocietyModel.fromFirestore(doc))
+          .toList();
     } catch (e) {
       return _getFallbackDatabaseSocieties();
     }
   }
 
   /// Fetch societies filtered by Country and City
-  Future<List<SocietyModel>> fetchSocietiesByLocation(String country, String city) async {
+  Future<List<SocietyModel>> fetchSocietiesByLocation(
+      String country, String city) async {
     try {
       final snapshot = await _db
           .collection('societies')
@@ -88,15 +96,18 @@ class SocietyService {
       if (snapshot.docs.isEmpty) {
         // Fallback: search all societies matching city or country
         final all = await fetchAllSocieties();
-        final matched = all.where((s) => 
-          s.city.toLowerCase() == city.toLowerCase() || 
-          s.country.toLowerCase() == country.toLowerCase()
-        ).toList();
+        final matched = all
+            .where((s) =>
+                s.city.toLowerCase() == city.toLowerCase() ||
+                s.country.toLowerCase() == country.toLowerCase())
+            .toList();
 
         return matched.isNotEmpty ? matched : all;
       }
 
-      return snapshot.docs.map((doc) => SocietyModel.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => SocietyModel.fromFirestore(doc))
+          .toList();
     } catch (e) {
       return fetchAllSocieties();
     }
@@ -111,7 +122,11 @@ class SocietyService {
 
     for (int i = 0; i < count; i++) {
       int num = start + i;
-      String flatStr = num < 10 ? '00$num' : num < 100 ? '0$num' : '$num';
+      String flatStr = num < 10
+          ? '00$num'
+          : num < 100
+              ? '0$num'
+              : '$num';
       flats.add(flatStr);
     }
 

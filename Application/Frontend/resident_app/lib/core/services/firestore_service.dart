@@ -36,7 +36,8 @@ class FirestoreService {
   Future<FlatValidationResult> validateFlat(String hostFlat) async {
     final rawInput = hostFlat.trim();
     if (rawInput.isEmpty) {
-      return FlatValidationResult(isValid: false, error: 'Flat Number is required');
+      return FlatValidationResult(
+          isValid: false, error: 'Flat Number is required');
     }
 
     try {
@@ -79,7 +80,8 @@ class FirestoreService {
         error: 'Flat "$rawInput" not assigned to any resident',
       );
     } catch (e) {
-      return FlatValidationResult(isValid: false, error: 'Flat validation error: $e');
+      return FlatValidationResult(
+          isValid: false, error: 'Flat validation error: $e');
     }
   }
 
@@ -115,15 +117,14 @@ class FirestoreService {
           .get();
 
       if (dupSnapshot.docs.isNotEmpty) {
-        throw Exception('A pending visitor request already exists for this mobile number ($cleanPhone).');
+        throw Exception(
+            'A pending visitor request already exists for this mobile number ($cleanPhone).');
       }
     }
 
     // 3. Write Visitor Record
     final nowStr = DateTime.now().toIso8601String();
-    final docRef = await _db
-        .collection('societies/$societyId/visitors')
-        .add({
+    final docRef = await _db.collection('societies/$societyId/visitors').add({
       'name': name,
       'type': type,
       'hostFlat': hostFlat,
@@ -150,10 +151,12 @@ class FirestoreService {
     if (validation.residentUid != null && validation.residentUid!.isNotEmpty) {
       try {
         await _db
-            .collection('societies/$societyId/users/${validation.residentUid}/notifications')
+            .collection(
+                'societies/$societyId/users/${validation.residentUid}/notifications')
             .add({
           'title': '🔔 New Visitor Request',
-          'body': '$name ($type) is waiting at ${gateName ?? "Gate 1"} for Flat $hostFlat.',
+          'body':
+              '$name ($type) is waiting at ${gateName ?? "Gate 1"} for Flat $hostFlat.',
           'type': 'visitor_pending',
           'visitorId': docRef.id,
           'read': false,
@@ -166,7 +169,8 @@ class FirestoreService {
   }
 
   Future<void> markVisitorExit(String visitorId) async {
-    final docRef = _db.collection('societies/$societyId/visitors').doc(visitorId);
+    final docRef =
+        _db.collection('societies/$societyId/visitors').doc(visitorId);
     final doc = await docRef.get();
     final exitNow = DateTime.now();
     final exitStr = exitNow.toIso8601String();
@@ -185,7 +189,8 @@ class FirestoreService {
           final hours = durationMinutes ~/ 60;
           final mins = durationMinutes % 60;
           if (hours > 0) {
-            durationString = '$hours Hr${hours > 1 ? "s" : ""} $mins Min${mins != 1 ? "s" : ""}';
+            durationString =
+                '$hours Hr${hours > 1 ? "s" : ""} $mins Min${mins != 1 ? "s" : ""}';
           } else {
             durationString = '$mins Min${mins != 1 ? "s" : ""}';
           }
@@ -205,7 +210,7 @@ class FirestoreService {
   /// Processes QR code or 6-digit numeric Pass Code scan with duplicate prevention, expiration check, and validation
   Future<Map<String, dynamic>> validateAndProcessQrScan(String code) async {
     final cleanCode = code.trim();
-    
+
     // 1. Look up visitor by qrCode, passCode, or docId
     QuerySnapshot query = await _db
         .collection('societies/$societyId/visitors')
@@ -228,7 +233,8 @@ class FirestoreService {
         targetDoc = passQuery.docs.first;
       } else {
         // Fallback to document ID search
-        final doc = await _db.doc('societies/$societyId/visitors/$cleanCode').get();
+        final doc =
+            await _db.doc('societies/$societyId/visitors/$cleanCode').get();
         if (doc.exists) targetDoc = doc;
       }
     }
@@ -246,22 +252,46 @@ class FirestoreService {
       try {
         final exp = DateTime.parse(expiresAtStr);
         if (DateTime.now().isAfter(exp)) {
-          return {'valid': false, 'reason': 'expired', 'docId': targetDoc.id, 'data': data, 'error': 'QR Code Expired'};
+          return {
+            'valid': false,
+            'reason': 'expired',
+            'docId': targetDoc.id,
+            'data': data,
+            'error': 'QR Code Expired'
+          };
         }
       } catch (_) {}
     }
 
     // 3. Duplicate Prevention Check
     if (status == 'inside') {
-      return {'valid': false, 'reason': 'already_used', 'docId': targetDoc.id, 'data': data, 'error': 'Pass Already Used'};
+      return {
+        'valid': false,
+        'reason': 'already_used',
+        'docId': targetDoc.id,
+        'data': data,
+        'error': 'Pass Already Used'
+      };
     }
 
     if (status == 'denied' || status == 'rejected') {
-      return {'valid': false, 'reason': 'denied', 'docId': targetDoc.id, 'data': data, 'error': 'Visitor Denied Entry'};
+      return {
+        'valid': false,
+        'reason': 'denied',
+        'docId': targetDoc.id,
+        'data': data,
+        'error': 'Visitor Denied Entry'
+      };
     }
 
     if (status == 'checked_out' || status == 'left') {
-      return {'valid': false, 'reason': 'checked_out', 'docId': targetDoc.id, 'data': data, 'error': 'Visitor Already Checked Out'};
+      return {
+        'valid': false,
+        'reason': 'checked_out',
+        'docId': targetDoc.id,
+        'data': data,
+        'error': 'Visitor Already Checked Out'
+      };
     }
 
     return {
@@ -366,7 +396,8 @@ class FirestoreService {
     String? residentName,
     String? flatNumber,
   }) async {
-    final ticketNum = 'CMP-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+    final ticketNum =
+        'CMP-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
     final nowStr = DateTime.now().toIso8601String();
 
     final docRef = await _db.collection('societies/$societyId/complaints').add({
@@ -389,12 +420,17 @@ class FirestoreService {
 
     // Write Live Notification to Society Admin & Super Admin
     try {
-      final senderName = residentName != null && residentName.isNotEmpty ? residentName : 'Resident';
-      final senderFlat = flatNumber != null && flatNumber.isNotEmpty ? ' (Flat $flatNumber)' : '';
+      final senderName = residentName != null && residentName.isNotEmpty
+          ? residentName
+          : 'Resident';
+      final senderFlat = flatNumber != null && flatNumber.isNotEmpty
+          ? ' (Flat $flatNumber)'
+          : '';
 
       await _db.collection('societies/$societyId/notifications').add({
         'title': '🚨 New Complaint: $ticketNum',
-        'message': '$senderName$senderFlat raised a $category complaint: "$title"',
+        'message':
+            '$senderName$senderFlat raised a $category complaint: "$title"',
         'category': category,
         'type': 'complaint',
         'ticketNumber': ticketNum,
@@ -405,7 +441,8 @@ class FirestoreService {
 
       await _db.collection('notifications').add({
         'title': '🚨 New Complaint: $ticketNum',
-        'message': '$category complaint raised by $senderName$senderFlat ($title)',
+        'message':
+            '$category complaint raised by $senderName$senderFlat ($title)',
         'societyId': societyId,
         'type': 'complaint',
         'read': false,
@@ -484,9 +521,7 @@ class FirestoreService {
   // ── AMENITIES ────────────────────────────────────────────────────────────
 
   Stream<QuerySnapshot> amenitiesStream() {
-    return _db
-        .collection('societies/$societyId/amenities')
-        .snapshots();
+    return _db.collection('societies/$societyId/amenities').snapshots();
   }
 
   // ── AMENITY BOOKINGS ─────────────────────────────────────────────────────
@@ -498,14 +533,15 @@ class FirestoreService {
         .snapshots();
   }
 
-  Future<List<String>> getBookedSlotsForDate(String amenityId, String date) async {
+  Future<List<String>> getBookedSlotsForDate(
+      String amenityId, String date) async {
     final snapshot = await _db
         .collection('societies/$societyId/amenity_bookings')
         .where('amenityId', isEqualTo: amenityId)
         .where('date', isEqualTo: date)
         .where('status', isEqualTo: 'confirmed')
         .get();
-        
+
     return snapshot.docs
         .map((doc) => doc.data()['timeSlot'] as String?)
         .whereType<String>()
@@ -527,12 +563,17 @@ class FirestoreService {
     // 1. Fetch Amenity Profile for Capacity & Approval Policy
     DocumentSnapshot? amenityDoc;
     try {
-      amenityDoc = await _db.collection('societies/$societyId/amenities').doc(amenityId).get();
+      amenityDoc = await _db
+          .collection('societies/$societyId/amenities')
+          .doc(amenityId)
+          .get();
     } catch (_) {}
 
     final amenityData = amenityDoc?.data() as Map<String, dynamic>? ?? {};
     final approvalPolicy = amenityData['approvalPolicy'] as String? ?? 'auto';
-    final maxCapacity = (amenityData['capacity'] as num?)?.toInt() ?? (amenityData['maxSlots'] as num?)?.toInt() ?? 10;
+    final maxCapacity = (amenityData['capacity'] as num?)?.toInt() ??
+        (amenityData['maxSlots'] as num?)?.toInt() ??
+        10;
 
     // 2. Count Active Bookings for this Date & Time Slot
     final existingSnapshot = await _db
@@ -548,7 +589,8 @@ class FirestoreService {
     }).length;
 
     if (activeCount >= maxCapacity) {
-      throw Exception('Slot Sold Out! All $maxCapacity available slots for $timeSlot on $date are already booked.');
+      throw Exception(
+          'Slot Sold Out! All $maxCapacity available slots for $timeSlot on $date are already booked.');
     }
 
     // 3. Determine Initial Status (Auto-Approve vs Manual Admin Approval)
@@ -557,7 +599,8 @@ class FirestoreService {
     final nowStr = DateTime.now().toIso8601String();
 
     // 4. Add Booking Document
-    final docRef = await _db.collection('societies/$societyId/amenity_bookings').add({
+    final docRef =
+        await _db.collection('societies/$societyId/amenity_bookings').add({
       'amenityId': amenityId,
       'amenityName': amenityName,
       'bookedBy': uid,
@@ -583,7 +626,10 @@ class FirestoreService {
     // 5. Update live availableSlots on Amenity Document
     try {
       final remainingForDoc = remainingSlots < 0 ? 0 : remainingSlots;
-      await _db.collection('societies/$societyId/amenities').doc(amenityId).update({
+      await _db
+          .collection('societies/$societyId/amenities')
+          .doc(amenityId)
+          .update({
         'availableSlots': remainingForDoc,
         'updatedAt': nowStr,
       });
@@ -594,7 +640,8 @@ class FirestoreService {
       try {
         await _db.collection('societies/$societyId/notifications').add({
           'title': '📅 New Amenity Booking Request',
-          'message': '$userName requested a booking for $amenityName on $date ($timeSlot).',
+          'message':
+              '$userName requested a booking for $amenityName on $date ($timeSlot).',
           'type': 'amenity',
           'bookingId': docRef.id,
           'read': false,
@@ -607,7 +654,10 @@ class FirestoreService {
   }
 
   Future<void> cancelAmenityBooking(String bookingId, String userUid) async {
-    final docSnap = await _db.collection('societies/$societyId/amenity_bookings').doc(bookingId).get();
+    final docSnap = await _db
+        .collection('societies/$societyId/amenity_bookings')
+        .doc(bookingId)
+        .get();
     final amenityId = docSnap.data()?['amenityId'] as String?;
 
     await _db
@@ -621,11 +671,21 @@ class FirestoreService {
 
     if (amenityId != null) {
       try {
-        final amenityDoc = await _db.collection('societies/$societyId/amenities').doc(amenityId).get();
-        final currentCap = (amenityDoc.data()?['capacity'] as num?)?.toInt() ?? 10;
-        final currentSlots = (amenityDoc.data()?['availableSlots'] as num?)?.toInt() ?? currentCap;
-        await _db.collection('societies/$societyId/amenities').doc(amenityId).update({
-          'availableSlots': (currentSlots + 1) > currentCap ? currentCap : (currentSlots + 1),
+        final amenityDoc = await _db
+            .collection('societies/$societyId/amenities')
+            .doc(amenityId)
+            .get();
+        final currentCap =
+            (amenityDoc.data()?['capacity'] as num?)?.toInt() ?? 10;
+        final currentSlots =
+            (amenityDoc.data()?['availableSlots'] as num?)?.toInt() ??
+                currentCap;
+        await _db
+            .collection('societies/$societyId/amenities')
+            .doc(amenityId)
+            .update({
+          'availableSlots':
+              (currentSlots + 1) > currentCap ? currentCap : (currentSlots + 1),
         });
       } catch (_) {}
     }
@@ -643,13 +703,12 @@ class FirestoreService {
   // ── DOCUMENTS ────────────────────────────────────────────────────────────
 
   Stream<QuerySnapshot> documentsStream() {
-    return _db
-        .collection('societies/$societyId/documents')
-        .snapshots();
+    return _db.collection('societies/$societyId/documents').snapshots();
   }
 
   Future<void> seedDocumentsIfEmpty() async {
-    final snap = await _db.collection('societies/$societyId/documents').limit(1).get();
+    final snap =
+        await _db.collection('societies/$societyId/documents').limit(1).get();
     if (snap.docs.isEmpty) {
       final batch = _db.batch();
       final docs = [
@@ -657,28 +716,32 @@ class FirestoreService {
           'title': 'Society By-Laws 2026',
           'category': 'Rules',
           'size': '2.4 MB',
-          'url': 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+          'url':
+              'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
           'uploadedAt': DateTime.now().toIso8601String(),
         },
         {
           'title': 'Financial Audit Report FY25-26',
           'category': 'Financial',
           'size': '4.1 MB',
-          'url': 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+          'url':
+              'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
           'uploadedAt': DateTime.now().toIso8601String(),
         },
         {
           'title': 'AGM Minutes - July 2026',
           'category': 'Compliance',
           'size': '1.8 MB',
-          'url': 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+          'url':
+              'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
           'uploadedAt': DateTime.now().toIso8601String(),
         },
         {
           'title': 'Fire Safety & Evacuation Plan',
           'category': 'Rules',
           'size': '3.2 MB',
-          'url': 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+          'url':
+              'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
           'uploadedAt': DateTime.now().toIso8601String(),
         },
       ];
@@ -704,11 +767,10 @@ class FirestoreService {
   }) async {
     // Generate cryptographically secure 6-digit numeric Pass Code with 24-hour expiration
     final passCode = (100000 + Random.secure().nextInt(900000)).toString();
-    final expiresAt = DateTime.now().add(const Duration(hours: 24)).toIso8601String();
+    final expiresAt =
+        DateTime.now().add(const Duration(hours: 24)).toIso8601String();
 
-    final docRef = await _db
-        .collection('societies/$societyId/visitors')
-        .add({
+    final docRef = await _db.collection('societies/$societyId/visitors').add({
       'name': name,
       'phone': phone,
       'type': purpose,
@@ -731,9 +793,8 @@ class FirestoreService {
     };
   }
 
-
   // ── NOTIFICATIONS ────────────────────────────────────────────────────────
-  
+
   Stream<QuerySnapshot> notificationsStream(String uid) {
     return _db
         .collection('societies/$societyId/users/$uid/notifications')
@@ -769,7 +830,8 @@ class FirestoreService {
     await batch.commit();
   }
 
-  Future<void> updateNotificationPreferences(String uid, Map<String, bool> prefs) async {
+  Future<void> updateNotificationPreferences(
+      String uid, Map<String, bool> prefs) async {
     await _db
         .collection('societies/$societyId/users')
         .doc(uid)

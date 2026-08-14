@@ -81,14 +81,10 @@ class ComplaintRepositoryImpl implements ComplaintRepository {
 
     // Write Live Notification to Society Admin
     try {
-      final senderName =
-          residentName.isNotEmpty ? residentName : 'Resident';
-      final senderFlat =
-          flatNumber.isNotEmpty ? ' (Flat $flatNumber)' : '';
+      final senderName = residentName.isNotEmpty ? residentName : 'Resident';
+      final senderFlat = flatNumber.isNotEmpty ? ' (Flat $flatNumber)' : '';
 
-      await _firestore
-          .collection('societies/$societyId/notifications')
-          .add({
+      await _firestore.collection('societies/$societyId/notifications').add({
         'title': '🚨 New Complaint: $ticketNum',
         'message':
             '$senderName$senderFlat raised a $category complaint: "$title"',

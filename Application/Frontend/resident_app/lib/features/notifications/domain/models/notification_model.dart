@@ -17,7 +17,8 @@ class NotificationModel {
     this.societyId = 'SOC-001',
   });
 
-  factory NotificationModel.fromMap(Map<String, dynamic> map, String documentId) {
+  factory NotificationModel.fromMap(
+      Map<String, dynamic> map, String documentId) {
     return NotificationModel(
       id: documentId,
       title: map['title'] as String? ?? 'Notification',

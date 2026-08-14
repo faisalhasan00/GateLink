@@ -12,7 +12,8 @@ class AlertRepositoryImpl implements AlertRepository {
     required String guardEmail,
     required String message,
   }) async {
-    final docRef = await _firestore.collection('societies/$societyId/alerts').add({
+    final docRef =
+        await _firestore.collection('societies/$societyId/alerts').add({
       'type': 'SOS',
       'guardEmail': guardEmail,
       'message': message,
@@ -48,7 +49,8 @@ class AlertRepositoryImpl implements AlertRepository {
 
     await _firestore.collection('societies/$societyId/notifications').add({
       'title': '🚨 EMERGENCY SOS TRIGGERED: $type',
-      'body': 'Emergency SOS triggered by $residentName (Flat $flatNumber). Type: $type. Immediate assistance required!',
+      'body':
+          'Emergency SOS triggered by $residentName (Flat $flatNumber). Type: $type. Immediate assistance required!',
       'createdAt': timestampStr,
       'isRead': false,
       'type': 'sos',

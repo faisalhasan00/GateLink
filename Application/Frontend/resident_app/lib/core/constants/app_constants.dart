@@ -3,8 +3,10 @@ class AppConstants {
   AppConstants._();
 
   // API
-  static const String baseUrl = 'http://10.0.2.2:8000/api/v1'; // Android emulator localhost
-  static const String baseUrlIos = 'http://127.0.0.1:8000/api/v1'; // iOS simulator localhost
+  static const String baseUrl =
+      'http://10.0.2.2:8000/api/v1'; // Android emulator localhost
+  static const String baseUrlIos =
+      'http://127.0.0.1:8000/api/v1'; // iOS simulator localhost
 
   // Secure Storage Keys
   static const String accessTokenKey = 'access_token';

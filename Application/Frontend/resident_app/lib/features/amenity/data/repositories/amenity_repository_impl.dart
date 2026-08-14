@@ -22,7 +22,8 @@ class AmenityRepositoryImpl implements AmenityRepository {
   }
 
   @override
-  Stream<List<AmenityBookingModel>> watchMyBookings(String societyId, String uid) {
+  Stream<List<AmenityBookingModel>> watchMyBookings(
+      String societyId, String uid) {
     return _firestore
         .collection('societies/$societyId/amenity_bookings')
         .where('bookedBy', isEqualTo: uid)
@@ -47,7 +48,8 @@ class AmenityRepositoryImpl implements AmenityRepository {
   }
 
   @override
-  Future<AmenityModel?> fetchAmenityById(String societyId, String amenityId) async {
+  Future<AmenityModel?> fetchAmenityById(
+      String societyId, String amenityId) async {
     final docSnap = await _firestore
         .collection('societies/$societyId/amenities')
         .doc(amenityId)
@@ -121,9 +123,7 @@ class AmenityRepositoryImpl implements AmenityRepository {
     final remainingSlots = maxCapacity - activeCount - 1;
     final nowStr = DateTime.now().toIso8601String();
 
-    await _firestore
-        .collection('societies/$societyId/amenity_bookings')
-        .add({
+    await _firestore.collection('societies/$societyId/amenity_bookings').add({
       'amenityId': amenityId,
       'amenityName': amenityName,
       'bookedBy': uid,
@@ -160,7 +160,8 @@ class AmenityRepositoryImpl implements AmenityRepository {
     }
 
     final data = docSnap.data() ?? {};
-    final bookedBy = data['bookedBy'] as String? ?? data['uid'] as String? ?? '';
+    final bookedBy =
+        data['bookedBy'] as String? ?? data['uid'] as String? ?? '';
     if (bookedBy.isNotEmpty && bookedBy != uid) {
       throw Exception('Unauthorized to cancel this booking.');
     }
@@ -241,9 +242,8 @@ class AmenityRepositoryImpl implements AmenityRepository {
     ];
 
     for (final item in items) {
-      final docRef = _firestore
-          .collection('societies/$societyId/amenities')
-          .doc();
+      final docRef =
+          _firestore.collection('societies/$societyId/amenities').doc();
       batch.set(docRef, item);
     }
 

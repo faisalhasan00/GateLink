@@ -55,15 +55,25 @@ class RecentNoticesList extends ConsumerWidget {
                           color: AppColors.notice.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(AppRadius.md),
                         ),
-                        child: const Icon(Icons.campaign_rounded, color: AppColors.notice, size: 20),
+                        child: const Icon(Icons.campaign_rounded,
+                            color: AppColors.notice, size: 20),
                       ),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary), maxLines: 2, overflow: TextOverflow.ellipsis),
-                            Text(dateStr, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                            Text(title,
+                                style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textPrimary),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis),
+                            Text(dateStr,
+                                style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary)),
                           ],
                         ),
                       ),
@@ -76,7 +86,8 @@ class RecentNoticesList extends ConsumerWidget {
         );
       },
       loading: () => const _SkeletonCardList(),
-      error: (e, st) => const _EmptyStateSmall(message: 'Unable to load notices'),
+      error: (e, st) =>
+          const _EmptyStateSmall(message: 'Unable to load notices'),
     );
   }
 }
@@ -95,7 +106,11 @@ class _EmptyStateSmall extends StatelessWidget {
         border: Border.all(color: AppColors.border),
       ),
       child: Center(
-        child: Text(message, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500)),
+        child: Text(message,
+            style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+                fontWeight: FontWeight.w500)),
       ),
     );
   }

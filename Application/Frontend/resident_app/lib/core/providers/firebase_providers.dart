@@ -23,9 +23,8 @@ export '../../features/payment/providers/payment_providers.dart';
 
 final firestoreServiceProvider = Provider<FirestoreService>((ref) {
   final profile = ref.watch(userProfileProvider).value;
-  final societyId = profile?.societyId.isNotEmpty == true
-      ? profile!.societyId
-      : 'SOC-001';
+  final societyId =
+      profile?.societyId.isNotEmpty == true ? profile!.societyId : 'SOC-001';
   return FirestoreService(societyId: societyId);
 });
 

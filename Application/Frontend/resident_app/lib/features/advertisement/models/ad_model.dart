@@ -6,7 +6,8 @@ class AdModel {
   final String businessName;
   final String tagline;
   final String ctaText;
-  final String? ctaUrl; // External URL: website, WhatsApp wa.me link, tel:, etc.
+  final String?
+      ctaUrl; // External URL: website, WhatsApp wa.me link, tel:, etc.
   final Color gradientStart;
   final Color gradientEnd;
   final IconData icon;
@@ -27,7 +28,7 @@ class AdModel {
 
 /// Mock/static ad data for initial version.
 /// Replace with API/Firebase data when backend is ready.
-class AdRepository {
+class AdMockData {
   static List<AdModel> getMockAds() {
     return [
       const AdModel(

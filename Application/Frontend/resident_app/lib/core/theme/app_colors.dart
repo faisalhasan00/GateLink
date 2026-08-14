@@ -49,13 +49,13 @@ class AppColors {
 
   // --- Feature-Specific Colors ---
   static const Color maintenance = Color(0xFF8B5CF6); // Purple
-  static const Color visitor = Color(0xFF10B981);    // Emerald
-  static const Color complaint = Color(0xFFF97316);  // Orange
-  static const Color amenity = Color(0xFF3B82F6);    // Blue
-  static const Color parking = Color(0xFF6366F1);    // Indigo
-  static const Color notice = Color(0xFFF59E0B);     // Amber
-  static const Color payment = Color(0xFF22C55E);    // Green
-  static const Color security = Color(0xFFEF4444);   // Red
+  static const Color visitor = Color(0xFF10B981); // Emerald
+  static const Color complaint = Color(0xFFF97316); // Orange
+  static const Color amenity = Color(0xFF3B82F6); // Blue
+  static const Color parking = Color(0xFF6366F1); // Indigo
+  static const Color notice = Color(0xFFF59E0B); // Amber
+  static const Color payment = Color(0xFF22C55E); // Green
+  static const Color security = Color(0xFFEF4444); // Red
 
   // --- Dark Theme ---
   static const Color darkBackground = Color(0xFF0F172A);

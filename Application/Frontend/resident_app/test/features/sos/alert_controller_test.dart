@@ -78,7 +78,8 @@ void main() {
 
       expect(success, false);
       expect(controller.state.status, AlertActionStatus.error);
-      expect(controller.state.errorMessage, contains('Failed to broadcast SOS alert'));
+      expect(controller.state.errorMessage,
+          contains('Failed to broadcast SOS alert'));
     });
   });
 }

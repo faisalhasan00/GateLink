@@ -17,8 +17,7 @@ final complaintControllerProvider =
   return ComplaintController(repository);
 });
 
-final myComplaintsStreamProvider =
-    StreamProvider<List<ComplaintModel>>((ref) {
+final myComplaintsStreamProvider = StreamProvider<List<ComplaintModel>>((ref) {
   final user = ref.watch(currentUserProvider);
   final profile = ref.watch(userProfileProvider).value;
   final societyId = profile?.societyId ?? 'SOC-001';

@@ -20,25 +20,29 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       icon: Icons.security_rounded,
       iconColor: AppColors.visitor,
       title: 'Smart Visitor Management',
-      subtitle: 'Pre-approve visitors with a QR code. Let security verify them in seconds — no calls needed.',
+      subtitle:
+          'Pre-approve visitors with a QR code. Let security verify them in seconds — no calls needed.',
     ),
     _OnboardingItem(
       icon: Icons.receipt_long_rounded,
       iconColor: AppColors.maintenance,
       title: 'Maintenance Bills Made Easy',
-      subtitle: 'View, track, and pay your monthly maintenance dues online in just a few taps.',
+      subtitle:
+          'View, track, and pay your monthly maintenance dues online in just a few taps.',
     ),
     _OnboardingItem(
       icon: Icons.support_agent_rounded,
       iconColor: AppColors.complaint,
       title: 'Raise Complaints Instantly',
-      subtitle: 'Log maintenance issues and track their resolution status in real-time.',
+      subtitle:
+          'Log maintenance issues and track their resolution status in real-time.',
     ),
     _OnboardingItem(
       icon: Icons.sports_tennis_rounded,
       iconColor: AppColors.amenity,
       title: 'Book Community Amenities',
-      subtitle: 'Reserve the clubhouse, gym, or swimming pool with live availability.',
+      subtitle:
+          'Reserve the clubhouse, gym, or swimming pool with live availability.',
     ),
   ];
 
@@ -93,7 +97,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         width: _currentPage == i ? 24 : 8,
                         height: 8,
                         decoration: BoxDecoration(
-                          color: _currentPage == i ? AppColors.primary : AppColors.border,
+                          color: _currentPage == i
+                              ? AppColors.primary
+                              : AppColors.border,
                           borderRadius: BorderRadius.circular(AppRadius.full),
                         ),
                       ),

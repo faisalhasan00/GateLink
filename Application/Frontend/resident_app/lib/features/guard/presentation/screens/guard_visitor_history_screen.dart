@@ -10,10 +10,12 @@ class GuardVisitorHistoryScreen extends ConsumerStatefulWidget {
   const GuardVisitorHistoryScreen({super.key});
 
   @override
-  ConsumerState<GuardVisitorHistoryScreen> createState() => _GuardVisitorHistoryScreenState();
+  ConsumerState<GuardVisitorHistoryScreen> createState() =>
+      _GuardVisitorHistoryScreenState();
 }
 
-class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryScreen> {
+class _GuardVisitorHistoryScreenState
+    extends ConsumerState<GuardVisitorHistoryScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
@@ -22,10 +24,35 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
   String _categoryFilter = 'All';
   String _sortBy = 'Newest First';
 
-  final List<String> _dateOptions = ['Today', 'Yesterday', 'Last 7 Days', 'All Time'];
-  final List<String> _statusOptions = ['All', 'Inside', 'Pending', 'Approved', 'Denied', 'Checked Out'];
-  final List<String> _categoryOptions = ['All', 'Guest', 'Delivery', 'Cab', 'Staff', 'Service Provider', 'Relative'];
-  final List<String> _sortOptions = ['Newest First', 'Oldest First', 'Visitor Name', 'Flat Number'];
+  final List<String> _dateOptions = [
+    'Today',
+    'Yesterday',
+    'Last 7 Days',
+    'All Time'
+  ];
+  final List<String> _statusOptions = [
+    'All',
+    'Inside',
+    'Pending',
+    'Approved',
+    'Denied',
+    'Checked Out'
+  ];
+  final List<String> _categoryOptions = [
+    'All',
+    'Guest',
+    'Delivery',
+    'Cab',
+    'Staff',
+    'Service Provider',
+    'Relative'
+  ];
+  final List<String> _sortOptions = [
+    'Newest First',
+    'Oldest First',
+    'Visitor Name',
+    'Flat Number'
+  ];
 
   @override
   void dispose() {
@@ -77,15 +104,20 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
                 // Search Input
                 TextField(
                   controller: _searchController,
-                  onChanged: (v) => setState(() => _searchQuery = v.trim().toLowerCase()),
+                  onChanged: (v) =>
+                      setState(() => _searchQuery = v.trim().toLowerCase()),
                   style: const TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: 'Search by Visitor, Phone, Flat, Vehicle, QR ID...',
-                    hintStyle: const TextStyle(color: Colors.white60, fontSize: 12),
-                    prefixIcon: const Icon(Icons.search_rounded, color: Colors.white60),
+                    hintText:
+                        'Search by Visitor, Phone, Flat, Vehicle, QR ID...',
+                    hintStyle:
+                        const TextStyle(color: Colors.white60, fontSize: 12),
+                    prefixIcon:
+                        const Icon(Icons.search_rounded, color: Colors.white60),
                     suffixIcon: _searchQuery.isNotEmpty
                         ? IconButton(
-                            icon: const Icon(Icons.clear_rounded, color: Colors.white60),
+                            icon: const Icon(Icons.clear_rounded,
+                                color: Colors.white60),
                             onPressed: () {
                               _searchController.clear();
                               setState(() => _searchQuery = '');
@@ -117,13 +149,15 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
                       _FilterDropdown(
                         label: 'Status: $_statusFilter',
                         options: _statusOptions,
-                        onSelected: (val) => setState(() => _statusFilter = val),
+                        onSelected: (val) =>
+                            setState(() => _statusFilter = val),
                       ),
                       const SizedBox(width: 6),
                       _FilterDropdown(
                         label: 'Category: $_categoryFilter',
                         options: _categoryOptions,
-                        onSelected: (val) => setState(() => _categoryFilter = val),
+                        onSelected: (val) =>
+                            setState(() => _categoryFilter = val),
                       ),
                       const SizedBox(width: 6),
                       _FilterDropdown(
@@ -142,18 +176,23 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
           Expanded(
             child: visitorsAsync.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, st) => Center(child: Text('Error loading history: $e')),
+              error: (e, st) =>
+                  Center(child: Text('Error loading history: $e')),
               data: (visitors) {
-                var docs = visitors.map((v) => v.toMap()..['_id'] = v.id).toList();
+                var docs =
+                    visitors.map((v) => v.toMap()..['_id'] = v.id).toList();
 
                 // 1. Apply Search Filter
                 if (_searchQuery.isNotEmpty) {
                   docs = docs.where((d) {
                     final name = (d['name'] ?? '').toString().toLowerCase();
                     final phone = (d['phone'] ?? '').toString().toLowerCase();
-                    final hostFlat = (d['hostFlat'] ?? '').toString().toLowerCase();
-                    final residentName = (d['hostResidentName'] ?? '').toString().toLowerCase();
-                    final vehicle = (d['vehicleNumber'] ?? '').toString().toLowerCase();
+                    final hostFlat =
+                        (d['hostFlat'] ?? '').toString().toLowerCase();
+                    final residentName =
+                        (d['hostResidentName'] ?? '').toString().toLowerCase();
+                    final vehicle =
+                        (d['vehicleNumber'] ?? '').toString().toLowerCase();
                     final qrCode = (d['qrCode'] ?? '').toString().toLowerCase();
 
                     return name.contains(_searchQuery) ||
@@ -167,7 +206,8 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
 
                 // 2. Apply Date Filter
                 docs = docs.where((d) {
-                  final createdStr = d['createdAt'] as String? ?? d['createdDate'] as String?;
+                  final createdStr =
+                      d['createdAt'] as String? ?? d['createdDate'] as String?;
                   if (createdStr != null) {
                     try {
                       final dt = DateTime.parse(createdStr);
@@ -181,8 +221,10 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
                 if (_statusFilter != 'All') {
                   docs = docs.where((d) {
                     final st = (d['status'] ?? '').toString().toLowerCase();
-                    final target = _statusFilter.toLowerCase().replaceAll(' ', '_');
-                    return st == target || (target == 'checked_out' && st == 'left');
+                    final target =
+                        _statusFilter.toLowerCase().replaceAll(' ', '_');
+                    return st == target ||
+                        (target == 'checked_out' && st == 'left');
                   }).toList();
                 }
 
@@ -197,9 +239,13 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
                 // 5. Apply Sorting
                 docs.sort((a, b) {
                   if (_sortBy == 'Visitor Name') {
-                    return (a['name'] ?? '').toString().compareTo((b['name'] ?? '').toString());
+                    return (a['name'] ?? '')
+                        .toString()
+                        .compareTo((b['name'] ?? '').toString());
                   } else if (_sortBy == 'Flat Number') {
-                    return (a['hostFlat'] ?? '').toString().compareTo((b['hostFlat'] ?? '').toString());
+                    return (a['hostFlat'] ?? '')
+                        .toString()
+                        .compareTo((b['hostFlat'] ?? '').toString());
                   } else if (_sortBy == 'Oldest First') {
                     final aTime = a['createdAt'] ?? a['createdDate'] ?? '';
                     final bTime = b['createdAt'] ?? b['createdDate'] ?? '';
@@ -217,16 +263,21 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.history_toggle_off_rounded, size: 54, color: AppColors.gray300),
+                        const Icon(Icons.history_toggle_off_rounded,
+                            size: 54, color: AppColors.gray300),
                         const SizedBox(height: 12),
                         const Text(
                           'No Visitor History Available',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary),
                         ),
                         const SizedBox(height: 4),
                         const Text(
                           'Try adjusting search or filter options',
-                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          style: TextStyle(
+                              fontSize: 12, color: AppColors.textSecondary),
                         ),
                       ],
                     ),
@@ -246,7 +297,8 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
                     final status = item['status'] ?? 'pending';
                     final phone = item['phone'] ?? '';
                     final durationStr = item['durationString'] as String?;
-                    final createdStr = item['createdDate'] ?? item['createdAt'] ?? '';
+                    final createdStr =
+                        item['createdDate'] ?? item['createdAt'] ?? '';
 
                     DateTime? createdDt;
                     try {
@@ -258,14 +310,16 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
                         : 'Recent';
 
                     final isInside = status == 'inside';
-                    final isCheckedOut = status == 'checked_out' || status == 'left';
+                    final isCheckedOut =
+                        status == 'checked_out' || status == 'left';
                     final isDenied = status == 'denied' || status == 'rejected';
 
                     return Card(
                       margin: const EdgeInsets.only(bottom: AppSpacing.md),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(AppRadius.lg),
-                        side: BorderSide(color: AppColors.border.withValues(alpha: 0.8)),
+                        side: BorderSide(
+                            color: AppColors.border.withValues(alpha: 0.8)),
                       ),
                       elevation: 0,
                       child: InkWell(
@@ -286,7 +340,10 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
                                             : AppColors.secondary,
                                 child: Text(
                                   name.isNotEmpty ? name[0].toUpperCase() : 'V',
-                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                                  style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -299,25 +356,37 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
                                         Expanded(
                                           child: Text(
                                             name,
-                                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                                            style: const TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w800,
+                                                color: AppColors.textPrimary),
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
                                         ),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 8, vertical: 3),
                                           decoration: BoxDecoration(
                                             color: isInside
-                                                ? AppColors.success.withValues(alpha: 0.15)
+                                                ? AppColors.success
+                                                    .withValues(alpha: 0.15)
                                                 : isCheckedOut
                                                     ? AppColors.gray200
                                                     : isDenied
-                                                        ? AppColors.error.withValues(alpha: 0.15)
-                                                        : AppColors.warning.withValues(alpha: 0.15),
-                                            borderRadius: BorderRadius.circular(AppRadius.full),
+                                                        ? AppColors.error
+                                                            .withValues(
+                                                                alpha: 0.15)
+                                                        : AppColors.warning
+                                                            .withValues(
+                                                                alpha: 0.15),
+                                            borderRadius: BorderRadius.circular(
+                                                AppRadius.full),
                                           ),
                                           child: Text(
-                                            status.toUpperCase().replaceAll('_', ' '),
+                                            status
+                                                .toUpperCase()
+                                                .replaceAll('_', ' '),
                                             style: TextStyle(
                                               fontSize: 10,
                                               fontWeight: FontWeight.w800,
@@ -336,19 +405,33 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
                                     const SizedBox(height: 2),
                                     Text(
                                       '$type  •  Flat $hostFlat ($residentName)',
-                                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                                      style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.textSecondary,
+                                          fontWeight: FontWeight.w500),
                                     ),
                                     const SizedBox(height: 4),
                                     Row(
                                       children: [
-                                        const Icon(Icons.access_time_rounded, size: 13, color: AppColors.textDisabled),
+                                        const Icon(Icons.access_time_rounded,
+                                            size: 13,
+                                            color: AppColors.textDisabled),
                                         const SizedBox(width: 4),
-                                        Text(formattedDate, style: const TextStyle(fontSize: 11, color: AppColors.textDisabled)),
+                                        Text(formattedDate,
+                                            style: const TextStyle(
+                                                fontSize: 11,
+                                                color: AppColors.textDisabled)),
                                         if (durationStr != null) ...[
                                           const SizedBox(width: 8),
-                                          const Icon(Icons.timer_outlined, size: 13, color: AppColors.secondary),
+                                          const Icon(Icons.timer_outlined,
+                                              size: 13,
+                                              color: AppColors.secondary),
                                           const SizedBox(width: 3),
-                                          Text(durationStr, style: const TextStyle(fontSize: 11, color: AppColors.secondary, fontWeight: FontWeight.w700)),
+                                          Text(durationStr,
+                                              style: const TextStyle(
+                                                  fontSize: 11,
+                                                  color: AppColors.secondary,
+                                                  fontWeight: FontWeight.w700)),
                                         ],
                                       ],
                                     ),
@@ -356,7 +439,8 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              const Icon(Icons.chevron_right_rounded, color: AppColors.gray400),
+                              const Icon(Icons.chevron_right_rounded,
+                                  color: AppColors.gray400),
                             ],
                           ),
                         ),
@@ -389,7 +473,9 @@ class _FilterDropdown extends StatelessWidget {
     return PopupMenuButton<String>(
       onSelected: onSelected,
       itemBuilder: (context) => options
-          .map((opt) => PopupMenuItem(value: opt, child: Text(opt, style: const TextStyle(fontSize: 13))))
+          .map((opt) => PopupMenuItem(
+              value: opt,
+              child: Text(opt, style: const TextStyle(fontSize: 13))))
           .toList(),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -400,9 +486,14 @@ class _FilterDropdown extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(label, style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w600)),
+            Text(label,
+                style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600)),
             const SizedBox(width: 4),
-            const Icon(Icons.arrow_drop_down_rounded, color: Colors.white, size: 16),
+            const Icon(Icons.arrow_drop_down_rounded,
+                color: Colors.white, size: 16),
           ],
         ),
       ),

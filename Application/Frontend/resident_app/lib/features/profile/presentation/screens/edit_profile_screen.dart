@@ -77,8 +77,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         );
         context.pop();
       } else {
-        final errorMsg =
-            ref.read(profileControllerProvider).errorMessage ?? 'Update failed.';
+        final errorMsg = ref.read(profileControllerProvider).errorMessage ??
+            'Update failed.';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(errorMsg),
@@ -92,13 +92,13 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(userProfileProvider).value;
-    final phone = profile?.phone.isNotEmpty == true ? profile!.phone : 'No Phone';
+    final phone =
+        profile?.phone.isNotEmpty == true ? profile!.phone : 'No Phone';
     final societyName = profile?.societyName.isNotEmpty == true
         ? profile!.societyName
         : 'Housing Society';
-    final flatNumber = profile?.flatNumber.isNotEmpty == true
-        ? profile!.flatNumber
-        : 'A-402';
+    final flatNumber =
+        profile?.flatNumber.isNotEmpty == true ? profile!.flatNumber : 'A-402';
     final controllerState = ref.watch(profileControllerProvider);
 
     return Scaffold(
@@ -223,8 +223,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           controller: _dobController,
                           decoration: InputDecoration(
                             hintText: 'DD MMM YYYY',
-                            prefixIcon: const Icon(
-                                Icons.calendar_today_rounded,
+                            prefixIcon: const Icon(Icons.calendar_today_rounded,
                                 size: 18),
                             border: OutlineInputBorder(
                                 borderRadius:

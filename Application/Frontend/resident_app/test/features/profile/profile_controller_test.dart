@@ -52,7 +52,8 @@ class MockUserRepository implements UserRepository {
     required Map<String, bool> preferences,
   }) async {
     updateNotifPrefsCalls++;
-    if (shouldFail) throw Exception('Failed to update notification preferences');
+    if (shouldFail)
+      throw Exception('Failed to update notification preferences');
   }
 
   @override

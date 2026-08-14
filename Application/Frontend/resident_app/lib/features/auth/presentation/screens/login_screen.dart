@@ -47,9 +47,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = true);
     try {
       await ref.read(authServiceProvider).signInWithEmail(
-        _emailController.text,
-        _passwordController.text,
-      );
+            _emailController.text,
+            _passwordController.text,
+          );
       if (mounted) context.go('/home');
     } on FirebaseAuthException catch (e) {
       _showError(e.message ?? 'Login failed. Please try again.');
@@ -63,13 +63,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = true);
     try {
       await ref.read(authServiceProvider).registerWithEmail(
-        email: _emailController.text,
-        password: _passwordController.text,
-        name: _nameController.text,
-        flatNumber: _flatController.text,
-        societyCode: _societyCodeController.text,
-        role: 'resident',
-      );
+            email: _emailController.text,
+            password: _passwordController.text,
+            name: _nameController.text,
+            flatNumber: _flatController.text,
+            societyCode: _societyCodeController.text,
+            role: 'resident',
+          );
       if (mounted) context.go('/pending-approval');
     } on FirebaseAuthException catch (e) {
       _showError(e.message ?? 'Registration failed. Please try again.');
@@ -112,31 +112,43 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     color: AppColors.primarySurface,
                     borderRadius: BorderRadius.circular(AppRadius.lg),
                   ),
-                  child: const Icon(Icons.apartment_rounded, color: AppColors.primary, size: 30),
+                  child: const Icon(Icons.apartment_rounded,
+                      color: AppColors.primary, size: 30),
                 ),
                 const SizedBox(height: AppSpacing.xl),
                 Text(
                   _isRegisterMode ? 'Create Account' : 'Welcome Back',
-                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  style: const TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary),
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  _isRegisterMode ? 'Register your account to get started' : 'Sign in to your SocietySphere account',
-                  style: const TextStyle(fontSize: 15, color: AppColors.textSecondary),
+                  _isRegisterMode
+                      ? 'Register your account to get started'
+                      : 'Sign in to your SocietySphere account',
+                  style: const TextStyle(
+                      fontSize: 15, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: AppSpacing.xxl),
 
                 // Register-only fields
                 if (_isRegisterMode) ...[
-                  _buildField('Full Name', _nameController, hint: 'e.g. Arjun Kumar'),
+                  _buildField('Full Name', _nameController,
+                      hint: 'e.g. Arjun Kumar'),
                   const SizedBox(height: AppSpacing.md),
-                  _buildField('Flat Number', _flatController, hint: 'e.g. A-101'),
+                  _buildField('Flat Number', _flatController,
+                      hint: 'e.g. A-101'),
                   const SizedBox(height: AppSpacing.md),
-                  _buildField('Society Access Code', _societyCodeController, hint: 'e.g. GW-8492'),
+                  _buildField('Society Access Code', _societyCodeController,
+                      hint: 'e.g. GW-8492'),
                   const SizedBox(height: AppSpacing.md),
                 ],
 
-                _buildField('Email Address', _emailController, hint: 'you@example.com', keyboardType: TextInputType.emailAddress),
+                _buildField('Email Address', _emailController,
+                    hint: 'you@example.com',
+                    keyboardType: TextInputType.emailAddress),
                 const SizedBox(height: AppSpacing.md),
                 _buildPasswordField(),
                 const SizedBox(height: AppSpacing.xl),
@@ -146,14 +158,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : (_isRegisterMode ? _handleRegister : _handleEmailLogin),
+                    onPressed: _isLoading
+                        ? null
+                        : (_isRegisterMode
+                            ? _handleRegister
+                            : _handleEmailLogin),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(AppRadius.lg)),
                     ),
                     child: _isLoading
-                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : Text(_isRegisterMode ? 'Create Account' : 'Sign In', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                        ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white))
+                        : Text(_isRegisterMode ? 'Create Account' : 'Sign In',
+                            style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white)),
                   ),
                 ),
 
@@ -163,7 +188,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     onPressed: () => context.push('/register'),
                     child: const Text(
                       'New resident? Register & Add Home',
-                      style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 15),
+                      style: TextStyle(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 15),
                     ),
                   ),
                 ),
@@ -175,17 +203,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Widget _buildField(String label, TextEditingController controller, {String? hint, TextInputType? keyboardType}) {
+  Widget _buildField(String label, TextEditingController controller,
+      {String? hint, TextInputType? keyboardType}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+        Text(label,
+            style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary)),
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
           decoration: InputDecoration(hintText: hint),
-          validator: (v) => (v == null || v.isEmpty) ? '$label is required' : null,
+          validator: (v) =>
+              (v == null || v.isEmpty) ? '$label is required' : null,
         ),
       ],
     );
@@ -195,7 +229,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Password', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
+        const Text('Password',
+            style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textPrimary)),
         const SizedBox(height: 8),
         TextFormField(
           controller: _passwordController,
@@ -203,8 +241,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           decoration: InputDecoration(
             hintText: 'Enter your password',
             suffixIcon: IconButton(
-              icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+              icon: Icon(
+                  _obscurePassword ? Icons.visibility_off : Icons.visibility),
+              onPressed: () =>
+                  setState(() => _obscurePassword = !_obscurePassword),
             ),
           ),
           validator: (v) {

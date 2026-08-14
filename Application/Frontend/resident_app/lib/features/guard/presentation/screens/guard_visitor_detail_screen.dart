@@ -25,10 +25,12 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('Error: $e')),
         data: (visitors) {
-          final matchingVisitors = visitors.where((d) => d.id == visitorId).toList();
+          final matchingVisitors =
+              visitors.where((d) => d.id == visitorId).toList();
           if (matchingVisitors.isEmpty) {
             return const Center(
-              child: Text('Visitor details not found or removed.', style: TextStyle(color: AppColors.textSecondary)),
+              child: Text('Visitor details not found or removed.',
+                  style: TextStyle(color: AppColors.textSecondary)),
             );
           }
 
@@ -68,7 +70,10 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                           ? [AppColors.error, const Color(0xFF991B1B)]
                           : isApproved || isInside
                               ? [AppColors.success, const Color(0xFF047857)]
-                              : [const Color(0xFF0F1923), const Color(0xFF1A2A3A)],
+                              : [
+                                  const Color(0xFF0F1923),
+                                  const Color(0xFF1A2A3A)
+                                ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -79,7 +84,8 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                       if (photoUrl != null && photoUrl.isNotEmpty)
                         ClipRRect(
                           borderRadius: BorderRadius.circular(50),
-                          child: Image.network(photoUrl, width: 80, height: 80, fit: BoxFit.cover),
+                          child: Image.network(photoUrl,
+                              width: 80, height: 80, fit: BoxFit.cover),
                         )
                       else
                         CircleAvatar(
@@ -87,25 +93,38 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                           backgroundColor: Colors.white.withValues(alpha: 0.2),
                           child: Text(
                             name.isNotEmpty ? name[0].toUpperCase() : 'V',
-                            style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+                            style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white),
                           ),
                         ),
                       const SizedBox(height: 12),
-                      Text(name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white)),
+                      Text(name,
+                          style: const TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white)),
                       if (company.isNotEmpty) ...[
                         const SizedBox(height: 2),
-                        Text(company, style: const TextStyle(fontSize: 13, color: Colors.white70)),
+                        Text(company,
+                            style: const TextStyle(
+                                fontSize: 13, color: Colors.white70)),
                       ],
                       const SizedBox(height: 10),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 5),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.2),
                           borderRadius: BorderRadius.circular(AppRadius.full),
                         ),
                         child: Text(
                           status.toUpperCase().replaceAll('_', ' '),
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Colors.white),
+                          style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white),
                         ),
                       ),
                     ],
@@ -130,12 +149,24 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                       _DetailRow(label: 'Gender', value: gender),
                       _DetailRow(label: 'Destination Flat', value: hostFlat),
                       _DetailRow(label: 'Resident Name', value: residentName),
-                      _DetailRow(label: 'Vehicle Info', value: vehicleNumber.isEmpty ? 'None' : '$vehicleNumber ($vehicleType)'),
+                      _DetailRow(
+                          label: 'Vehicle Info',
+                          value: vehicleNumber.isEmpty
+                              ? 'None'
+                              : '$vehicleNumber ($vehicleType)'),
                       _DetailRow(label: 'Gate Name', value: gateName),
-                      _DetailRow(label: 'Logged At', value: createdDate.isEmpty ? 'Just now' : createdDate),
-                      if (entryTime != null) _DetailRow(label: 'Entry Timestamp', value: entryTime),
-                      if (exitTime != null) _DetailRow(label: 'Exit Timestamp', value: exitTime),
-                      if (data['durationString'] != null) _DetailRow(label: 'Visit Duration', value: data['durationString'] as String),
+                      _DetailRow(
+                          label: 'Logged At',
+                          value:
+                              createdDate.isEmpty ? 'Just now' : createdDate),
+                      if (entryTime != null)
+                        _DetailRow(label: 'Entry Timestamp', value: entryTime),
+                      if (exitTime != null)
+                        _DetailRow(label: 'Exit Timestamp', value: exitTime),
+                      if (data['durationString'] != null)
+                        _DetailRow(
+                            label: 'Visit Duration',
+                            value: data['durationString'] as String),
                     ],
                   ),
                 ),
@@ -155,16 +186,23 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                     children: [
                       const Row(
                         children: [
-                          Icon(Icons.timeline_rounded, size: 18, color: AppColors.secondary),
+                          Icon(Icons.timeline_rounded,
+                              size: 18, color: AppColors.secondary),
                           SizedBox(width: 8),
-                          Text('ACTIVITY TIMELINE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textSecondary, letterSpacing: 0.5)),
+                          Text('ACTIVITY TIMELINE',
+                              style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.textSecondary,
+                                  letterSpacing: 0.5)),
                         ],
                       ),
                       const Divider(height: 20),
                       _TimelineStep(
                         title: 'Visitor Entry Logged',
                         subtitle: 'Logged at $gateName by Security Guard',
-                        timestamp: createdDate.isEmpty ? 'Just now' : createdDate,
+                        timestamp:
+                            createdDate.isEmpty ? 'Just now' : createdDate,
                         icon: Icons.note_add_rounded,
                         color: AppColors.secondary,
                         isFirst: true,
@@ -172,7 +210,8 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                       _TimelineStep(
                         title: 'Resident Notification Sent',
                         subtitle: 'Sent to $residentName ($hostFlat)',
-                        timestamp: createdDate.isEmpty ? 'Just now' : createdDate,
+                        timestamp:
+                            createdDate.isEmpty ? 'Just now' : createdDate,
                         icon: Icons.notifications_active_rounded,
                         color: AppColors.info,
                       ),
@@ -180,7 +219,8 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                         _TimelineStep(
                           title: 'Resident Approved Request',
                           subtitle: 'Approved by $residentName',
-                          timestamp: data['approvedAt'] as String? ?? 'Approved',
+                          timestamp:
+                              data['approvedAt'] as String? ?? 'Approved',
                           icon: Icons.check_circle_rounded,
                           color: AppColors.success,
                         )
@@ -203,7 +243,8 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                       if (exitTime != null)
                         _TimelineStep(
                           title: 'Visitor Checked Out',
-                          subtitle: 'Visit Duration: ${data["durationString"] ?? "Checked Out"}',
+                          subtitle:
+                              'Visit Duration: ${data["durationString"] ?? "Checked Out"}',
                           timestamp: exitTime as String,
                           icon: Icons.exit_to_app_rounded,
                           color: AppColors.textSecondary,
@@ -226,7 +267,9 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                               await svc.markVisitorExit(doc.id);
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Visitor marked as checked out.')),
+                                  const SnackBar(
+                                      content: Text(
+                                          'Visitor marked as checked out.')),
                                 );
                               }
                             }
@@ -249,7 +292,10 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                               await svc.updateVisitorStatus(doc.id, 'inside');
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(content: Text('Visitor checked in successfully!'), backgroundColor: AppColors.success),
+                                  const SnackBar(
+                                      content: Text(
+                                          'Visitor checked in successfully!'),
+                                      backgroundColor: AppColors.success),
                                 );
                               }
                             }
@@ -272,7 +318,8 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 14),
                         ),
                       ),
                     ],
@@ -299,12 +346,17 @@ class _DetailRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 13, color: AppColors.textSecondary)),
           Flexible(
             child: Text(
               value,
               textAlign: TextAlign.end,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary),
             ),
           ),
         ],
@@ -362,12 +414,20 @@ class _TimelineStep extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                    Text(timestamp, style: const TextStyle(fontSize: 10, color: AppColors.textDisabled)),
+                    Text(title,
+                        style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary)),
+                    Text(timestamp,
+                        style: const TextStyle(
+                            fontSize: 10, color: AppColors.textDisabled)),
                   ],
                 ),
                 const SizedBox(height: 2),
-                Text(subtitle, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                Text(subtitle,
+                    style: const TextStyle(
+                        fontSize: 11, color: AppColors.textSecondary)),
               ],
             ),
           ),

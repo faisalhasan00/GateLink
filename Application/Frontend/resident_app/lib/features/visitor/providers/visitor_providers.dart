@@ -25,7 +25,8 @@ final visitorsProvider = StreamProvider<List<VisitorModel>>((ref) {
 });
 
 /// Stream of pending gate visitors requiring approval for current resident's flat.
-final pendingVisitorsForFlatProvider = StreamProvider<List<VisitorModel>>((ref) {
+final pendingVisitorsForFlatProvider =
+    StreamProvider<List<VisitorModel>>((ref) {
   final repo = ref.watch(visitorRepositoryProvider);
   final profile = ref.watch(userProfileProvider).value;
   final flatNumber = profile?['flatNumber'] as String? ?? '';

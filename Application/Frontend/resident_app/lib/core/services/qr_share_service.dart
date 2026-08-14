@@ -21,7 +21,8 @@ class QrShareService {
   }) async {
     try {
       // Capture QR widget as image
-      final boundary = qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      final boundary =
+          qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) return;
 
       final image = await boundary.toImage(pixelRatio: 3.0);
@@ -32,7 +33,8 @@ class QrShareService {
 
       // Save to temp file
       final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/visitor_pass_${DateTime.now().millisecondsSinceEpoch}.png');
+      final file = File(
+          '${dir.path}/visitor_pass_${DateTime.now().millisecondsSinceEpoch}.png');
       await file.writeAsBytes(bytes);
 
       // Build share message

@@ -24,17 +24,20 @@ class AmenityModel {
   });
 
   factory AmenityModel.fromMap(Map<String, dynamic> map, String documentId) {
-    final rawTiming = map['timing'] as String? ?? map['timings'] as String? ?? '06:00 AM - 10:00 PM';
+    final rawTiming = map['timing'] as String? ??
+        map['timings'] as String? ??
+        '06:00 AM - 10:00 PM';
     final isAvailableStatus = map['status'] == 'Available';
     final isAvailable = map['available'] == true || isAvailableStatus;
-    
-    final maxQuota = (map['capacity'] as num?)?.toInt() ?? 
-                     (map['maxSlots'] as num?)?.toInt() ?? 10;
-                     
-    final rawFee = map['fee'] as String? ?? 
-                  (map['pricePerHour'] != null && (map['pricePerHour'] as num) > 0 
-                      ? '₹${map['pricePerHour']}/hr' 
-                      : 'Free');
+
+    final maxQuota = (map['capacity'] as num?)?.toInt() ??
+        (map['maxSlots'] as num?)?.toInt() ??
+        10;
+
+    final rawFee = map['fee'] as String? ??
+        (map['pricePerHour'] != null && (map['pricePerHour'] as num) > 0
+            ? '₹${map['pricePerHour']}/hr'
+            : 'Free');
 
     return AmenityModel(
       id: documentId,

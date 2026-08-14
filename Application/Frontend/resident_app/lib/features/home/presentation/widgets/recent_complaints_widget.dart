@@ -99,8 +99,7 @@ class _EmptyStateSmall extends StatelessWidget {
       child: Center(
         child: Text(
           message,
-          style:
-              const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
         ),
       ),
     );

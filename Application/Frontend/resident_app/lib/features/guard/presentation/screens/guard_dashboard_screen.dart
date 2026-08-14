@@ -19,7 +19,8 @@ class GuardDashboardScreen extends ConsumerStatefulWidget {
   const GuardDashboardScreen({super.key});
 
   @override
-  ConsumerState<GuardDashboardScreen> createState() => _GuardDashboardScreenState();
+  ConsumerState<GuardDashboardScreen> createState() =>
+      _GuardDashboardScreenState();
 }
 
 class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
@@ -42,10 +43,13 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
   }
 
   FirestoreService get _service =>
-      ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: 'SOC-001');
+      ref.read(firestoreServiceProvider) ??
+      FirestoreService(societyId: 'SOC-001');
 
   Future<void> _markCheckedOut(String docId) async {
-    final success = await ref.read(visitorControllerProvider.notifier).markVisitorExit(docId);
+    final success = await ref
+        .read(visitorControllerProvider.notifier)
+        .markVisitorExit(docId);
     if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -58,12 +62,14 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
           ),
           backgroundColor: AppColors.success,
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           duration: const Duration(seconds: 2),
         ),
       );
     } else if (mounted) {
-      final errorMsg = ref.read(visitorControllerProvider).errorMessage ?? 'Error marking exit';
+      final errorMsg = ref.read(visitorControllerProvider).errorMessage ??
+          'Error marking exit';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMsg), backgroundColor: AppColors.error),
       );
@@ -71,9 +77,12 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
   }
 
   Future<void> _approveEntry(String docId) async {
-    final success = await ref.read(visitorControllerProvider.notifier).updateVisitorStatus(docId, 'inside');
+    final success = await ref
+        .read(visitorControllerProvider.notifier)
+        .updateVisitorStatus(docId, 'inside');
     if (!success && mounted) {
-      final errorMsg = ref.read(visitorControllerProvider).errorMessage ?? 'Failed to approve entry.';
+      final errorMsg = ref.read(visitorControllerProvider).errorMessage ??
+          'Failed to approve entry.';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(errorMsg), backgroundColor: AppColors.error),
       );
@@ -84,12 +93,14 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.xl)),
         title: const Row(
           children: [
             Icon(Icons.warning_rounded, color: AppColors.error, size: 26),
             SizedBox(width: 8),
-            Text('Emergency Alert', style: TextStyle(fontWeight: FontWeight.w800)),
+            Text('Emergency Alert',
+                style: TextStyle(fontWeight: FontWeight.w800)),
           ],
         ),
         content: const Text(
@@ -108,23 +119,26 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
               final messenger = ScaffoldMessenger.of(context);
               try {
                 await ref.read(alertRepositoryProvider).triggerEmergencySos(
-                  societyId: _service.societyId,
-                  guardEmail: FirebaseAuth.instance.currentUser?.email ?? 'Guard',
-                  message: 'Emergency SOS triggered by Guard at Gate 1',
-                );
+                      societyId: _service.societyId,
+                      guardEmail:
+                          FirebaseAuth.instance.currentUser?.email ?? 'Guard',
+                      message: 'Emergency SOS triggered by Guard at Gate 1',
+                    );
               } catch (_) {}
               messenger.showSnackBar(
                 SnackBar(
                   content: const Row(
                     children: [
-                      Icon(Icons.warning_rounded, color: Colors.white, size: 18),
+                      Icon(Icons.warning_rounded,
+                          color: Colors.white, size: 18),
                       SizedBox(width: 8),
                       Text('🚨 SOS Alert sent to Society Manager!'),
                     ],
                   ),
                   backgroundColor: AppColors.error,
                   behavior: SnackBarBehavior.floating,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12)),
                   duration: const Duration(seconds: 4),
                 ),
               );
@@ -143,16 +157,32 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
   List<dynamic> _filterDocs(List<dynamic> docs) {
     switch (_selectedFilter) {
       case 'Inside':
-        return docs.where((d) => (d is VisitorModel ? d.status.toFirestore() : (d.data() as Map)['status']) == 'inside').toList();
+        return docs
+            .where((d) =>
+                (d is VisitorModel
+                    ? d.status.toFirestore()
+                    : (d.data() as Map)['status']) ==
+                'inside')
+            .toList();
       case 'Pending':
         return docs.where((d) {
-          final s = d is VisitorModel ? d.status.toFirestore() : (d.data() as Map)['status'];
+          final s = d is VisitorModel
+              ? d.status.toFirestore()
+              : (d.data() as Map)['status'];
           return s == 'pending' || s == 'approved' || s == 'denied';
         }).toList();
       case 'Delivery':
-        return docs.where((d) => (d is VisitorModel ? d.type : (d.data() as Map)['type']) == 'Delivery').toList();
+        return docs
+            .where((d) =>
+                (d is VisitorModel ? d.type : (d.data() as Map)['type']) ==
+                'Delivery')
+            .toList();
       case 'Cab':
-        return docs.where((d) => (d is VisitorModel ? d.type : (d.data() as Map)['type']) == 'Cab').toList();
+        return docs
+            .where((d) =>
+                (d is VisitorModel ? d.type : (d.data() as Map)['type']) ==
+                'Cab')
+            .toList();
       default:
         return docs;
     }
@@ -165,13 +195,15 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
     final dateStr = DateFormat('EEEE, d MMM').format(_now);
     final user = FirebaseAuth.instance.currentUser;
     final profile = ref.watch(userProfileProvider).value;
-    
-    final guardName = profile?.name ?? user?.displayName ?? user?.email ?? 'Security Guard';
+
+    final guardName =
+        profile?.name ?? user?.displayName ?? user?.email ?? 'Security Guard';
     final societyName = profile?.societyName ?? 'Housing Society';
     final gateName = profile?.gateName ?? 'Gate 1 — Main Entry';
 
     return visitorsAsync.when(
-      loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
+      loading: () =>
+          const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (e, _) => Scaffold(body: Center(child: Text('Error: $e'))),
       data: (visitors) {
         final insideCount = visitors.where((d) => d.isInside).length;
@@ -215,7 +247,8 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                                 child: const CircleAvatar(
                                   radius: 24,
                                   backgroundColor: AppColors.primary,
-                                  child: Icon(Icons.shield_rounded, color: Colors.white, size: 24),
+                                  child: Icon(Icons.shield_rounded,
+                                      color: Colors.white, size: 24),
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -223,17 +256,24 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                                 child: GestureDetector(
                                   onTap: () => context.go('/profile'),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         guardName,
-                                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white),
+                                        style: const TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w800,
+                                            color: Colors.white),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
                                       Text(
                                         '$societyName  •  $gateName',
-                                        style: const TextStyle(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.w500),
+                                        style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.white70,
+                                            fontWeight: FontWeight.w500),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
                                       ),
@@ -245,13 +285,16 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                               GestureDetector(
                                 onTap: _showSosDialog,
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 6),
                                   decoration: BoxDecoration(
                                     color: AppColors.error,
-                                    borderRadius: BorderRadius.circular(AppRadius.full),
+                                    borderRadius:
+                                        BorderRadius.circular(AppRadius.full),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: AppColors.error.withValues(alpha: 0.4),
+                                        color: AppColors.error
+                                            .withValues(alpha: 0.4),
                                         blurRadius: 10,
                                         offset: const Offset(0, 3),
                                       ),
@@ -260,7 +303,8 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                                   child: const Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(Icons.emergency_rounded, color: Colors.white, size: 14),
+                                      Icon(Icons.emergency_rounded,
+                                          color: Colors.white, size: 14),
                                       SizedBox(width: 4),
                                       Text(
                                         'SOS',
@@ -284,7 +328,8 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                                     context.go('/login');
                                   }
                                 },
-                                icon: const Icon(Icons.logout_rounded, color: Colors.white70),
+                                icon: const Icon(Icons.logout_rounded,
+                                    color: Colors.white70),
                                 padding: EdgeInsets.zero,
                                 constraints: const BoxConstraints(),
                               ),
@@ -304,26 +349,35 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                                       fontSize: 28,
                                       fontWeight: FontWeight.w800,
                                       color: Colors.white,
-                                      fontFeatures: [FontFeature.tabularFigures()],
+                                      fontFeatures: [
+                                        FontFeature.tabularFigures()
+                                      ],
                                     ),
                                   ),
                                   Text(
                                     dateStr,
-                                    style: const TextStyle(fontSize: 12, color: Colors.white60),
+                                    style: const TextStyle(
+                                        fontSize: 12, color: Colors.white60),
                                   ),
                                 ],
                               ),
                               const Spacer(),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 6),
                                 decoration: BoxDecoration(
-                                  color: AppColors.successSurface.withValues(alpha: 0.2),
-                                  borderRadius: BorderRadius.circular(AppRadius.full),
-                                  border: Border.all(color: AppColors.success.withValues(alpha: 0.4)),
+                                  color: AppColors.successSurface
+                                      .withValues(alpha: 0.2),
+                                  borderRadius:
+                                      BorderRadius.circular(AppRadius.full),
+                                  border: Border.all(
+                                      color: AppColors.success
+                                          .withValues(alpha: 0.4)),
                                 ),
                                 child: const Row(
                                   children: [
-                                    Icon(Icons.circle, color: AppColors.success, size: 8),
+                                    Icon(Icons.circle,
+                                        color: AppColors.success, size: 8),
                                     SizedBox(width: 6),
                                     Text(
                                       'ON DUTY',
@@ -450,18 +504,26 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                         children: [
                           const Text(
                             'Live Gate Feed',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary),
                           ),
                           const Spacer(),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 3),
                             decoration: BoxDecoration(
                               color: AppColors.errorSurface,
-                              borderRadius: BorderRadius.circular(AppRadius.full),
+                              borderRadius:
+                                  BorderRadius.circular(AppRadius.full),
                             ),
                             child: Text(
                               '${filtered.length} entries',
-                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.error),
+                              style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.error),
                             ),
                           ),
                         ],
@@ -471,28 +533,45 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
-                          children: ['All', 'Inside', 'Pending', 'Delivery', 'Cab'].map((filter) {
+                          children: [
+                            'All',
+                            'Inside',
+                            'Pending',
+                            'Delivery',
+                            'Cab'
+                          ].map((filter) {
                             final isSelected = _selectedFilter == filter;
                             return Padding(
                               padding: const EdgeInsets.only(right: 8.0),
                               child: GestureDetector(
-                                onTap: () => setState(() => _selectedFilter = filter),
+                                onTap: () =>
+                                    setState(() => _selectedFilter = filter),
                                 child: AnimatedContainer(
                                   duration: const Duration(milliseconds: 200),
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 7),
                                   decoration: BoxDecoration(
-                                    color: isSelected ? AppColors.secondary : Colors.white,
-                                    borderRadius: BorderRadius.circular(AppRadius.full),
+                                    color: isSelected
+                                        ? AppColors.secondary
+                                        : Colors.white,
+                                    borderRadius:
+                                        BorderRadius.circular(AppRadius.full),
                                     border: Border.all(
-                                      color: isSelected ? AppColors.secondary : AppColors.border,
+                                      color: isSelected
+                                          ? AppColors.secondary
+                                          : AppColors.border,
                                     ),
                                   ),
                                   child: Text(
                                     filter,
                                     style: TextStyle(
                                       fontSize: 12,
-                                      fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
-                                      color: isSelected ? Colors.white : AppColors.textSecondary,
+                                      fontWeight: isSelected
+                                          ? FontWeight.w700
+                                          : FontWeight.w400,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : AppColors.textSecondary,
                                     ),
                                   ),
                                 ),
@@ -510,11 +589,14 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                           alignment: Alignment.center,
                           child: Column(
                             children: [
-                              const Icon(Icons.inbox_rounded, size: 48, color: AppColors.gray300),
+                              const Icon(Icons.inbox_rounded,
+                                  size: 48, color: AppColors.gray300),
                               const SizedBox(height: 12),
                               Text(
                                 'No entries for "$_selectedFilter"',
-                                style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                                style: const TextStyle(
+                                    color: AppColors.textSecondary,
+                                    fontSize: 13),
                               ),
                             ],
                           ),
@@ -523,7 +605,8 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                         ...filtered.map((doc) {
                           final data = doc.data() as Map<String, dynamic>;
                           return Padding(
-                            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                            padding:
+                                const EdgeInsets.only(bottom: AppSpacing.sm),
                             child: _GateEntryCard(
                               docId: doc.id,
                               data: data,
@@ -585,18 +668,23 @@ class _StatCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+            style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary),
           ),
           Text(
             title,
-            style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
+            style:
+                const TextStyle(fontSize: 10, color: AppColors.textSecondary),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 2),
           Text(
             trend,
-            style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: color),
+            style: TextStyle(
+                fontSize: 9, fontWeight: FontWeight.w600, color: color),
           ),
         ],
       ),
@@ -706,178 +794,203 @@ class _GateEntryCard extends StatelessWidget {
     try {
       entryTime = DateTime.parse(data['entryTime'] as String? ?? '');
     } catch (_) {}
-    final timeStr = entryTime != null ? DateFormat('hh:mm a').format(entryTime) : '--';
+    final timeStr =
+        entryTime != null ? DateFormat('hh:mm a').format(entryTime) : '--';
 
     return GestureDetector(
       onTap: () => context.go('/visitors/$docId'),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(
-          color: _status == 'pending' ? AppColors.warning : AppColors.border,
-          width: _status == 'pending' ? 1.5 : 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          border: Border.all(
+            color: _status == 'pending' ? AppColors.warning : AppColors.border,
+            width: _status == 'pending' ? 1.5 : 1.0,
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: _typeColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                ),
-                child: Icon(_typeIcon, color: _typeColor, size: 22),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            data['name'] as String? ?? 'Unknown',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        _StatusBadge(status: _status),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Flat ${data['hostFlat'] ?? ''} • ${data['type'] ?? 'Guest'}',
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
-                    ),
-                    Row(
-                      children: [
-                        const Icon(Icons.access_time_rounded, size: 11, color: AppColors.textSecondary),
-                        const SizedBox(width: 3),
-                        Text(
-                          'Entry: $timeStr',
-                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                        ),
-                        if (data['vehicleNumber'] != null && (data['vehicleNumber'] as String).isNotEmpty) ...[
-                          const SizedBox(width: 8),
-                          const Icon(Icons.directions_car_rounded, size: 11, color: AppColors.primary),
-                          const SizedBox(width: 2),
-                          Text(
-                            data['vehicleNumber'] as String,
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          // Action buttons
-          if (_status == 'inside') ...[
-            const SizedBox(height: AppSpacing.sm),
-            const Divider(height: 1),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: onMarkOut,
-                  icon: const Icon(Icons.logout_rounded, size: 14),
-                  label: const Text('Mark Exit'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.error,
-                    side: const BorderSide(color: AppColors.error),
-                    minimumSize: const Size(100, 32),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-          ] else if (_status == 'pending') ...[
-            const SizedBox(height: AppSpacing.sm),
-            const Divider(height: 1),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.hourglass_top_rounded, size: 14, color: AppColors.warning),
-                const SizedBox(width: 4),
-                const Expanded(
-                  child: Text(
-                    'Waiting for resident approval...',
-                    style: TextStyle(fontSize: 11, color: AppColors.warning, fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ],
-            ),
-          ] else if (_status == 'approved') ...[
-            const SizedBox(height: AppSpacing.sm),
-            const Divider(height: 1),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.check_circle_rounded, size: 14, color: AppColors.success),
-                const SizedBox(width: 4),
-                const Expanded(
-                  child: Text(
-                    'Approved by Resident',
-                    style: TextStyle(fontSize: 11, color: AppColors.success, fontWeight: FontWeight.w500),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: onApprove,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.success,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(90, 32),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-                  ),
-                  child: const Text('Check In'),
-                ),
-              ],
-            ),
-          ] else if (_status == 'denied') ...[
-            const SizedBox(height: AppSpacing.sm),
-            const Divider(height: 1),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.cancel_rounded, size: 14, color: AppColors.error),
-                const SizedBox(width: 4),
-                const Expanded(
-                  child: Text(
-                    'Entry Denied by Resident',
-                    style: TextStyle(fontSize: 11, color: AppColors.error, fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
-        ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: _typeColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                  ),
+                  child: Icon(_typeIcon, color: _typeColor, size: 22),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              data['name'] as String? ?? 'Unknown',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          _StatusBadge(status: _status),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Flat ${data['hostFlat'] ?? ''} • ${data['type'] ?? 'Guest'}',
+                        style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500),
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.access_time_rounded,
+                              size: 11, color: AppColors.textSecondary),
+                          const SizedBox(width: 3),
+                          Text(
+                            'Entry: $timeStr',
+                            style: const TextStyle(
+                                fontSize: 11, color: AppColors.textSecondary),
+                          ),
+                          if (data['vehicleNumber'] != null &&
+                              (data['vehicleNumber'] as String).isNotEmpty) ...[
+                            const SizedBox(width: 8),
+                            const Icon(Icons.directions_car_rounded,
+                                size: 11, color: AppColors.primary),
+                            const SizedBox(width: 2),
+                            Text(
+                              data['vehicleNumber'] as String,
+                              style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            // Action buttons
+            if (_status == 'inside') ...[
+              const SizedBox(height: AppSpacing.sm),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: onMarkOut,
+                    icon: const Icon(Icons.logout_rounded, size: 14),
+                    label: const Text('Mark Exit'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.error,
+                      side: const BorderSide(color: AppColors.error),
+                      minimumSize: const Size(100, 32),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      textStyle: const TextStyle(
+                          fontSize: 11, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+            ] else if (_status == 'pending') ...[
+              const SizedBox(height: AppSpacing.sm),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.hourglass_top_rounded,
+                      size: 14, color: AppColors.warning),
+                  const SizedBox(width: 4),
+                  const Expanded(
+                    child: Text(
+                      'Waiting for resident approval...',
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.warning,
+                          fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+            ] else if (_status == 'approved') ...[
+              const SizedBox(height: AppSpacing.sm),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.check_circle_rounded,
+                      size: 14, color: AppColors.success),
+                  const SizedBox(width: 4),
+                  const Expanded(
+                    child: Text(
+                      'Approved by Resident',
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.success,
+                          fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: onApprove,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.success,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(90, 32),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      textStyle: const TextStyle(
+                          fontSize: 11, fontWeight: FontWeight.w600),
+                    ),
+                    child: const Text('Check In'),
+                  ),
+                ],
+              ),
+            ] else if (_status == 'denied') ...[
+              const SizedBox(height: AppSpacing.sm),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.cancel_rounded,
+                      size: 14, color: AppColors.error),
+                  const SizedBox(width: 4),
+                  const Expanded(
+                    child: Text(
+                      'Entry Denied by Resident',
+                      style: TextStyle(
+                          fontSize: 11,
+                          color: AppColors.error,
+                          fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
   }
 }
 
@@ -934,7 +1047,11 @@ class _StatusBadge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: fg, letterSpacing: 0.5),
+        style: TextStyle(
+            fontSize: 9,
+            fontWeight: FontWeight.w700,
+            color: fg,
+            letterSpacing: 0.5),
       ),
     );
   }

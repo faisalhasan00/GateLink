@@ -9,7 +9,8 @@ class NotificationRepositoryImpl implements NotificationRepository {
       : _firestore = firestore ?? FirebaseFirestore.instance;
 
   @override
-  Stream<List<NotificationModel>> watchNotifications(String societyId, String uid) {
+  Stream<List<NotificationModel>> watchNotifications(
+      String societyId, String uid) {
     return _firestore
         .collection('societies/$societyId/users/$uid/notifications')
         .orderBy('createdAt', descending: true)

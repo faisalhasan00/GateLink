@@ -30,7 +30,8 @@ class MaintenanceController extends StateNotifier<MaintenanceState> {
     if (refNum.isEmpty) {
       state = state.copyWith(
         status: MaintenanceActionStatus.error,
-        errorMessage: 'Transaction reference number (UTR / Cheque) is required.',
+        errorMessage:
+            'Transaction reference number (UTR / Cheque) is required.',
       );
       return false;
     }
@@ -38,7 +39,8 @@ class MaintenanceController extends StateNotifier<MaintenanceState> {
     if (refNum.length < 4) {
       state = state.copyWith(
         status: MaintenanceActionStatus.error,
-        errorMessage: 'Please enter a valid reference number (at least 4 characters).',
+        errorMessage:
+            'Please enter a valid reference number (at least 4 characters).',
       );
       return false;
     }
@@ -58,13 +60,15 @@ class MaintenanceController extends StateNotifier<MaintenanceState> {
 
       state = state.copyWith(
         status: MaintenanceActionStatus.success,
-        successMessage: 'Offline payment reference submitted successfully for Treasurer verification.',
+        successMessage:
+            'Offline payment reference submitted successfully for Treasurer verification.',
       );
       return true;
     } catch (e) {
       state = state.copyWith(
         status: MaintenanceActionStatus.error,
-        errorMessage: 'Failed to submit offline payment reference. Please try again.',
+        errorMessage:
+            'Failed to submit offline payment reference. Please try again.',
       );
       return false;
     }

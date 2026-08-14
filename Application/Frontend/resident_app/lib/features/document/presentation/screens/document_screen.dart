@@ -48,7 +48,8 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
           // Filter Row
           Container(
             color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(AppSpacing.pagePadding, 0, AppSpacing.pagePadding, AppSpacing.md),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.pagePadding, 0,
+                AppSpacing.pagePadding, AppSpacing.md),
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
@@ -60,17 +61,23 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                       onTap: () => setState(() => _selectedCategory = cat),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 7),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primary : AppColors.gray100,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.gray100,
                           borderRadius: BorderRadius.circular(AppRadius.full),
                         ),
                         child: Text(
                           cat,
                           style: TextStyle(
                             fontSize: 12,
-                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                            color: isSelected ? Colors.white : AppColors.textSecondary,
+                            fontWeight:
+                                isSelected ? FontWeight.w700 : FontWeight.w500,
+                            color: isSelected
+                                ? Colors.white
+                                : AppColors.textSecondary,
                           ),
                         ),
                       ),
@@ -86,8 +93,8 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
             child: docsAsync.when(
               data: (snapshot) {
                 final allDocs = snapshot.docs;
-                final filtered = _selectedCategory == 'All' 
-                    ? allDocs 
+                final filtered = _selectedCategory == 'All'
+                    ? allDocs
                     : allDocs.where((doc) {
                         final data = doc.data() as Map<String, dynamic>;
                         return data['category'] == _selectedCategory;
@@ -98,9 +105,11 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.folder_off_rounded, size: 48, color: AppColors.gray300),
+                        const Icon(Icons.folder_off_rounded,
+                            size: 48, color: AppColors.gray300),
                         const SizedBox(height: 12),
-                        const Text('No documents found', style: TextStyle(color: AppColors.textSecondary)),
+                        const Text('No documents found',
+                            style: TextStyle(color: AppColors.textSecondary)),
                         const SizedBox(height: 16),
                         ElevatedButton.icon(
                           onPressed: () async {
@@ -127,15 +136,18 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                     final size = data['size'] ?? '0 KB';
                     final date = data['date'] ?? '';
                     final downloadUrl = data['downloadUrl'] as String?;
-                    
-                    final color = _categoryColors[category] ?? AppColors.primary;
-                    final icon = _categoryIcons[category] ?? Icons.insert_drive_file_rounded;
+
+                    final color =
+                        _categoryColors[category] ?? AppColors.primary;
+                    final icon = _categoryIcons[category] ??
+                        Icons.insert_drive_file_rounded;
 
                     return Material(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(AppRadius.md),
                       child: ListTile(
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
                         leading: Container(
                           width: 48,
                           height: 48,
@@ -147,27 +159,37 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                         ),
                         title: Text(
                           title,
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                          style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary),
                         ),
                         subtitle: Padding(
                           padding: const EdgeInsets.only(top: 4),
                           child: Row(
                             children: [
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
                                   color: color.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(AppRadius.full),
+                                  borderRadius:
+                                      BorderRadius.circular(AppRadius.full),
                                 ),
                                 child: Text(
                                   category,
-                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: color),
+                                  style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
+                                      color: color),
                                 ),
                               ),
                               const SizedBox(width: 6),
                               Text(
                                 '$size • $date',
-                                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary),
                               ),
                             ],
                           ),
@@ -177,11 +199,14 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                             if (downloadUrl != null && downloadUrl.isNotEmpty) {
                               final uri = Uri.parse(downloadUrl);
                               if (await canLaunchUrl(uri)) {
-                                await launchUrl(uri, mode: LaunchMode.externalApplication);
+                                await launchUrl(uri,
+                                    mode: LaunchMode.externalApplication);
                               } else {
                                 if (context.mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Could not open document URL')),
+                                    const SnackBar(
+                                        content: Text(
+                                            'Could not open document URL')),
                                   );
                                 }
                               }
@@ -190,7 +215,8 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                                 SnackBar(
                                   content: Text('Downloading $title...'),
                                   behavior: SnackBarBehavior.floating,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
                                 ),
                               );
                             }
@@ -202,7 +228,8 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                               color: AppColors.primarySurface,
                               borderRadius: BorderRadius.circular(AppRadius.md),
                             ),
-                            child: const Icon(Icons.download_rounded, color: AppColors.primary, size: 20),
+                            child: const Icon(Icons.download_rounded,
+                                color: AppColors.primary, size: 20),
                           ),
                         ),
                       ),

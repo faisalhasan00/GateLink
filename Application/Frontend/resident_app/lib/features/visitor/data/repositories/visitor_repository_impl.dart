@@ -11,14 +11,20 @@ class VisitorRepositoryImpl implements VisitorRepository {
   @override
   Stream<List<VisitorModel>> watchVisitors() {
     return _firestoreService.visitorsStream().map((snapshot) {
-      return snapshot.docs.map((doc) => VisitorModel.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => VisitorModel.fromFirestore(doc))
+          .toList();
     });
   }
 
   @override
   Stream<List<VisitorModel>> watchPendingVisitorsForFlat(String hostFlat) {
-    return _firestoreService.pendingVisitorsForFlatStream(hostFlat).map((snapshot) {
-      return snapshot.docs.map((doc) => VisitorModel.fromFirestore(doc)).toList();
+    return _firestoreService
+        .pendingVisitorsForFlatStream(hostFlat)
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => VisitorModel.fromFirestore(doc))
+          .toList();
     });
   }
 

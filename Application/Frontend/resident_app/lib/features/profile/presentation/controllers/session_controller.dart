@@ -18,7 +18,8 @@ class SessionController extends StateNotifier<SessionState> {
       );
       return false;
     }
-    state = state.copyWith(status: SessionActionStatus.loading, errorMessage: null);
+    state =
+        state.copyWith(status: SessionActionStatus.loading, errorMessage: null);
     try {
       await _repository.revokeSession(userId: userId, sessionId: sessionId);
       state = state.copyWith(
@@ -39,7 +40,8 @@ class SessionController extends StateNotifier<SessionState> {
     required String userId,
     required String currentSessionId,
   }) async {
-    state = state.copyWith(status: SessionActionStatus.loading, errorMessage: null);
+    state =
+        state.copyWith(status: SessionActionStatus.loading, errorMessage: null);
     try {
       await _repository.revokeAllOtherSessions(
         userId: userId,

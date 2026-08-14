@@ -33,7 +33,8 @@ class DashboardAppBar extends ConsumerWidget {
         ? profile!.name
         : (profile?.displayName.isNotEmpty == true
             ? profile!.displayName
-            : (user?.displayName ?? (user?.email?.split('@').first ?? 'Resident')));
+            : (user?.displayName ??
+                (user?.email?.split('@').first ?? 'Resident')));
 
     final String societyName = profile?.societyName.isNotEmpty == true
         ? profile!.societyName
@@ -54,7 +55,10 @@ class DashboardAppBar extends ConsumerWidget {
             backgroundColor: AppColors.primarySurface,
             child: Text(
               residentName.isNotEmpty ? residentName[0].toUpperCase() : 'R',
-              style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.primary, fontSize: 16),
+              style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
+                  fontSize: 16),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -64,17 +68,26 @@ class DashboardAppBar extends ConsumerWidget {
               children: [
                 Text(
                   '$greeting 👋',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w400),
+                  style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w400),
                 ),
                 Text(
                   residentName,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                  style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Text(
                   societyName,
-                  style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w600),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -86,7 +99,8 @@ class DashboardAppBar extends ConsumerWidget {
       actions: [
         Consumer(
           builder: (context, ref, _) {
-            final unreadCountAsync = ref.watch(unreadNotificationsCountStreamProvider);
+            final unreadCountAsync =
+                ref.watch(unreadNotificationsCountStreamProvider);
             final count = unreadCountAsync.value ?? 0;
 
             return IconButton(
@@ -94,18 +108,24 @@ class DashboardAppBar extends ConsumerWidget {
               icon: Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  const Icon(Icons.notifications_outlined, color: AppColors.textPrimary, size: 24),
+                  const Icon(Icons.notifications_outlined,
+                      color: AppColors.textPrimary, size: 24),
                   if (count > 0)
                     Positioned(
                       right: -2,
                       top: -2,
                       child: Container(
                         padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(color: AppColors.error, shape: BoxShape.circle),
-                        constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+                        decoration: const BoxDecoration(
+                            color: AppColors.error, shape: BoxShape.circle),
+                        constraints:
+                            const BoxConstraints(minWidth: 16, minHeight: 16),
                         child: Text(
                           count > 9 ? '9+' : '$count',
-                          style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w800),
+                          style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 9,
+                              fontWeight: FontWeight.w800),
                           textAlign: TextAlign.center,
                         ),
                       ),

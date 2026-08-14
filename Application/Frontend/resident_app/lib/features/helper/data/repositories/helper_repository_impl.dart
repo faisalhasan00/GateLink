@@ -69,8 +69,6 @@ class HelperRepositoryImpl implements HelperRepository {
       'createdAt': DateTime.now().toIso8601String(),
     };
 
-    await _firestore
-        .collection('societies/$societyId/helpers')
-        .add(docData);
+    await _firestore.collection('societies/$societyId/helpers').add(docData);
   }
 }

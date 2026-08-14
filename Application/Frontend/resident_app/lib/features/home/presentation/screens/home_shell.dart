@@ -14,11 +14,31 @@ class _HomeShellState extends State<HomeShell> {
   int _currentIndex = 0;
 
   final List<_NavItem> _navItems = const [
-    _NavItem(label: 'Home', icon: Icons.home_rounded, activeIcon: Icons.home_rounded, route: '/home/dashboard'),
-    _NavItem(label: 'Visitors', icon: Icons.person_add_outlined, activeIcon: Icons.person_add_rounded, route: '/home/visitors'),
-    _NavItem(label: 'Bills', icon: Icons.receipt_long_outlined, activeIcon: Icons.receipt_long_rounded, route: '/home/maintenance'),
-    _NavItem(label: 'Complaints', icon: Icons.support_agent_outlined, activeIcon: Icons.support_agent_rounded, route: '/home/complaints'),
-    _NavItem(label: 'Profile', icon: Icons.person_outline_rounded, activeIcon: Icons.person_rounded, route: '/home/profile'),
+    _NavItem(
+        label: 'Home',
+        icon: Icons.home_rounded,
+        activeIcon: Icons.home_rounded,
+        route: '/home/dashboard'),
+    _NavItem(
+        label: 'Visitors',
+        icon: Icons.person_add_outlined,
+        activeIcon: Icons.person_add_rounded,
+        route: '/home/visitors'),
+    _NavItem(
+        label: 'Bills',
+        icon: Icons.receipt_long_outlined,
+        activeIcon: Icons.receipt_long_rounded,
+        route: '/home/maintenance'),
+    _NavItem(
+        label: 'Complaints',
+        icon: Icons.support_agent_outlined,
+        activeIcon: Icons.support_agent_rounded,
+        route: '/home/complaints'),
+    _NavItem(
+        label: 'Profile',
+        icon: Icons.person_outline_rounded,
+        activeIcon: Icons.person_rounded,
+        route: '/home/profile'),
   ];
 
   @override
@@ -82,7 +102,9 @@ class _NavBarItem extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+          color: isActive
+              ? AppColors.primary.withOpacity(0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(

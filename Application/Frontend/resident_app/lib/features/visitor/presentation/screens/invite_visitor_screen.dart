@@ -13,7 +13,8 @@ class InviteVisitorScreen extends ConsumerStatefulWidget {
   const InviteVisitorScreen({super.key});
 
   @override
-  ConsumerState<InviteVisitorScreen> createState() => _InviteVisitorScreenState();
+  ConsumerState<InviteVisitorScreen> createState() =>
+      _InviteVisitorScreenState();
 }
 
 class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
@@ -26,8 +27,14 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
   bool _isLoading = false;
 
   final List<String> _purposes = [
-    'Personal Visit', 'Delivery', 'House Help', 'Maintenance Work',
-    'Medical Visit', 'Guest Stay', 'Cab / Taxi', 'Other',
+    'Personal Visit',
+    'Delivery',
+    'House Help',
+    'Maintenance Work',
+    'Medical Visit',
+    'Guest Stay',
+    'Cab / Taxi',
+    'Other',
   ];
 
   @override
@@ -82,9 +89,8 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
         expectedDate: _selectedDate != null
             ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
             : 'Today',
-        expectedTime: _selectedTime != null
-            ? _selectedTime!.format(context)
-            : 'Anytime',
+        expectedTime:
+            _selectedTime != null ? _selectedTime!.format(context) : 'Anytime',
       );
 
       if (!mounted) return;
@@ -93,7 +99,8 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
       if (inviteResult != null) {
         _showQrDialog(inviteResult.visitorId, inviteResult.passCode);
       } else {
-        final errorMsg = ref.read(visitorControllerProvider).errorMessage ?? 'Failed to create visitor pass.';
+        final errorMsg = ref.read(visitorControllerProvider).errorMessage ??
+            'Failed to create visitor pass.';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(errorMsg), backgroundColor: AppColors.error),
         );
@@ -102,7 +109,8 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
       setState(() => _isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+              content: Text('Error: $e'), backgroundColor: AppColors.error),
         );
       }
     }
@@ -122,16 +130,26 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(width: 40, height: 4,
-              decoration: BoxDecoration(color: AppColors.border, borderRadius: BorderRadius.circular(2))),
+            Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                    color: AppColors.border,
+                    borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: AppSpacing.lg),
-            const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 56),
+            const Icon(Icons.check_circle_rounded,
+                color: AppColors.success, size: 56),
             const SizedBox(height: AppSpacing.md),
             const Text('Visitor Invited!',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary)),
             const SizedBox(height: AppSpacing.sm),
-            Text('A QR code & Gate Pass Code has been generated for ${_nameController.text}.',
-                style: const TextStyle(color: AppColors.textSecondary, fontSize: 14),
+            Text(
+                'A QR code & Gate Pass Code has been generated for ${_nameController.text}.',
+                style: const TextStyle(
+                    color: AppColors.textSecondary, fontSize: 14),
                 textAlign: TextAlign.center),
             const SizedBox(height: AppSpacing.md),
 
@@ -141,15 +159,25 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
               decoration: BoxDecoration(
                 color: AppColors.primaryLight,
                 borderRadius: BorderRadius.circular(AppRadius.md),
-                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+                border:
+                    Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
               ),
               child: Column(
                 children: [
-                  const Text('6-DIGIT GATE PASS CODE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, color: AppColors.primary, letterSpacing: 1)),
+                  const Text('6-DIGIT GATE PASS CODE',
+                      style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primary,
+                          letterSpacing: 1)),
                   const SizedBox(height: 4),
                   SelectableText(
                     passCode,
-                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: 6, color: AppColors.primary),
+                    style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 6,
+                        color: AppColors.primary),
                   ),
                 ],
               ),
@@ -195,7 +223,10 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
             ),
             const SizedBox(height: AppSpacing.md),
             OutlinedButton(
-              onPressed: () { Navigator.pop(ctx); context.go(AppRoutes.visitors); },
+              onPressed: () {
+                Navigator.pop(ctx);
+                context.go(AppRoutes.visitors);
+              },
               child: const Text('Done'),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -223,8 +254,10 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
               const SizedBox(height: 6),
               TextFormField(
                 controller: _nameController,
-                decoration: const InputDecoration(hintText: 'Full name of visitor'),
-                validator: (v) => (v == null || v.isEmpty) ? 'Name is required' : null,
+                decoration:
+                    const InputDecoration(hintText: 'Full name of visitor'),
+                validator: (v) =>
+                    (v == null || v.isEmpty) ? 'Name is required' : null,
               ),
               const SizedBox(height: AppSpacing.md),
               _FieldLabel(label: 'Mobile Number (Optional)'),
@@ -233,14 +266,17 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
                 controller: _mobileController,
                 keyboardType: TextInputType.phone,
                 maxLength: 10,
-                decoration: const InputDecoration(hintText: '10-digit mobile number', counterText: ''),
+                decoration: const InputDecoration(
+                    hintText: '10-digit mobile number', counterText: ''),
               ),
               const SizedBox(height: AppSpacing.md),
               _FieldLabel(label: 'Purpose of Visit'),
               const SizedBox(height: 6),
               DropdownButtonFormField<String>(
                 value: _selectedPurpose,
-                items: _purposes.map((p) => DropdownMenuItem(value: p, child: Text(p))).toList(),
+                items: _purposes
+                    .map((p) => DropdownMenuItem(value: p, child: Text(p)))
+                    .toList(),
                 onChanged: (v) => setState(() => _selectedPurpose = v!),
                 decoration: const InputDecoration(hintText: 'Select purpose'),
               ),
@@ -260,14 +296,17 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
                           border: Border.all(color: AppColors.border),
                         ),
                         child: Row(children: [
-                          const Icon(Icons.calendar_today_rounded, size: 18, color: AppColors.primary),
+                          const Icon(Icons.calendar_today_rounded,
+                              size: 18, color: AppColors.primary),
                           const SizedBox(width: 8),
                           Text(
                             _selectedDate == null
                                 ? 'Select Date'
                                 : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
                             style: TextStyle(
-                              color: _selectedDate == null ? AppColors.textSecondary : AppColors.textPrimary,
+                              color: _selectedDate == null
+                                  ? AppColors.textSecondary
+                                  : AppColors.textPrimary,
                               fontSize: 14,
                             ),
                           ),
@@ -287,12 +326,17 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
                           border: Border.all(color: AppColors.border),
                         ),
                         child: Row(children: [
-                          const Icon(Icons.access_time_rounded, size: 18, color: AppColors.primary),
+                          const Icon(Icons.access_time_rounded,
+                              size: 18, color: AppColors.primary),
                           const SizedBox(width: 8),
                           Text(
-                            _selectedTime == null ? 'Select Time' : _selectedTime!.format(context),
+                            _selectedTime == null
+                                ? 'Select Time'
+                                : _selectedTime!.format(context),
                             style: TextStyle(
-                              color: _selectedTime == null ? AppColors.textSecondary : AppColors.textPrimary,
+                              color: _selectedTime == null
+                                  ? AppColors.textSecondary
+                                  : AppColors.textPrimary,
                               fontSize: 14,
                             ),
                           ),
@@ -306,8 +350,11 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
               ElevatedButton(
                 onPressed: _isLoading ? null : _submit,
                 child: _isLoading
-                    ? const SizedBox(height: 20, width: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                            strokeWidth: 2, color: Colors.white))
                     : const Text('Generate Visitor Pass'),
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -325,7 +372,10 @@ class _SectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(text,
-    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary));
+      style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary));
 }
 
 class _FieldLabel extends StatelessWidget {
@@ -334,5 +384,8 @@ class _FieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Text(label,
-    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary));
+      style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textSecondary));
 }

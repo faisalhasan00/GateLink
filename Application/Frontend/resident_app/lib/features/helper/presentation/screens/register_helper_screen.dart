@@ -136,12 +136,10 @@ class _RegisterHelperScreenState extends ConsumerState<RegisterHelperScreen> {
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppRadius.md)),
                 ),
-                validator: (v) => v == null || v.trim().isEmpty
-                    ? 'Name is required'
-                    : null,
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Name is required' : null,
               ),
               const SizedBox(height: AppSpacing.md),
-
               Row(
                 children: [
                   Expanded(
@@ -185,8 +183,7 @@ class _RegisterHelperScreenState extends ConsumerState<RegisterHelperScreen> {
                           keyboardType: TextInputType.phone,
                           decoration: InputDecoration(
                             hintText: '+91 98765...',
-                            prefixIcon:
-                                const Icon(Icons.phone_android_rounded),
+                            prefixIcon: const Icon(Icons.phone_android_rounded),
                             border: OutlineInputBorder(
                                 borderRadius:
                                     BorderRadius.circular(AppRadius.md)),
@@ -201,7 +198,6 @@ class _RegisterHelperScreenState extends ConsumerState<RegisterHelperScreen> {
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
-
               Row(
                 children: [
                   Expanded(
@@ -256,7 +252,6 @@ class _RegisterHelperScreenState extends ConsumerState<RegisterHelperScreen> {
                 ],
               ),
               const SizedBox(height: AppSpacing.md),
-
               const Text('Working Days & Schedule',
                   style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
@@ -271,7 +266,6 @@ class _RegisterHelperScreenState extends ConsumerState<RegisterHelperScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
-
               const Text('Emergency Contact Number',
                   style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
@@ -285,9 +279,7 @@ class _RegisterHelperScreenState extends ConsumerState<RegisterHelperScreen> {
                       borderRadius: BorderRadius.circular(AppRadius.md)),
                 ),
               ),
-
               const SizedBox(height: AppSpacing.xl),
-
               SizedBox(
                 width: double.infinity,
                 height: 50,

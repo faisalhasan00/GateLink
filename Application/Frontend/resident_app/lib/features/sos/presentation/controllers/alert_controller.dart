@@ -16,7 +16,8 @@ class AlertController extends StateNotifier<AlertState> {
     required String type,
     required String notes,
   }) async {
-    state = state.copyWith(status: AlertActionStatus.loading, errorMessage: null);
+    state =
+        state.copyWith(status: AlertActionStatus.loading, errorMessage: null);
     try {
       await _repository.broadcastSosAlert(
         societyId: societyId,

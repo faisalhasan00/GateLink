@@ -17,7 +17,8 @@ class MockAmenityRepository implements AmenityRepository {
   }
 
   @override
-  Stream<List<AmenityBookingModel>> watchMyBookings(String societyId, String uid) {
+  Stream<List<AmenityBookingModel>> watchMyBookings(
+      String societyId, String uid) {
     return Stream.value([]);
   }
 
@@ -27,7 +28,8 @@ class MockAmenityRepository implements AmenityRepository {
   }
 
   @override
-  Future<AmenityModel?> fetchAmenityById(String societyId, String amenityId) async {
+  Future<AmenityModel?> fetchAmenityById(
+      String societyId, String amenityId) async {
     return AmenityModel(id: amenityId, name: 'Swimming Pool');
   }
 
@@ -106,7 +108,8 @@ void main() {
 
       expect(success, false);
       expect(controller.state.status, AmenityActionStatus.error);
-      expect(controller.state.errorMessage, contains('select both a date and a time slot'));
+      expect(controller.state.errorMessage,
+          contains('select both a date and a time slot'));
       expect(mockRepository.bookCalls, 0);
     });
 
@@ -144,11 +147,13 @@ void main() {
 
       expect(success, true);
       expect(controller.state.status, AmenityActionStatus.success);
-      expect(controller.state.successMessage, contains('Pool at 6:00 AM has been booked'));
+      expect(controller.state.successMessage,
+          contains('Pool at 6:00 AM has been booked'));
       expect(mockRepository.bookCalls, 1);
     });
 
-    test('bookAmenity sets error state when repository throws Exception', () async {
+    test('bookAmenity sets error state when repository throws Exception',
+        () async {
       mockRepository.shouldFail = true;
 
       final success = await controller.bookAmenity(
@@ -178,7 +183,8 @@ void main() {
 
       expect(success, true);
       expect(controller.state.status, AmenityActionStatus.success);
-      expect(controller.state.successMessage, contains('cancelled successfully'));
+      expect(
+          controller.state.successMessage, contains('cancelled successfully'));
       expect(mockRepository.cancelCalls, 1);
     });
 

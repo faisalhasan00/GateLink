@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../providers/visitor_providers.dart';
-import '../presentation/controllers/visitor_controller.dart';
+import '../../../visitor/providers/visitor_providers.dart';
+import '../../../visitor/presentation/controllers/visitor_controller.dart';
 
 class VehicleLogScreen extends ConsumerStatefulWidget {
   const VehicleLogScreen({super.key});

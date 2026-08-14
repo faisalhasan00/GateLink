@@ -17,7 +17,8 @@ class HelperLogModel {
     required this.flatNumber,
   });
 
-  factory HelperLogModel.fromMap(Map<String, dynamic> map, {String? defaultId}) {
+  factory HelperLogModel.fromMap(Map<String, dynamic> map,
+      {String? defaultId}) {
     return HelperLogModel(
       id: map['id'] as String? ?? defaultId ?? '',
       helperId: map['helperId'] as String? ?? '',

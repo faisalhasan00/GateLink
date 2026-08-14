@@ -25,7 +25,7 @@ class OfflineSyncService extends ChangeNotifier {
 
   Future<void> syncQueuedActions() async {
     if (_queuedActions.isEmpty) return;
-    
+
     // Process queued offline operations safely
     _queuedActions.clear();
     notifyListeners();

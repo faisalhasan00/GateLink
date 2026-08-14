@@ -28,10 +28,12 @@ class _GuardLoginScreenState extends ConsumerState<GuardLoginScreen>
   @override
   void initState() {
     super.initState();
-    _animController = AnimationController(vsync: this, duration: const Duration(milliseconds: 700));
+    _animController = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 700));
     _fadeAnim = CurvedAnimation(parent: _animController, curve: Curves.easeOut);
     _slideAnim = Tween<Offset>(begin: const Offset(0, 0.15), end: Offset.zero)
-        .animate(CurvedAnimation(parent: _animController, curve: Curves.easeOut));
+        .animate(
+            CurvedAnimation(parent: _animController, curve: Curves.easeOut));
     _animController.forward();
   }
 
@@ -48,9 +50,9 @@ class _GuardLoginScreenState extends ConsumerState<GuardLoginScreen>
     setState(() => _isLoading = true);
     try {
       final cred = await ref.read(authServiceProvider).signInWithEmail(
-        _emailController.text.trim(),
-        _passwordController.text.trim(),
-      );
+            _emailController.text.trim(),
+            _passwordController.text.trim(),
+          );
       if (mounted && cred.user != null) {
         context.go('/dashboard');
       }
@@ -67,7 +69,9 @@ class _GuardLoginScreenState extends ConsumerState<GuardLoginScreen>
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login Error: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+              content: Text('Login Error: $e'),
+              backgroundColor: AppColors.error),
         );
       }
     } finally {
@@ -106,12 +110,21 @@ class _GuardLoginScreenState extends ConsumerState<GuardLoginScreen>
                           color: Colors.white.withValues(alpha: 0.2),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.security_rounded, color: Colors.white, size: 42),
+                        child: const Icon(Icons.security_rounded,
+                            color: Colors.white, size: 42),
                       ),
                       const SizedBox(height: AppSpacing.xl),
-                      const Text('Guard Portal', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white)),
+                      const Text('Guard Portal',
+                          style: TextStyle(
+                              fontSize: 28,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.white)),
                       const SizedBox(height: AppSpacing.sm),
-                      Text('Sign in to access the gate management system', style: TextStyle(fontSize: 14, color: Colors.white.withValues(alpha: 0.8)), textAlign: TextAlign.center),
+                      Text('Sign in to access the gate management system',
+                          style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white.withValues(alpha: 0.8)),
+                          textAlign: TextAlign.center),
                       const SizedBox(height: AppSpacing.xxl),
 
                       // Email field
@@ -127,9 +140,12 @@ class _GuardLoginScreenState extends ConsumerState<GuardLoginScreen>
                             hintText: 'Email address',
                             prefixIcon: Icon(Icons.email_outlined),
                             border: InputBorder.none,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 16),
                           ),
-                          validator: (v) => (v == null || v.isEmpty) ? 'Email is required' : null,
+                          validator: (v) => (v == null || v.isEmpty)
+                              ? 'Email is required'
+                              : null,
                         ),
                       ),
                       const SizedBox(height: AppSpacing.md),
@@ -147,13 +163,19 @@ class _GuardLoginScreenState extends ConsumerState<GuardLoginScreen>
                             hintText: 'Password',
                             prefixIcon: const Icon(Icons.lock_outline),
                             border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 16),
                             suffixIcon: IconButton(
-                              icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
-                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                              icon: Icon(_obscurePassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility),
+                              onPressed: () => setState(
+                                  () => _obscurePassword = !_obscurePassword),
                             ),
                           ),
-                          validator: (v) => (v == null || v.isEmpty) ? 'Password is required' : null,
+                          validator: (v) => (v == null || v.isEmpty)
+                              ? 'Password is required'
+                              : null,
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xl),
@@ -167,11 +189,20 @@ class _GuardLoginScreenState extends ConsumerState<GuardLoginScreen>
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.white,
                             foregroundColor: AppColors.secondary,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.lg)),
                           ),
                           child: _isLoading
-                              ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                              : const Text('Sign In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2))
+                              : const Text('Sign In',
+                                  style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w700)),
                         ),
                       ),
                     ],

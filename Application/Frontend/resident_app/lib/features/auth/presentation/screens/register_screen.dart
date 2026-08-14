@@ -11,7 +11,8 @@ import '../../../../core/services/society_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
-final societyServiceProvider = Provider<SocietyService>((ref) => SocietyService());
+final societyServiceProvider =
+    Provider<SocietyService>((ref) => SocietyService());
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -40,10 +41,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKeyLayer2 = GlobalKey<FormState>();
   String _selectedCountry = 'India';
   String _selectedCity = 'Hyderabad';
-  
+
   List<SocietyModel> _dbSocieties = [];
   SocietyModel? _selectedSocietyModel;
-  
+
   String _selectedBuilding = 'A';
   String _selectedFlatNo = '001';
   List<String> _dynamicFlats = [];
@@ -51,13 +52,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   final List<String> _countries = ['India', 'UAE'];
   final Map<String, List<String>> _cityMap = {
-    'India': ['Hyderabad', 'Mumbai', 'Bengaluru', 'Delhi NCR', 'Chennai', 'Pune'],
+    'India': [
+      'Hyderabad',
+      'Mumbai',
+      'Bengaluru',
+      'Delhi NCR',
+      'Chennai',
+      'Pune'
+    ],
     'UAE': ['Dubai', 'Abu Dhabi', 'Sharjah'],
   };
 
   // ── Layer 3: Residency, Occupancy & Proof ──
-  String _selectedYouAre = 'Flat Owner'; // 'Flat Owner', 'Renting with family', 'Renting with other flatmates'
-  String _selectedOccupancy = 'Currently residing'; // 'Currently residing', 'Flat is let out', 'Flat is empty'
+  String _selectedYouAre =
+      'Flat Owner'; // 'Flat Owner', 'Renting with family', 'Renting with other flatmates'
+  String _selectedOccupancy =
+      'Currently residing'; // 'Currently residing', 'Flat is let out', 'Flat is empty'
   String _documentType = 'Rent Agreement / Electricity Bill';
 
   @override
@@ -82,7 +92,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     setState(() => _isFetchingDb = true);
     try {
       final service = ref.read(societyServiceProvider);
-      final societies = await service.fetchSocietiesByLocation(_selectedCountry, _selectedCity);
+      final societies = await service.fetchSocietiesByLocation(
+          _selectedCountry, _selectedCity);
 
       if (mounted) {
         setState(() {
@@ -119,20 +130,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Future<void> _pickDocument() async {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => Container(
         padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Upload Verification Document', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            const Text('Upload Verification Document',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
             const SizedBox(height: 6),
-            const Text('Select document format (Image, PDF, or File)', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+            const Text('Select document format (Image, PDF, or File)',
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
             const SizedBox(height: 16),
             ListTile(
-              leading: const Icon(Icons.photo_library_rounded, color: AppColors.primary, size: 28),
-              title: const Text('Image / Photo', style: TextStyle(fontWeight: FontWeight.w700)),
+              leading: const Icon(Icons.photo_library_rounded,
+                  color: AppColors.primary, size: 28),
+              title: const Text('Image / Photo',
+                  style: TextStyle(fontWeight: FontWeight.w700)),
               subtitle: const Text('PNG, JPG, WEBP from Gallery'),
               onTap: () async {
                 Navigator.pop(ctx);
@@ -152,19 +168,29 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ),
             const Divider(),
             ListTile(
-              leading: const Icon(Icons.picture_as_pdf_rounded, color: Colors.redAccent, size: 28),
-              title: const Text('PDF / Document File', style: TextStyle(fontWeight: FontWeight.w700)),
+              leading: const Icon(Icons.picture_as_pdf_rounded,
+                  color: Colors.redAccent, size: 28),
+              title: const Text('PDF / Document File',
+                  style: TextStyle(fontWeight: FontWeight.w700)),
               subtitle: const Text('PDF, DOC, DOCX, or scan document'),
               onTap: () async {
                 Navigator.pop(ctx);
                 final result = await FilePicker.platform.pickFiles(
                   type: FileType.custom,
-                  allowedExtensions: ['pdf', 'doc', 'docx', 'png', 'jpg', 'jpeg'],
+                  allowedExtensions: [
+                    'pdf',
+                    'doc',
+                    'docx',
+                    'png',
+                    'jpg',
+                    'jpeg'
+                  ],
                 );
                 if (result != null && result.files.single.path != null) {
                   setState(() {
                     _documentFile = File(result.files.single.path!);
-                    final ext = result.files.single.extension?.toUpperCase() ?? 'PDF';
+                    final ext =
+                        result.files.single.extension?.toUpperCase() ?? 'PDF';
                     _documentType = '$ext Document';
                   });
                 }
@@ -194,8 +220,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       if (_documentFile != null && await _documentFile!.exists()) {
         try {
           final ext = _documentFile!.path.split('.').last.toLowerCase();
-          final fileName = 'proof_${DateTime.now().millisecondsSinceEpoch}.$ext';
-          final storageRef = FirebaseStorage.instance.ref().child('verification_documents').child(fileName);
+          final fileName =
+              'proof_${DateTime.now().millisecondsSinceEpoch}.$ext';
+          final storageRef = FirebaseStorage.instance
+              .ref()
+              .child('verification_documents')
+              .child(fileName);
           final uploadTask = await storageRef.putFile(_documentFile!);
           documentUrl = await uploadTask.ref.getDownloadURL();
         } catch (storageErr) {
@@ -209,21 +239,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       }
 
       await ref.read(authServiceProvider).registerWithEmail(
-        email: _emailController.text,
-        password: _passwordController.text,
-        name: _nameController.text,
-        phone: _phoneController.text,
-        country: _selectedCountry,
-        city: _selectedCity,
-        societyCode: _selectedSocietyModel!.code,
-        buildingBlock: _selectedBuilding,
-        flatNumber: _selectedFlatNo,
-        role: 'resident',
-        residentRoleType: _selectedYouAre,
-        occupancyStatus: _selectedOccupancy,
-        documentProofUrl: documentUrl ?? _documentFile?.path,
-        documentType: _documentType,
-      );
+            email: _emailController.text,
+            password: _passwordController.text,
+            name: _nameController.text,
+            phone: _phoneController.text,
+            country: _selectedCountry,
+            city: _selectedCity,
+            societyCode: _selectedSocietyModel!.code,
+            buildingBlock: _selectedBuilding,
+            flatNumber: _selectedFlatNo,
+            role: 'resident',
+            residentRoleType: _selectedYouAre,
+            occupancyStatus: _selectedOccupancy,
+            documentProofUrl: documentUrl ?? _documentFile?.path,
+            documentType: _documentType,
+          );
 
       if (mounted) {
         context.go('/pending-approval');
@@ -240,7 +270,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: Text(_currentLayer == 1 ? 'Add Home' : _currentLayer == 2 ? 'Select Home' : 'Residency Proof'),
+        title: Text(_currentLayer == 1
+            ? 'Add Home'
+            : _currentLayer == 2
+                ? 'Select Home'
+                : 'Residency Proof'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
           onPressed: () {
@@ -282,8 +316,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text('Step $_currentLayer of 3', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: AppColors.primary)),
-              Text(_currentLayer == 1 ? 'Personal Info' : _currentLayer == 2 ? 'Location & Flat' : 'Verification Proof', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              Text('Step $_currentLayer of 3',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: AppColors.primary)),
+              Text(
+                  _currentLayer == 1
+                      ? 'Personal Info'
+                      : _currentLayer == 2
+                          ? 'Location & Flat'
+                          : 'Verification Proof',
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.textSecondary)),
             ],
           ),
           const SizedBox(height: 8),
@@ -295,7 +340,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   height: 4,
                   margin: EdgeInsets.only(right: index < 2 ? 6 : 0),
                   decoration: BoxDecoration(
-                    color: stepNum <= _currentLayer ? AppColors.primary : AppColors.gray200,
+                    color: stepNum <= _currentLayer
+                        ? AppColors.primary
+                        : AppColors.gray200,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -314,9 +361,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Create Account', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+          const Text('Create Account',
+              style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary)),
           const SizedBox(height: 4),
-          const Text('Enter your details to get started with SocietySphere', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+          const Text('Enter your details to get started with SocietySphere',
+              style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
           const SizedBox(height: AppSpacing.xl),
 
           // Full Name
@@ -325,7 +377,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             controller: _nameController,
             hint: 'e.g. Faisal Hasan',
             icon: Icons.person_outline_rounded,
-            validator: (v) => v == null || v.isEmpty ? 'Full name is required' : null,
+            validator: (v) =>
+                v == null || v.isEmpty ? 'Full name is required' : null,
           ),
           const SizedBox(height: AppSpacing.md),
 
@@ -351,18 +404,22 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             hint: '+91 99999 99999',
             keyboardType: TextInputType.phone,
             icon: Icons.phone_outlined,
-            validator: (v) => v == null || v.isEmpty ? 'Phone number is required' : null,
+            validator: (v) =>
+                v == null || v.isEmpty ? 'Phone number is required' : null,
           ),
           const SizedBox(height: AppSpacing.md),
 
           // Password
-          _buildPasswordField('Password', _passwordController, _obscurePassword, () {
+          _buildPasswordField('Password', _passwordController, _obscurePassword,
+              () {
             setState(() => _obscurePassword = !_obscurePassword);
           }),
           const SizedBox(height: AppSpacing.md),
 
           // Confirm Password
-          _buildPasswordField('Confirm Password', _confirmPasswordController, _obscurePassword, () {
+          _buildPasswordField(
+              'Confirm Password', _confirmPasswordController, _obscurePassword,
+              () {
             setState(() => _obscurePassword = !_obscurePassword);
           }, validator: (v) {
             if (v != _passwordController.text) return 'Passwords do not match';
@@ -383,9 +440,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.lg)),
               ),
-              child: const Text('Next: Select Location & Society ➔', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+              child: const Text('Next: Select Location & Society ➔',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white)),
             ),
           ),
         ],
@@ -409,13 +471,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Select Your Home', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+              const Text('Select Your Home',
+                  style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary)),
               if (_isFetchingDb)
-                const SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary)),
+                const SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: AppColors.primary)),
             ],
           ),
           const SizedBox(height: 4),
-          const Text('Data fetched directly from live Firestore database records', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+          const Text(
+              'Data fetched directly from live Firestore database records',
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
           const SizedBox(height: AppSpacing.xl),
 
           // Country Dropdown
@@ -431,7 +503,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               child: DropdownButton<String>(
                 value: _selectedCountry,
                 isExpanded: true,
-                items: _countries.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                items: _countries
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .toList(),
                 onChanged: (val) {
                   if (val != null) {
                     setState(() {
@@ -457,9 +531,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
-                value: availableCities.contains(_selectedCity) ? _selectedCity : availableCities.first,
+                value: availableCities.contains(_selectedCity)
+                    ? _selectedCity
+                    : availableCities.first,
                 isExpanded: true,
-                items: availableCities.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                items: availableCities
+                    .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+                    .toList(),
                 onChanged: (val) {
                   if (val != null) {
                     setState(() => _selectedCity = val);
@@ -484,12 +562,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.info_outline_rounded, color: AppColors.warning),
+                      Icon(Icons.info_outline_rounded,
+                          color: AppColors.warning),
                       SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'No societies onboarded in database yet. Onboard your society via Super Admin panel!',
-                          style: TextStyle(fontSize: 13, color: AppColors.textPrimary, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w500),
                         ),
                       ),
                     ],
@@ -507,23 +589,34 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       value: _selectedSocietyModel,
                       isExpanded: true,
                       hint: const Text('Select Society from Database'),
-                      items: _dbSocieties.map((soc) => DropdownMenuItem(
-                        value: soc,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(soc.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(soc.code, style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.bold)),
-                            ),
-                          ],
-                        ),
-                      )).toList(),
+                      items: _dbSocieties
+                          .map((soc) => DropdownMenuItem(
+                                value: soc,
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(soc.name,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w600)),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary
+                                            .withValues(alpha: 0.1),
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Text(soc.code,
+                                          style: const TextStyle(
+                                              fontSize: 11,
+                                              color: AppColors.primary,
+                                              fontWeight: FontWeight.bold)),
+                                    ),
+                                  ],
+                                ),
+                              ))
+                          .toList(),
                       onChanged: (val) {
                         if (val != null) {
                           setState(() {
@@ -539,7 +632,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
           // Building Block Dynamic Selector
           _buildDropdownLabel('SELECT BUILDING / BLOCK'),
-          (_selectedSocietyModel == null || _selectedSocietyModel!.blocks.isEmpty)
+          (_selectedSocietyModel == null ||
+                  _selectedSocietyModel!.blocks.isEmpty)
               ? Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(14),
@@ -550,7 +644,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   child: const Text(
                     'No building blocks configured for this society in database',
-                    style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                    style:
+                        TextStyle(fontSize: 13, color: AppColors.textSecondary),
                   ),
                 )
               : Container(
@@ -564,15 +659,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       final isSelected = _selectedBuilding == b;
                       return ListTile(
                         dense: true,
-                        leading: Icon(Icons.apartment_rounded, color: isSelected ? AppColors.primary : AppColors.textSecondary),
-                        title: Text(b, style: TextStyle(fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500, color: isSelected ? AppColors.primary : AppColors.textPrimary)),
-                        trailing: Icon(isSelected ? Icons.check_circle_rounded : Icons.chevron_right_rounded, color: isSelected ? AppColors.primary : AppColors.gray400),
+                        leading: Icon(Icons.apartment_rounded,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.textSecondary),
+                        title: Text(b,
+                            style: TextStyle(
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : AppColors.textPrimary)),
+                        trailing: Icon(
+                            isSelected
+                                ? Icons.check_circle_rounded
+                                : Icons.chevron_right_rounded,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.gray400),
                         onTap: () {
                           setState(() {
                             _selectedBuilding = b;
                             if (_selectedSocietyModel != null) {
-                              _dynamicFlats = ref.read(societyServiceProvider).generateFlatsForSociety(_selectedSocietyModel!, b);
-                              if (_dynamicFlats.isNotEmpty) _selectedFlatNo = _dynamicFlats.first;
+                              _dynamicFlats = ref
+                                  .read(societyServiceProvider)
+                                  .generateFlatsForSociety(
+                                      _selectedSocietyModel!, b);
+                              if (_dynamicFlats.isNotEmpty)
+                                _selectedFlatNo = _dynamicFlats.first;
                             }
                           });
                         },
@@ -599,7 +714,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     hintText: 'Enter Flat to Search (e.g. 001, 101)',
                     prefixIcon: Icon(Icons.search_rounded),
                     border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    contentPadding:
+                        EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   ),
                   onChanged: (_) => setState(() {}),
                 ),
@@ -613,9 +729,25 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       final isSelected = _selectedFlatNo == f;
                       return ListTile(
                         dense: true,
-                        leading: Icon(Icons.home_outlined, color: isSelected ? AppColors.primary : AppColors.textSecondary),
-                        title: Text(f, style: TextStyle(fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500, color: isSelected ? AppColors.primary : AppColors.textPrimary)),
-                        trailing: Icon(isSelected ? Icons.check_circle_rounded : Icons.chevron_right_rounded, color: isSelected ? AppColors.primary : AppColors.gray400),
+                        leading: Icon(Icons.home_outlined,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.textSecondary),
+                        title: Text(f,
+                            style: TextStyle(
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                color: isSelected
+                                    ? AppColors.primary
+                                    : AppColors.textPrimary)),
+                        trailing: Icon(
+                            isSelected
+                                ? Icons.check_circle_rounded
+                                : Icons.chevron_right_rounded,
+                            color: isSelected
+                                ? AppColors.primary
+                                : AppColors.gray400),
                         onTap: () => setState(() => _selectedFlatNo = f),
                       );
                     },
@@ -641,9 +773,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.lg)),
               ),
-              child: const Text('Next: Residency & Proof ➔', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+              child: const Text('Next: Residency & Proof ➔',
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white)),
             ),
           ),
         ],
@@ -656,9 +793,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Residency & Verification', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
+        const Text('Residency & Verification',
+            style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary)),
         const SizedBox(height: 4),
-        const Text('Specify occupancy status and upload document proof for RWA review', style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+        const Text(
+            'Specify occupancy status and upload document proof for RWA review',
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
         const SizedBox(height: AppSpacing.xl),
 
         // Selected Flat Summary Box
@@ -671,14 +814,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           child: Row(
             children: [
-              const Icon(Icons.home_work_rounded, color: AppColors.primary, size: 36),
+              const Icon(Icons.home_work_rounded,
+                  color: AppColors.primary, size: 36),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${_selectedSocietyModel?.name ?? "Housing Society"} (${_selectedBuilding}-$_selectedFlatNo)', style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: AppColors.textPrimary)),
-                    Text('Code: ${_selectedSocietyModel?.code ?? "SOC-001"} | $_selectedCity, $_selectedCountry', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                    Text(
+                        '${_selectedSocietyModel?.name ?? "Housing Society"} (${_selectedBuilding}-$_selectedFlatNo)',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                            color: AppColors.textPrimary)),
+                    Text(
+                        'Code: ${_selectedSocietyModel?.code ?? "SOC-001"} | $_selectedCity, $_selectedCountry',
+                        style: TextStyle(
+                            fontSize: 13, color: AppColors.textSecondary)),
                   ],
                 ),
               ),
@@ -697,11 +849,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           child: Column(
             children: [
-              _buildRadioOption('Flat Owner', _selectedYouAre, (val) => setState(() => _selectedYouAre = val)),
+              _buildRadioOption('Flat Owner', _selectedYouAre,
+                  (val) => setState(() => _selectedYouAre = val)),
               const Divider(height: 1),
-              _buildRadioOption('Renting with family', _selectedYouAre, (val) => setState(() => _selectedYouAre = val)),
+              _buildRadioOption('Renting with family', _selectedYouAre,
+                  (val) => setState(() => _selectedYouAre = val)),
               const Divider(height: 1),
-              _buildRadioOption('Renting with other flatmates', _selectedYouAre, (val) => setState(() => _selectedYouAre = val)),
+              _buildRadioOption('Renting with other flatmates', _selectedYouAre,
+                  (val) => setState(() => _selectedYouAre = val)),
             ],
           ),
         ),
@@ -717,11 +872,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           child: Column(
             children: [
-              _buildRadioOption('Currently residing', _selectedOccupancy, (val) => setState(() => _selectedOccupancy = val)),
+              _buildRadioOption('Currently residing', _selectedOccupancy,
+                  (val) => setState(() => _selectedOccupancy = val)),
               const Divider(height: 1),
-              _buildRadioOption('Flat is let out', _selectedOccupancy, (val) => setState(() => _selectedOccupancy = val)),
+              _buildRadioOption('Flat is let out', _selectedOccupancy,
+                  (val) => setState(() => _selectedOccupancy = val)),
               const Divider(height: 1),
-              _buildRadioOption('Flat is empty', _selectedOccupancy, (val) => setState(() => _selectedOccupancy = val)),
+              _buildRadioOption('Flat is empty', _selectedOccupancy,
+                  (val) => setState(() => _selectedOccupancy = val)),
             ],
           ),
         ),
@@ -736,13 +894,21 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(AppRadius.lg),
-              border: Border.all(color: _documentFile != null ? AppColors.success : AppColors.gray300, width: 1.5),
+              border: Border.all(
+                  color: _documentFile != null
+                      ? AppColors.success
+                      : AppColors.gray300,
+                  width: 1.5),
             ),
             child: Row(
               children: [
                 Icon(
-                  _documentFile != null ? Icons.check_circle_rounded : Icons.cloud_upload_outlined,
-                  color: _documentFile != null ? AppColors.success : AppColors.primary,
+                  _documentFile != null
+                      ? Icons.check_circle_rounded
+                      : Icons.cloud_upload_outlined,
+                  color: _documentFile != null
+                      ? AppColors.success
+                      : AppColors.primary,
                   size: 32,
                 ),
                 const SizedBox(width: 14),
@@ -751,17 +917,28 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        _documentFile != null ? 'Document Selected' : 'Upload Proof (Rent Agreement / Utility Bill)',
-                        style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: _documentFile != null ? AppColors.success : AppColors.textPrimary),
+                        _documentFile != null
+                            ? 'Document Selected'
+                            : 'Upload Proof (Rent Agreement / Utility Bill)',
+                        style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                            color: _documentFile != null
+                                ? AppColors.success
+                                : AppColors.textPrimary),
                       ),
                       Text(
-                        _documentFile != null ? _documentFile!.path.split('/').last : 'Tap to attach address proof for RWA Admin review',
-                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        _documentFile != null
+                            ? _documentFile!.path.split('/').last
+                            : 'Tap to attach address proof for RWA Admin review',
+                        style: TextStyle(
+                            fontSize: 12, color: AppColors.textSecondary),
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.add_photo_alternate_outlined, color: AppColors.primary),
+                const Icon(Icons.add_photo_alternate_outlined,
+                    color: AppColors.primary),
               ],
             ),
           ),
@@ -777,11 +954,20 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             onPressed: _isLoading ? null : _submitRegistration,
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(AppRadius.lg)),
             ),
             child: _isLoading
-                ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
-                : const Text('Add Flat/Villa & Submit ➔', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.white)),
+                ? const SizedBox(
+                    height: 22,
+                    width: 22,
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2.5, color: Colors.white))
+                : const Text('Add Flat/Villa & Submit ➔',
+                    style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white)),
           ),
         ),
       ],
@@ -792,11 +978,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget _buildDropdownLabel(String label) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+      child: Text(label,
+          style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary)),
     );
   }
 
-  Widget _buildRadioOption(String value, String groupValue, ValueChanged<String> onChanged) {
+  Widget _buildRadioOption(
+      String value, String groupValue, ValueChanged<String> onChanged) {
     final isSelected = value == groupValue;
     return InkWell(
       onTap: () => onChanged(value),
@@ -805,12 +996,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         child: Row(
           children: [
             Icon(
-              isSelected ? Icons.radio_button_checked_rounded : Icons.radio_button_off_rounded,
+              isSelected
+                  ? Icons.radio_button_checked_rounded
+                  : Icons.radio_button_off_rounded,
               color: isSelected ? AppColors.primary : AppColors.gray400,
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(value, style: TextStyle(fontSize: 15, fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400, color: AppColors.textPrimary)),
+              child: Text(value,
+                  style: TextStyle(
+                      fontSize: 15,
+                      fontWeight:
+                          isSelected ? FontWeight.w700 : FontWeight.w400,
+                      color: AppColors.textPrimary)),
             ),
           ],
         ),
@@ -829,7 +1027,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+        Text(label,
+            style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary)),
         const SizedBox(height: 6),
         TextFormField(
           controller: controller,
@@ -856,26 +1058,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+        Text(label,
+            style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary)),
         const SizedBox(height: 6),
         TextFormField(
           controller: controller,
           obscureText: obscure,
           decoration: InputDecoration(
             hintText: 'Enter password',
-            prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.textSecondary),
+            prefixIcon: const Icon(Icons.lock_outline_rounded,
+                color: AppColors.textSecondary),
             fillColor: Colors.white,
             filled: true,
             suffixIcon: IconButton(
-              icon: Icon(obscure ? Icons.visibility_off_rounded : Icons.visibility_rounded),
+              icon: Icon(obscure
+                  ? Icons.visibility_off_rounded
+                  : Icons.visibility_rounded),
               onPressed: onToggle,
             ),
           ),
-          validator: validator ?? (v) {
-            if (v == null || v.isEmpty) return 'Password is required';
-            if (v.length < 6) return 'Password must be at least 6 characters';
-            return null;
-          },
+          validator: validator ??
+              (v) {
+                if (v == null || v.isEmpty) return 'Password is required';
+                if (v.length < 6)
+                  return 'Password must be at least 6 characters';
+                return null;
+              },
         ),
       ],
     );

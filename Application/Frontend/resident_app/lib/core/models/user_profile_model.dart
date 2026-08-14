@@ -33,18 +33,23 @@ class UserProfileModel {
     this.notificationPreferences = const {},
   });
 
-  factory UserProfileModel.fromMap(Map<String, dynamic> map, {String? defaultUid}) {
+  factory UserProfileModel.fromMap(Map<String, dynamic> map,
+      {String? defaultUid}) {
     final uid = map['uid'] as String? ?? defaultUid ?? '';
-    final name = map['name'] as String? ?? map['displayName'] as String? ?? 'Resident';
+    final name =
+        map['name'] as String? ?? map['displayName'] as String? ?? 'Resident';
     final displayName = map['displayName'] as String? ?? name;
     final email = map['email'] as String? ?? '';
-    final phone = map['phone'] as String? ?? map['phoneNumber'] as String? ?? '';
+    final phone =
+        map['phone'] as String? ?? map['phoneNumber'] as String? ?? '';
     final gender = map['gender'] as String? ?? 'Male';
     final dob = map['dob'] as String? ?? '12 Oct 1992';
     final societyId = map['societyId'] as String? ?? 'SOC-001';
-    final societyName = map['societyName'] as String? ?? 'SocietySphere Residency';
+    final societyName =
+        map['societyName'] as String? ?? 'SocietySphere Residency';
     final tower = map['tower'] as String? ?? 'Tower A';
-    final flatNumber = map['flatNumber'] as String? ?? map['flat'] as String? ?? 'Unknown';
+    final flatNumber =
+        map['flatNumber'] as String? ?? map['flat'] as String? ?? 'Unknown';
     final gateName = map['gateName'] as String? ?? 'Gate 1 — Main Entry';
     final role = map['role'] as String? ?? 'resident';
     final status = map['status'] as String? ?? 'active';

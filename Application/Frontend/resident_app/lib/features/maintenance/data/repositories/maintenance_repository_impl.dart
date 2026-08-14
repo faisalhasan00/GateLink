@@ -13,22 +13,29 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
 
   @override
   Stream<List<MaintenanceBillModel>> watchMaintenanceBills(String residentUid) {
-    return _firestoreService.maintenanceBillsStream(residentUid).map((snapshot) {
-      return snapshot.docs.map((doc) => MaintenanceBillModel.fromFirestore(doc)).toList();
+    return _firestoreService
+        .maintenanceBillsStream(residentUid)
+        .map((snapshot) {
+      return snapshot.docs
+          .map((doc) => MaintenanceBillModel.fromFirestore(doc))
+          .toList();
     });
   }
 
   @override
   Stream<List<PaymentReceiptModel>> watchPaymentReceipts(String residentUid) {
     return _firestoreService.paymentReceiptsStream(residentUid).map((snapshot) {
-      return snapshot.docs.map((doc) => PaymentReceiptModel.fromFirestore(doc)).toList();
+      return snapshot.docs
+          .map((doc) => PaymentReceiptModel.fromFirestore(doc))
+          .toList();
     });
   }
 
   @override
   Future<MaintenanceBillModel?> getPendingBill(String residentUid) async {
     final snap = await _db
-        .collection('societies/${_firestoreService.societyId}/maintenance_bills')
+        .collection(
+            'societies/${_firestoreService.societyId}/maintenance_bills')
         .where('residentUid', isEqualTo: residentUid)
         .get();
 
@@ -53,12 +60,11 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     required String flatNumber,
     required String invoiceNumber,
   }) async {
-    final activeSocId = societyId.isNotEmpty ? societyId : _firestoreService.societyId;
+    final activeSocId =
+        societyId.isNotEmpty ? societyId : _firestoreService.societyId;
     final nowStr = DateTime.now().toIso8601String();
 
-    await _db
-        .doc('societies/$activeSocId/maintenance_bills/$billId')
-        .set({
+    await _db.doc('societies/$activeSocId/maintenance_bills/$billId').set({
       'status': 'pending_verification',
       'utrNumber': referenceNumber,
       'transactionId': referenceNumber,
@@ -70,11 +76,10 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     }, SetOptions(merge: true));
 
     try {
-      await _db
-          .collection('societies/$activeSocId/notifications')
-          .add({
+      await _db.collection('societies/$activeSocId/notifications').add({
         'title': 'New Offline Payment Submitted',
-        'body': 'Flat $flatNumber ($residentName) submitted ref $referenceNumber for Bill $invoiceNumber. Treasurer verification required.',
+        'body':
+            'Flat $flatNumber ($residentName) submitted ref $referenceNumber for Bill $invoiceNumber. Treasurer verification required.',
         'type': 'billing_verification',
         'billId': billId,
         'utrNumber': referenceNumber,
@@ -94,7 +99,8 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     required String flatNumber,
     required double amount,
   }) async {
-    final activeSocId = societyId.isNotEmpty ? societyId : _firestoreService.societyId;
+    final activeSocId =
+        societyId.isNotEmpty ? societyId : _firestoreService.societyId;
     final nowStr = DateTime.now().toIso8601String();
 
     final paymentRecord = {
@@ -124,7 +130,8 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     required String residentUid,
     required String flatNumber,
   }) async {
-    final activeSocId = societyId.isNotEmpty ? societyId : _firestoreService.societyId;
+    final activeSocId =
+        societyId.isNotEmpty ? societyId : _firestoreService.societyId;
     final batch = _db.batch();
 
     final bills = [
@@ -164,7 +171,8 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     ];
 
     for (final b in bills) {
-      final ref = _db.collection('societies/$activeSocId/maintenance_bills').doc();
+      final ref =
+          _db.collection('societies/$activeSocId/maintenance_bills').doc();
       batch.set(ref, b);
     }
 

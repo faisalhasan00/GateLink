@@ -35,7 +35,8 @@ class PaymentReceiptModel {
   }
 
   factory PaymentReceiptModel.fromMap(String docId, Map<String, dynamic> map) {
-    final paidTime = map['paidAt'] as String? ?? map['createdAt'] as String? ?? '';
+    final paidTime =
+        map['paidAt'] as String? ?? map['createdAt'] as String? ?? '';
     return PaymentReceiptModel(
       id: docId,
       billId: map['billId'] as String? ?? '',

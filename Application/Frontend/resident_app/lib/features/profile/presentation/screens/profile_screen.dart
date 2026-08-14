@@ -19,15 +19,12 @@ class ProfileScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('My Profile')),
       body: profileAsync.when(
         data: (profile) {
-          final name = profile?.name.isNotEmpty == true
-              ? profile!.name
-              : 'Unknown User';
-          final phone = profile?.phone.isNotEmpty == true
-              ? profile!.phone
-              : 'No Phone';
-          final role = profile?.role.isNotEmpty == true
-              ? profile!.role
-              : 'Resident';
+          final name =
+              profile?.name.isNotEmpty == true ? profile!.name : 'Unknown User';
+          final phone =
+              profile?.phone.isNotEmpty == true ? profile!.phone : 'No Phone';
+          final role =
+              profile?.role.isNotEmpty == true ? profile!.role : 'Resident';
           final flatNumber = profile?.flatNumber.isNotEmpty == true
               ? profile!.flatNumber
               : 'N/A';
@@ -165,8 +162,8 @@ class _OptionTile extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppRadius.md),
       child: ListTile(
         onTap: onTap,
-        leading: Icon(icon,
-            color: iconColor ?? AppColors.textPrimary, size: 22),
+        leading:
+            Icon(icon, color: iconColor ?? AppColors.textPrimary, size: 22),
         title: Text(title,
             style: TextStyle(
                 fontSize: 14,
@@ -222,40 +219,35 @@ class _NotificationPreferencesDialogState
             SwitchListTile(
               title: const Text('Visitor Alerts',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              subtitle:
-                  const Text('Real-time gate arrival & approval alerts'),
+              subtitle: const Text('Real-time gate arrival & approval alerts'),
               value: _visitors,
               onChanged: (v) => setState(() => _visitors = v),
             ),
             SwitchListTile(
               title: const Text('Billing & Maintenance',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              subtitle:
-                  const Text('Invoice generation & payment receipts'),
+              subtitle: const Text('Invoice generation & payment receipts'),
               value: _bills,
               onChanged: (v) => setState(() => _bills = v),
             ),
             SwitchListTile(
               title: const Text('Complaint Status',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              subtitle:
-                  const Text('Staff assignment & resolution updates'),
+              subtitle: const Text('Staff assignment & resolution updates'),
               value: _complaints,
               onChanged: (v) => setState(() => _complaints = v),
             ),
             SwitchListTile(
               title: const Text('Amenity Bookings',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              subtitle:
-                  const Text('Slot confirmation & cancellation updates'),
+              subtitle: const Text('Slot confirmation & cancellation updates'),
               value: _amenities,
               onChanged: (v) => setState(() => _amenities = v),
             ),
             SwitchListTile(
               title: const Text('Society Notices',
                   style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              subtitle:
-                  const Text('Emergency announcements & circulars'),
+              subtitle: const Text('Emergency announcements & circulars'),
               value: _notices,
               onChanged: (v) => setState(() => _notices = v),
             ),
@@ -278,24 +270,23 @@ class _NotificationPreferencesDialogState
                     final success = await widget.ref
                         .read(profileControllerProvider.notifier)
                         .updateNotificationPreferences(
-                          societyId: activeSocId,
-                          uid: user.uid,
-                          preferences: {
-                            'visitors': _visitors,
-                            'bills': _bills,
-                            'complaints': _complaints,
-                            'amenities': _amenities,
-                            'notices': _notices,
-                          },
-                        );
+                      societyId: activeSocId,
+                      uid: user.uid,
+                      preferences: {
+                        'visitors': _visitors,
+                        'bills': _bills,
+                        'complaints': _complaints,
+                        'amenities': _amenities,
+                        'notices': _notices,
+                      },
+                    );
 
                     if (context.mounted) {
                       if (success) {
                         Navigator.pop(context);
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
-                              content:
-                                  Text('Notification preferences saved!')),
+                              content: Text('Notification preferences saved!')),
                         );
                       } else {
                         final errorMsg = widget.ref

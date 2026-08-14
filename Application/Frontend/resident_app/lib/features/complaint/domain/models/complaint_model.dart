@@ -39,7 +39,8 @@ class ComplaintModel {
     required this.updatedAt,
   });
 
-  factory ComplaintModel.fromMap(Map<String, dynamic> map, {String? defaultId}) {
+  factory ComplaintModel.fromMap(Map<String, dynamic> map,
+      {String? defaultId}) {
     final id = map['id'] as String? ?? defaultId ?? '';
     final ticketNumber = map['ticketNumber'] as String? ?? '#CMP-$id';
     return ComplaintModel(
@@ -92,7 +93,8 @@ class ComplaintModel {
 
   bool get isResolved => status.toLowerCase() == 'resolved';
   bool get isInProgress =>
-      status.toLowerCase() == 'in progress' || status.toLowerCase() == 'assigned';
+      status.toLowerCase() == 'in progress' ||
+      status.toLowerCase() == 'assigned';
 
   ComplaintModel copyWith({
     String? id,

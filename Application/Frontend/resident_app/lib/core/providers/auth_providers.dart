@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/auth_service.dart';
 import '../models/user_profile_model.dart';
+import '../../features/profile/providers/user_providers.dart';
+export '../../features/profile/providers/user_providers.dart';
 
 // ── SERVICE PROVIDER ──────────────────────────────────────────────────────────
 
@@ -19,9 +21,6 @@ final authStateProvider = StreamProvider<User?>((ref) {
 final currentUserProvider = Provider<User?>((ref) {
   return ref.watch(authStateProvider).value;
 });
-
-// Export UserRepository providers
-export '../../features/profile/providers/user_providers.dart';
 
 /// Directly fetches the user profile using UserRepository
 final userProfileProvider = FutureProvider<UserProfileModel?>((ref) async {

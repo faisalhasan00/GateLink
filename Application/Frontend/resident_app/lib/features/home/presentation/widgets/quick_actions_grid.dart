@@ -10,12 +10,36 @@ class QuickActionsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final actions = [
-      _QuickAction(icon: Icons.person_add_rounded, label: 'Invite\nVisitor', color: AppColors.visitor, route: AppRoutes.inviteVisitor),
-      _QuickAction(icon: Icons.support_agent_rounded, label: 'Raise\nComplaint', color: AppColors.complaint, route: AppRoutes.raiseComplaint),
-      _QuickAction(icon: Icons.sports_tennis_rounded, label: 'Book\nAmenity', color: AppColors.amenity, route: AppRoutes.amenities),
-      _QuickAction(icon: Icons.local_parking_rounded, label: 'My\nParking', color: AppColors.parking, route: AppRoutes.parking),
-      _QuickAction(icon: Icons.campaign_rounded, label: 'Notices', color: AppColors.notice, route: AppRoutes.notices),
-      _QuickAction(icon: Icons.folder_rounded, label: 'Documents', color: AppColors.textSecondary, route: AppRoutes.documents),
+      _QuickAction(
+          icon: Icons.person_add_rounded,
+          label: 'Invite\nVisitor',
+          color: AppColors.visitor,
+          route: AppRoutes.inviteVisitor),
+      _QuickAction(
+          icon: Icons.support_agent_rounded,
+          label: 'Raise\nComplaint',
+          color: AppColors.complaint,
+          route: AppRoutes.raiseComplaint),
+      _QuickAction(
+          icon: Icons.sports_tennis_rounded,
+          label: 'Book\nAmenity',
+          color: AppColors.amenity,
+          route: AppRoutes.amenities),
+      _QuickAction(
+          icon: Icons.local_parking_rounded,
+          label: 'My\nParking',
+          color: AppColors.parking,
+          route: AppRoutes.parking),
+      _QuickAction(
+          icon: Icons.campaign_rounded,
+          label: 'Notices',
+          color: AppColors.notice,
+          route: AppRoutes.notices),
+      _QuickAction(
+          icon: Icons.folder_rounded,
+          label: 'Documents',
+          color: AppColors.textSecondary,
+          route: AppRoutes.documents),
     ];
 
     return GridView.count(
@@ -60,7 +84,11 @@ class _QuickActionCard extends StatelessWidget {
             Text(
               action.label,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textPrimary, height: 1.3),
+              style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                  height: 1.3),
             ),
           ],
         ),
@@ -74,5 +102,9 @@ class _QuickAction {
   final String label;
   final Color color;
   final String route;
-  const _QuickAction({required this.icon, required this.label, required this.color, required this.route});
+  const _QuickAction(
+      {required this.icon,
+      required this.label,
+      required this.color,
+      required this.route});
 }

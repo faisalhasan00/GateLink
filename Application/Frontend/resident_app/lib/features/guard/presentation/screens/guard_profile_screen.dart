@@ -15,13 +15,15 @@ class GuardProfileScreen extends ConsumerWidget {
     final profile = ref.watch(userProfileProvider).value;
 
     final name = profile?['name'] ?? authUser?.displayName ?? 'Security Guard';
-    final email = profile?['email'] ?? authUser?.email ?? 'guard@societysphere.com';
+    final email =
+        profile?['email'] ?? authUser?.email ?? 'guard@societysphere.com';
     final phone = profile?['phone'] ?? '+91 98765 43210';
     final employeeId = profile?['employeeId'] ?? 'EMP-GRD-042';
     final societyName = profile?['societyName'] ?? 'Housing Society';
     final societyCode = profile?['societyId'] ?? 'SOC-001';
     final gateName = profile?['gateName'] ?? 'Gate 1 — Main Entry';
-    final shiftTiming = profile?['shiftTiming'] ?? '08:00 AM - 08:00 PM (Day Shift)';
+    final shiftTiming =
+        profile?['shiftTiming'] ?? '08:00 AM - 08:00 PM (Day Shift)';
     final joiningDate = profile?['joiningDate'] ?? '15 Jan 2025';
     final status = profile?['status'] ?? 'ON DUTY';
 
@@ -69,30 +71,40 @@ class GuardProfileScreen extends ConsumerWidget {
                   const CircleAvatar(
                     radius: 42,
                     backgroundColor: AppColors.primary,
-                    child: Icon(Icons.shield_rounded, size: 44, color: Colors.white),
+                    child: Icon(Icons.shield_rounded,
+                        size: 44, color: Colors.white),
                   ),
                   const SizedBox(height: AppSpacing.md),
                   Text(
                     name,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white),
+                    style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'Employee ID: $employeeId',
-                    style: const TextStyle(fontSize: 13, color: Colors.white70, fontWeight: FontWeight.w500),
+                    style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.white70,
+                        fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 10),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
                     decoration: BoxDecoration(
                       color: AppColors.success.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(AppRadius.full),
-                      border: Border.all(color: AppColors.success.withValues(alpha: 0.4)),
+                      border: Border.all(
+                          color: AppColors.success.withValues(alpha: 0.4)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.circle, color: AppColors.success, size: 8),
+                        const Icon(Icons.circle,
+                            color: AppColors.success, size: 8),
                         const SizedBox(width: 6),
                         Text(
                           status.toUpperCase(),
@@ -143,17 +155,23 @@ class GuardProfileScreen extends ConsumerWidget {
                     context: context,
                     builder: (ctx) => AlertDialog(
                       title: const Text('Change Password'),
-                      content: const Text('Security Guards must contact the Society Admin or use your registered email reset link to change passwords.'),
+                      content: const Text(
+                          'Security Guards must contact the Society Admin or use your registered email reset link to change passwords.'),
                       actions: [
-                        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('OK')),
+                        TextButton(
+                            onPressed: () => Navigator.pop(ctx),
+                            child: const Text('OK')),
                       ],
                     ),
                   );
                 },
                 icon: const Icon(Icons.lock_reset_rounded),
-                label: const Text('Change Guard Account Password', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                label: const Text('Change Guard Account Password',
+                    style:
+                        TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                 style: OutlinedButton.styleFrom(
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.lg)),
                 ),
               ),
             ),
@@ -167,17 +185,21 @@ class GuardProfileScreen extends ConsumerWidget {
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Shift handover report generated & submitted to admin.'),
+                      content: Text(
+                          'Shift handover report generated & submitted to admin.'),
                       backgroundColor: AppColors.primary,
                     ),
                   );
                 },
                 icon: const Icon(Icons.published_with_changes_rounded),
-                label: const Text('End Shift & Handover', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                label: const Text('End Shift & Handover',
+                    style:
+                        TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.secondary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.lg)),
                 ),
               ),
             ),
@@ -248,12 +270,17 @@ class _DetailRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 13, color: AppColors.textSecondary)),
           Flexible(
             child: Text(
               value,
               textAlign: TextAlign.end,
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+              style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary),
             ),
           ),
         ],

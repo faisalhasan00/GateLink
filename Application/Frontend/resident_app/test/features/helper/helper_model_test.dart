@@ -50,7 +50,8 @@ void main() {
       expect(model.isActive, true);
     });
 
-    test('HelperLogModel parses fromMap and computes formattedTime correctly', () {
+    test('HelperLogModel parses fromMap and computes formattedTime correctly',
+        () {
       final map = {
         'id': 'log-101',
         'helperId': 'hlp-101',

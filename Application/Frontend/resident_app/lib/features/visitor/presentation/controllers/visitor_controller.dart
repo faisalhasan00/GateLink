@@ -102,7 +102,8 @@ class VisitorController extends StateNotifier<VisitorState> {
       final isApproved = status.toLowerCase() == 'approved';
       state = state.copyWith(
         status: VisitorActionStatus.success,
-        successMessage: isApproved ? 'Visitor entry approved.' : 'Visitor entry denied.',
+        successMessage:
+            isApproved ? 'Visitor entry approved.' : 'Visitor entry denied.',
       );
       return true;
     } catch (e) {

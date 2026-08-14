@@ -5,8 +5,7 @@ import 'notification_state.dart';
 class NotificationController extends StateNotifier<NotificationState> {
   final NotificationRepository _repository;
 
-  NotificationController(this._repository)
-      : super(NotificationState.initial());
+  NotificationController(this._repository) : super(NotificationState.initial());
 
   void resetState() {
     state = NotificationState.initial();

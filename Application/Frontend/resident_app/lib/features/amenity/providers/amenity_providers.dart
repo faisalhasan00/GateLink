@@ -19,7 +19,8 @@ final amenitiesStreamProvider = StreamProvider<List<AmenityModel>>((ref) {
   return repository.watchAmenities(societyId);
 });
 
-final myBookingsStreamProvider = StreamProvider<List<AmenityBookingModel>>((ref) {
+final myBookingsStreamProvider =
+    StreamProvider<List<AmenityBookingModel>>((ref) {
   final repository = ref.watch(amenityRepositoryProvider);
   final user = ref.watch(currentUserProvider);
   final profile = ref.watch(userProfileProvider).value;

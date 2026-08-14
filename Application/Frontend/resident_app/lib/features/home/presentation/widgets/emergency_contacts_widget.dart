@@ -16,10 +16,30 @@ class EmergencyContactsWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final contacts = [
-      {'name': 'Security Desk', 'phone': '+91 98201 11111', 'icon': Icons.security_rounded, 'color': AppColors.primary},
-      {'name': 'Society Office', 'phone': '+91 98201 22222', 'icon': Icons.business_rounded, 'color': AppColors.secondary},
-      {'name': 'Plumber & Electrician', 'phone': '+91 98201 33333', 'icon': Icons.build_rounded, 'color': AppColors.warning},
-      {'name': 'Emergency Ambulance', 'phone': '108', 'icon': Icons.local_hospital_rounded, 'color': AppColors.error},
+      {
+        'name': 'Security Desk',
+        'phone': '+91 98201 11111',
+        'icon': Icons.security_rounded,
+        'color': AppColors.primary
+      },
+      {
+        'name': 'Society Office',
+        'phone': '+91 98201 22222',
+        'icon': Icons.business_rounded,
+        'color': AppColors.secondary
+      },
+      {
+        'name': 'Plumber & Electrician',
+        'phone': '+91 98201 33333',
+        'icon': Icons.build_rounded,
+        'color': AppColors.warning
+      },
+      {
+        'name': 'Emergency Ambulance',
+        'phone': '108',
+        'icon': Icons.local_hospital_rounded,
+        'color': AppColors.error
+      },
     ];
 
     return Container(
@@ -47,11 +67,16 @@ class EmergencyContactsWidget extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
-                  child: Text(name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                  child: Text(name,
+                      style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary)),
                 ),
                 IconButton(
                   onPressed: () => _callNumber(phone),
-                  icon: const Icon(Icons.phone_in_talk_rounded, color: AppColors.success, size: 20),
+                  icon: const Icon(Icons.phone_in_talk_rounded,
+                      color: AppColors.success, size: 20),
                   constraints: const BoxConstraints(),
                   padding: EdgeInsets.zero,
                 ),

@@ -1,8 +1,10 @@
 import '../models/complaint_model.dart';
 
 abstract class ComplaintRepository {
-  Stream<List<ComplaintModel>> watchMyComplaints(String societyId, String residentUid);
-  Stream<ComplaintModel?> watchComplaintDetail(String societyId, String complaintId);
+  Stream<List<ComplaintModel>> watchMyComplaints(
+      String societyId, String residentUid);
+  Stream<ComplaintModel?> watchComplaintDetail(
+      String societyId, String complaintId);
   Future<String> raiseComplaint({
     required String societyId,
     required String residentUid,

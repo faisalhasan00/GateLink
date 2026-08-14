@@ -92,7 +92,8 @@ void main() {
 
       expect(success, false);
       expect(controller.state.status, SessionActionStatus.error);
-      expect(controller.state.errorMessage, contains('Failed to revoke session'));
+      expect(
+          controller.state.errorMessage, contains('Failed to revoke session'));
     });
   });
 }

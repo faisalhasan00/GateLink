@@ -9,7 +9,8 @@ final alertRepositoryProvider = Provider<AlertRepository>((ref) {
   return AlertRepositoryImpl(FirebaseFirestore.instance);
 });
 
-final alertControllerProvider = StateNotifierProvider<AlertController, AlertState>((ref) {
+final alertControllerProvider =
+    StateNotifierProvider<AlertController, AlertState>((ref) {
   final repository = ref.watch(alertRepositoryProvider);
   return AlertController(repository);
 });

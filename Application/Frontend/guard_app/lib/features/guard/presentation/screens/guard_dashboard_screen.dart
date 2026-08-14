@@ -9,9 +9,9 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../sos/domain/models/guard_alert_model.dart';
 import '../../../sos/presentation/controllers/alert_controller.dart';
-import '../../domain/models/visitor_model.dart';
-import '../../presentation/controllers/visitor_controller.dart';
-import '../../providers/visitor_providers.dart';
+import '../../../visitor/domain/models/visitor_model.dart';
+import '../../../visitor/presentation/controllers/visitor_controller.dart';
+import '../../../visitor/providers/visitor_providers.dart';
 
 class GuardDashboardScreen extends ConsumerStatefulWidget {
   const GuardDashboardScreen({super.key});

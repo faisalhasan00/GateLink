@@ -46,7 +46,8 @@ class AmenityController extends StateNotifier<AmenityState> {
     state = state.copyWith(status: AmenityActionStatus.loading);
 
     try {
-      final dateStr = '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}';
+      final dateStr =
+          '${selectedDate.day}/${selectedDate.month}/${selectedDate.year}';
       await _repository.bookAmenity(
         societyId: societyId,
         amenityId: amenityId,
@@ -63,7 +64,8 @@ class AmenityController extends StateNotifier<AmenityState> {
 
       state = state.copyWith(
         status: AmenityActionStatus.success,
-        successMessage: 'Your slot for $amenityName at $selectedSlot has been booked.',
+        successMessage:
+            'Your slot for $amenityName at $selectedSlot has been booked.',
       );
       return true;
     } catch (e) {

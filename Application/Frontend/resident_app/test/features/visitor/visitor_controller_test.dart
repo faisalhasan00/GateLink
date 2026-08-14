@@ -18,7 +18,8 @@ class MockVisitorRepository implements VisitorRepository {
   Stream<List<VisitorModel>> watchVisitors() => const Stream.empty();
 
   @override
-  Stream<List<VisitorModel>> watchPendingVisitorsForFlat(String hostFlat) => const Stream.empty();
+  Stream<List<VisitorModel>> watchPendingVisitorsForFlat(String hostFlat) =>
+      const Stream.empty();
 
   @override
   Future<FlatValidationResult> validateFlat(String hostFlat) async {
@@ -134,11 +135,14 @@ void main() {
 
       expect(result, isNull);
       expect(controller.state.status, VisitorActionStatus.error);
-      expect(controller.state.errorMessage, contains('phone number is required'));
+      expect(
+          controller.state.errorMessage, contains('phone number is required'));
       expect(mockRepository.inviteVisitorCalls, 0);
     });
 
-    test('inviteVisitor succeeds with valid input returning VisitorInviteResult', () async {
+    test(
+        'inviteVisitor succeeds with valid input returning VisitorInviteResult',
+        () async {
       final result = await controller.inviteVisitor(
         name: 'John Doe',
         phone: '9876543210',
@@ -171,7 +175,8 @@ void main() {
 
       expect(result, isNull);
       expect(controller.state.status, VisitorActionStatus.error);
-      expect(controller.state.errorMessage, contains('Failed to create visitor pass'));
+      expect(controller.state.errorMessage,
+          contains('Failed to create visitor pass'));
       expect(mockRepository.inviteVisitorCalls, 1);
     });
 
@@ -220,7 +225,8 @@ void main() {
       expect(mockRepository.markVisitorExitCalls, 1);
     });
 
-    test('validateAndProcessQrScan succeeds returning VisitorScanResult', () async {
+    test('validateAndProcessQrScan succeeds returning VisitorScanResult',
+        () async {
       final result = await controller.validateAndProcessQrScan('654321');
 
       expect(result, isNotNull);
@@ -230,7 +236,9 @@ void main() {
       expect(mockRepository.validateAndProcessQrScanCalls, 1);
     });
 
-    test('updateVisitorStatus succeeds when guard approves entry status to inside', () async {
+    test(
+        'updateVisitorStatus succeeds when guard approves entry status to inside',
+        () async {
       final success = await controller.updateVisitorStatus('vis-101', 'inside');
 
       expect(success, true);

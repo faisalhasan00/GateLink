@@ -91,7 +91,8 @@ void main() {
 
       expect(success, false);
       expect(controller.state.status, ComplaintActionStatus.error);
-      expect(controller.state.errorMessage, contains('select a complaint category'));
+      expect(controller.state.errorMessage,
+          contains('select a complaint category'));
       expect(mockRepository.raiseCalls, 0);
     });
 

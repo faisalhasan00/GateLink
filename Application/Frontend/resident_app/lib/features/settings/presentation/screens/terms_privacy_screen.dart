@@ -82,7 +82,8 @@ For urgent gate emergency configuration, please contact your local Society Admin
 class _PolicyView extends StatelessWidget {
   final String title, date, content;
 
-  const _PolicyView({required this.title, required this.date, required this.content});
+  const _PolicyView(
+      {required this.title, required this.date, required this.content});
 
   @override
   Widget build(BuildContext context) {
@@ -98,11 +99,17 @@ class _PolicyView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(title,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 4),
-            Text(date, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            Text(date,
+                style: const TextStyle(
+                    fontSize: 12, color: AppColors.textSecondary)),
             const Divider(height: 24),
-            Text(content, style: const TextStyle(fontSize: 14, height: 1.6, color: AppColors.textPrimary)),
+            Text(content,
+                style: const TextStyle(
+                    fontSize: 14, height: 1.6, color: AppColors.textPrimary)),
           ],
         ),
       ),

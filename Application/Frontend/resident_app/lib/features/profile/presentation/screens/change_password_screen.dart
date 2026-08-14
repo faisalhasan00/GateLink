@@ -164,8 +164,7 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                     icon: Icon(_obscureNew
                         ? Icons.visibility_off_rounded
                         : Icons.visibility_rounded),
-                    onPressed: () =>
-                        setState(() => _obscureNew = !_obscureNew),
+                    onPressed: () => setState(() => _obscureNew = !_obscureNew),
                   ),
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(AppRadius.md)),
@@ -220,7 +219,8 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: controllerState.isLoading ? null : _handleChangePassword,
+                  onPressed:
+                      controllerState.isLoading ? null : _handleChangePassword,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     shape: RoundedRectangleBorder(

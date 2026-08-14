@@ -56,13 +56,17 @@ class MockMaintenanceRepository implements MaintenanceRepository {
   }
 
   @override
-  Future<MaintenanceBillModel?> getPendingBill(String residentUid) async => null;
+  Future<MaintenanceBillModel?> getPendingBill(String residentUid) async =>
+      null;
 
   @override
-  Stream<List<MaintenanceBillModel>> watchMaintenanceBills(String residentUid) => const Stream.empty();
+  Stream<List<MaintenanceBillModel>> watchMaintenanceBills(
+          String residentUid) =>
+      const Stream.empty();
 
   @override
-  Stream<List<PaymentReceiptModel>> watchPaymentReceipts(String residentUid) => const Stream.empty();
+  Stream<List<PaymentReceiptModel>> watchPaymentReceipts(String residentUid) =>
+      const Stream.empty();
 }
 
 void main() {
@@ -81,7 +85,8 @@ void main() {
       expect(controller.state.isSubmitting, false);
     });
 
-    test('submitOfflinePayment fails validation if reference number is empty', () async {
+    test('submitOfflinePayment fails validation if reference number is empty',
+        () async {
       final success = await controller.submitOfflinePayment(
         societyId: 'SOC-001',
         billId: 'bill-123',
@@ -98,7 +103,9 @@ void main() {
       expect(mockRepository.submitOfflinePaymentCalls, 0);
     });
 
-    test('submitOfflinePayment fails validation if reference number is too short (< 4 chars)', () async {
+    test(
+        'submitOfflinePayment fails validation if reference number is too short (< 4 chars)',
+        () async {
       final success = await controller.submitOfflinePayment(
         societyId: 'SOC-001',
         billId: 'bill-123',
@@ -128,11 +135,13 @@ void main() {
 
       expect(success, true);
       expect(controller.state.status, MaintenanceActionStatus.success);
-      expect(controller.state.successMessage, contains('submitted successfully'));
+      expect(
+          controller.state.successMessage, contains('submitted successfully'));
       expect(mockRepository.submitOfflinePaymentCalls, 1);
     });
 
-    test('submitOfflinePayment sets error state on repository failure', () async {
+    test('submitOfflinePayment sets error state on repository failure',
+        () async {
       mockRepository.shouldFail = true;
 
       final success = await controller.submitOfflinePayment(
@@ -151,7 +160,8 @@ void main() {
       expect(mockRepository.submitOfflinePaymentCalls, 1);
     });
 
-    test('createPendingPaymentRecord succeeds when repository succeeds', () async {
+    test('createPendingPaymentRecord succeeds when repository succeeds',
+        () async {
       final success = await controller.createPendingPaymentRecord(
         internalPaymentId: 'pay-001',
         orderId: 'cf-order-001',
@@ -167,7 +177,8 @@ void main() {
       expect(mockRepository.createPendingPaymentRecordCalls, 1);
     });
 
-    test('createPendingPaymentRecord sets error state on repository failure', () async {
+    test('createPendingPaymentRecord sets error state on repository failure',
+        () async {
       mockRepository.shouldFail = true;
 
       final success = await controller.createPendingPaymentRecord(

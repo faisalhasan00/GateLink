@@ -37,13 +37,20 @@ class AmenityBookingModel {
   bool get isCancelled => status == 'cancelled';
   bool get isPending => status == 'pending';
 
-  factory AmenityBookingModel.fromMap(Map<String, dynamic> map, String documentId) {
+  factory AmenityBookingModel.fromMap(
+      Map<String, dynamic> map, String documentId) {
     return AmenityBookingModel(
       id: documentId,
       amenityId: map['amenityId'] as String? ?? '',
-      amenityName: map['amenityName'] as String? ?? map['name'] as String? ?? 'Amenity',
-      bookedBy: map['bookedBy'] as String? ?? map['residentUid'] as String? ?? map['uid'] as String? ?? '',
-      residentName: map['residentName'] as String? ?? map['userName'] as String? ?? 'Unknown User',
+      amenityName:
+          map['amenityName'] as String? ?? map['name'] as String? ?? 'Amenity',
+      bookedBy: map['bookedBy'] as String? ??
+          map['residentUid'] as String? ??
+          map['uid'] as String? ??
+          '',
+      residentName: map['residentName'] as String? ??
+          map['userName'] as String? ??
+          'Unknown User',
       flatNumber: map['flatNumber'] as String? ?? '',
       phone: map['phone'] as String? ?? '',
       date: map['date'] as String? ?? map['bookingDate'] as String? ?? '',

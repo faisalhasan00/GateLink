@@ -26,14 +26,21 @@ class DynamicMaintenanceBanner extends ConsumerWidget {
             ),
             child: const Row(
               children: [
-                Icon(Icons.check_circle_rounded, color: Color(0xFF059669), size: 32),
+                Icon(Icons.check_circle_rounded,
+                    color: Color(0xFF059669), size: 32),
                 SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('No Pending Dues', style: TextStyle(color: Color(0xFF065F46), fontSize: 15, fontWeight: FontWeight.w700)),
-                      Text('All maintenance bills are paid up to date!', style: TextStyle(color: Color(0xFF047857), fontSize: 12)),
+                      Text('No Pending Dues',
+                          style: TextStyle(
+                              color: Color(0xFF065F46),
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700)),
+                      Text('All maintenance bills are paid up to date!',
+                          style: TextStyle(
+                              color: Color(0xFF047857), fontSize: 12)),
                     ],
                   ),
                 ),
@@ -44,7 +51,8 @@ class DynamicMaintenanceBanner extends ConsumerWidget {
 
         final firstBill = pendingBills.first;
         final amount = firstBill.amount;
-        final dueDateStr = firstBill.dueDate.isNotEmpty ? firstBill.dueDate : firstBill.month;
+        final dueDateStr =
+            firstBill.dueDate.isNotEmpty ? firstBill.dueDate : firstBill.month;
 
         return Container(
           padding: const EdgeInsets.all(AppSpacing.md),
@@ -58,7 +66,8 @@ class DynamicMaintenanceBanner extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              const Icon(Icons.receipt_long_rounded, color: Colors.white, size: 36),
+              const Icon(Icons.receipt_long_rounded,
+                  color: Colors.white, size: 36),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
@@ -70,11 +79,15 @@ class DynamicMaintenanceBanner extends ConsumerWidget {
                     ),
                     Text(
                       '₹ ${amount.toString()}',
-                      style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700),
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700),
                     ),
                     Text(
                       'Due: $dueDateStr',
-                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      style:
+                          const TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                   ],
                 ),
@@ -103,7 +116,8 @@ class DynamicMaintenanceBanner extends ConsumerWidget {
                   backgroundColor: Colors.white,
                   foregroundColor: AppColors.primary,
                   minimumSize: const Size(80, 36),
-                  textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                  textStyle: const TextStyle(
+                      fontSize: 13, fontWeight: FontWeight.w700),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                 ),
                 child: const Text('Pay Now'),

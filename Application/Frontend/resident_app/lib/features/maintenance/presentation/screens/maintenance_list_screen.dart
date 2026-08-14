@@ -13,7 +13,8 @@ class MaintenanceListScreen extends ConsumerStatefulWidget {
   const MaintenanceListScreen({super.key});
 
   @override
-  ConsumerState<MaintenanceListScreen> createState() => _MaintenanceListScreenState();
+  ConsumerState<MaintenanceListScreen> createState() =>
+      _MaintenanceListScreenState();
 }
 
 class _MaintenanceListScreenState extends ConsumerState<MaintenanceListScreen>
@@ -75,17 +76,25 @@ class _BillsListView extends StatelessWidget {
   final List<MaintenanceBillModel> bills;
   final bool isPaid;
   final WidgetRef ref;
-  const _BillsListView({required this.bills, required this.isPaid, required this.ref});
+  const _BillsListView(
+      {required this.bills, required this.isPaid, required this.ref});
 
   @override
   Widget build(BuildContext context) {
     if (bills.isEmpty) {
       return Center(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(isPaid ? Icons.check_circle_outline_rounded : Icons.receipt_long_rounded,
-              size: 56, color: AppColors.textDisabled),
+          Icon(
+              isPaid
+                  ? Icons.check_circle_outline_rounded
+                  : Icons.receipt_long_rounded,
+              size: 56,
+              color: AppColors.textDisabled),
           const SizedBox(height: AppSpacing.md),
-          Text(isPaid ? 'No paid bills recorded' : 'No pending maintenance bills 🎉',
+          Text(
+              isPaid
+                  ? 'No paid bills recorded'
+                  : 'No pending maintenance bills 🎉',
               style: const TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: AppSpacing.lg),
           if (kDebugMode && !isPaid)
@@ -94,15 +103,18 @@ class _BillsListView extends StatelessWidget {
                 try {
                   final user = ref.read(currentUserProvider);
                   final userProfile = ref.read(userProfileProvider).value;
-                  final activeSocId = userProfile?['societyId'] as String? ?? '';
+                  final activeSocId =
+                      userProfile?['societyId'] as String? ?? '';
                   final flatNum = userProfile?['flatNumber'] ?? 'A-101';
                   if (activeSocId.isEmpty || user == null) return;
 
-                  await ref.read(maintenanceControllerProvider.notifier).seedDemoBills(
-                    societyId: activeSocId,
-                    residentUid: user.uid,
-                    flatNumber: flatNum,
-                  );
+                  await ref
+                      .read(maintenanceControllerProvider.notifier)
+                      .seedDemoBills(
+                        societyId: activeSocId,
+                        residentUid: user.uid,
+                        flatNumber: flatNum,
+                      );
                 } catch (e) {
                   debugPrint('Seeding error: $e');
                 }
@@ -137,12 +149,16 @@ class _BillCard extends StatelessWidget {
 
   Color get _statusColor {
     switch (bill.status) {
-      case PaymentStatus.paid: return AppColors.success;
-      case PaymentStatus.overdue: return AppColors.error;
-      case PaymentStatus.pendingVerification: return AppColors.warning;
+      case PaymentStatus.paid:
+        return AppColors.success;
+      case PaymentStatus.overdue:
+        return AppColors.error;
+      case PaymentStatus.pendingVerification:
+        return AppColors.warning;
       case PaymentStatus.pending:
       case PaymentStatus.unknown:
-      default: return AppColors.warning;
+      default:
+        return AppColors.warning;
     }
   }
 
@@ -171,14 +187,18 @@ class _BillCard extends StatelessWidget {
                   children: [
                     Text(bill.month,
                         style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary)),
                     const SizedBox(height: 2),
                     Text(bill.invoiceNumber,
-                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        style: const TextStyle(
+                            fontSize: 12, color: AppColors.textSecondary)),
                   ],
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
                     color: _statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppRadius.full),
@@ -186,7 +206,9 @@ class _BillCard extends StatelessWidget {
                   child: Text(
                     _statusLabel,
                     style: TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.bold, color: _statusColor),
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: _statusColor),
                   ),
                 ),
               ],
@@ -199,22 +221,28 @@ class _BillCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text('Due Date',
-                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        style: TextStyle(
+                            fontSize: 12, color: AppColors.textSecondary)),
                     const SizedBox(height: 2),
                     Text(bill.dueDate,
                         style: const TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary)),
                   ],
                 ),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     const Text('Total Amount',
-                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                        style: TextStyle(
+                            fontSize: 12, color: AppColors.textSecondary)),
                     const SizedBox(height: 2),
                     Text('₹${bill.amount.toStringAsFixed(0)}',
                         style: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary)),
                   ],
                 ),
               ],
@@ -223,14 +251,18 @@ class _BillCard extends StatelessWidget {
             ExpansionTile(
               tilePadding: EdgeInsets.zero,
               title: const Text('View Charge Breakdown',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                  style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary)),
               children: [
                 _breakdownRow('Maintenance Charge', bill.maintenanceCharge),
                 _breakdownRow('Water Supply Charge', bill.waterCharge),
                 _breakdownRow('Parking Slot Fee', bill.parkingCharge),
                 _breakdownRow('Sinking Fund', bill.sinkingFund),
                 if (bill.penaltyFee > 0)
-                  _breakdownRow('Late Payment Penalty', bill.penaltyFee, isWarning: true),
+                  _breakdownRow('Late Payment Penalty', bill.penaltyFee,
+                      isWarning: true),
               ],
             ),
             if (!bill.isPaid) ...[
@@ -261,7 +293,8 @@ class _BillCard extends StatelessWidget {
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.md)),
                   ),
                   child: Text('Pay Now  •  ₹${bill.amount.toStringAsFixed(0)}'),
                 ),
@@ -282,7 +315,8 @@ class _BillCard extends StatelessWidget {
           Text(label,
               style: TextStyle(
                   fontSize: 13,
-                  color: isWarning ? AppColors.error : AppColors.textSecondary)),
+                  color:
+                      isWarning ? AppColors.error : AppColors.textSecondary)),
           Text('₹${amount.toStringAsFixed(0)}',
               style: TextStyle(
                   fontSize: 13,

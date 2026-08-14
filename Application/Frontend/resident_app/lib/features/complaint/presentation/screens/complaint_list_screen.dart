@@ -4,8 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../domain/models/complaint_model.dart';
-import '../providers/complaint_providers.dart';
+import '../../domain/models/complaint_model.dart';
+import '../../providers/complaint_providers.dart';
 
 class ComplaintListScreen extends ConsumerStatefulWidget {
   const ComplaintListScreen({super.key});
@@ -34,8 +34,10 @@ class _ComplaintListScreenState extends ConsumerState<ComplaintListScreen>
   List<ComplaintModel> _filtered(
       List<ComplaintModel> complaints, String status) {
     if (status == 'all') return complaints;
-    if (status == 'open') return complaints.where((c) => !c.isResolved).toList();
-    if (status == 'resolved') return complaints.where((c) => c.isResolved).toList();
+    if (status == 'open')
+      return complaints.where((c) => !c.isResolved).toList();
+    if (status == 'resolved')
+      return complaints.where((c) => c.isResolved).toList();
     return complaints;
   }
 
@@ -175,8 +177,8 @@ class _ComplaintCard extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(complaint.title,
-                style: const TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.bold)),
+                style:
+                    const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
             const SizedBox(height: 4),
             Row(
               children: [

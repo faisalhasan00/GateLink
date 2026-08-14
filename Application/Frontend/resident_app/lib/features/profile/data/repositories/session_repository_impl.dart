@@ -16,7 +16,9 @@ class SessionRepositoryImpl implements SessionRepository {
         .collectionGroup('user_sessions')
         .where('userUid', isEqualTo: userId)
         .snapshots()
-        .map((snap) => snap.docs.map((doc) => SessionModel.fromMap(doc.data(), doc.id)).toList());
+        .map((snap) => snap.docs
+            .map((doc) => SessionModel.fromMap(doc.data(), doc.id))
+            .toList());
   }
 
   @override

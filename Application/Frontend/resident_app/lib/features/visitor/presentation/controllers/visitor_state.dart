@@ -12,7 +12,8 @@ class VisitorState {
   });
 
   bool get isSubmitting => status == VisitorActionStatus.loading;
-  bool get hasError => status == VisitorActionStatus.error && errorMessage != null;
+  bool get hasError =>
+      status == VisitorActionStatus.error && errorMessage != null;
   bool get isSuccess => status == VisitorActionStatus.success;
 
   VisitorState copyWith({
@@ -39,5 +40,6 @@ class VisitorState {
           successMessage == other.successMessage;
 
   @override
-  int get hashCode => status.hashCode ^ errorMessage.hashCode ^ successMessage.hashCode;
+  int get hashCode =>
+      status.hashCode ^ errorMessage.hashCode ^ successMessage.hashCode;
 }

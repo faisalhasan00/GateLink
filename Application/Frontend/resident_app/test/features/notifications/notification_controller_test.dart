@@ -12,7 +12,8 @@ class MockNotificationRepository implements NotificationRepository {
   int clearAllCalls = 0;
 
   @override
-  Stream<List<NotificationModel>> watchNotifications(String societyId, String uid) {
+  Stream<List<NotificationModel>> watchNotifications(
+      String societyId, String uid) {
     return Stream.value([]);
   }
 
@@ -122,7 +123,8 @@ void main() {
       expect(mockRepository.clearAllCalls, 1);
     });
 
-    test('controller sets error state when repository throws Exception', () async {
+    test('controller sets error state when repository throws Exception',
+        () async {
       mockRepository.shouldFail = true;
 
       final success = await controller.markNotificationAsRead(
@@ -133,7 +135,8 @@ void main() {
 
       expect(success, false);
       expect(controller.state.status, NotificationActionStatus.error);
-      expect(controller.state.errorMessage, contains('Failed to mark notification as read'));
+      expect(controller.state.errorMessage,
+          contains('Failed to mark notification as read'));
       expect(mockRepository.markReadCalls, 1);
     });
   });

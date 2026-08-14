@@ -30,8 +30,11 @@ class AuthService {
         final staffQuery = await _db.collectionGroup('staff').get();
         for (final docSnap in staffQuery.docs) {
           final docData = docSnap.data();
-          if ((docData['email'] as String? ?? '').trim().toLowerCase() == cleanEmail) {
-            final parentSocId = docSnap.reference.parent.parent?.id ?? docData['societyId'] ?? 'SOC-001';
+          if ((docData['email'] as String? ?? '').trim().toLowerCase() ==
+              cleanEmail) {
+            final parentSocId = docSnap.reference.parent.parent?.id ??
+                docData['societyId'] ??
+                'SOC-001';
 
             UserCredential cred;
             try {
@@ -40,8 +43,10 @@ class AuthService {
                 password: cleanPass,
               );
             } catch (authErr) {
-              if (authErr is FirebaseAuthException && authErr.code == 'email-already-in-use') {
-                cred = await _auth.signInWithEmailAndPassword(email: cleanEmail, password: cleanPass);
+              if (authErr is FirebaseAuthException &&
+                  authErr.code == 'email-already-in-use') {
+                cred = await _auth.signInWithEmailAndPassword(
+                    email: cleanEmail, password: cleanPass);
               } else {
                 rethrow;
               }
@@ -76,8 +81,11 @@ class AuthService {
         final usersQuery = await _db.collectionGroup('users').get();
         for (final docSnap in usersQuery.docs) {
           final docData = docSnap.data();
-          if ((docData['email'] as String? ?? '').trim().toLowerCase() == cleanEmail) {
-            final parentSocId = docSnap.reference.parent.parent?.id ?? docData['societyId'] ?? 'SOC-001';
+          if ((docData['email'] as String? ?? '').trim().toLowerCase() ==
+              cleanEmail) {
+            final parentSocId = docSnap.reference.parent.parent?.id ??
+                docData['societyId'] ??
+                'SOC-001';
 
             UserCredential cred;
             try {
@@ -86,8 +94,10 @@ class AuthService {
                 password: cleanPass,
               );
             } catch (authErr) {
-              if (authErr is FirebaseAuthException && authErr.code == 'email-already-in-use') {
-                cred = await _auth.signInWithEmailAndPassword(email: cleanEmail, password: cleanPass);
+              if (authErr is FirebaseAuthException &&
+                  authErr.code == 'email-already-in-use') {
+                cred = await _auth.signInWithEmailAndPassword(
+                    email: cleanEmail, password: cleanPass);
               } else {
                 rethrow;
               }
@@ -132,8 +142,10 @@ class AuthService {
     String country = 'India',
     String city = 'Hyderabad',
     String buildingBlock = '',
-    String residentRoleType = 'Flat Owner', // 'Flat Owner', 'Renting with family', 'Renting with other flatmates'
-    String occupancyStatus = 'Currently residing', // 'Currently residing', 'Flat is let out', 'Flat is empty'
+    String residentRoleType =
+        'Flat Owner', // 'Flat Owner', 'Renting with family', 'Renting with other flatmates'
+    String occupancyStatus =
+        'Currently residing', // 'Currently residing', 'Flat is let out', 'Flat is empty'
     String? documentProofUrl,
     String? documentType,
   }) async {
@@ -141,7 +153,8 @@ class AuthService {
 
     // 1. Guards cannot self-register without RWA Pre-Provisioning
     if (role.toLowerCase() == 'guard') {
-      throw Exception('Security Guards cannot self-register. Please ask your RWA Committee to provision your Gate Access Passcode.');
+      throw Exception(
+          'Security Guards cannot self-register. Please ask your RWA Committee to provision your Gate Access Passcode.');
     }
 
     // 2. Validate societyCode against real societies collection (or fallback if SOC-001)
@@ -170,10 +183,14 @@ class AuthService {
 
     await credential.user?.updateDisplayName(name);
 
-    final fullFlatNo = buildingBlock.isNotEmpty ? '$buildingBlock-$flatNumber' : flatNumber;
+    final fullFlatNo =
+        buildingBlock.isNotEmpty ? '$buildingBlock-$flatNumber' : flatNumber;
 
     // 4. Save profile to Firestore with pending_approval status
-    await _db.collection('societies/$societyId/users').doc(credential.user!.uid).set({
+    await _db
+        .collection('societies/$societyId/users')
+        .doc(credential.user!.uid)
+        .set({
       'uid': credential.user!.uid,
       'name': name,
       'email': email.trim(),
@@ -192,7 +209,8 @@ class AuthService {
       'societyCode': cleanCode,
       'status': 'pending_approval', // Requires RWA Admin approval
       'documentProofUrl': documentProofUrl ?? '',
-      'documentType': documentType ?? 'Rent Agreement / Electricity Bill / Address Proof',
+      'documentType':
+          documentType ?? 'Rent Agreement / Electricity Bill / Address Proof',
       'createdAt': DateTime.now().toIso8601String(),
     });
 
@@ -242,7 +260,8 @@ class AuthService {
     final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
     if (googleUser == null) return null;
 
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    final GoogleSignInAuthentication googleAuth =
+        await googleUser.authentication;
     final credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,

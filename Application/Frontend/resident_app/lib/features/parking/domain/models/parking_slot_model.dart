@@ -23,7 +23,8 @@ class ParkingSlotModel {
     required this.societyId,
   });
 
-  factory ParkingSlotModel.fromMap(Map<String, dynamic> map, {String? defaultId}) {
+  factory ParkingSlotModel.fromMap(Map<String, dynamic> map,
+      {String? defaultId}) {
     return ParkingSlotModel(
       id: map['id'] as String? ?? defaultId ?? '',
       slot: map['slot'] as String? ?? 'Unknown Slot',

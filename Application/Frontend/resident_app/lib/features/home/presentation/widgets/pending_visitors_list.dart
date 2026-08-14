@@ -16,10 +16,12 @@ class PendingVisitorsList extends ConsumerWidget {
 
     return visitorsAsync.when(
       data: (visitorsList) {
-        final pendingVisitors = visitorsList.where((v) => v.isPending).take(3).toList();
+        final pendingVisitors =
+            visitorsList.where((v) => v.isPending).take(3).toList();
 
         if (pendingVisitors.isEmpty) {
-          return const _EmptyStateSmall(message: 'No pending visitor approvals 👋');
+          return const _EmptyStateSmall(
+              message: 'No pending visitor approvals 👋');
         }
 
         return Column(
@@ -51,7 +53,8 @@ class PendingVisitorsList extends ConsumerWidget {
         );
       },
       loading: () => const _SkeletonCardList(),
-      error: (e, st) => const _EmptyStateSmall(message: 'Unable to load visitor logs'),
+      error: (e, st) =>
+          const _EmptyStateSmall(message: 'Unable to load visitor logs'),
     );
   }
 }
@@ -76,7 +79,10 @@ class _VisitorCard extends ConsumerWidget {
             backgroundColor: AppColors.visitor.withOpacity(0.1),
             child: Text(
               visitor.initials,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.visitor),
+              style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.visitor),
             ),
           ),
           const SizedBox(width: AppSpacing.md),
@@ -84,9 +90,17 @@ class _VisitorCard extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(visitor.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                Text(visitor.purpose, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                Text(visitor.time, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                Text(visitor.name,
+                    style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary)),
+                Text(visitor.purpose,
+                    style: const TextStyle(
+                        fontSize: 12, color: AppColors.textSecondary)),
+                Text(visitor.time,
+                    style: const TextStyle(
+                        fontSize: 11, color: AppColors.textSecondary)),
               ],
             ),
           ),
@@ -98,11 +112,13 @@ class _VisitorCard extends ConsumerWidget {
                 onTap: () async {
                   final user = ref.read(currentUserProvider);
                   if (user != null) {
-                    await ref.read(visitorControllerProvider.notifier).updateVisitorApproval(
-                      visitorId: visitor.id,
-                      status: 'approved',
-                      residentUid: user.uid,
-                    );
+                    await ref
+                        .read(visitorControllerProvider.notifier)
+                        .updateVisitorApproval(
+                          visitorId: visitor.id,
+                          status: 'approved',
+                          residentUid: user.uid,
+                        );
                   }
                 },
               ),
@@ -113,11 +129,13 @@ class _VisitorCard extends ConsumerWidget {
                 onTap: () async {
                   final user = ref.read(currentUserProvider);
                   if (user != null) {
-                    await ref.read(visitorControllerProvider.notifier).updateVisitorApproval(
-                      visitorId: visitor.id,
-                      status: 'denied',
-                      residentUid: user.uid,
-                    );
+                    await ref
+                        .read(visitorControllerProvider.notifier)
+                        .updateVisitorApproval(
+                          visitorId: visitor.id,
+                          status: 'denied',
+                          residentUid: user.uid,
+                        );
                   }
                 },
               ),
@@ -133,7 +151,8 @@ class _ApproveButton extends StatelessWidget {
   final String label;
   final Color color;
   final VoidCallback onTap;
-  const _ApproveButton({required this.label, required this.color, required this.onTap});
+  const _ApproveButton(
+      {required this.label, required this.color, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +164,9 @@ class _ApproveButton extends StatelessWidget {
           color: color.withOpacity(0.1),
           borderRadius: BorderRadius.circular(AppRadius.sm),
         ),
-        child: Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+        child: Text(label,
+            style: TextStyle(
+                fontSize: 11, fontWeight: FontWeight.w600, color: color)),
       ),
     );
   }
@@ -153,7 +174,12 @@ class _ApproveButton extends StatelessWidget {
 
 class _VisitorPreview {
   final String id, name, purpose, time, initials;
-  const _VisitorPreview({required this.id, required this.name, required this.purpose, required this.time, required this.initials});
+  const _VisitorPreview(
+      {required this.id,
+      required this.name,
+      required this.purpose,
+      required this.time,
+      required this.initials});
 }
 
 class _EmptyStateSmall extends StatelessWidget {
@@ -170,7 +196,11 @@ class _EmptyStateSmall extends StatelessWidget {
         border: Border.all(color: AppColors.border),
       ),
       child: Center(
-        child: Text(message, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500)),
+        child: Text(message,
+            style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 13,
+                fontWeight: FontWeight.w500)),
       ),
     );
   }

@@ -74,7 +74,9 @@ void main() {
       expect(controller.state.activeOrder, isNull);
     });
 
-    test('initiateCashfreeOrder updates state to success on valid repository response', () async {
+    test(
+        'initiateCashfreeOrder updates state to success on valid repository response',
+        () async {
       final order = await controller.initiateCashfreeOrder(
         societyId: 'SOC-001',
         maintenanceBillId: 'bill_1',
@@ -88,7 +90,8 @@ void main() {
       expect(controller.state.activeOrder, equals(order));
     });
 
-    test('initiateCashfreeOrder sets state to error when repository fails', () async {
+    test('initiateCashfreeOrder sets state to error when repository fails',
+        () async {
       repository.shouldThrow = true;
 
       final order = await controller.initiateCashfreeOrder(
@@ -99,10 +102,12 @@ void main() {
 
       expect(order, isNull);
       expect(controller.state.status, equals(PaymentActionStatus.error));
-      expect(controller.state.errorMessage, contains('Failed to create payment order'));
+      expect(controller.state.errorMessage,
+          contains('Failed to create payment order'));
     });
 
-    test('submitOfflinePayment updates state to success on valid submission', () async {
+    test('submitOfflinePayment updates state to success on valid submission',
+        () async {
       final success = await controller.submitOfflinePayment(
         societyId: 'SOC-001',
         billId: 'bill_1',
@@ -115,10 +120,12 @@ void main() {
 
       expect(success, isTrue);
       expect(controller.state.status, equals(PaymentActionStatus.success));
-      expect(controller.state.successMessage, contains('submitted for verification'));
+      expect(controller.state.successMessage,
+          contains('submitted for verification'));
     });
 
-    test('submitOfflinePayment sets state to error when repository fails', () async {
+    test('submitOfflinePayment sets state to error when repository fails',
+        () async {
       repository.shouldThrow = true;
 
       final success = await controller.submitOfflinePayment(

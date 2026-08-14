@@ -3,8 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../domain/models/amenity_booking_model.dart';
-import '../providers/amenity_providers.dart';
+import '../../domain/models/amenity_booking_model.dart';
+import '../../providers/amenity_providers.dart';
+import '../controllers/amenity_controller.dart';
 
 class MyBookingsScreen extends ConsumerWidget {
   const MyBookingsScreen({super.key});
@@ -49,8 +50,7 @@ class MyBookingsScreen extends ConsumerWidget {
 
           final upcomingDocs =
               bookings.where((b) => b.isConfirmed || b.isPending).toList();
-          final historyDocs =
-              bookings.where((b) => b.isCancelled).toList();
+          final historyDocs = bookings.where((b) => b.isCancelled).toList();
 
           return ListView(
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
@@ -95,8 +95,7 @@ class MyBookingsScreen extends ConsumerWidget {
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) =>
-            Center(child: Text('Error loading bookings: $e')),
+        error: (e, st) => Center(child: Text('Error loading bookings: $e')),
       ),
     );
   }
@@ -248,8 +247,8 @@ class _LiveBookingCard extends ConsumerWidget {
                     minimumSize: Size.zero,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
-                  child:
-                      const Text('Cancel Booking', style: TextStyle(fontSize: 12)),
+                  child: const Text('Cancel Booking',
+                      style: TextStyle(fontSize: 12)),
                 ),
               ],
             ),

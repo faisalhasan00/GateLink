@@ -7,7 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/services/firestore_service.dart';
-import '../../visitor/providers/visitor_providers.dart';
+import '../../../visitor/providers/visitor_providers.dart';
 
 class QrScannerScreen extends ConsumerStatefulWidget {
   const QrScannerScreen({super.key});
@@ -53,7 +53,8 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
   /// Processes QR code scan with duplicate prevention, expiry check, and validation
   Future<void> _processQrCode(String code) async {
     try {
-      final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: 'SOC-001');
+      final firestoreService = ref.read(firestoreServiceProvider) ??
+          FirestoreService(societyId: 'SOC-001');
       final result = await firestoreService.validateAndProcessQrScan(code);
 
       if (!mounted) return;
@@ -61,7 +62,8 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
       final bool isValid = result['valid'] == true;
       final String reason = result['reason'] as String? ?? 'invalid';
       final String? docId = result['docId'] as String?;
-      final Map<String, dynamic> data = (result['data'] as Map<String, dynamic>?) ?? {};
+      final Map<String, dynamic> data =
+          (result['data'] as Map<String, dynamic>?) ?? {};
 
       _showValidationModal(
         code: code,
@@ -86,11 +88,15 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
   }
 
   Future<void> _allowEntry(String docId) async {
-    await ref.read(visitorControllerProvider.notifier).updateVisitorStatus(docId, 'inside');
+    await ref
+        .read(visitorControllerProvider.notifier)
+        .updateVisitorStatus(docId, 'inside');
   }
 
   Future<void> _denyEntry(String docId) async {
-    await ref.read(visitorControllerProvider.notifier).updateVisitorStatus(docId, 'denied');
+    await ref
+        .read(visitorControllerProvider.notifier)
+        .updateVisitorStatus(docId, 'denied');
   }
 
   Future<void> _markExit(String docId) async {
@@ -147,7 +153,8 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
         ),
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xxl)),
+          borderRadius:
+              BorderRadius.vertical(top: Radius.circular(AppRadius.xxl)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -183,7 +190,8 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
             Text(
               headerSub,
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              style:
+                  const TextStyle(fontSize: 12, color: AppColors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.md),
             const Divider(),
@@ -191,13 +199,27 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
 
             // Visitor Details Card
             if (data.isNotEmpty) ...[
-              _ModalInfoRow(label: 'Visitor Name', value: data['name'] as String? ?? '-'),
-              _ModalInfoRow(label: 'Destination Flat', value: data['hostFlat'] as String? ?? '-'),
-              _ModalInfoRow(label: 'Visitor Type', value: data['type'] as String? ?? 'Guest'),
-              _ModalInfoRow(label: 'Current Status', value: (data['status'] as String? ?? 'pending').toUpperCase()),
-              _ModalInfoRow(label: 'Pass Code', value: code.length > 18 ? '${code.substring(0, 18)}...' : code),
+              _ModalInfoRow(
+                  label: 'Visitor Name', value: data['name'] as String? ?? '-'),
+              _ModalInfoRow(
+                  label: 'Destination Flat',
+                  value: data['hostFlat'] as String? ?? '-'),
+              _ModalInfoRow(
+                  label: 'Visitor Type',
+                  value: data['type'] as String? ?? 'Guest'),
+              _ModalInfoRow(
+                  label: 'Current Status',
+                  value:
+                      (data['status'] as String? ?? 'pending').toUpperCase()),
+              _ModalInfoRow(
+                  label: 'Pass Code',
+                  value:
+                      code.length > 18 ? '${code.substring(0, 18)}...' : code),
             ] else ...[
-              _ModalInfoRow(label: 'Scanned Code', value: code.length > 22 ? '${code.substring(0, 22)}...' : code),
+              _ModalInfoRow(
+                  label: 'Scanned Code',
+                  value:
+                      code.length > 22 ? '${code.substring(0, 22)}...' : code),
             ],
             const SizedBox(height: AppSpacing.lg),
 
@@ -215,7 +237,8 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
                         setState(() => _isProcessing = false);
                         messenger.showSnackBar(
                           const SnackBar(
-                            content: Text('✅ Visitor marked as checked out at gate!'),
+                            content: Text(
+                                '✅ Visitor marked as checked out at gate!'),
                             backgroundColor: AppColors.secondary,
                           ),
                         );
@@ -226,7 +249,8 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
                         backgroundColor: AppColors.secondary,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppRadius.lg)),
                       ),
                     ),
                   )
@@ -241,7 +265,8 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
                       },
                       style: OutlinedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppRadius.lg)),
                       ),
                       child: const Text('Deny Entry'),
                     ),
@@ -269,7 +294,8 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
                         backgroundColor: AppColors.success,
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(AppRadius.lg)),
                       ),
                     ),
                   ),
@@ -303,14 +329,17 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.xl)),
-        title: const Text('Manual Pass Lookup', style: TextStyle(fontWeight: FontWeight.w700)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppRadius.xl)),
+        title: const Text('Manual Pass Lookup',
+            style: TextStyle(fontWeight: FontWeight.w700)),
         content: TextField(
           controller: _manualCodeController,
           autofocus: true,
           decoration: InputDecoration(
             hintText: 'Enter Pass Code or Doc ID',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+            border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppRadius.lg)),
           ),
         ),
         actions: [
@@ -349,7 +378,8 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(_torchOn ? Icons.flash_on_rounded : Icons.flash_off_rounded),
+            icon: Icon(
+                _torchOn ? Icons.flash_on_rounded : Icons.flash_off_rounded),
             onPressed: _toggleTorch,
             tooltip: 'Toggle Flashlight',
           ),
@@ -372,17 +402,22 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(Icons.camera_alt_rounded, size: 56, color: Colors.white70),
+                    const Icon(Icons.camera_alt_rounded,
+                        size: 56, color: Colors.white70),
                     const SizedBox(height: 16),
                     const Text(
                       'Camera Access / Permission Required',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       'Error: ${error.errorCode}',
-                      style: const TextStyle(color: Colors.white70, fontSize: 12),
+                      style:
+                          const TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
@@ -431,7 +466,10 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
               ),
               child: const Text(
                 'Align Visitor QR Code within frame',
-                style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -446,8 +484,10 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.secondary,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.full)),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(AppRadius.full)),
               ),
             ),
           ),
@@ -470,8 +510,14 @@ class _ModalInfoRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-          Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+          Text(label,
+              style: const TextStyle(
+                  fontSize: 13, color: AppColors.textSecondary)),
+          Text(value,
+              style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary)),
         ],
       ),
     );

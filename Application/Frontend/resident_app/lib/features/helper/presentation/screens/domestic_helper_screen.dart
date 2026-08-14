@@ -114,10 +114,8 @@ class DomesticHelperScreen extends ConsumerWidget {
           ],
         ),
         floatingActionButton: FloatingActionButton.extended(
-          onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (_) => const RegisterHelperScreen())),
+          onPressed: () => Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const RegisterHelperScreen())),
           backgroundColor: AppColors.primary,
           icon: const Icon(Icons.person_add_rounded, color: Colors.white),
           label: const Text('Add Helper',
@@ -237,8 +235,7 @@ class _HelperLogTile extends StatelessWidget {
               style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
-                  color:
-                      log.isEntry ? AppColors.success : AppColors.warning)),
+                  color: log.isEntry ? AppColors.success : AppColors.warning)),
         ],
       ),
     );

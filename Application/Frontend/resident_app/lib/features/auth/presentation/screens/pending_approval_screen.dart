@@ -11,7 +11,8 @@ class PendingApprovalScreen extends ConsumerStatefulWidget {
   const PendingApprovalScreen({super.key});
 
   @override
-  ConsumerState<PendingApprovalScreen> createState() => _PendingApprovalScreenState();
+  ConsumerState<PendingApprovalScreen> createState() =>
+      _PendingApprovalScreenState();
 }
 
 class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
@@ -34,7 +35,8 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('🎉 Your account is approved! Welcome to SocietySphere.'),
+              content: Text(
+                  '🎉 Your account is approved! Welcome to SocietySphere.'),
               backgroundColor: AppColors.success,
             ),
           );
@@ -46,7 +48,8 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Account still pending RWA Admin approval. Please check back shortly.'),
+            content: Text(
+                'Account still pending RWA Admin approval. Please check back shortly.'),
             backgroundColor: AppColors.warning,
           ),
         );
@@ -54,7 +57,9 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error checking status: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+              content: Text('Error checking status: $e'),
+              backgroundColor: AppColors.error),
         );
       }
     } finally {
@@ -106,11 +111,23 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.xl),
-              _StepItem(step: 1, title: 'Identity & Flat Submitted', subtitle: 'Completed', isDone: true),
+              _StepItem(
+                  step: 1,
+                  title: 'Identity & Flat Submitted',
+                  subtitle: 'Completed',
+                  isDone: true),
               const SizedBox(height: AppSpacing.md),
-              _StepItem(step: 2, title: 'RWA Admin Verification', subtitle: 'In Progress by Committee', isDone: false),
+              _StepItem(
+                  step: 2,
+                  title: 'RWA Admin Verification',
+                  subtitle: 'In Progress by Committee',
+                  isDone: false),
               const SizedBox(height: AppSpacing.md),
-              _StepItem(step: 3, title: 'Gate & App Access Activated', subtitle: 'Pending Approval', isDone: false),
+              _StepItem(
+                  step: 3,
+                  title: 'Gate & App Access Activated',
+                  subtitle: 'Pending Approval',
+                  isDone: false),
               const SizedBox(height: AppSpacing.xxl),
               SizedBox(
                 width: double.infinity,
@@ -118,7 +135,11 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
                 child: ElevatedButton.icon(
                   onPressed: _isChecking ? null : _checkStatus,
                   icon: _isChecking
-                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(
+                              strokeWidth: 2, color: Colors.white))
                       : const Icon(Icons.refresh_rounded),
                   label: const Text('Check Approval Status'),
                   style: ElevatedButton.styleFrom(
@@ -172,15 +193,27 @@ class _StepItem extends StatelessWidget {
           backgroundColor: isDone ? AppColors.success : AppColors.gray200,
           child: isDone
               ? const Icon(Icons.check, size: 16, color: Colors.white)
-              : Text('$step', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+              : Text('$step',
+                  style: const TextStyle(
+                      fontSize: 12,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.bold)),
         ),
         const SizedBox(width: 14),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: isDone ? AppColors.textPrimary : AppColors.textSecondary)),
-              Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              Text(title,
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: isDone
+                          ? AppColors.textPrimary
+                          : AppColors.textSecondary)),
+              Text(subtitle,
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.textSecondary)),
             ],
           ),
         ),

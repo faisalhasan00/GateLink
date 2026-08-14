@@ -24,10 +24,12 @@ class VisitorDetailScreen extends ConsumerWidget {
       ),
       body: visitorsAsync.when(
         data: (visitors) {
-          final matchingVisitors = visitors.where((v) => v.id == visitorId).toList();
+          final matchingVisitors =
+              visitors.where((v) => v.id == visitorId).toList();
           if (matchingVisitors.isEmpty) {
             return const Center(
-              child: Text('Visitor details not found or removed.', style: TextStyle(color: AppColors.textSecondary)),
+              child: Text('Visitor details not found or removed.',
+                  style: TextStyle(color: AppColors.textSecondary)),
             );
           }
 
@@ -76,29 +78,41 @@ class VisitorDetailScreen extends ConsumerWidget {
                         child: Center(
                           child: Text(
                             visitor.initials,
-                            style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: Colors.white),
+                            style: const TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white),
                           ),
                         ),
                       ),
                       const SizedBox(height: 12),
                       Text(
                         name,
-                        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: Colors.white),
+                        style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white),
                       ),
                       if (company.isNotEmpty) ...[
                         const SizedBox(height: 2),
-                        Text(company, style: const TextStyle(fontSize: 13, color: Colors.white70)),
+                        Text(company,
+                            style: const TextStyle(
+                                fontSize: 13, color: Colors.white70)),
                       ],
                       const SizedBox(height: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 14, vertical: 5),
                         decoration: BoxDecoration(
                           color: Colors.white.withValues(alpha: 0.25),
                           borderRadius: BorderRadius.circular(AppRadius.full),
                         ),
                         child: Text(
                           visitor.status.displayName.toUpperCase(),
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
+                          style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white),
                         ),
                       ),
                     ],
@@ -115,13 +129,29 @@ class VisitorDetailScreen extends ConsumerWidget {
                   ),
                   child: Column(
                     children: [
-                      _InfoRow(icon: Icons.phone_rounded, label: 'Mobile', value: phone, color: AppColors.success),
+                      _InfoRow(
+                          icon: Icons.phone_rounded,
+                          label: 'Mobile',
+                          value: phone,
+                          color: AppColors.success),
                       const Divider(height: 1, indent: 56),
-                      _InfoRow(icon: Icons.category_rounded, label: 'Entry Type', value: type, color: AppColors.amenity),
+                      _InfoRow(
+                          icon: Icons.category_rounded,
+                          label: 'Entry Type',
+                          value: type,
+                          color: AppColors.amenity),
                       const Divider(height: 1, indent: 56),
-                      _InfoRow(icon: Icons.directions_car_rounded, label: 'Vehicle Number', value: vehicleNumber, color: AppColors.warning),
+                      _InfoRow(
+                          icon: Icons.directions_car_rounded,
+                          label: 'Vehicle Number',
+                          value: vehicleNumber,
+                          color: AppColors.warning),
                       const Divider(height: 1, indent: 56),
-                      _InfoRow(icon: Icons.door_front_door_rounded, label: 'Visiting Flat', value: hostFlat, color: AppColors.visitor),
+                      _InfoRow(
+                          icon: Icons.door_front_door_rounded,
+                          label: 'Visiting Flat',
+                          value: hostFlat,
+                          color: AppColors.visitor),
                     ],
                   ),
                 ),
@@ -141,18 +171,27 @@ class VisitorDetailScreen extends ConsumerWidget {
                     children: [
                       const Text(
                         'Audit & Visit Timeline',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                        style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary),
                       ),
                       const SizedBox(height: AppSpacing.md),
                       _TimelineStep(
                         title: 'Visitor Request Logged',
-                        time: createdDate.isNotEmpty ? createdDate : 'System Recorded',
+                        time: createdDate.isNotEmpty
+                            ? createdDate
+                            : 'System Recorded',
                         isDone: true,
                         isCurrent: visitor.isPending,
                       ),
                       _TimelineStep(
-                        title: visitor.isRejected ? 'Resident Rejected Entry' : 'Resident Approved Entry',
-                        time: approvedAt ?? rejectedAt ?? 'Pending Resident Action',
+                        title: visitor.isRejected
+                            ? 'Resident Rejected Entry'
+                            : 'Resident Approved Entry',
+                        time: approvedAt ??
+                            rejectedAt ??
+                            'Pending Resident Action',
                         isDone: approvedAt != null || rejectedAt != null,
                         isCurrent: false,
                         isError: visitor.isRejected,
@@ -189,7 +228,10 @@ class VisitorDetailScreen extends ConsumerWidget {
                       children: [
                         const Text(
                           'Digital Gate Pass',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary),
                         ),
                         const SizedBox(height: AppSpacing.md),
                         QrImageView(
@@ -201,7 +243,10 @@ class VisitorDetailScreen extends ConsumerWidget {
                         const SizedBox(height: AppSpacing.sm),
                         Text(
                           'PASS-$visitorId',
-                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+                          style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'monospace'),
                         ),
                       ],
                     ),
@@ -224,7 +269,11 @@ class _InfoRow extends StatelessWidget {
   final String value;
   final Color color;
 
-  const _InfoRow({required this.icon, required this.label, required this.value, required this.color});
+  const _InfoRow(
+      {required this.icon,
+      required this.label,
+      required this.value,
+      required this.color});
 
   @override
   Widget build(BuildContext context) {
@@ -234,15 +283,23 @@ class _InfoRow extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(8)),
+            decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8)),
             child: Icon(icon, size: 18, color: color),
           ),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-              Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+              Text(label,
+                  style: const TextStyle(
+                      fontSize: 11, color: AppColors.textSecondary)),
+              Text(value,
+                  style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textPrimary)),
             ],
           ),
         ],
@@ -309,13 +366,17 @@ class _TimelineStep extends StatelessWidget {
                 title,
                 style: TextStyle(
                   fontSize: 13,
-                  fontWeight: isDone || isCurrent ? FontWeight.w700 : FontWeight.w500,
-                  color: isDone || isCurrent ? AppColors.textPrimary : AppColors.textSecondary,
+                  fontWeight:
+                      isDone || isCurrent ? FontWeight.w700 : FontWeight.w500,
+                  color: isDone || isCurrent
+                      ? AppColors.textPrimary
+                      : AppColors.textSecondary,
                 ),
               ),
               Text(
                 time,
-                style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                style: const TextStyle(
+                    fontSize: 11, color: AppColors.textSecondary),
               ),
               const SizedBox(height: 12),
             ],

@@ -103,7 +103,10 @@ class _OtpScreenState extends State<OtpScreen> {
               const SizedBox(height: AppSpacing.sm),
               RichText(
                 text: TextSpan(
-                  style: const TextStyle(fontSize: 15, color: AppColors.textSecondary, height: 1.5),
+                  style: const TextStyle(
+                      fontSize: 15,
+                      color: AppColors.textSecondary,
+                      height: 1.5),
                   children: [
                     const TextSpan(text: 'We sent a 6-digit OTP to '),
                     TextSpan(
@@ -139,8 +142,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              if (_isLoading)
-                const Center(child: CircularProgressIndicator()),
+              if (_isLoading) const Center(child: CircularProgressIndicator()),
               const SizedBox(height: AppSpacing.lg),
               Center(
                 child: _canResend
@@ -166,11 +168,13 @@ class _OtpScreenState extends State<OtpScreen> {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.timer_outlined, color: AppColors.warning, size: 16),
+                    const Icon(Icons.timer_outlined,
+                        color: AppColors.warning, size: 16),
                     const SizedBox(width: AppSpacing.sm),
                     Text(
                       'OTP expires in ${AppConstants.otpExpiryMinutes} minutes',
-                      style: const TextStyle(fontSize: 13, color: AppColors.warning),
+                      style: const TextStyle(
+                          fontSize: 13, color: AppColors.warning),
                     ),
                   ],
                 ),

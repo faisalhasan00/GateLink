@@ -12,7 +12,8 @@ class MaintenanceState {
   });
 
   bool get isSubmitting => status == MaintenanceActionStatus.loading;
-  bool get hasError => status == MaintenanceActionStatus.error && errorMessage != null;
+  bool get hasError =>
+      status == MaintenanceActionStatus.error && errorMessage != null;
   bool get isSuccess => status == MaintenanceActionStatus.success;
 
   MaintenanceState copyWith({
@@ -39,5 +40,6 @@ class MaintenanceState {
           successMessage == other.successMessage;
 
   @override
-  int get hashCode => status.hashCode ^ errorMessage.hashCode ^ successMessage.hashCode;
+  int get hashCode =>
+      status.hashCode ^ errorMessage.hashCode ^ successMessage.hashCode;
 }

@@ -8,7 +8,8 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/services/storage_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../providers/complaint_providers.dart';
+import '../../providers/complaint_providers.dart';
+import '../controllers/complaint_controller.dart';
 
 class RaiseComplaintScreen extends ConsumerStatefulWidget {
   const RaiseComplaintScreen({super.key});
@@ -86,8 +87,8 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
         final societyId = userProfile?.societyId ?? 'SOC-001';
         final storage = ref.read(storageServiceProvider);
         final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
-        photoUrl =
-            await storage.uploadComplaintImage(_imageFile!, societyId, uniqueId);
+        photoUrl = await storage.uploadComplaintImage(
+            _imageFile!, societyId, uniqueId);
         if (photoUrl.isEmpty) photoUrl = null;
       }
 
@@ -97,21 +98,20 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
       final flatNo = userProfile?.flatNumber ?? '';
       final societyId = userProfile?.societyId ?? 'SOC-001';
 
-      final success = await ref
-          .read(complaintControllerProvider.notifier)
-          .raiseComplaint(
-            societyId: societyId,
-            residentUid: user.uid,
-            residentName: resName,
-            flatNumber: flatNo,
-            title: _titleController.text,
-            description: _descController.text,
-            category: _selectedCategory!,
-            block: _blockController.text,
-            floor: _floorController.text,
-            priority: _selectedPriority,
-            photoUrl: photoUrl,
-          );
+      final success =
+          await ref.read(complaintControllerProvider.notifier).raiseComplaint(
+                societyId: societyId,
+                residentUid: user.uid,
+                residentName: resName,
+                flatNumber: flatNo,
+                title: _titleController.text,
+                description: _descController.text,
+                category: _selectedCategory!,
+                block: _blockController.text,
+                floor: _floorController.text,
+                priority: _selectedPriority,
+                photoUrl: photoUrl,
+              );
 
       if (!mounted) return;
 
@@ -147,14 +147,13 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(userProfileProvider).value;
-    final resName = profile?.name.isNotEmpty == true ? profile!.name : 'Resident';
+    final resName =
+        profile?.name.isNotEmpty == true ? profile!.name : 'Resident';
     final flatNum =
         profile?.flatNumber.isNotEmpty == true ? profile!.flatNumber : 'A-101';
-    final block = profile?.block.isNotEmpty == true
-        ? profile!.block
-        : (profile?.tower.isNotEmpty == true ? profile!.tower : 'Tower A');
-    final floor =
-        profile?.floor.isNotEmpty == true ? profile!.floor : '1st Floor';
+    final block =
+        profile?.tower.isNotEmpty == true ? profile!.tower : 'Tower A';
+    const floor = '1st Floor';
 
     if (_blockController.text.isEmpty && block.isNotEmpty) {
       _blockController.text = block;
@@ -214,7 +213,6 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
-
               const _FieldLabel(label: 'Category *'),
               const SizedBox(height: AppSpacing.xs),
               DropdownButtonFormField<String>(
@@ -225,13 +223,12 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
                       borderRadius: BorderRadius.circular(AppRadius.md)),
                 ),
                 items: _categories
-                    .map((cat) =>
-                        DropdownMenuItem(value: cat, child: Text(cat)))
+                    .map(
+                        (cat) => DropdownMenuItem(value: cat, child: Text(cat)))
                     .toList(),
                 onChanged: (val) => setState(() => _selectedCategory = val),
               ),
               const SizedBox(height: AppSpacing.md),
-
               const _FieldLabel(label: 'Complaint Title *'),
               const SizedBox(height: AppSpacing.xs),
               TextFormField(
@@ -245,7 +242,6 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
                     v == null || v.trim().isEmpty ? 'Title is required' : null,
               ),
               const SizedBox(height: AppSpacing.md),
-
               const _FieldLabel(label: 'Detailed Description *'),
               const SizedBox(height: AppSpacing.xs),
               TextFormField(
@@ -262,7 +258,6 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
                     : null,
               ),
               const SizedBox(height: AppSpacing.md),
-
               const _FieldLabel(label: 'Priority Level'),
               const SizedBox(height: AppSpacing.xs),
               Row(
@@ -290,7 +285,6 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
                 ],
               ),
               const SizedBox(height: AppSpacing.lg),
-
               const _FieldLabel(label: 'Attach Photo (Optional)'),
               const SizedBox(height: AppSpacing.xs),
               GestureDetector(
@@ -323,7 +317,6 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-
               SizedBox(
                 width: double.infinity,
                 height: 50,
