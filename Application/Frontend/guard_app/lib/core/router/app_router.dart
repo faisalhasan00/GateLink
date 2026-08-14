@@ -7,35 +7,19 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/pending_approval_screen.dart';
-import '../../features/home/presentation/screens/home_shell.dart';
-import '../../features/home/presentation/screens/dashboard_screen.dart';
-import '../../features/maintenance/presentation/screens/maintenance_list_screen.dart';
-import '../../features/maintenance/presentation/screens/pay_maintenance_screen.dart';
-import '../../features/maintenance/presentation/screens/maintenance_history_screen.dart';
-import '../../features/visitor/presentation/screens/visitor_list_screen.dart';
-import '../../features/visitor/presentation/screens/invite_visitor_screen.dart';
-import '../../features/visitor/presentation/screens/visitor_detail_screen.dart';
-import '../../features/complaint/presentation/screens/complaint_list_screen.dart';
-import '../../features/complaint/presentation/screens/raise_complaint_screen.dart';
-import '../../features/complaint/presentation/screens/complaint_detail_screen.dart';
-import '../../features/amenity/presentation/screens/amenity_list_screen.dart';
-import '../../features/amenity/presentation/screens/amenity_booking_screen.dart';
-import '../../features/amenity/presentation/screens/my_bookings_screen.dart';
-import '../../features/notice/presentation/screens/notice_list_screen.dart';
-import '../../features/notice/presentation/screens/notice_detail_screen.dart';
-import '../../features/profile/presentation/screens/profile_screen.dart';
-import '../../features/profile/presentation/screens/edit_profile_screen.dart';
-import '../../features/profile/presentation/screens/change_password_screen.dart';
-import '../../features/notifications/presentation/screens/notifications_screen.dart';
-import '../../features/parking/presentation/screens/parking_screen.dart';
-import '../../features/document/presentation/screens/document_screen.dart';
 import '../../features/guard/presentation/screens/guard_shell.dart';
 import '../../features/guard/presentation/screens/guard_dashboard_screen.dart';
 import '../../features/guard/presentation/screens/qr_scanner_screen.dart';
 import '../../features/guard/presentation/screens/quick_entry_screen.dart';
 import '../../features/guard/presentation/screens/vehicle_log_screen.dart';
+import '../../features/guard/presentation/screens/guard_visitor_history_screen.dart';
+import '../../features/guard/presentation/screens/guard_profile_screen.dart';
+import '../../features/visitor/presentation/screens/visitor_detail_screen.dart';
+import '../../features/notifications/presentation/screens/notifications_screen.dart';
+import '../../features/notice/presentation/screens/notice_list_screen.dart';
+import '../../features/notice/presentation/screens/notice_detail_screen.dart';
 
-/// All route paths in one place
+/// All route paths for GateLink Guard App
 class AppRoutes {
   static const String splash = '/';
   static const String onboarding = '/onboarding';
@@ -43,41 +27,37 @@ class AppRoutes {
   static const String otp = '/otp';
   static const String register = '/register';
   static const String pendingApproval = '/pending-approval';
-  static const String home = '/home';
-  static const String dashboard = '/home/dashboard';
-  static const String notifications = '/home/notifications';
-  // Maintenance
-  static const String maintenance = '/home/maintenance';
-  static const String payMaintenance = '/home/maintenance/pay';
-  static const String maintenanceHistory = '/home/maintenance/history';
-  // Visitor
-  static const String visitors = '/home/visitors';
-  static const String inviteVisitor = '/home/visitors/invite';
-  static const String visitorDetail = '/home/visitors/:id';
-  // Complaint
-  static const String complaints = '/home/complaints';
-  static const String raiseComplaint = '/home/complaints/raise';
-  static const String complaintDetail = '/home/complaints/:id';
-  // Amenity
-  static const String amenities = '/home/amenities';
-  static const String bookAmenity = '/home/amenities/:id/book';
-  static const String myBookings = '/home/amenities/my-bookings';
-  // Notice
-  static const String notices = '/home/notices';
-  static const String noticeDetail = '/home/notices/:id';
-  // Parking
-  static const String parking = '/home/parking';
-  // Documents
-  static const String documents = '/home/documents';
-  // Profile
-  static const String profile = '/home/profile';
-  static const String editProfile = '/home/profile/edit';
-  static const String changePassword = '/home/profile/change-password';
-  // Guard App Routes
+  
+  // Guard Navigation Routes
   static const String guardDashboard = '/guard/dashboard';
   static const String guardScan = '/guard/scan';
   static const String guardQuickEntry = '/guard/quick-entry';
   static const String guardVehicles = '/guard/vehicles';
+  static const String guardHistory = '/guard/history';
+  static const String profile = '/guard/profile';
+  
+  // Common & Detail Routes
+  static const String notifications = '/notifications';
+  static const String notices = '/notices';
+  static const String noticeDetail = '/notices/:id';
+  static const String visitorDetail = '/visitors/:id';
+  
+  // Legacy / Aliases
+  static const String home = '/guard/dashboard';
+  static const String dashboard = '/guard/dashboard';
+  static const String visitors = '/guard/dashboard';
+  static const String complaints = '/guard/dashboard';
+  static const String amenities = '/guard/dashboard';
+  static const String maintenance = '/guard/dashboard';
+  static const String payMaintenance = '/guard/dashboard';
+  static const String maintenanceHistory = '/guard/dashboard';
+  static const String myBookings = '/guard/dashboard';
+  static const String parking = '/guard/vehicles';
+  static const String documents = '/guard/dashboard';
+  static const String editProfile = '/guard/profile';
+  static const String changePassword = '/guard/profile';
+  static const String raiseComplaint = '/guard/dashboard';
+  static const String inviteVisitor = '/guard/quick-entry';
 }
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -86,6 +66,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
   return GoRouter(
     initialLocation: AppRoutes.splash,
+    errorBuilder: (context, state) => const GuardDashboardScreen(),
     redirect: (context, state) {
       final isLoading = authState.isLoading;
       if (isLoading) return null;
@@ -122,10 +103,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       return null;
     },
-    errorBuilder: (context, state) => const GuardDashboardScreen(),
     debugLogDiagnostics: true,
     routes: [
-      // Top-level Aliases & Shortcuts to prevent No-Route GoExceptions
+      // Top-level Aliases & Shortcuts
       GoRoute(
         path: '/dashboard',
         redirect: (context, state) => AppRoutes.guardDashboard,
@@ -143,25 +123,35 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         redirect: (context, state) => AppRoutes.guardVehicles,
       ),
       GoRoute(
+        path: '/history',
+        redirect: (context, state) => AppRoutes.guardHistory,
+      ),
+      GoRoute(
         path: '/profile',
         redirect: (context, state) => AppRoutes.profile,
       ),
       GoRoute(
-        path: '/history',
+        path: '/home',
         redirect: (context, state) => AppRoutes.guardDashboard,
+      ),
+      GoRoute(
+        path: '/home/dashboard',
+        redirect: (context, state) => AppRoutes.guardDashboard,
+      ),
+      GoRoute(
+        path: '/home/profile',
+        redirect: (context, state) => AppRoutes.profile,
+      ),
+      GoRoute(
+        path: '/home/visitors/:id',
+        redirect: (context, state) => '/visitors/${state.pathParameters['id']}',
       ),
       GoRoute(
         path: '/all',
         redirect: (context, state) => AppRoutes.guardDashboard,
       ),
-      GoRoute(
-        path: '/visitors',
-        redirect: (context, state) => AppRoutes.guardDashboard,
-      ),
-      GoRoute(
-        path: '/visitors/:id',
-        redirect: (context, state) => '/home/visitors/${state.pathParameters['id']}',
-      ),
+
+      // Auth & Onboarding Routes
       GoRoute(
         path: AppRoutes.splash,
         builder: (context, state) => const SplashScreen(),
@@ -189,127 +179,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.pendingApproval,
         builder: (context, state) => const PendingApprovalScreen(),
       ),
-      ShellRoute(
-        builder: (context, state, child) => HomeShell(child: child),
-        routes: [
-          GoRoute(
-            path: AppRoutes.dashboard,
-            builder: (context, state) => const DashboardScreen(),
-          ),
-          GoRoute(
-            path: AppRoutes.notifications,
-            builder: (context, state) => const NotificationsScreen(),
-          ),
-          GoRoute(
-            path: AppRoutes.maintenance,
-            builder: (context, state) => const MaintenanceListScreen(),
-            routes: [
-              GoRoute(
-                path: 'pay',
-                builder: (context, state) => const PayMaintenanceScreen(),
-              ),
-              GoRoute(
-                path: 'history',
-                builder: (context, state) => const MaintenanceHistoryScreen(),
-              ),
-            ],
-          ),
-          GoRoute(
-            path: AppRoutes.visitors,
-            builder: (context, state) => const VisitorListScreen(),
-            routes: [
-              GoRoute(
-                path: 'invite',
-                builder: (context, state) => const InviteVisitorScreen(),
-              ),
-              GoRoute(
-                path: ':id',
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return VisitorDetailScreen(visitorId: id);
-                },
-              ),
-            ],
-          ),
-          GoRoute(
-            path: AppRoutes.complaints,
-            builder: (context, state) => const ComplaintListScreen(),
-            routes: [
-              GoRoute(
-                path: 'raise',
-                builder: (context, state) => const RaiseComplaintScreen(),
-              ),
-              GoRoute(
-                path: ':id',
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return ComplaintDetailScreen(complaintId: id);
-                },
-              ),
-            ],
-          ),
-          GoRoute(
-            path: AppRoutes.amenities,
-            builder: (context, state) => const AmenityListScreen(),
-            routes: [
-              GoRoute(
-                path: 'my-bookings',
-                builder: (context, state) => const MyBookingsScreen(),
-              ),
-              GoRoute(
-                path: ':id',
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return AmenityBookingScreen(amenityId: id);
-                },
-              ),
-              GoRoute(
-                path: ':id/book',
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return AmenityBookingScreen(amenityId: id);
-                },
-              ),
-            ],
-          ),
-          GoRoute(
-            path: AppRoutes.notices,
-            builder: (context, state) => const NoticeListScreen(),
-            routes: [
-              GoRoute(
-                path: ':id',
-                builder: (context, state) {
-                  final id = state.pathParameters['id']!;
-                  return NoticeDetailScreen(noticeId: id);
-                },
-              ),
-            ],
-          ),
-          GoRoute(
-            path: AppRoutes.parking,
-            builder: (context, state) => const ParkingScreen(),
-          ),
-          GoRoute(
-            path: AppRoutes.documents,
-            builder: (context, state) => const DocumentScreen(),
-          ),
-          GoRoute(
-            path: AppRoutes.profile,
-            builder: (context, state) => const ProfileScreen(),
-            routes: [
-              GoRoute(
-                path: 'edit',
-                builder: (context, state) => const EditProfileScreen(),
-              ),
-              GoRoute(
-                path: 'change-password',
-                builder: (context, state) => const ChangePasswordScreen(),
-              ),
-            ],
-          ),
-        ],
-      ),
-      // Security Guard App Shell
+
+      // Primary Security Guard Shell
       ShellRoute(
         builder: (context, state, child) => GuardShell(child: child),
         routes: [
@@ -328,6 +199,40 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.guardVehicles,
             builder: (context, state) => const VehicleLogScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.guardHistory,
+            builder: (context, state) => const GuardVisitorHistoryScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.profile,
+            builder: (context, state) => const GuardProfileScreen(),
+          ),
+        ],
+      ),
+
+      // Detail screens outside shell
+      GoRoute(
+        path: AppRoutes.visitorDetail,
+        builder: (context, state) {
+          final id = state.pathParameters['id'] ?? '';
+          return VisitorDetailScreen(visitorId: id);
+        },
+      ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        builder: (context, state) => const NotificationsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.notices,
+        builder: (context, state) => const NoticeListScreen(),
+        routes: [
+          GoRoute(
+            path: ':id',
+            builder: (context, state) {
+              final id = state.pathParameters['id'] ?? '';
+              return NoticeDetailScreen(noticeId: id);
+            },
           ),
         ],
       ),
