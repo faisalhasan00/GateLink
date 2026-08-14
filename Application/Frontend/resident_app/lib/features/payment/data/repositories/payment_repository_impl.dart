@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import '../../domain/models/payment_order_model.dart';
 import '../../domain/repositories/payment_repository.dart';
@@ -54,7 +55,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
         final data = jsonDecode(response.body) as Map<String, dynamic>;
         final orderId = data['orderId'] as String;
         final paymentSessionId = data['paymentSessionId'] as String?;
-        final officialAmount = (data['amount'] as num?)?.toDouble() ?? 1.0;
+        final officialAmount = (data['amount'] as num?)?.toDouble() ?? 4500.0;
 
         return PaymentOrderModel(
           orderId: orderId,
@@ -72,7 +73,23 @@ class PaymentRepositoryImpl implements PaymentRepository {
       // Cloud Function endpoint unreachable or returned non-200 in dev/sandbox
     }
 
-    // Cashfree Sandbox Direct Gateway Fallback
+    // Cashfree Sandbox Direct Gateway Fallback: dynamically fetch exact bill amount from Firestore
+    double billAmount = 4500.0;
+    try {
+      final billDoc = await _firestore
+          .doc('societies/$societyId/maintenance_bills/$maintenanceBillId')
+          .get();
+      if (billDoc.exists) {
+        final d = billDoc.data();
+        final rawAmt = d?['amount'] ?? d?['totalAmount'] ?? d?['dueAmount'];
+        if (rawAmt != null && rawAmt is num && rawAmt.toDouble() > 0) {
+          billAmount = rawAmt.toDouble();
+        }
+      }
+    } catch (e) {
+      debugPrint('[PaymentRepo] Error fetching bill amount from Firestore: $e');
+    }
+
     final orderId =
         'CF_${societyId}_${maintenanceBillId}_${DateTime.now().millisecondsSinceEpoch}';
     
@@ -96,7 +113,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
       },
       body: jsonEncode({
         'order_id': orderId,
-        'order_amount': 1.0,
+        'order_amount': billAmount,
         'order_currency': 'INR',
         'customer_details': {
           'customer_id': currentUser.uid,
@@ -118,7 +135,7 @@ class PaymentRepositoryImpl implements PaymentRepository {
         maintenanceBillId: maintenanceBillId,
         residentUid: residentUid,
         flatNumber: '',
-        amount: 1.0,
+        amount: billAmount,
         currency: 'INR',
         status: 'PENDING',
       );
