@@ -232,16 +232,16 @@ class _DynamicMaintenanceBanner extends ConsumerWidget {
           return Container(
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: const Color(0xFFECFDF5),
+              color: AppColors.successSurface,
               borderRadius: BorderRadius.circular(AppRadius.xl),
-              border: Border.all(color: const Color(0xFFA7F3D0)),
+              border: Border.all(color: AppColors.success.withOpacity(0.3)),
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: const BoxDecoration(
-                    color: Color(0xFF10B981),
+                    color: AppColors.success,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.check_circle_rounded, color: Colors.white, size: 24),
@@ -269,7 +269,7 @@ class _DynamicMaintenanceBanner extends ConsumerWidget {
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF1E40AF), Color(0xFF3B82F6)],
+              colors: [AppColors.primary, AppColors.primaryLight],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),

@@ -127,7 +127,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 Text(
                   _isRegisterMode
                       ? 'Register your account to get started'
-                      : 'Sign in to your SocietySphere account',
+                      : 'Sign in to your GateLink account',
                   style: const TextStyle(
                       fontSize: 15, color: AppColors.textSecondary),
                 ),

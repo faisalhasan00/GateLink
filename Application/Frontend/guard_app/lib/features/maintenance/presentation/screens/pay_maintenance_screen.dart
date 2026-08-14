@@ -136,7 +136,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
             Container(
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
-                  colors: [Color(0xFF1D4ED8), Color(0xFF2563EB)],
+                  colors: [AppColors.primary, AppColors.primaryLight],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),

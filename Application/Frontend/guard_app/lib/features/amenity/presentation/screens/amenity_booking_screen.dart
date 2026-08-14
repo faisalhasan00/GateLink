@@ -194,7 +194,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
                     padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                          colors: [Color(0xFF06B6D4), Color(0xFF0891B2)],
+                          colors: [AppColors.primary, AppColors.primaryLight],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight),
                       borderRadius: BorderRadius.circular(AppRadius.xl),
