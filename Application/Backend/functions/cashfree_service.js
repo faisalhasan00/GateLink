@@ -128,7 +128,10 @@ class CashfreePaymentProvider {
         .update(dataToSign)
         .digest("base64");
 
-      return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
+      const bufSig = Buffer.from(signature);
+      const bufExp = Buffer.from(expectedSignature);
+      if (bufSig.length !== bufExp.length) return false;
+      return crypto.timingSafeEqual(bufSig, bufExp);
     } catch (err) {
       console.error("Webhook signature verification error:", err);
       return false;
