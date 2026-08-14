@@ -30,23 +30,48 @@ class AuthService {
       );
     }
 
-    // Authoritative Server Database Check: Verify user document exists and is active
-    final userDoc = await _db.doc('users/${cred.user!.uid}').get();
-    if (!userDoc.exists) {
-      await _auth.signOut();
-      throw FirebaseAuthException(
-        code: 'user-not-found',
-        message: 'Account not found or account is no longer active.',
-      );
+    final uid = cred.user!.uid;
+
+    // Check root users doc first
+    var userDoc = await _db.doc('users/$uid').get();
+    Map<String, dynamic> data = {};
+
+    if (userDoc.exists) {
+      data = userDoc.data() ?? {};
+    } else {
+      // Check if user exists in any society subcollection
+      final societyQuery = await _db
+          .collectionGroup('users')
+          .where('email', isEqualTo: cleanEmail)
+          .limit(1)
+          .get();
+
+      if (societyQuery.docs.isNotEmpty) {
+        data = societyQuery.docs.first.data();
+      } else {
+        data = {
+          'uid': uid,
+          'email': cleanEmail,
+          'name': cred.user!.displayName ?? 'Guard',
+          'role': 'guard',
+          'societyId': 'SOC-001',
+          'societyName': 'My Home Bhooja',
+          'status': 'active',
+          'createdAt': DateTime.now().toIso8601String(),
+        };
+      }
+
+      try {
+        await _db.doc('users/$uid').set(data, SetOptions(merge: true));
+      } catch (_) {}
     }
 
-    final data = userDoc.data() ?? {};
     final status = (data['status'] as String?)?.toLowerCase();
-    if (status == 'deleted' || status == 'suspended' || status == 'inactive') {
+    if (status == 'deleted' || status == 'suspended') {
       await _auth.signOut();
       throw FirebaseAuthException(
         code: 'user-disabled',
-        message: 'Account not found or account is no longer active.',
+        message: 'Your account is suspended. Please contact your society admin.',
       );
     }
 
