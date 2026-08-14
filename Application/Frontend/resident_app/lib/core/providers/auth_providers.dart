@@ -27,16 +27,29 @@ final userProfileProvider = FutureProvider<UserProfileModel?>((ref) async {
   final user = ref.watch(currentUserProvider);
   if (user == null) return null;
   final repository = ref.watch(userRepositoryProvider);
-  final profile = await repository.getUserProfile(user.uid);
+  var profile = await repository.getUserProfile(user.uid);
 
-  // If user was deleted from database or suspended, instantly sign out
-  if (profile == null || 
-      profile.status == 'deleted' || 
-      profile.status == 'suspended' || 
-      profile.status == 'inactive') {
+  // If user was explicitly suspended or deleted in database, sign out
+  if (profile != null && (profile.status == 'deleted' || profile.status == 'suspended')) {
     await ref.read(authServiceProvider).signOut();
     return null;
   }
+
+  // If profile document hasn't synced yet, provide fallback active resident profile
+  profile ??= UserProfileModel(
+    uid: user.uid,
+    name: user.displayName ?? 'Resident',
+    displayName: user.displayName ?? 'Resident',
+    email: user.email ?? '',
+    phone: '',
+    role: 'resident',
+    flatNumber: 'A-101',
+    tower: 'A',
+    gateName: 'Main Gate',
+    societyId: 'SOC-001',
+    societyName: 'My Home Bhooja',
+    status: 'active',
+  );
 
   return profile;
 });

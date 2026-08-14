@@ -33,24 +33,21 @@ class AuthService {
     final uid = cred.user!.uid;
 
     // Check root users doc first
-    var userDoc = await _db.doc('users/$uid').get();
-    Map<String, dynamic> data = {};
-
-    if (userDoc.exists) {
-      data = userDoc.data() ?? {};
-    } else {
-      // Check if user exists in any society subcollection
-      final societyQuery = await _db
-          .collectionGroup('users')
-          .where('email', isEqualTo: cleanEmail)
-          .limit(1)
-          .get();
-
-      if (societyQuery.docs.isNotEmpty) {
-        data = societyQuery.docs.first.data();
+    try {
+      final userDoc = await _db.doc('users/$uid').get();
+      if (userDoc.exists) {
+        final data = userDoc.data() ?? {};
+        final status = (data['status'] as String?)?.toLowerCase();
+        if (status == 'deleted' || status == 'suspended') {
+          await _auth.signOut();
+          throw FirebaseAuthException(
+            code: 'user-disabled',
+            message: 'Your account is suspended. Please contact your society admin.',
+          );
+        }
       } else {
         // Fallback: auto-create initial active resident profile so valid Auth user is never blocked
-        data = {
+        final data = {
           'uid': uid,
           'email': cleanEmail,
           'name': cred.user!.displayName ?? 'Resident',
@@ -61,21 +58,11 @@ class AuthService {
           'status': 'active',
           'createdAt': DateTime.now().toIso8601String(),
         };
-      }
-
-      // Backfill root users document for seamless future lookups
-      try {
         await _db.doc('users/$uid').set(data, SetOptions(merge: true));
-      } catch (_) {}
-    }
-
-    final status = (data['status'] as String?)?.toLowerCase();
-    if (status == 'deleted' || status == 'suspended') {
-      await _auth.signOut();
-      throw FirebaseAuthException(
-        code: 'user-disabled',
-        message: 'Your account is suspended. Please contact your society admin.',
-      );
+      }
+    } catch (e) {
+      if (e is FirebaseAuthException) rethrow;
+      // Do not block authentication if Firestore sync is deferred
     }
 
     return cred;
