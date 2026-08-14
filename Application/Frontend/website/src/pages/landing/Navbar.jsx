@@ -150,23 +150,53 @@ export default function Navbar({ onOpenDemo }) {
             {/* Outlined "Society Login" */}
             <a
               href={societyAdminUrl}
-              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '6px 16px', borderRadius: '2px', border: isDark ? '1px solid rgba(255,255,255,0.3)' : '1px solid #707070', backgroundColor: 'transparent', color: isDark ? '#FFFFFF' : '#333333', textDecoration: 'none', fontSize: '13px', fontWeight: 600, height: '36px', boxSizing: 'border-box' }}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '6px 18px',
+                borderRadius: '12px',
+                border: isDark ? '1.5px solid rgba(255,255,255,0.3)' : '1.5px solid #1E3A8A',
+                backgroundColor: 'transparent',
+                color: isDark ? '#FFFFFF' : '#1E3A8A',
+                textDecoration: 'none',
+                fontSize: '13px',
+                fontWeight: 700,
+                height: '38px',
+                boxSizing: 'border-box',
+                transition: 'all 0.2s ease'
+              }}
             >
               Society Login
             </a>
 
-            {/* Solid Emerald Green "Enroll your society" */}
+            {/* Solid Navy "Enroll your society" */}
             <button
               onClick={handleEnrollClick}
-              style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '6px 20px', borderRadius: '2px', backgroundColor: '#00B589', color: '#FFFFFF', border: 'none', fontSize: '13px', fontWeight: 700, cursor: 'pointer', height: '36px', boxSizing: 'border-box', transition: 'background-color 0.2s ease' }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#009E77'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#00B589'}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                padding: '6px 22px',
+                borderRadius: '12px',
+                backgroundColor: '#1E3A8A',
+                color: '#FFFFFF',
+                border: 'none',
+                fontSize: '13px',
+                fontWeight: 700,
+                cursor: 'pointer',
+                height: '38px',
+                boxSizing: 'border-box',
+                transition: 'background-color 0.2s ease'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
             >
               Enroll your society
             </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             {/* Mobile "Enroll your society" Button */}
             <button
               onClick={handleEnrollClick}
@@ -174,15 +204,15 @@ export default function Navbar({ onOpenDemo }) {
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '5px 10px',
-                borderRadius: '2px',
-                backgroundColor: '#00B589',
+                padding: '6px 14px',
+                borderRadius: '12px',
+                backgroundColor: '#1E3A8A',
                 color: '#FFFFFF',
                 border: 'none',
-                fontSize: '11px',
+                fontSize: '12px',
                 fontWeight: 800,
                 cursor: 'pointer',
-                height: '32px',
+                height: '34px',
                 boxSizing: 'border-box',
                 whiteSpace: 'nowrap'
               }}
@@ -194,7 +224,7 @@ export default function Navbar({ onOpenDemo }) {
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle Menu"
-              style={{ width: '32px', height: '32px', borderRadius: '4px', background: isDark ? '#1E293B' : '#F8FAFC', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB', color: isDark ? '#FFFFFF' : '#333333', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+              style={{ width: '34px', height: '34px', borderRadius: '8px', background: isDark ? '#1E293B' : '#F8FAFC', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB', color: isDark ? '#FFFFFF' : '#1E3A8A', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
             >
               {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>

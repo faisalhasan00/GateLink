@@ -141,25 +141,25 @@ export default function HeroSection({ onOpenDemo }) {
                     style={{
                       width: '100%',
                       padding: '12px 14px',
-                      borderRadius: '4px',
-                      border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC',
+                      borderRadius: '12px',
+                      border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1.5px solid #E2E8F0',
                       background: isDark ? '#1E293B' : '#FFFFFF',
-                      color: isDark ? '#FFFFFF' : '#333333',
+                      color: isDark ? '#FFFFFF' : '#0F172A',
                       fontSize: '14px',
                       outline: 'none'
                     }}
                   />
 
-                  <div style={{ display: 'flex', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', borderRadius: '4px', background: isDark ? '#1E293B' : '#FFFFFF', overflow: 'hidden' }}>
+                  <div style={{ display: 'flex', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1.5px solid #E2E8F0', borderRadius: '12px', background: isDark ? '#1E293B' : '#FFFFFF', overflow: 'hidden' }}>
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       gap: '6px',
                       padding: '0 12px',
-                      background: isDark ? 'rgba(255,255,255,0.05)' : '#F5F5F5',
-                      borderRight: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E0E0E0',
-                      color: isDark ? '#FFFFFF' : '#2C2C2C',
+                      background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9',
+                      borderRight: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
+                      color: isDark ? '#FFFFFF' : '#0F172A',
                       userSelect: 'none'
                     }}>
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1 }}>
@@ -176,10 +176,10 @@ export default function HeroSection({ onOpenDemo }) {
                       onChange={e => setFormData({ ...formData, phone: e.target.value })}
                       style={{
                         width: '100%',
-                        padding: '12px 10px',
+                        padding: '12px 12px',
                         border: 'none',
                         background: 'transparent',
-                        color: isDark ? '#FFFFFF' : '#333333',
+                        color: isDark ? '#FFFFFF' : '#0F172A',
                         fontSize: '14px',
                         outline: 'none'
                       }}
@@ -195,10 +195,10 @@ export default function HeroSection({ onOpenDemo }) {
                     style={{
                       width: '100%',
                       padding: '12px 14px',
-                      borderRadius: '4px',
-                      border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC',
+                      borderRadius: '12px',
+                      border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1.5px solid #E2E8F0',
                       background: isDark ? '#1E293B' : '#FFFFFF',
-                      color: isDark ? '#FFFFFF' : '#333333',
+                      color: isDark ? '#FFFFFF' : '#0F172A',
                       fontSize: '14px',
                       outline: 'none'
                     }}
@@ -213,8 +213,8 @@ export default function HeroSection({ onOpenDemo }) {
                     style={{
                       width: '100%',
                       padding: '12px 18px',
-                      borderRadius: '4px',
-                      backgroundColor: '#00B589',
+                      borderRadius: '12px',
+                      backgroundColor: '#1E3A8A',
                       color: '#FFFFFF',
                       border: 'none',
                       fontSize: '14px',
@@ -226,8 +226,8 @@ export default function HeroSection({ onOpenDemo }) {
                       gap: '8px',
                       transition: 'background-color 0.2s ease'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#009E77'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#00B589'}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
                   >
                     <span>{submitting ? 'Submitting...' : 'Enroll your society'}</span>
                     <ArrowRight size={16} />
