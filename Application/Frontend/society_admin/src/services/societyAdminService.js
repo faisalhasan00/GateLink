@@ -152,9 +152,14 @@ export const societyAdminService = {
   // ── RESIDENTS ──────────────────────────────────────────────────────────
   subscribeResidents(societyId, callback, onError) {
     if (!societyId) return () => {};
-    const q = query(collection(db, `societies/${societyId}/users`), orderBy('createdAt', 'desc'));
+    const q = collection(db, `societies/${societyId}/users`);
     return onSnapshot(q, (snap) => {
       const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      data.sort((a, b) => {
+        const timeA = new Date(a.createdAt || a.createdDate || a.updatedAt || 0).getTime();
+        const timeB = new Date(b.createdAt || b.createdDate || b.updatedAt || 0).getTime();
+        return timeB - timeA;
+      });
       callback(data);
     }, onError);
   },

@@ -118,8 +118,14 @@ export default function Residents() {
     }
   };
 
-  const pendingList = residents.filter(r => r.status === 'pending' || r.status === 'pending_approval');
-  const activeList = residents.filter(r => r.status === 'active' || r.status === 'approved' || r.status === 'suspended');
+  const pendingList = residents.filter(r => {
+    const s = (r.status || '').toLowerCase();
+    return s === 'pending' || s === 'pending_approval' || s === 'pending_verification' || s === 'unapproved';
+  });
+  const activeList = residents.filter(r => {
+    const s = (r.status || 'active').toLowerCase();
+    return s === 'active' || s === 'approved' || s === 'suspended' || s === '' || !['pending', 'pending_approval', 'pending_verification', 'unapproved', 'rejected'].includes(s);
+  });
 
   if (loading) return <div style={{ padding: '20px' }}>Loading resident directory...</div>;
 
