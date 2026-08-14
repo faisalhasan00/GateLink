@@ -1,7 +1,8 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from './firebase'
+import { doc, setDoc } from 'firebase/firestore'
+import { auth, db } from './firebase'
 
 import { ThemeProvider } from './context/ThemeContext'
 import SkeletonLoader from './components/ui/SkeletonLoader'
@@ -40,7 +41,30 @@ export default function App() {
   const [user, setUser] = useState(undefined); // undefined = loading
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const nowStr = new Date().toISOString();
+          const session = getSocietyAdminSession();
+          const societyId = session?.societyId || 'SOC-ADMIN';
+          await setDoc(doc(db, 'users', firebaseUser.uid), {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            role: 'admin',
+            societyId: societyId,
+            updatedAt: nowStr
+          }, { merge: true });
+          await setDoc(doc(db, `societies/${societyId}/users`, firebaseUser.uid), {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            role: 'admin',
+            societyId: societyId,
+            updatedAt: nowStr
+          }, { merge: true });
+        } catch (e) {
+          console.warn('Could not sync admin profile doc:', e);
+        }
+      }
       setUser(firebaseUser || null);
     });
     return () => unsubscribe();

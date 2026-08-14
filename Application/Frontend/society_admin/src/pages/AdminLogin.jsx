@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import { setSocietyAdminSession } from '../services/sessionManager';
 import HomeHniHoodLogo from '../components/ui/HomeHniHoodLogo';
@@ -23,6 +24,28 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const syncAdminProfile = async (uid, cleanEmail) => {
+    try {
+      const nowStr = new Date().toISOString();
+      await setDoc(doc(db, 'users', uid), {
+        uid: uid,
+        email: cleanEmail,
+        role: 'admin',
+        societyId: 'SOC-ADMIN',
+        updatedAt: nowStr
+      }, { merge: true });
+      await setDoc(doc(db, 'societies/SOC-ADMIN/users', uid), {
+        uid: uid,
+        email: cleanEmail,
+        role: 'admin',
+        societyId: 'SOC-ADMIN',
+        updatedAt: nowStr
+      }, { merge: true });
+    } catch (e) {
+      console.warn('Error syncing admin profile on login:', e);
+    }
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -32,12 +55,14 @@ export default function AdminLogin() {
     try {
       try {
         const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
+        await syncAdminProfile(res.user.uid, cleanEmail);
         setSocietyAdminSession({ email: cleanEmail, token: res.user?.uid, societyId: 'SOC-ADMIN' });
         navigate('/');
       } catch (authErr) {
         if (password.length >= 6) {
           try {
             const newRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
+            await syncAdminProfile(newRes.user.uid, cleanEmail);
             setSocietyAdminSession({ email: cleanEmail, token: newRes.user?.uid, societyId: 'SOC-ADMIN' });
             navigate('/');
             return;
