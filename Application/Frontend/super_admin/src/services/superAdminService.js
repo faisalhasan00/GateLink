@@ -1,3 +1,12 @@
+/**
+ * GateLink Super Admin Data Service Layer
+ * 
+ * ARCHITECTURE & RESPONSIBILITIES:
+ * 1. Global Platform Management: Manages tenant societies, system-wide subscriptions, and CRM leads.
+ * 2. Cross-Tenant Audits: Provides real-time reactive Firestore subscriptions for platform monitoring.
+ * 3. Security Boundary: Only users with `super_admin` claims in Firebase Auth have permissions here.
+ */
+
 import { 
   collection, 
   doc, 

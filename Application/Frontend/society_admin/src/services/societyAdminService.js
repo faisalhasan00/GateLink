@@ -1,3 +1,14 @@
+/**
+ * GateLink Society Admin Data Service Layer
+ * 
+ * ARCHITECTURE & BUSINESS RULES:
+ * 1. Multi-Tenant Isolation: Every method requires or validates a `societyId`.
+ *    Subcollections (e.g. `societies/{societyId}/residents`) guarantee strict data boundary.
+ * 2. Clean Service Pattern: Components should NEVER call raw Firestore queries directly.
+ *    Instead, call `societyAdminService.<method>` via custom React hooks.
+ * 3. Auditability: All mutation batches timestamp `createdAt`, `updatedAt`, and `updatedBy`.
+ */
+
 import { 
   collection, 
   doc, 
