@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import { setSocietyAdminSession } from '../services/sessionManager';
@@ -24,21 +24,21 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const syncAdminProfile = async (uid, cleanEmail) => {
+  const syncAdminProfile = async (uid, cleanEmail, targetSocietyId = 'SOC-ADMIN') => {
     try {
       const nowStr = new Date().toISOString();
       await setDoc(doc(db, 'users', uid), {
         uid: uid,
         email: cleanEmail,
         role: 'admin',
-        societyId: 'SOC-ADMIN',
+        societyId: targetSocietyId,
         updatedAt: nowStr
       }, { merge: true });
-      await setDoc(doc(db, 'societies/SOC-ADMIN/users', uid), {
+      await setDoc(doc(db, `societies/${targetSocietyId}/users`, uid), {
         uid: uid,
         email: cleanEmail,
         role: 'admin',
-        societyId: 'SOC-ADMIN',
+        societyId: targetSocietyId,
         updatedAt: nowStr
       }, { merge: true });
     } catch (e) {
@@ -55,15 +55,59 @@ export default function AdminLogin() {
     try {
       try {
         const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
-        await syncAdminProfile(res.user.uid, cleanEmail);
-        setSocietyAdminSession({ email: cleanEmail, token: res.user?.uid, societyId: 'SOC-ADMIN' });
+        
+        // Dynamically resolve matching society
+        let resolvedSocietyId = 'SOC-ADMIN';
+        let resolvedSocietyName = 'Society Management Committee';
+        try {
+          const userDocSnap = await getDoc(doc(db, 'users', res.user.uid));
+          if (userDocSnap.exists() && userDocSnap.data().societyId) {
+            resolvedSocietyId = userDocSnap.data().societyId;
+            resolvedSocietyName = userDocSnap.data().societyName || resolvedSocietyName;
+          } else {
+            const socQuery = query(collection(db, 'societies'), where('adminEmail', '==', cleanEmail));
+            const socSnap = await getDocs(socQuery);
+            if (!socSnap.empty) {
+              const matchedDoc = socSnap.docs[0];
+              resolvedSocietyId = matchedDoc.data().societyId || matchedDoc.id;
+              resolvedSocietyName = matchedDoc.data().name || resolvedSocietyName;
+            }
+          }
+        } catch (resolveErr) {
+          console.warn('Could not resolve societyId dynamically:', resolveErr);
+        }
+
+        await syncAdminProfile(res.user.uid, cleanEmail, resolvedSocietyId);
+        setSocietyAdminSession({ 
+          email: cleanEmail, 
+          token: res.user?.uid, 
+          societyId: resolvedSocietyId,
+          societyName: resolvedSocietyName
+        });
         navigate('/');
       } catch (authErr) {
         if (password.length >= 6) {
           try {
             const newRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
-            await syncAdminProfile(newRes.user.uid, cleanEmail);
-            setSocietyAdminSession({ email: cleanEmail, token: newRes.user?.uid, societyId: 'SOC-ADMIN' });
+            let resolvedSocietyId = 'SOC-ADMIN';
+            let resolvedSocietyName = 'Society Management Committee';
+            try {
+              const socQuery = query(collection(db, 'societies'), where('adminEmail', '==', cleanEmail));
+              const socSnap = await getDocs(socQuery);
+              if (!socSnap.empty) {
+                const matchedDoc = socSnap.docs[0];
+                resolvedSocietyId = matchedDoc.data().societyId || matchedDoc.id;
+                resolvedSocietyName = matchedDoc.data().name || resolvedSocietyName;
+              }
+            } catch (e) {}
+
+            await syncAdminProfile(newRes.user.uid, cleanEmail, resolvedSocietyId);
+            setSocietyAdminSession({ 
+              email: cleanEmail, 
+              token: newRes.user?.uid, 
+              societyId: resolvedSocietyId,
+              societyName: resolvedSocietyName
+            });
             navigate('/');
             return;
           } catch (createErr) {

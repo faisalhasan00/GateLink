@@ -188,41 +188,115 @@ export const societyAdminService = {
   // ── RESIDENTS ──────────────────────────────────────────────────────────
   subscribeResidents(societyId, callback, onError) {
     if (!societyId) return () => {};
-    const q = collection(db, `societies/${societyId}/users`);
-    return onSnapshot(q, (snap) => {
-      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      data.sort((a, b) => {
+    
+    // Multi-source listener: Subcollection + Global users collection
+    let subcollectionData = [];
+    let globalUsersData = [];
+
+    const emitMerged = () => {
+      const map = new Map();
+      
+      // 1. Add subcollection records
+      subcollectionData.forEach(item => {
+        const key = item.uid || item.id;
+        if (key) map.set(key, { id: key, ...item });
+      });
+
+      // 2. Add / merge global users records
+      globalUsersData.forEach(item => {
+        const key = item.uid || item.id;
+        if (key) {
+          const existing = map.get(key) || {};
+          map.set(key, { ...existing, id: key, ...item });
+        }
+      });
+
+      // 3. Filter out system super_admins and sort by timestamp descending
+      const mergedList = Array.from(map.values()).filter(u => u.role !== 'super_admin');
+      mergedList.sort((a, b) => {
         const timeA = new Date(a.createdAt || a.createdDate || a.updatedAt || 0).getTime();
         const timeB = new Date(b.createdAt || b.createdDate || b.updatedAt || 0).getTime();
         return timeB - timeA;
       });
-      callback(data);
+
+      callback(mergedList);
+    };
+
+    // Listener 1: societies/{societyId}/users subcollection
+    const unsub1 = onSnapshot(collection(db, `societies/${societyId}/users`), (snap) => {
+      subcollectionData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      emitMerged();
     }, onError);
+
+    // Listener 2: users global collection where societyId == societyId
+    let unsub2 = () => {};
+    try {
+      const qGlobal = query(collection(db, 'users'), where('societyId', '==', societyId));
+      unsub2 = onSnapshot(qGlobal, (snap) => {
+        globalUsersData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        emitMerged();
+      }, (err) => {
+        console.warn('Global users query notice:', err);
+      });
+    } catch (e) {
+      console.warn('Could not attach global users listener:', e);
+    }
+
+    return () => {
+      unsub1();
+      unsub2();
+    };
   },
 
   async addResident(societyId, residentData) {
     if (!societyId) throw new Error('Society ID is required');
+    const timestamp = new Date().toISOString();
     const docRef = doc(collection(db, `societies/${societyId}/users`));
-    await setDoc(docRef, {
+    const payload = {
       ...residentData,
-      role: 'resident',
+      id: docRef.id,
+      uid: docRef.id,
+      societyId: societyId,
+      role: residentData.role || 'resident',
       status: 'active',
-      createdAt: new Date().toISOString(),
-    });
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+
+    await setDoc(docRef, payload);
+    try {
+      await setDoc(doc(db, 'users', docRef.id), payload, { merge: true });
+    } catch (e) {
+      console.warn('Could not sync to global users collection:', e);
+    }
     return docRef.id;
   },
 
   async updateResidentStatus(societyId, userId, status) {
     if (!societyId || !userId) throw new Error('Society ID and User ID are required');
-    await updateDoc(doc(db, `societies/${societyId}/users`, userId), {
+    const timestamp = new Date().toISOString();
+    const updatePayload = {
       status,
-      updatedAt: new Date().toISOString(),
-    });
+      updatedAt: timestamp,
+    };
+
+    try {
+      await updateDoc(doc(db, `societies/${societyId}/users`, userId), updatePayload);
+    } catch (e) {}
+
+    try {
+      await updateDoc(doc(db, 'users', userId), updatePayload);
+    } catch (e) {}
   },
 
   async deleteResident(societyId, userId) {
     if (!societyId || !userId) throw new Error('Society ID and User ID are required');
-    await deleteDoc(doc(db, `societies/${societyId}/users`, userId));
+    try {
+      await deleteDoc(doc(db, `societies/${societyId}/users`, userId));
+    } catch (e) {}
+    try {
+      await deleteDoc(doc(db, 'users', userId));
+    } catch (e) {}
   },
 
   // ── VISITORS ───────────────────────────────────────────────────────────
