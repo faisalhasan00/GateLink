@@ -199,12 +199,16 @@ export const superAdminService = {
   },
 
   // ── CRM INBOUND LEADS ──────────────────────────────────────────────────
-  subscribeCrmLeads(callback, onError) {
+  subscribeLeads(callback, onError) {
     const q = query(collection(db, 'leads'), orderBy('createdAt', 'desc'));
     return onSnapshot(q, (snap) => {
       const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       callback(data);
     }, onError);
+  },
+
+  subscribeCrmLeads(callback, onError) {
+    return this.subscribeLeads(callback, onError);
   },
 
   async createLead(leadData) {
