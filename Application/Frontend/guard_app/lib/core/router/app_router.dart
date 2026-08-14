@@ -122,6 +122,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       return null;
     },
+    errorBuilder: (context, state) => const GuardDashboardScreen(),
     debugLogDiagnostics: true,
     routes: [
       // Top-level Aliases & Shortcuts to prevent No-Route GoExceptions

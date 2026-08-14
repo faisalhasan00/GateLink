@@ -112,7 +112,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       if (isAuth) {
-        final status = userProfile?['status'] ?? 'pending_approval';
+        final status = userProfile?.status ?? 'active';
         final isApproved = status == 'active' || status == 'approved';
 
         if (!isApproved && !isPendingRoute) {
@@ -126,8 +126,50 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       return null;
     },
+    errorBuilder: (context, state) => const DashboardScreen(),
     debugLogDiagnostics: true,
     routes: [
+      // Top-level Aliases & Shortcuts to prevent No-Route GoExceptions
+      GoRoute(
+        path: '/home',
+        redirect: (context, state) => AppRoutes.dashboard,
+      ),
+      GoRoute(
+        path: '/dashboard',
+        redirect: (context, state) => AppRoutes.dashboard,
+      ),
+      GoRoute(
+        path: '/scan',
+        redirect: (context, state) => AppRoutes.guardScan,
+      ),
+      GoRoute(
+        path: '/quick-entry',
+        redirect: (context, state) => AppRoutes.guardQuickEntry,
+      ),
+      GoRoute(
+        path: '/vehicles',
+        redirect: (context, state) => AppRoutes.guardVehicles,
+      ),
+      GoRoute(
+        path: '/profile',
+        redirect: (context, state) => AppRoutes.profile,
+      ),
+      GoRoute(
+        path: '/history',
+        redirect: (context, state) => AppRoutes.dashboard,
+      ),
+      GoRoute(
+        path: '/all',
+        redirect: (context, state) => AppRoutes.dashboard,
+      ),
+      GoRoute(
+        path: '/visitors',
+        redirect: (context, state) => AppRoutes.visitors,
+      ),
+      GoRoute(
+        path: '/visitors/:id',
+        redirect: (context, state) => '/home/visitors/${state.pathParameters['id']}',
+      ),
       GoRoute(
         path: AppRoutes.splash,
         builder: (context, state) => const SplashScreen(),
