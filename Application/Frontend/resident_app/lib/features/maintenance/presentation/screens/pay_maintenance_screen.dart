@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_cashfree_pg_sdk/utils/cfenums.dart';
 
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../payment/providers/payment_providers.dart';
+import '../../../payment/services/cashfree_native_service.dart';
 import '../../providers/maintenance_providers.dart';
 import '../widgets/bill_summary_card.dart';
 import '../widgets/cashfree_payment_card.dart';
@@ -178,49 +179,36 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       }
 
       debugPrint(
-          '[PaymentFlow] Initiating Cashfree Checkout for billId: $targetBillId, societyId: $activeSocId');
+          '[PaymentFlow] Initiating Native Cashfree Checkout for billId: $targetBillId, societyId: $activeSocId, orderId: ${order.orderId}');
 
-      final cfCheckoutUrl = Uri.parse(
-          'https://payments-sandbox.cashfree.com/order/#${order.cashfreePaymentSessionId}');
-      debugPrint('[PaymentFlow] Opening Cashfree Checkout URL: $cfCheckoutUrl');
-
-      bool launched = false;
-      try {
-        launched =
-            await launchUrl(cfCheckoutUrl, mode: LaunchMode.inAppBrowserView);
-      } catch (e1) {
-        debugPrint('[PaymentFlow] inAppBrowserView launch failed: $e1');
-      }
-
-      if (!launched) {
-        try {
-          launched =
-              await launchUrl(cfCheckoutUrl, mode: LaunchMode.platformDefault);
-        } catch (e2) {
-          debugPrint('[PaymentFlow] platformDefault launch failed: $e2');
-        }
-      }
-
-      if (!launched) {
-        try {
-          launched = await launchUrl(cfCheckoutUrl,
-              mode: LaunchMode.externalApplication);
-        } catch (e3) {
-          debugPrint('[PaymentFlow] externalApplication launch failed: $e3');
-        }
-      }
-
-      if (!launched) {
-        throw Exception(
-            'Could not launch Cashfree Checkout. Please verify browser availability.');
-      }
-
-      setState(() => _isProcessing = false);
-      if (!mounted) return;
-
-      // Listen for Real-Time Payment Success from Webhook
+      // Start listening for real-time Firestore webhook confirmation
       _listenForPaymentCompletion(
           activeSocId, targetBillId, invNum, order.amount);
+
+      // Launch Native Cashfree SDK Checkout
+      await CashfreeNativeService().startCheckout(
+        orderId: order.orderId,
+        paymentSessionId: order.cashfreePaymentSessionId!,
+        environment: CFEnvironment.SANDBOX,
+        onSuccess: (orderId) {
+          debugPrint('[PaymentFlow] Native SDK reported success for order: $orderId');
+          if (mounted) {
+            setState(() => _isProcessing = false);
+          }
+        },
+        onError: (errorMessage, orderId) {
+          debugPrint('[PaymentFlow] Native SDK reported error/cancel: $errorMessage');
+          if (mounted) {
+            setState(() => _isProcessing = false);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(errorMessage),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+        },
+      );
     } catch (e) {
       setState(() => _isProcessing = false);
       if (mounted) {
