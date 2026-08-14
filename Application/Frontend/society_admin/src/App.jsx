@@ -64,41 +64,51 @@ export default function App() {
         userDocRef,
         async (docSnap) => {
           if (!docSnap.exists()) {
-            // Check fallback society owner verification
-            let hasValidSocFallback = false;
-            try {
-              const session = getSocietyAdminSession();
-              if (session?.societyId && session.societyId !== 'SOC-ADMIN') {
-                const socSnap = await getDoc(doc(db, 'societies', session.societyId));
-                if (socSnap.exists() && socSnap.data()?.status !== 'deleted' && socSnap.data()?.adminEmail?.toLowerCase() === firebaseUser.email?.toLowerCase()) {
-                  hasValidSocFallback = true;
-                }
-              }
-            } catch (e) {
-              console.warn('Fallback verification error:', e);
-            }
+            console.warn('Authoritative verification failed: User account deleted in database. Logging out...');
+            await performCentralizedLogout(auth);
+            setUser(null);
+            return;
+          }
 
-            if (!hasValidSocFallback) {
-              console.warn('Authoritative verification failed: User account deleted in database. Logging out...');
+          const data = docSnap.data() || {};
+          const status = (data.status || 'active').toLowerCase();
+          const role = data.role;
+
+          if (status === 'deleted' || status === 'suspended' || status === 'inactive' ||
+              (role !== 'admin' && role !== 'society_admin' && role !== 'super_admin')) {
+            console.warn('Authoritative verification failed: Account inactive/unauthorized. Logging out...');
+            await performCentralizedLogout(auth);
+            setUser(null);
+            return;
+          }
+
+          // Verify associated society actually exists in database
+          const targetSocietyId = data.societyId || getSocietyAdminSession()?.societyId;
+          if (!targetSocietyId || targetSocietyId === 'SOC-ADMIN') {
+            console.warn('Authoritative verification failed: Invalid society ID. Logging out...');
+            await performCentralizedLogout(auth);
+            setUser(null);
+            return;
+          }
+
+          try {
+            const socSnap = await getDoc(doc(db, 'societies', targetSocietyId));
+            if (!socSnap.exists() || socSnap.data()?.status === 'deleted') {
+              console.warn('Authoritative verification failed: Society document deleted in database. Logging out...');
               await performCentralizedLogout(auth);
               setUser(null);
               return;
             }
-          } else {
-            const data = docSnap.data() || {};
-            if (data.status === 'deleted' || data.status === 'suspended' || data.status === 'inactive') {
-              console.warn('Authoritative verification failed: Account status inactive/suspended. Logging out...');
-              await performCentralizedLogout(auth);
-              setUser(null);
-              return;
-            }
+          } catch (socErr) {
+            console.warn('Society verification check error:', socErr);
           }
 
           setUser(firebaseUser);
         },
         async (err) => {
-          console.warn('Real-time session snapshot notice:', err);
-          setUser(firebaseUser);
+          console.warn('Real-time session snapshot error:', err);
+          await performCentralizedLogout(auth);
+          setUser(null);
         }
       );
     });

@@ -40,62 +40,54 @@ export default function AdminLogin() {
       }
 
       // 2. Authoritative Server/Database Verification
-      // Check if user record exists in Firestore and is not deleted/inactive
-      let resolvedSocietyId = null;
-      let resolvedSocietyName = 'Society Management Committee';
-      let isValidAccount = false;
-
       const userDocSnap = await getDoc(doc(db, 'users', uid));
 
-      if (userDocSnap.exists()) {
-        const userData = userDocSnap.data() || {};
-        const status = userData.status || 'active';
-        const role = userData.role;
-
-        // Check if user was deleted or suspended in database
-        if (status === 'deleted' || status === 'suspended' || status === 'inactive') {
-          await performCentralizedLogout(auth);
-          throw new Error('Account not found or account is no longer active.');
-        }
-
-        if (role === 'admin' || role === 'society_admin' || role === 'super_admin') {
-          resolvedSocietyId = userData.societyId || 'SOC-ADMIN';
-          resolvedSocietyName = userData.societyName || resolvedSocietyName;
-          isValidAccount = true;
-        }
-      }
-
-      // If user profile is not in /users/{uid}, check if admin is listed under societies directory
-      if (!isValidAccount) {
-        const socQuery = query(collection(db, 'societies'), where('adminEmail', '==', cleanEmail));
-        const socSnap = await getDocs(socQuery);
-        if (!socSnap.empty) {
-          const matchedDoc = socSnap.docs[0];
-          const socData = matchedDoc.data() || {};
-          if (socData.status !== 'deleted' && socData.status !== 'suspended') {
-            resolvedSocietyId = socData.societyId || matchedDoc.id;
-            resolvedSocietyName = socData.name || resolvedSocietyName;
-            isValidAccount = true;
-          }
-        }
-      }
-
-      // 3. Strict Rejection if Account Does Not Exist in Database
-      if (!isValidAccount || !resolvedSocietyId) {
+      if (!userDocSnap.exists()) {
         await performCentralizedLogout(auth);
         throw new Error('Account not found or account is no longer active.');
       }
 
-      // Verify society itself exists and is not deleted (if not default SOC-ADMIN)
-      if (resolvedSocietyId !== 'SOC-ADMIN') {
-        const socDocSnap = await getDoc(doc(db, 'societies', resolvedSocietyId));
-        if (!socDocSnap.exists() || socDocSnap.data()?.status === 'deleted') {
+      const userData = userDocSnap.data() || {};
+      const status = (userData.status || 'active').toLowerCase();
+      const role = userData.role;
+
+      // Check if user was deleted or suspended in database
+      if (status === 'deleted' || status === 'suspended' || status === 'inactive') {
+        await performCentralizedLogout(auth);
+        throw new Error('Account not found or account is no longer active.');
+      }
+
+      if (role !== 'admin' && role !== 'society_admin' && role !== 'super_admin') {
+        await performCentralizedLogout(auth);
+        throw new Error('Unauthorized: Insufficient permissions for Society Admin Console.');
+      }
+
+      let resolvedSocietyId = userData.societyId;
+      let resolvedSocietyName = userData.societyName || 'Society Management Committee';
+
+      if (!resolvedSocietyId || resolvedSocietyId === 'SOC-ADMIN') {
+        const socQuery = query(collection(db, 'societies'), where('adminEmail', '==', cleanEmail));
+        const socSnap = await getDocs(socQuery);
+        if (!socSnap.empty) {
+          const matchedDoc = socSnap.docs[0];
+          resolvedSocietyId = matchedDoc.id;
+          resolvedSocietyName = matchedDoc.data()?.name || resolvedSocietyName;
+        } else {
           await performCentralizedLogout(auth);
           throw new Error('Associated society account not found or has been deactivated.');
         }
       }
 
-      // 4. Session Initialization on Successful Authoritative Verification
+      // Verify society document actually exists in Firestore and is not deleted
+      const socDocSnap = await getDoc(doc(db, 'societies', resolvedSocietyId));
+      if (!socDocSnap.exists() || socDocSnap.data()?.status === 'deleted' || socDocSnap.data()?.status === 'suspended') {
+        await performCentralizedLogout(auth);
+        throw new Error('Associated society account not found or has been deactivated.');
+      }
+
+      resolvedSocietyName = socDocSnap.data()?.name || resolvedSocietyName;
+
+      // 3. Session Initialization on Successful Authoritative Verification
       setSocietyAdminSession({ 
         email: cleanEmail, 
         token: uid, 
