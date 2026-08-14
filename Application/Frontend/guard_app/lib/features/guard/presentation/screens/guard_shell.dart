@@ -2,66 +2,58 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 
-class GuardShell extends StatefulWidget {
+class GuardShell extends StatelessWidget {
   final Widget child;
   const GuardShell({super.key, required this.child});
 
-  @override
-  State<GuardShell> createState() => _GuardShellState();
-}
-
-class _GuardShellState extends State<GuardShell> {
-  int _currentIndex = 0;
-
-  final List<_GuardNavItem> _navItems = const [
+  static const List<_GuardNavItem> _navItems = [
     _GuardNavItem(
       label: 'Gate Log',
       icon: Icons.shield_outlined,
       activeIcon: Icons.shield_rounded,
-      route: '/dashboard',
+      route: '/guard/dashboard',
     ),
     _GuardNavItem(
       label: 'QR Scan',
       icon: Icons.qr_code_scanner_outlined,
       activeIcon: Icons.qr_code_scanner_rounded,
-      route: '/scan',
+      route: '/guard/scan',
     ),
     _GuardNavItem(
       label: 'Quick Entry',
       icon: Icons.person_add_alt_outlined,
       activeIcon: Icons.person_add_alt_1_rounded,
-      route: '/quick-entry',
+      route: '/guard/quick-entry',
     ),
     _GuardNavItem(
       label: 'Vehicles',
       icon: Icons.directions_car_outlined,
       activeIcon: Icons.directions_car_rounded,
-      route: '/vehicles',
-    ),
-    _GuardNavItem(
-      label: 'History',
-      icon: Icons.history_toggle_off_rounded,
-      activeIcon: Icons.history_rounded,
-      route: '/history',
+      route: '/guard/vehicles',
     ),
     _GuardNavItem(
       label: 'Profile',
       icon: Icons.person_outline_rounded,
       activeIcon: Icons.person_rounded,
-      route: '/profile',
+      route: '/home/profile',
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final currentPath = GoRouterState.of(context).uri.path;
+
     return Scaffold(
-      body: widget.child,
+      body: child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppColors.secondary, // Dark sleek theme for Security Guard app
+          color: Colors.white,
+          border: const Border(
+            top: BorderSide(color: AppColors.border, width: 1),
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.15),
+              color: Colors.black.withValues(alpha: 0.06),
               blurRadius: 16,
               offset: const Offset(0, -4),
             ),
@@ -70,49 +62,53 @@ class _GuardShellState extends State<GuardShell> {
         child: SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: List.generate(_navItems.length, (index) {
                 final item = _navItems[index];
-                final isActive = _currentIndex == index;
-                return Flexible(
+                final isActive = currentPath.startsWith(item.route) ||
+                    (item.route == '/guard/dashboard' && currentPath == '/guard');
+
+                return Expanded(
                   child: GestureDetector(
-                    onTap: () {
-                      setState(() => _currentIndex = index);
-                      context.go(item.route);
-                    },
+                    onTap: () => context.go(item.route),
                     behavior: HitTestBehavior.opaque,
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                       decoration: BoxDecoration(
-                        color: isActive ? AppColors.primary : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
+                        color: isActive
+                            ? AppColors.primary.withValues(alpha: 0.1)
+                            : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
                       ),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                        Icon(
-                          isActive ? item.activeIcon : item.icon,
-                          color: isActive ? Colors.white : AppColors.gray400,
-                          size: 22,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          item.label,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                            color: isActive ? Colors.white : AppColors.gray400,
+                          Icon(
+                            isActive ? item.activeIcon : item.icon,
+                            color: isActive ? AppColors.primary : AppColors.gray600,
+                            size: 24,
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 4),
+                          Text(
+                            item.label,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                              color: isActive ? AppColors.primary : AppColors.gray600,
+                              letterSpacing: 0.1,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            }),
+                );
+              }),
             ),
           ),
         ),
