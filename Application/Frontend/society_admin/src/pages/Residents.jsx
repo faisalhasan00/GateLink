@@ -118,11 +118,17 @@ export default function Residents() {
     }
   };
 
-  const pendingList = residents.filter(r => {
+  // Exclude system administrators from the resident directory
+  const nonAdminResidents = residents.filter(r => {
+    const role = (r.role || '').toLowerCase();
+    return role !== 'admin' && role !== 'society_admin' && role !== 'super_admin';
+  });
+
+  const pendingList = nonAdminResidents.filter(r => {
     const s = (r.status || '').toLowerCase();
     return s === 'pending' || s === 'pending_approval' || s === 'pending_verification' || s === 'unapproved';
   });
-  const activeList = residents.filter(r => {
+  const activeList = nonAdminResidents.filter(r => {
     const s = (r.status || 'active').toLowerCase();
     return s === 'active' || s === 'approved' || s === 'suspended' || s === '' || !['pending', 'pending_approval', 'pending_verification', 'unapproved', 'rejected'].includes(s);
   });
@@ -207,59 +213,71 @@ export default function Residents() {
                 {activeList.length === 0 ? (
                   <tr><td colSpan={6} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-secondary)' }}>No active residents found.</td></tr>
                 ) : (
-                  activeList.map((r) => (
-                    <tr key={r.id}>
-                      <td><strong>{r.flatNumber || '-'}</strong></td>
-                      <td>
-                        <div>
-                          <strong>{r.name}</strong>
-                          <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{r.role}</div>
-                        </div>
-                      </td>
-                      <td>
-                        <div style={{ fontSize: '13px' }}>
-                          {r.phone && <div>📞 {r.phone}</div>}
-                          {r.email && <div style={{ color: '#2563EB' }}>✉️ {r.email}</div>}
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`badge ${r.ownershipType === 'Tenant' ? 'warning' : 'primary'}`}>
-                          {r.ownershipType || 'Owner'}
-                        </span>
-                      </td>
-                      <td>
-                        <span className={`badge ${(r.status === 'active' || r.status === 'approved') ? 'success' : 'danger'}`}>
-                          {r.status}
-                        </span>
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                          <button
-                            className="btn btn-outline"
-                            style={{ padding: '4px 10px', fontSize: '12px', color: '#2563EB', borderColor: '#2563EB' }}
-                            onClick={() => setSelectedResidentForView(r)}
-                          >
-                            <Eye size={14} /> View
-                          </button>
-                          <button
-                            className="btn btn-outline"
-                            style={{ padding: '4px 10px', fontSize: '12px', color: (r.status === 'active' || r.status === 'approved') ? 'var(--warning)' : 'var(--secondary)' }}
-                            onClick={() => toggleStatus(r.id, r.status)}
-                          >
-                            {(r.status === 'active' || r.status === 'approved') ? <><XCircle size={14} /> Suspend</> : <><CheckCircle size={14} /> Activate</>}
-                          </button>
-                          <button
-                            className="btn-icon"
-                            style={{ color: 'var(--danger)' }}
-                            onClick={() => handleDeleteResident(r.id, r.name, r.flatNumber)}
-                            title="Delete Resident Record"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                  activeList.map((r) => {
+                    const residentName = r.name || r.fullName || r.displayName || (r.email ? r.email.split('@')[0].replace(/[._-]/g, ' ') : 'Resident');
+                    const flatNo = r.flatNumber || r.unitNumber || r.flatNo || r.apartment || (r.buildingBlock ? `${r.buildingBlock}` : '-');
+                    const roleLabel = r.residentRoleType || (r.role ? (r.role.charAt(0).toUpperCase() + r.role.slice(1)) : 'Resident');
+                    const statusText = (r.status === 'pending' || r.status === 'pending_approval') 
+                      ? 'Pending' 
+                      : (r.status === 'suspended' || r.status === 'inactive') 
+                      ? 'Suspended' 
+                      : 'Active';
+                    const isApproved = statusText === 'Active';
+
+                    return (
+                      <tr key={r.id}>
+                        <td><strong style={{ fontSize: '14px', color: '#1E3A8A' }}>{flatNo}</strong></td>
+                        <td>
+                          <div>
+                            <strong style={{ textTransform: 'capitalize' }}>{residentName}</strong>
+                            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{roleLabel}</div>
+                          </div>
+                        </td>
+                        <td>
+                          <div style={{ fontSize: '13px' }}>
+                            {r.phone && <div>📞 {r.phone}</div>}
+                            {r.email && <div style={{ color: '#2563EB' }}>✉️ {r.email}</div>}
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`badge ${r.ownershipType === 'Tenant' ? 'warning' : 'primary'}`}>
+                            {r.ownershipType || 'Owner'}
+                          </span>
+                        </td>
+                        <td>
+                          <span className={`badge ${isApproved ? 'success' : statusText === 'Pending' ? 'warning' : 'danger'}`}>
+                            {statusText}
+                          </span>
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <button
+                              className="btn btn-outline"
+                              style={{ padding: '4px 10px', fontSize: '12px', color: '#2563EB', borderColor: '#2563EB' }}
+                              onClick={() => setSelectedResidentForView(r)}
+                            >
+                              <Eye size={14} /> View
+                            </button>
+                            <button
+                              className="btn btn-outline"
+                              style={{ padding: '4px 10px', fontSize: '12px', color: isApproved ? 'var(--warning)' : 'var(--secondary)' }}
+                              onClick={() => toggleStatus(r.id, r.status)}
+                            >
+                              {isApproved ? <><XCircle size={14} /> Suspend</> : <><CheckCircle size={14} /> Activate</>}
+                            </button>
+                            <button
+                              className="btn-icon"
+                              style={{ color: 'var(--danger)' }}
+                              onClick={() => handleDeleteResident(r.id, residentName, flatNo)}
+                              title="Delete Resident Record"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
@@ -291,70 +309,75 @@ export default function Residents() {
                 {pendingList.length === 0 ? (
                   <tr>
                     <td colSpan={6} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
-                      🎉 No pending resident approvals! All mobile signups have been verified.
+                      No pending resident approvals. All mobile signups have been verified.
                     </td>
                   </tr>
                 ) : (
-                  pendingList.map((r) => (
-                    <tr key={r.id}>
-                      <td><strong style={{ fontSize: '15px', color: '#2563EB' }}>{r.flatNumber || 'N/A'}</strong></td>
-                      <td><strong>{r.name}</strong></td>
-                      <td>
-                        <div>
-                          <div>✉️ {r.email}</div>
-                          {r.phone && <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>📞 {r.phone}</div>}
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`badge ${r.ownershipType === 'Tenant' ? 'warning' : 'primary'}`}>
-                          {r.ownershipType || 'Owner'}
-                        </span>
-                      </td>
-                      <td>
-                        <button
-                          type="button"
-                          className="btn btn-outline"
-                          style={{ padding: '4px 10px', fontSize: '12px', color: '#2563EB', borderColor: '#2563EB', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
-                          onClick={(e) => handleOpenDocument(e, r.documentProofUrl, r.documentType || 'Rent Agreement / Address Proof')}
-                        >
-                          <FileText size={14} /> View Proof
-                        </button>
-                      </td>
-                      <td>
-                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  pendingList.map((r) => {
+                    const residentName = r.name || r.fullName || r.displayName || (r.email ? r.email.split('@')[0].replace(/[._-]/g, ' ') : 'Resident');
+                    const flatNo = r.flatNumber || r.unitNumber || r.flatNo || r.apartment || (r.buildingBlock ? `${r.buildingBlock}` : 'N/A');
+
+                    return (
+                      <tr key={r.id}>
+                        <td><strong style={{ fontSize: '15px', color: '#1E3A8A' }}>{flatNo}</strong></td>
+                        <td><strong style={{ textTransform: 'capitalize' }}>{residentName}</strong></td>
+                        <td>
+                          <div>
+                            <div>✉️ {r.email}</div>
+                            {r.phone && <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>📞 {r.phone}</div>}
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`badge ${r.ownershipType === 'Tenant' ? 'warning' : 'primary'}`}>
+                            {r.ownershipType || 'Owner'}
+                          </span>
+                        </td>
+                        <td>
                           <button
+                            type="button"
                             className="btn btn-outline"
-                            style={{ padding: '6px 12px', fontSize: '12px', color: '#2563EB', borderColor: '#2563EB' }}
-                            onClick={() => setSelectedResidentForView(r)}
+                            style={{ padding: '4px 10px', fontSize: '12px', color: '#1E3A8A', borderColor: '#1E3A8A', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                            onClick={(e) => handleOpenDocument(e, r.documentProofUrl, r.documentType || 'Rent Agreement / Address Proof')}
                           >
-                            <Eye size={14} /> View Details
+                            <FileText size={14} /> View Proof
                           </button>
-                          <button
-                            className="btn btn-primary"
-                            style={{ padding: '6px 12px', fontSize: '12px', backgroundColor: '#00B589' }}
-                            onClick={() => handleApprove(r.id)}
-                          >
-                            <CheckCircle size={14} /> Approve Access
-                          </button>
-                          <button
-                            className="btn btn-outline"
-                            style={{ padding: '6px 12px', fontSize: '12px', color: 'var(--danger)', borderColor: 'var(--danger)' }}
-                            onClick={() => handleReject(r.id)}
-                          >
-                            <XCircle size={14} /> Decline
-                          </button>
-                          <button
-                            className="btn-icon"
-                            style={{ color: 'var(--danger)' }}
-                            onClick={() => handleDeleteResident(r.id, r.name, r.flatNumber)}
-                            title="Delete Resident Record"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        <td>
+                          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <button
+                              className="btn btn-outline"
+                              style={{ padding: '6px 12px', fontSize: '12px', color: '#1E3A8A', borderColor: '#1E3A8A' }}
+                              onClick={() => setSelectedResidentForView(r)}
+                            >
+                              <Eye size={14} /> View Details
+                            </button>
+                            <button
+                              className="btn btn-primary"
+                              style={{ padding: '6px 12px', fontSize: '12px', backgroundColor: '#1E3A8A' }}
+                              onClick={() => handleApprove(r.id)}
+                            >
+                              <CheckCircle size={14} /> Approve Access
+                            </button>
+                            <button
+                              className="btn btn-outline"
+                              style={{ padding: '6px 12px', fontSize: '12px', color: 'var(--danger)', borderColor: 'var(--danger)' }}
+                              onClick={() => handleReject(r.id)}
+                            >
+                              <XCircle size={14} /> Decline
+                            </button>
+                            <button
+                              className="btn-icon"
+                              style={{ color: 'var(--danger)' }}
+                              onClick={() => handleDeleteResident(r.id, residentName, flatNo)}
+                              title="Delete Resident Record"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
             </tbody>
           </table>
