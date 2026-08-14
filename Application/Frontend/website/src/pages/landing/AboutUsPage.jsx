@@ -32,9 +32,9 @@ export default function AboutUsPage() {
   return (
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <SeoHead
-        title="About Us - HomeHni Hood Society OS"
-        description="Learn about HomeHni Hood's mission to digitize gatekeeper security, resident management, and accounting for housing societies across India and UAE."
-        canonicalUrl="https://societysphere.com/about"
+        title="About Us - GateLink Society OS"
+        description="Learn about GateLink's mission to digitize gatekeeper security, resident management, and accounting for housing societies across India and UAE."
+        canonicalUrl="https://gatelink.in/about"
       />
 
       {/* Sticky Header */}
@@ -53,7 +53,7 @@ export default function AboutUsPage() {
               Pioneering Gated Community & Gatekeeper Security OS
             </h1>
             <p style={{ fontSize: '16px', color: isDark ? '#94A3B8' : '#555555', lineHeight: 1.6, margin: 0 }}>
-              HomeHni Hood is designed to simplify daily apartment living, replace paper gate registers, eliminate payment chasing, and protect housing societies across India and UAE.
+              GateLink is designed to simplify daily apartment living, replace paper gate registers, eliminate payment chasing, and protect housing societies across India and UAE.
             </p>
           </div>
 
@@ -99,7 +99,7 @@ export default function AboutUsPage() {
           {/* Three Company Pillars Grid */}
           <div style={{ marginBottom: '70px' }}>
             <h2 style={{ fontSize: '28px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', textAlign: 'center', marginBottom: '40px' }}>
-              Why Housing Societies Trust HomeHni Hood
+              Why Housing Societies Trust GateLink
             </h2>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px' }}>

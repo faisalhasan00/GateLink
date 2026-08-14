@@ -68,7 +68,7 @@ export default function HeroSection({ onOpenDemo }) {
           <div style={{ width: '100%', maxWidth: '380px', margin: '0 auto 10px auto', textAlign: 'center' }}>
             <img 
               src="/assets/hero_illustration.png" 
-              alt="SocietySphere Management App Illustration" 
+              alt="GateLink Management App Illustration" 
               style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '12px' }} 
             />
           </div>
@@ -287,13 +287,13 @@ export default function HeroSection({ onOpenDemo }) {
           <div style={{ width: '100%', maxWidth: '540px', marginBottom: '24px' }}>
             <img 
               src="/assets/hero_illustration.png" 
-              alt="SocietySphere Management App Illustration" 
+              alt="GateLink Management App Illustration" 
               style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '12px' }} 
             />
           </div>
 
           <div style={{ fontSize: '13px', fontWeight: 700, color: isDark ? '#FFFFFF' : '#333333', marginBottom: '12px' }}>
-            Download SocietySphere<br />
+            Download GateLink<br />
             <span style={{ color: isDark ? '#94A3B8' : '#666666', fontWeight: 500 }}>Your Society Management App for a Convenient Life</span>
           </div>
 

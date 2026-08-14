@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronDown, Phone, Menu, X } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-import HomeHniHoodLogo from '../../components/ui/HomeHniHoodLogo';
+import GateLinkLogo from '../../components/ui/GateLinkLogo';
 
 export default function Navbar({ onOpenDemo }) {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -67,9 +67,9 @@ export default function Navbar({ onOpenDemo }) {
         
         {/* Left Side: Brand Logo + Desktop Nav Items */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
-          {/* HomeHniHood Brand Logo - Device Responsive */}
+          {/* GateLink Brand Logo - Device Responsive */}
           <Link to="/landing" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
-            <HomeHniHoodLogo isDark={isDark} size={isMobile ? 'responsive' : 'medium'} />
+            <GateLinkLogo isDark={isDark} size={isMobile ? 'responsive' : 'medium'} />
           </Link>
 
           {/* Desktop Nav Items */}

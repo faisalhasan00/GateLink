@@ -98,12 +98,12 @@ export default function LeadGenerationPage() {
 
   return (
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <SeoHead title="Contact Us - Super Admin" description="Contact HomeHni Hood." canonicalUrl="https://societysphere.com/contact" />
+      <SeoHead title="Contact Us - Super Admin" description="Contact GateLink." canonicalUrl="https://gatelink.in/contact" />
       <Navbar onOpenDemo={() => setIsDemoModalOpen(true)} />
 
       <section style={{ paddingTop: '120px', paddingBottom: '40px', textAlign: 'center' }}>
         <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
-          <h2>Get Started with HomeHni Hood</h2>
+          <h2>Get Started with GateLink</h2>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap', marginTop: '20px' }}>
             <button className="btn btn-primary" onClick={() => setActiveFormTab('demo')}>Book Demo</button>
             <button className="btn btn-outline" onClick={() => setActiveFormTab('callback')}>Callback</button>

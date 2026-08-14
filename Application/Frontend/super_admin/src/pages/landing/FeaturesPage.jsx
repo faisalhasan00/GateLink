@@ -206,9 +206,9 @@ export default function FeaturesPage() {
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {/* Dynamic SEO Head */}
       <SeoHead
-        title="All Features & Capabilities - HomeHni Hood"
-        description="Explore HomeHni Hood core modules designed to digitize visitor security, maintenance billing, complaints, amenities, and RWA governance."
-        canonicalUrl="https://societysphere.com/features"
+        title="All Features & Capabilities - GateLink"
+        description="Explore GateLink core modules designed to digitize visitor security, maintenance billing, complaints, amenities, and RWA governance."
+        canonicalUrl="https://gatelink.in/features"
       />
 
       {/* Sticky Navbar */}

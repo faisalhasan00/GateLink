@@ -147,9 +147,9 @@ export default function LeadGenerationPage() {
   return (
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <SeoHead
-        title="Contact Us & Book Demo - HomeHni Hood"
-        description="Contact HomeHni Hood onboarding specialists, book a live product demo, request a callback, or register your society."
-        canonicalUrl="https://societysphere.com/contact"
+        title="Contact Us & Book Demo - GateLink"
+        description="Contact GateLink onboarding specialists, book a live product demo, request a callback, or register your society."
+        canonicalUrl="https://gatelink.in/contact"
       />
 
       <Navbar onOpenDemo={() => setIsDemoModalOpen(true)} />
@@ -166,7 +166,7 @@ export default function LeadGenerationPage() {
             24/7 ONBOARDING & SALES HELP
           </span>
           <h1 style={{ fontSize: '40px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-1px', margin: '10px 0 16px 0' }}>
-            Get Started with HomeHni Hood Today
+            Get Started with GateLink Today
           </h1>
           <p style={{ fontSize: '16px', color: isDark ? '#94A3B8' : '#555555', maxWidth: '750px', margin: '0 auto 30px auto', lineHeight: 1.6 }}>
             Whether you want a live product demo, society registration, callback, or support inquiry, select your request below.

@@ -267,9 +267,9 @@ export default function SolutionsPage() {
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {/* Dynamic SEO Head */}
       <SeoHead
-        title="Solutions by Role - HomeHni Hood"
+        title="Solutions by Role - GateLink"
         description="Tailored society management solutions for residents, security guards, RWA committee members, accountants, developers, and facility managers."
-        canonicalUrl="https://societysphere.com/solutions"
+        canonicalUrl="https://gatelink.in/solutions"
       />
 
       {/* Navbar */}
@@ -288,7 +288,7 @@ export default function SolutionsPage() {
             TAILORED SOLUTIONS BY ROLE
           </span>
           <h1 style={{ fontSize: '40px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-1px', margin: '10px 0 16px 0' }}>
-            HomeHni Hood for Every Stakeholder
+            GateLink for Every Stakeholder
           </h1>
           <p style={{ fontSize: '16px', color: isDark ? '#94A3B8' : '#555555', maxWidth: '750px', margin: '0 auto 30px auto', lineHeight: 1.6 }}>
             Select your role below to explore tailored workflows, features, and operational benefits built for your needs.
@@ -358,7 +358,7 @@ export default function SolutionsPage() {
               {/* Solutions Column */}
               <div style={{ background: isDark ? '#0F172A' : '#ECFDF5', padding: '24px', borderRadius: '4px', border: isDark ? '1px solid rgba(0, 181, 137, 0.2)' : '1px solid #6EE7B7' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 900, color: '#00B589', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <CheckCircle2 size={18} /> HomeHni Hood Solution
+                  <CheckCircle2 size={18} /> GateLink Solution
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {currentPersona.solutions.map((sol, idx) => (

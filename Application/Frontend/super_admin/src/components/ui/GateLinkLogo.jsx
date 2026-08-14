@@ -22,4 +22,4 @@ export default function GateLinkLogo({ isDark = false, size = 'medium' }) {
   );
 }
 
-export { GateLinkLogo as GateLinkLogo };
+export { GateLinkLogo };

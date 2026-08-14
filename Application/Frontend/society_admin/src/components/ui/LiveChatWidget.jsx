@@ -7,7 +7,7 @@ export default function LiveChatWidget() {
   const isDashboard = location.pathname.startsWith('/app') || location.pathname.startsWith('/super-admin');
 
   const whatsappNumber = '919999999999';
-  const message = 'Hello HomeHni Hood Team, I want to know more about your society management OS and book a live demo.';
+  const message = 'Hello GateLink Team, I want to know more about your society management OS and book a live demo.';
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 
   const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);

@@ -8,7 +8,7 @@ export default function Legal() {
       {/* Header */}
       <div className="card" style={{ padding: '24px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <ShieldCheck size={24} color="var(--primary)" /> SocietySphere Legal & Enterprise Compliance
+          <ShieldCheck size={24} color="var(--primary)" /> GateLink Legal & Enterprise Compliance
         </h2>
         <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--text-secondary)' }}>
           Platform Privacy Policy, Terms of Service, Multi-Tenant Data Protection, and 24x7 Enterprise Support.
@@ -26,7 +26,7 @@ export default function Legal() {
             </h3>
           </div>
           <div style={{ padding: '20px', fontSize: '13px', lineHeight: 1.6, color: 'var(--text-primary)' }}>
-            <p><strong>1. Data Isolation & RBAC:</strong> SocietySphere enforces strict multi-tenant isolation. No resident data or society record is accessible outside your assigned Society ID.</p>
+            <p><strong>1. Data Isolation & RBAC:</strong> GateLink enforces strict multi-tenant isolation. No resident data or society record is accessible outside your assigned Society ID.</p>
             <p><strong>2. Encryption & Storage:</strong> All Firestore documents, Cloud Storage files, and credentials are encrypted in transit and at rest using GCP enterprise standards.</p>
             <p><strong>3. Zero Data Monetization:</strong> We never sell resident directory records or visitor logs to third-party advertisers.</p>
           </div>
@@ -56,7 +56,7 @@ export default function Legal() {
         <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', fontSize: '13px' }}>
           <div>
             <strong>Technical Support Email:</strong>
-            <div style={{ color: 'var(--primary)', fontWeight: 600 }}>support@societysphere.com</div>
+            <div style={{ color: 'var(--primary)', fontWeight: 600 }}>support@gatelink.in</div>
           </div>
           <div>
             <strong>Helpline Hotline:</strong>

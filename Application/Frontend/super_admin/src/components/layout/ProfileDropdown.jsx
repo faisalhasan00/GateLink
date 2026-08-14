@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function ProfileDropdown({ userEmail, role = 'Society Admin', societyCode = '', isSuperAdmin = false }) {
   const navigate = useNavigate();
-  const effectiveEmail = userEmail || (isSuperAdmin ? 'superadmin@societysphere.com' : 'admin@societysphere.com');
+  const effectiveEmail = userEmail || (isSuperAdmin ? 'superadmin@gatelink.in' : 'admin@gatelink.in');
   const initial = effectiveEmail ? effectiveEmail.charAt(0).toUpperCase() : 'A';
   const name = effectiveEmail ? effectiveEmail.split('@')[0].replace('.', ' ') : 'Administrator';
 

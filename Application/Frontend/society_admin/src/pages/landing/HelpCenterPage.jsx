@@ -35,9 +35,9 @@ export default function HelpCenterPage() {
   return (
     <div style={{ backgroundColor: '#020617', color: '#F8FAFC', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
       <SeoHead
-        title="Help Center & Knowledge Base - SocietySphere"
-        description="Get technical assistance and user guides for SocietySphere Resident App, Guard Gatekeeper App, and Admin Panel."
-        canonicalUrl="https://societysphere.com/help"
+        title="Help Center & Knowledge Base - GateLink"
+        description="Get technical assistance and user guides for GateLink Resident App, Guard Gatekeeper App, and Admin Panel."
+        canonicalUrl="https://gatelink.in/help"
       />
 
       <Navbar onOpenDemo={() => setIsDemoModalOpen(true)} />
@@ -48,7 +48,7 @@ export default function HelpCenterPage() {
             <LifeBuoy size={14} /> 24/7 SUPPORT & KNOWLEDGE BASE
           </div>
           <h1 style={{ fontSize: '48px', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-1.5px', margin: '0 0 16px 0' }}>
-            SocietySphere Help Center
+            GateLink Help Center
           </h1>
           <p style={{ fontSize: '18px', color: '#94A3B8', maxWidth: '650px', margin: '0 auto 30px auto' }}>
             Browse user guides, technical documentation, and setup tutorials.

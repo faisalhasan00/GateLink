@@ -10,7 +10,7 @@ export default function FaqSection() {
 
   const faqs = [
     {
-      q: 'How fast can our housing society get onboarded on HomeHni Hood?',
+      q: 'How fast can our housing society get onboarded on GateLink?',
       a: 'Our dedicated onboarding team sets up your society database, imports flat owner rosters, configures gate rules, and trains security guards in under 24 hours.'
     },
     {
@@ -38,7 +38,7 @@ export default function FaqSection() {
       a: 'Yes! Owners can seamlessly switch between multiple flats, grant tenant approvals, view payment history, and generate pre-approved guest QR passes from a single smartphone app.'
     },
     {
-      q: 'What support does HomeHni Hood provide after setup?',
+      q: 'What support does GateLink provide after setup?',
       a: 'We offer 24/7 technical support, dedicated account management for RWA committees, on-site guard re-training, and free lifetime feature updates.'
     }
   ];
@@ -60,7 +60,7 @@ export default function FaqSection() {
             Frequently Asked Questions
           </h2>
           <p style={{ fontSize: '16px', color: isDark ? '#94A3B8' : '#666666', maxWidth: '700px', margin: '0 auto', lineHeight: 1.6 }}>
-            Everything you need to know about HomeHni Hood gated community security, maintenance billing, and society onboarding.
+            Everything you need to know about GateLink gated community security, maintenance billing, and society onboarding.
           </p>
         </div>
 

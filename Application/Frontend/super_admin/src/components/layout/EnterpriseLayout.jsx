@@ -39,7 +39,7 @@ export default function EnterpriseLayout({ isSuperAdmin = true }) {
   };
 
   const navItems = SUPER_ADMIN_NAV;
-  const brandTitle = 'HomeHni Hood';
+  const brandTitle = 'GateLink';
 
   const handleToggleSidebar = () => {
     if (window.innerWidth < 1024) {

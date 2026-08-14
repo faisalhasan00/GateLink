@@ -30,7 +30,7 @@ export default function ComparisonSection() {
         {/* Section Header */}
         <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 50px auto' }}>
           <h2 style={{ fontSize: '36px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-0.5px', marginBottom: '12px' }}>
-            Traditional Paper Registers vs. SocietySphere OS
+            Traditional Paper Registers vs. GateLink OS
           </h2>
           <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#555555', lineHeight: 1.6, margin: 0 }}>
             See why over 500+ forward-thinking housing societies upgraded to automated digital security.
@@ -68,7 +68,7 @@ export default function ComparisonSection() {
             </div>
           </div>
 
-          {/* SocietySphere OS Way */}
+          {/* GateLink OS Way */}
           <div style={{
             background: isDark ? '#1E293B' : '#FFFFFF',
             borderRadius: '4px',
@@ -81,7 +81,7 @@ export default function ComparisonSection() {
                 <ShieldCheck size={20} color="#00B589" />
               </div>
               <div>
-                <h3 style={{ fontSize: '19px', fontWeight: 900, color: '#00B589', margin: 0 }}>SocietySphere OS</h3>
+                <h3 style={{ fontSize: '19px', fontWeight: 900, color: '#00B589', margin: 0 }}>GateLink OS</h3>
                 <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#666666' }}>100% Verified, Automated & Instant</div>
               </div>
             </div>

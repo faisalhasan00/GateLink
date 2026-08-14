@@ -4,7 +4,7 @@ import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
 import { setSocietyAdminSession } from '../services/sessionManager';
-import HomeHniHoodLogo from '../components/ui/HomeHniHoodLogo';
+import GateLinkLogo from '../components/ui/GateLinkLogo';
 import SeoHead from '../components/seo/SeoHead';
 import { Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
@@ -92,11 +92,11 @@ export default function AdminLogin() {
 
   return (
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#F8FAFC', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '24px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <SeoHead title="Society Admin Login - HomeHni Hood" description="Login to HomeHni Hood Society Management Committee Console." canonicalUrl="https://societysphere.com/login" />
+      <SeoHead title="Society Admin Login - GateLink" description="Login to GateLink Society Management Committee Console." canonicalUrl="https://gatelink.in/login" />
 
       <div style={{ marginBottom: '32px' }}>
         <a href={websiteUrl} style={{ textDecoration: 'none' }}>
-          <HomeHniHoodLogo isDark={isDark} size="large" />
+          <GateLinkLogo isDark={isDark} size="large" />
         </a>
       </div>
 

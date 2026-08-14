@@ -5,13 +5,13 @@ import { signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import { clearSocietyAdminSession, clearSuperAdminSession } from '../../services/sessionManager';
 
-import HomeHniHoodLogo from '../ui/HomeHniHoodLogo';
+import GateLinkLogo from '../ui/GateLinkLogo';
 
 export default function EnterpriseSidebar({ 
   isCollapsed = false, 
   setIsCollapsed, 
   navItems = [], 
-  brandTitle = 'HomeHni Hood',
+  brandTitle = 'GateLink',
   isSuperAdmin = false,
   isOpen = false,
   setIsOpen 
@@ -62,7 +62,7 @@ export default function EnterpriseSidebar({
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', overflow: 'hidden' }}>
-          <HomeHniHoodLogo isDark={true} size={isCollapsed ? 'small' : 'medium'} />
+          <GateLinkLogo isDark={true} size={isCollapsed ? 'small' : 'medium'} />
         </div>
 
         {setIsCollapsed && (

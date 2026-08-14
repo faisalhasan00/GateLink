@@ -1,5 +1,5 @@
 /**
- * Production Security & Sanitization Utilities for SocietySphere Admin
+ * Production Security & Sanitization Utilities for GateLink Admin
  */
 
 // Basic XSS Sanitization: Escapes dangerous HTML characters to prevent XSS payloads

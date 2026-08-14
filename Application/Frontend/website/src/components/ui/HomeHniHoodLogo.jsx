@@ -1,7 +1,7 @@
 import React from 'react';
 import logoImg from '../../assets/logo.png';
 
-export default function HomeHniHoodLogo({ isDark = false, size = 'medium' }) {
+export default function GateLinkLogo({ isDark = false, size = 'medium' }) {
   const height = size === 'small' ? '28px' : size === 'large' ? '46px' : size === 'responsive' ? 'clamp(24px, 5vw, 36px)' : '32px';
 
   return (
@@ -22,4 +22,4 @@ export default function HomeHniHoodLogo({ isDark = false, size = 'medium' }) {
   );
 }
 
-export { HomeHniHoodLogo as GateLinkLogo };
+export { GateLinkLogo as GateLinkLogo };

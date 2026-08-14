@@ -15,9 +15,9 @@ export default function DocsPage() {
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {/* Dynamic SEO Head */}
       <SeoHead
-        title="Developer & Admin API Docs - HomeHni Hood"
-        description="Comprehensive developer documentation for HomeHni Hood REST APIs, Gate Pass Webhooks, Online Payment Gateway, and RBAC matrix schema."
-        canonicalUrl="https://societysphere.com/docs"
+        title="Developer & Admin API Docs - GateLink"
+        description="Comprehensive developer documentation for GateLink REST APIs, Gate Pass Webhooks, Online Payment Gateway, and RBAC matrix schema."
+        canonicalUrl="https://gatelink.in/docs"
       />
 
       {/* Navbar */}
@@ -36,7 +36,7 @@ export default function DocsPage() {
             DEVELOPER & ADMIN API SPECIFICATION
           </span>
           <h1 style={{ fontSize: '40px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-1px', margin: '10px 0 16px 0' }}>
-            HomeHni Hood Developer Documentation
+            GateLink Developer Documentation
           </h1>
           <p style={{ fontSize: '16px', color: isDark ? '#94A3B8' : '#555555', maxWidth: '750px', margin: '0 auto', lineHeight: 1.6 }}>
             REST API endpoints, webhook telemetry events, authentication headers, and role-based access matrix schemas.

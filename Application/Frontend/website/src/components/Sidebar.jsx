@@ -35,7 +35,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   return (
     <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
       <div className="sidebar-logo">
-        <span>SocietySphere</span>
+        <span>GateLink</span>
       </div>
       
       <div className="sidebar-nav">

@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 
 export default function SeoHead({
-  title = 'SocietySphere - Complete Operating System for Gated Communities',
+  title = 'GateLink - Complete Operating System for Gated Communities',
   description = 'Manage Visitors, Residents, Security, Maintenance Billing, Parking, and Amenities from one intelligent platform.',
-  canonicalUrl = 'https://societysphere.com',
+  canonicalUrl = 'https://gatelink.in',
   schemaData = null
 }) {
   useEffect(() => {

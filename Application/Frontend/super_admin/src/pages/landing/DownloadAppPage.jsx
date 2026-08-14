@@ -25,9 +25,9 @@ export default function DownloadAppPage() {
   return (
     <div style={{ backgroundColor: '#020617', color: '#F8FAFC', minHeight: '100vh', fontFamily: "'Inter', sans-serif" }}>
       <SeoHead
-        title="Download Mobile Apps - SocietySphere Resident & Guard App"
-        description="Download SocietySphere Resident App for iOS & Android, and SocietySphere Guard App for gatekeepers."
-        canonicalUrl="https://societysphere.com/download"
+        title="Download Mobile Apps - GateLink Resident & Guard App"
+        description="Download GateLink Resident App for iOS & Android, and GateLink Guard App for gatekeepers."
+        canonicalUrl="https://gatelink.in/download"
       />
 
       <Navbar onOpenDemo={() => setIsDemoModalOpen(true)} />
@@ -45,7 +45,7 @@ export default function DownloadAppPage() {
               <Smartphone size={14} /> NATIVE iOS & ANDROID MOBILE APPS
             </div>
             <h1 style={{ fontSize: '48px', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-1.5px', margin: '0 0 16px 0' }}>
-              Download SocietySphere Apps
+              Download GateLink Apps
             </h1>
             <p style={{ fontSize: '18px', color: '#94A3B8', maxWidth: '700px', margin: '0 auto 30px auto', lineHeight: 1.6 }}>
               Get instant visitor approvals, maintenance bill payments, and gate security controls directly on your smartphone.
@@ -109,7 +109,7 @@ export default function DownloadAppPage() {
                   FOR RESIDENTS, OWNERS & TENANTS
                 </span>
                 <h2 style={{ fontSize: '32px', fontWeight: 900, color: '#FFFFFF', margin: '8px 0 16px 0' }}>
-                  SocietySphere Resident Mobile App
+                  GateLink Resident Mobile App
                 </h2>
                 <p style={{ fontSize: '15px', color: '#94A3B8', lineHeight: 1.6, marginBottom: '24px' }}>
                   Approve visitors with 1 tap, pay monthly maintenance via Razorpay, reserve clubhouse slots, and trigger Emergency SOS sirens.
@@ -221,7 +221,7 @@ export default function DownloadAppPage() {
                   FOR GATEKEEPERS & SECURITY GUARDS
                 </span>
                 <h2 style={{ fontSize: '32px', fontWeight: 900, color: '#FFFFFF', margin: '8px 0 16px 0' }}>
-                  SocietySphere Guard App
+                  GateLink Guard App
                 </h2>
                 <p style={{ fontSize: '15px', color: '#94A3B8', lineHeight: 1.6, marginBottom: '24px' }}>
                   Fast 5-second entry verification, QR passcode scanning, daily maid/cook attendance logging, and loud Emergency SOS sirens.

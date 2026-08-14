@@ -110,7 +110,7 @@ export default function PricingPage() {
   const faqs = [
     {
       q: 'Are there any hidden onboarding or setup fees?',
-      a: 'No. SocietySphere has zero hidden onboarding fees. We provide complete digital data migration, guard training, and committee setup free of charge.'
+      a: 'No. GateLink has zero hidden onboarding fees. We provide complete digital data migration, guard training, and committee setup free of charge.'
     },
     {
       q: 'How does the Razorpay payment gateway integration work?',

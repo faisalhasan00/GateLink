@@ -6,7 +6,7 @@ import { auth, db } from '../firebase';
 import GlobalSearchModal from './GlobalSearchModal';
 
 export default function Topbar({ title, toggleSidebar }) {
-  const [society, setSociety] = useState({ name: 'SocietySphere SaaS', code: 'WWW', plan: 'ENTERPRISE', city: 'Global' });
+  const [society, setSociety] = useState({ name: 'GateLink SaaS', code: 'WWW', plan: 'ENTERPRISE', city: 'Global' });
   const [userEmail, setUserEmail] = useState('Visitor');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 

@@ -1,5 +1,5 @@
 /**
- * Enterprise Multi-Session Manager for SocietySphere Admin Panels
+ * Enterprise Multi-Session Manager for GateLink Admin Panels
  * Ensures strict role-isolated session namespaces in localStorage to prevent 
  * cross-tab session overwrites between Society Admin and Super Admin portals.
  */

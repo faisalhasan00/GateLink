@@ -15,9 +15,9 @@ export default function PrivacyPolicyPage() {
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {/* Dynamic SEO Head */}
       <SeoHead
-        title="Privacy Policy & DPDP Compliance - HomeHni Hood"
-        description="HomeHni Hood Privacy Policy detailing ISO 27001 security, DPDP compliance, resident data protection, and 256-Bit SSL encryption."
-        canonicalUrl="https://societysphere.com/privacy"
+        title="Privacy Policy & DPDP Compliance - GateLink"
+        description="GateLink Privacy Policy detailing ISO 27001 security, DPDP compliance, resident data protection, and 256-Bit SSL encryption."
+        canonicalUrl="https://gatelink.in/privacy"
       />
 
       {/* Navbar */}
@@ -52,7 +52,7 @@ export default function PrivacyPolicyPage() {
             color: isDark ? '#E2E8F0' : '#444444'
           }}>
             <p style={{ marginTop: 0 }}>
-              <strong>HomeHni Hood</strong> ("we", "our", "us") is dedicated to safeguarding the personal information of housing society management committees, flat owners, residents, security guards, and visitors. This Privacy Policy details our data collection practices, encryption standards, and your rights under India’s Digital Personal Data Protection (DPDP) Act 2023.
+              <strong>GateLink</strong> ("we", "our", "us") is dedicated to safeguarding the personal information of housing society management committees, flat owners, residents, security guards, and visitors. This Privacy Policy details our data collection practices, encryption standards, and your rights under India’s Digital Personal Data Protection (DPDP) Act 2023.
             </p>
 
             <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginTop: '32px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -78,19 +78,19 @@ export default function PrivacyPolicyPage() {
               <Eye size={18} color="#00B589" /> 3. Data Protection Rights & Erasure
             </h3>
             <p>
-              Under DPDP regulations, flat owners and residents retain full control over their personal profile records. You may request profile data correction, access export logs, or submit erasure requests upon moving out of the housing society by contacting your RWA admin or emailing our Data Officer at <a href="mailto:privacy@societysphere.com" style={{ color: '#00B589', textDecoration: 'none', fontWeight: 700 }}>privacy@societysphere.com</a>.
+              Under DPDP regulations, flat owners and residents retain full control over their personal profile records. You may request profile data correction, access export logs, or submit erasure requests upon moving out of the housing society by contacting your RWA admin or emailing our Data Officer at <a href="mailto:privacy@gatelink.in" style={{ color: '#00B589', textDecoration: 'none', fontWeight: 700 }}>privacy@gatelink.in</a>.
             </p>
 
             <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginTop: '32px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <FileText size={18} color="#00B589" /> 4. Third-Party Sharing Restrictions
             </h3>
             <p>
-              We maintain a strict zero-selling policy. HomeHni Hood <strong>never sells, rents, or monetizes resident personal contact information</strong> or gate traffic logs to third-party telemarketers or advertisers.
+              We maintain a strict zero-selling policy. GateLink <strong>never sells, rents, or monetizes resident personal contact information</strong> or gate traffic logs to third-party telemarketers or advertisers.
             </p>
 
             <div style={{ marginTop: '36px', paddingTop: '24px', borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: isDark ? '#94A3B8' : '#666666' }}>
               <CheckCircle2 size={16} color="#00B589" />
-              <span>For questions regarding our privacy practices, contact Data Protection Officer at privacy@societysphere.com</span>
+              <span>For questions regarding our privacy practices, contact Data Protection Officer at privacy@gatelink.in</span>
             </div>
           </div>
 

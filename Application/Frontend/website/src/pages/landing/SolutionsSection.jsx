@@ -160,7 +160,7 @@ export default function SolutionsSection({ onOpenDemo }) {
         {/* Section Header */}
         <div style={{ marginBottom: '36px', maxWidth: '900px' }}>
           <h2 style={{ fontSize: '36px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-0.5px', marginBottom: '12px' }}>
-            SocietySphere for Every Need
+            GateLink for Every Need
           </h2>
           <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#555555', lineHeight: 1.6, margin: 0 }}>
             Improve the security standards of your gated community with our technologically advanced and in-house engineered security and community management tool. We offer numerous innovative features that are sure to simplify your everyday chores.

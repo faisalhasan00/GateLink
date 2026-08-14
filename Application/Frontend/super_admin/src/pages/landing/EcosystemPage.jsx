@@ -162,7 +162,7 @@ export default function EcosystemPage() {
               <Zap size={14} /> LIVE CONNECTED ARCHITECTURE
             </div>
             <h1 style={{ fontSize: '48px', fontWeight: 900, color: '#FFFFFF', letterSpacing: '-1.5px', margin: '0 0 16px 0' }}>
-              The Connected SocietySphere Ecosystem
+              The Connected GateLink Ecosystem
             </h1>
             <p style={{ fontSize: '18px', color: '#94A3B8', maxWidth: '760px', margin: '0 auto 20px auto', lineHeight: 1.6 }}>
               See how real-time data flows seamlessly between <strong style={{ color: '#FFFFFF' }}>Visitors, Security Guards, Residents, Admins, Staff, Vendors, and the Society OS</strong>.

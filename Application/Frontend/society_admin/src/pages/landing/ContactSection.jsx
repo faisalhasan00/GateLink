@@ -88,7 +88,7 @@ export default function ContactSection() {
                 </div>
                 <div>
                   <div style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 600 }}>EMAIL SALES</div>
-                  <div style={{ fontSize: '16px', fontWeight: 800, color: '#FFFFFF' }}>sales@societysphere.com</div>
+                  <div style={{ fontSize: '16px', fontWeight: 800, color: '#FFFFFF' }}>sales@gatelink.in</div>
                 </div>
               </div>
 

@@ -130,11 +130,11 @@ export default function BlogPage() {
   const blogSchema = {
     '@context': 'https://schema.org',
     '@type': 'Blog',
-    'name': 'SocietySphere Insights & Tech Blog',
+    'name': 'GateLink Insights & Tech Blog',
     'description': 'Latest insights on gated community security, maintenance billing, and RWA governance.',
     'publisher': {
       '@type': 'Organization',
-      'name': 'SocietySphere Inc.'
+      'name': 'GateLink Inc.'
     }
   };
 
@@ -142,9 +142,9 @@ export default function BlogPage() {
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {/* Dynamic SEO Head */}
       <SeoHead
-        title="SocietySphere Blog - Gated Community & RWA Management Insights"
+        title="GateLink Blog - Gated Community & RWA Management Insights"
         description="Read the latest articles on housing society security, automated maintenance billing, RWA bylaws compliance, and smart apartment living."
-        canonicalUrl="https://societysphere.com/blog"
+        canonicalUrl="https://gatelink.in/blog"
         schemaData={blogSchema}
       />
 
@@ -161,7 +161,7 @@ export default function BlogPage() {
       }}>
         <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, color: '#00B589', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>
-            <BookOpen size={14} /> SocietySphere Knowledge Hub
+            <BookOpen size={14} /> GateLink Knowledge Hub
           </div>
           <h1 style={{ fontSize: '40px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-1px', margin: '0 0 16px 0' }}>
             Society Management & Housing Tech Blog
@@ -310,7 +310,7 @@ export default function BlogPage() {
             <div style={{ background: isDark ? '#1E293B' : '#F8FAFC', borderRadius: '4px', padding: '24px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB', textAlign: 'center' }}>
               <h4 style={{ fontSize: '18px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '8px' }}>Enroll Your Society</h4>
               <p style={{ fontSize: '13px', color: isDark ? '#94A3B8' : '#666666', lineHeight: 1.5, marginBottom: '16px' }}>
-                Deploy SocietySphere OS in 24 hours with dedicated guard training and 14-day free trial.
+                Deploy GateLink OS in 24 hours with dedicated guard training and 14-day free trial.
               </p>
               <button
                 onClick={() => setIsDemoModalOpen(true)}

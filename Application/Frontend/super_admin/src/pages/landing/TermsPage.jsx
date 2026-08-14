@@ -15,9 +15,9 @@ export default function TermsPage() {
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {/* Dynamic SEO Head */}
       <SeoHead
-        title="Terms of Service & SaaS Agreement - HomeHni Hood"
-        description="HomeHni Hood Terms of Service detailing society onboarding licenses, 99.9% uptime SLA, user obligations, and payment terms."
-        canonicalUrl="https://societysphere.com/terms"
+        title="Terms of Service & SaaS Agreement - GateLink"
+        description="GateLink Terms of Service detailing society onboarding licenses, 99.9% uptime SLA, user obligations, and payment terms."
+        canonicalUrl="https://gatelink.in/terms"
       />
 
       {/* Navbar */}
@@ -52,14 +52,14 @@ export default function TermsPage() {
             color: isDark ? '#E2E8F0' : '#444444'
           }}>
             <p style={{ marginTop: 0 }}>
-              Welcome to <strong>HomeHni Hood</strong>. By registering your housing society, subscribing to our management services, or downloading our Resident App and Guard App, your Resident Welfare Association (RWA) or Management Committee agrees to be bound by these Terms of Service.
+              Welcome to <strong>GateLink</strong>. By registering your housing society, subscribing to our management services, or downloading our Resident App and Guard App, your Resident Welfare Association (RWA) or Management Committee agrees to be bound by these Terms of Service.
             </p>
 
             <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginTop: '32px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <FileText size={18} color="#00B589" /> 1. SaaS License & Platform Access
             </h3>
             <p>
-              HomeHni Hood grants your housing society a non-exclusive, non-transferable subscription license to access our cloud-based society management software, security gatekeeper apps, and payment reconciliation engines.
+              GateLink grants your housing society a non-exclusive, non-transferable subscription license to access our cloud-based society management software, security gatekeeper apps, and payment reconciliation engines.
             </p>
 
             <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginTop: '32px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -84,7 +84,7 @@ export default function TermsPage() {
             </p>
 
             <div style={{ marginTop: '36px', paddingTop: '24px', borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB', fontSize: '13px', color: isDark ? '#94A3B8' : '#666666' }}>
-              For legal inquiries or enterprise agreement terms, contact legal@societysphere.com
+              For legal inquiries or enterprise agreement terms, contact legal@gatelink.in
             </div>
           </div>
 

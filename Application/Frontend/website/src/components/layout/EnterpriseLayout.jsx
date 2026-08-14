@@ -85,7 +85,7 @@ export default function EnterpriseLayout({ isSuperAdmin = false }) {
   };
 
   const navItems = isSuperAdmin ? SUPER_ADMIN_NAV : SOCIETY_ADMIN_NAV;
-  const brandTitle = isSuperAdmin ? 'HomeHni Hood' : 'HomeHni Hood';
+  const brandTitle = isSuperAdmin ? 'GateLink' : 'GateLink';
 
   return (
     <div className="app-container" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', backgroundColor: 'var(--bg-color)' }}>

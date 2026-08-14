@@ -153,7 +153,7 @@ export default function Reports() {
       { Metric: 'Deliveries Processed Today', Value: stats.deliveriesToday },
       { Metric: 'Emergency SOS Events', Value: stats.sosEvents },
     ];
-    exportToCSV(reportData, 'SocietySphere_Executive_Report.csv');
+    exportToCSV(reportData, 'GateLink_Executive_Report.csv');
   };
 
   if (loading) return <div style={{ padding: '32px', textAlign: 'center' }}>Loading Reports Console...</div>;

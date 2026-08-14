@@ -17,10 +17,10 @@ import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 
 export default function SuperAdminProfile() {
   const [profile, setProfile] = useState({
     name: 'Super System Administrator',
-    email: auth.currentUser?.email || 'superadmin@societysphere.com',
+    email: auth.currentUser?.email || 'superadmin@gatelink.in',
     phone: '+91 99999 88888',
     role: 'Global System Administrator',
-    organization: 'SocietySphere Corp',
+    organization: 'GateLink Corp',
     lastLogin: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   });
 

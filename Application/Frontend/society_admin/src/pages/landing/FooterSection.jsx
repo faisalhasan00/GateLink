@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Apple, Play } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
-import HomeHniHoodLogo from '../../components/ui/HomeHniHoodLogo';
+import GateLinkLogo from '../../components/ui/GateLinkLogo';
 
 export default function FooterSection() {
   const { theme } = useTheme();
@@ -24,7 +24,7 @@ export default function FooterSection() {
           {/* Col 1: Brand Info & Social Media */}
           <div style={{ gridColumn: 'span 1' }}>
             <Link to="/landing" style={{ textDecoration: 'none', display: 'inline-block', marginBottom: '16px' }}>
-              <HomeHniHoodLogo isDark={true} size="medium" />
+              <GateLinkLogo isDark={true} size="medium" />
             </Link>
             <p style={{ fontSize: '13px', lineHeight: 1.65, color: '#94A3B8', marginBottom: '18px', maxWidth: '320px' }}>
               India’s intelligent society management operating system. Empowering gated communities, residents, and gate security staff with real-time digital automation.
@@ -102,7 +102,7 @@ export default function FooterSection() {
           <div>
             <h4 style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 800, marginBottom: '14px', letterSpacing: '0.5px' }}>GET MOBILE APPS</h4>
             <p style={{ fontSize: '12px', color: '#94A3B8', marginBottom: '14px', lineHeight: 1.5 }}>
-              Install HomeHni Hood Resident App and Guard App on your mobile devices.
+              Install GateLink Resident App and Guard App on your mobile devices.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <Link to="/download" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '8px 14px', borderRadius: '4px', background: '#1E293B', color: 'white', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.1)', fontSize: '12px', fontWeight: 700 }}>
@@ -129,7 +129,7 @@ export default function FooterSection() {
           color: '#64748B'
         }}>
           <div>
-            © {new Date().getFullYear()} HomeHni Hood. All rights reserved. Built for Indian & UAE Housing Societies.
+            © {new Date().getFullYear()} GateLink. All rights reserved. Built for Indian & UAE Housing Societies.
           </div>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <Link to="/privacy" style={{ color: '#64748B', textDecoration: 'none' }}>Privacy Policy</Link>

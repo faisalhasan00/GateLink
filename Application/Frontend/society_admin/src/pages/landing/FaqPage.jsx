@@ -19,8 +19,8 @@ export default function FaqPage() {
   const faqs = [
     {
       category: 'General',
-      q: 'What is HomeHni Hood?',
-      a: 'HomeHni Hood is a complete enterprise operating system for modern gated communities and apartment complexes. It integrates visitor management, resident mobile approvals, guard gatekeeper apps, online maintenance billing, amenity bookings, and RWA administrative governance into one platform.'
+      q: 'What is GateLink?',
+      a: 'GateLink is a complete enterprise operating system for modern gated communities and apartment complexes. It integrates visitor management, resident mobile approvals, guard gatekeeper apps, online maintenance billing, amenity bookings, and RWA administrative governance into one platform.'
     },
     {
       category: 'Security & Gate',
@@ -35,17 +35,17 @@ export default function FaqPage() {
     {
       category: 'Finance & Billing',
       q: 'How are monthly maintenance payments processed?',
-      a: 'HomeHni Hood automatically generates monthly maintenance bills on the 1st of every month. Residents pay online via UPI (GPay, PhonePe, Paytm), Credit/Debit cards, or NetBanking. Payments settle directly into the society bank account with automated GST PDF receipts.'
+      a: 'GateLink automatically generates monthly maintenance bills on the 1st of every month. Residents pay online via UPI (GPay, PhonePe, Paytm), Credit/Debit cards, or NetBanking. Payments settle directly into the society bank account with automated GST PDF receipts.'
     },
     {
       category: 'Finance & Billing',
-      q: 'Can HomeHni Hood export data to Tally ERP?',
-      a: 'Yes! HomeHni Hood provides 1-click export of sanitized transaction ledgers into Tally ERP, Excel, CSV, and PDF formats for effortless annual auditing and GST tax filing.'
+      q: 'Can GateLink export data to Tally ERP?',
+      a: 'Yes! GateLink provides 1-click export of sanitized transaction ledgers into Tally ERP, Excel, CSV, and PDF formats for effortless annual auditing and GST tax filing.'
     },
     {
       category: 'Legal & Bylaws',
-      q: 'Is HomeHni Hood compliant with Indian DPDP and privacy laws?',
-      a: 'Yes. HomeHni Hood enforces strict data privacy controls. Resident and visitor records are encrypted using 256-Bit SSL TLS v1.3 encryption and hosted on secure tier-4 data centers within India.'
+      q: 'Is GateLink compliant with Indian DPDP and privacy laws?',
+      a: 'Yes. GateLink enforces strict data privacy controls. Resident and visitor records are encrypted using 256-Bit SSL TLS v1.3 encryption and hosted on secure tier-4 data centers within India.'
     },
     {
       category: 'Technical',
@@ -78,9 +78,9 @@ export default function FaqPage() {
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {/* Dynamic SEO Head */}
       <SeoHead
-        title="Frequently Asked Questions (FAQ) - HomeHni Hood"
-        description="Find answers to common questions about HomeHni Hood visitor security, online maintenance billing, RWA bylaws compliance, and mobile app features."
-        canonicalUrl="https://societysphere.com/faq"
+        title="Frequently Asked Questions (FAQ) - GateLink"
+        description="Find answers to common questions about GateLink visitor security, online maintenance billing, RWA bylaws compliance, and mobile app features."
+        canonicalUrl="https://gatelink.in/faq"
         schemaData={faqSchema}
       />
 

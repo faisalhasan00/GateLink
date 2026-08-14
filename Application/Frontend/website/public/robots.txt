@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /super-admin/
 
-Sitemap: https://societysphere.com/sitemap.xml
+Sitemap: https://gatelink.in/sitemap.xml

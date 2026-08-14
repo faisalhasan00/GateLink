@@ -3,7 +3,7 @@ import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'fire
 import { auth } from '../../firebase';
 import { useNavigate, Link } from 'react-router-dom';
 import { setSuperAdminSession } from '../../services/sessionManager';
-import HomeHniHoodLogo from '../../components/ui/HomeHniHoodLogo';
+import GateLinkLogo from '../../components/ui/GateLinkLogo';
 import SeoHead from '../../components/seo/SeoHead';
 import { Lock, Mail, ArrowRight, AlertCircle, ShieldAlert } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
@@ -71,12 +71,12 @@ export default function SuperAdminLogin() {
 
   return (
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#F8FAFC', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '24px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <SeoHead title="Super Admin Portal Login - HomeHni Hood" description="Secure Executive Login for HomeHni Hood Super Administrators." canonicalUrl="https://admin.societysphere.com/super-admin/login" />
+      <SeoHead title="Super Admin Portal Login - GateLink" description="Secure Executive Login for GateLink Super Administrators." canonicalUrl="https://admin.gatelink.in/super-admin/login" />
 
       {/* Top Header Logo */}
       <div style={{ marginBottom: '32px' }}>
         <a href={websiteUrl} style={{ textDecoration: 'none' }}>
-          <HomeHniHoodLogo isDark={isDark} size="large" />
+          <GateLinkLogo isDark={isDark} size="large" />
         </a>
       </div>
 

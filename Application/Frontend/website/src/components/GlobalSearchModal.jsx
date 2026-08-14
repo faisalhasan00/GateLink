@@ -87,7 +87,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
             <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)' }}>Searching society database...</div>
           ) : results.length === 0 ? (
             <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-              {query.length < 2 ? 'Type at least 2 characters to search across SocietySphere.' : 'No matching results found.'}
+              {query.length < 2 ? 'Type at least 2 characters to search across GateLink.' : 'No matching results found.'}
             </div>
           ) : (
             results.map((r) => (
