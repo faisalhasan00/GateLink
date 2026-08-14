@@ -29,7 +29,7 @@ export default function SolutionsPage() {
       id: 'resident',
       title: 'Residents & Flat Owners',
       roleTag: 'RESIDENT MOBILE COMPANION',
-      icon: <User size={24} color="#00B589" />,
+      icon: <User size={24} color="#0EA5E9" />,
       tagline: '1-Tap Convenience, Seamless Approvals & Ultimate Peace of Mind',
       problems: [
         'Frequent disturbing intercom calls for routine deliveries and cabs',
@@ -68,7 +68,7 @@ export default function SolutionsPage() {
       id: 'guard',
       title: 'Security Guards & Gatekeepers',
       roleTag: 'MULTILINGUAL GUARD GATEKEEPER',
-      icon: <Shield size={24} color="#00B589" />,
+      icon: <Shield size={24} color="#0EA5E9" />,
       tagline: 'Fortress-Level Security Gate Operations Made 5x Faster',
       problems: [
         'Messy paper registers that get damaged, lost, or tampered with',
@@ -107,7 +107,7 @@ export default function SolutionsPage() {
       id: 'committee',
       title: 'Committee Members & Presidents',
       roleTag: 'SOCIETY COMMITTEE CONSOLE',
-      icon: <Building size={24} color="#00B589" />,
+      icon: <Building size={24} color="#0EA5E9" />,
       tagline: 'Complete Administrative Governance & 100% Financial Auditability',
       problems: [
         'Persistent maintenance fee defaulters and poor cash flow',
@@ -146,7 +146,7 @@ export default function SolutionsPage() {
       id: 'manager',
       title: 'Society Managers & Accountants',
       roleTag: 'FINANCIAL & ACCOUNTING SUITE',
-      icon: <Briefcase size={24} color="#00B589" />,
+      icon: <Briefcase size={24} color="#0EA5E9" />,
       tagline: 'Automated Ledger Reconciliation & 80% Time Saved on Billing',
       problems: [
         'Manual Excel reconciliation taking days at the end of every month',
@@ -185,7 +185,7 @@ export default function SolutionsPage() {
       id: 'builder',
       title: 'Builders & Real Estate Developers',
       roleTag: 'BUILDER HANDOVER & MULTI-TOWNSHIP',
-      icon: <Layers size={24} color="#00B589" />,
+      icon: <Layers size={24} color="#0EA5E9" />,
       tagline: 'Seamless Possession Handovers & Multi-Project Portfolio Management',
       problems: [
         'Chaos and disorganization during multi-flat possession handovers',
@@ -224,7 +224,7 @@ export default function SolutionsPage() {
       id: 'facility',
       title: 'Facility Managers & Maintenance Teams',
       roleTag: 'WORK-ORDER & ASSET MANAGEMENT',
-      icon: <Wrench size={24} color="#00B589" />,
+      icon: <Wrench size={24} color="#0EA5E9" />,
       tagline: 'Zero SLA Breaches, Verified Vendors & Proactive Asset Maintenance',
       problems: [
         'Untracked work orders causing delayed maintenance repairs',
@@ -284,7 +284,7 @@ export default function SolutionsPage() {
         textAlign: 'center'
       }}>
         <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 900, color: '#00B589', textTransform: 'uppercase', letterSpacing: '1px' }}>
+          <span style={{ fontSize: '12px', fontWeight: 900, color: '#0EA5E9', textTransform: 'uppercase', letterSpacing: '1px' }}>
             TAILORED SOLUTIONS BY ROLE
           </span>
           <h1 style={{ fontSize: '40px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-1px', margin: '10px 0 16px 0' }}>
@@ -303,10 +303,11 @@ export default function SolutionsPage() {
                   key={p.id}
                   onClick={() => setActivePersona(p.id)}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '2px', border: '1px solid',
-                    borderColor: isSelected ? '#00B589' : (isDark ? 'rgba(255,255,255,0.1)' : '#CCCCCC'),
-                    backgroundColor: isSelected ? '#00B589' : 'transparent',
-                    color: isSelected ? '#FFFFFF' : (isDark ? '#94A3B8' : '#444444'), fontSize: '13px', fontWeight: 700, cursor: 'pointer'
+                    display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '12px', border: '1px solid',
+                    borderColor: isSelected ? '#1E3A8A' : (isDark ? 'rgba(255,255,255,0.1)' : '#CCCCCC'),
+                    backgroundColor: isSelected ? '#1E3A8A' : 'transparent',
+                    color: isSelected ? '#FFFFFF' : (isDark ? '#94A3B8' : '#444444'), fontSize: '13px', fontWeight: 700, cursor: 'pointer',
+                    transition: 'all 0.2s ease'
                   }}
                 >
                   {p.icon} {p.title}
@@ -323,12 +324,12 @@ export default function SolutionsPage() {
           
           <div style={{
             background: isDark ? '#1E293B' : '#FFFFFF',
-            borderRadius: '4px',
+            borderRadius: '16px',
             padding: '40px',
             border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E5E7EB',
             boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
           }}>
-            <div style={{ fontSize: '12px', fontWeight: 900, color: '#00B589', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
+            <div style={{ fontSize: '12px', fontWeight: 900, color: '#0EA5E9', letterSpacing: '1px', textTransform: 'uppercase', marginBottom: '8px' }}>
               {currentPersona.roleTag}
             </div>
             <h2 style={{ fontSize: '28px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: '0 0 12px 0' }}>
@@ -341,7 +342,7 @@ export default function SolutionsPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', marginBottom: '40px' }}>
               
               {/* Problems Column */}
-              <div style={{ background: isDark ? '#0F172A' : '#FEF2F2', padding: '24px', borderRadius: '4px', border: isDark ? '1px solid rgba(239, 68, 68, 0.2)' : '1px solid #FCA5A5' }}>
+              <div style={{ background: isDark ? '#0F172A' : '#FEF2F2', padding: '24px', borderRadius: '12px', border: isDark ? '1px solid rgba(239, 68, 68, 0.2)' : '1px solid #FCA5A5' }}>
                 <h3 style={{ fontSize: '16px', fontWeight: 900, color: '#EF4444', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <AlertTriangle size={18} /> Traditional Pain Points
                 </h3>
@@ -356,14 +357,14 @@ export default function SolutionsPage() {
               </div>
 
               {/* Solutions Column */}
-              <div style={{ background: isDark ? '#0F172A' : '#ECFDF5', padding: '24px', borderRadius: '4px', border: isDark ? '1px solid rgba(0, 181, 137, 0.2)' : '1px solid #6EE7B7' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 900, color: '#00B589', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <CheckCircle2 size={18} /> GateLink Solution
+              <div style={{ background: isDark ? '#0F172A' : '#F0F9FF', padding: '24px', borderRadius: '12px', border: isDark ? '1px solid rgba(14, 165, 233, 0.2)' : '1px solid #BAE6FD' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 900, color: '#0284C7', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <CheckCircle2 size={18} color="#0EA5E9" /> GateLink Solution
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {currentPersona.solutions.map((sol, idx) => (
                     <div key={idx} style={{ fontSize: '14px', color: isDark ? '#E2E8F0' : '#444444', lineHeight: 1.5, display: 'flex', gap: '10px' }}>
-                      <CheckCircle2 size={16} color="#00B589" style={{ flexShrink: 0, marginTop: '2px' }} />
+                      <CheckCircle2 size={16} color="#0EA5E9" style={{ flexShrink: 0, marginTop: '2px' }} />
                       <span>{sol}</span>
                     </div>
                   ))}
@@ -379,8 +380,8 @@ export default function SolutionsPage() {
               </h3>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
                 {currentPersona.workflow.map((wf) => (
-                  <div key={wf.step} style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '20px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB' }}>
-                    <div style={{ fontSize: '12px', fontWeight: 900, color: '#00B589', marginBottom: '6px' }}>STEP {wf.step}</div>
+                  <div key={wf.step} style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '20px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 900, color: '#0EA5E9', marginBottom: '6px' }}>STEP {wf.step}</div>
                     <div style={{ fontSize: '15px', fontWeight: 800, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '6px' }}>{wf.title}</div>
                     <div style={{ fontSize: '13px', color: isDark ? '#94A3B8' : '#666666', lineHeight: 1.45 }}>{wf.desc}</div>
                   </div>

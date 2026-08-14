@@ -178,7 +178,7 @@ export default function LeadGenerationPage() {
         textAlign: 'center'
       }}>
         <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 900, color: '#00B589', textTransform: 'uppercase', letterSpacing: '1px' }}>
+          <span style={{ fontSize: '12px', fontWeight: 900, color: '#0EA5E9', textTransform: 'uppercase', letterSpacing: '1px' }}>
             24/7 ONBOARDING & SALES HELP
           </span>
           <h1 style={{ fontSize: '40px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-1px', margin: '10px 0 16px 0' }}>
@@ -203,10 +203,11 @@ export default function LeadGenerationPage() {
                   key={tab.id}
                   onClick={() => { setActiveFormTab(tab.id); resetForm(); }}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '2px',
-                    border: '1px solid', borderColor: isActive ? '#00B589' : (isDark ? 'rgba(255,255,255,0.1)' : '#CCCCCC'),
-                    backgroundColor: isActive ? '#00B589' : 'transparent',
-                    color: isActive ? '#FFFFFF' : (isDark ? '#94A3B8' : '#444444'), fontWeight: 700, fontSize: '13px', cursor: 'pointer'
+                    display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 20px', borderRadius: '12px',
+                    border: '1px solid', borderColor: isActive ? '#1E3A8A' : (isDark ? 'rgba(255,255,255,0.1)' : '#CCCCCC'),
+                    backgroundColor: isActive ? '#1E3A8A' : 'transparent',
+                    color: isActive ? '#FFFFFF' : (isDark ? '#94A3B8' : '#444444'), fontWeight: 700, fontSize: '13px', cursor: 'pointer',
+                    transition: 'all 0.2s ease'
                   }}
                 >
                   {tab.icon} {tab.label}
@@ -223,15 +224,15 @@ export default function LeadGenerationPage() {
           
           <div style={{
             background: isDark ? '#1E293B' : '#FFFFFF',
-            borderRadius: '4px',
+            borderRadius: '16px',
             padding: '36px',
             border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E5E7EB',
             boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
           }}>
             {submitted ? (
               <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-                <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#ECFDF5', border: '2px solid #00B589', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
-                  <CheckCircle2 size={36} color="#00B589" />
+                <div style={{ width: '64px', height: '64px', borderRadius: '50%', backgroundColor: '#EFF6FF', border: '2px solid #1E3A8A', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
+                  <CheckCircle2 size={36} color="#1E3A8A" />
                 </div>
                 <h3 style={{ fontSize: '24px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: '0 0 10px 0' }}>
                   {activeFormTab === 'newsletter' ? 'Subscription Confirmed!' : 'Request Received Successfully!'}

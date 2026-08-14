@@ -112,8 +112,8 @@ export default function ProposalSection({ onOpenDemo }) {
           <div style={{ width: '100%' }}>
             {submitted ? (
               <div style={{ textAlign: 'center', padding: '30px 16px' }}>
-                <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#ECFDF5', border: '2px solid #00B589', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
-                  <CheckCircle2 size={32} color="#00B589" />
+                <div style={{ width: '56px', height: '56px', borderRadius: '50%', backgroundColor: '#EFF6FF', border: '2px solid #1E3A8A', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px auto' }}>
+                  <CheckCircle2 size={32} color="#1E3A8A" />
                 </div>
                 <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: '0 0 10px 0' }}>Proposal Requested!</h3>
                 <p style={{ color: isDark ? '#94A3B8' : '#666666', fontSize: '14px', lineHeight: 1.6, margin: 0 }}>
@@ -186,11 +186,11 @@ export default function ProposalSection({ onOpenDemo }) {
                           onClick={() => toggleModule(mod)}
                           style={{
                             padding: '10px 12px',
-                            borderRadius: '4px',
+                            borderRadius: '8px',
                             border: '1px solid',
-                            borderColor: isSelected ? '#00B589' : (isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0'),
-                            background: isSelected ? (isDark ? 'rgba(0, 181, 137, 0.15)' : '#ECFDF5') : (isDark ? '#0F172A' : '#F8FAFC'),
-                            color: isSelected ? (isDark ? '#FFFFFF' : '#00B589') : (isDark ? '#94A3B8' : '#555555'),
+                            borderColor: isSelected ? '#1E3A8A' : (isDark ? 'rgba(255,255,255,0.1)' : '#E2E8F0'),
+                            background: isSelected ? (isDark ? 'rgba(30, 58, 138, 0.25)' : '#EFF6FF') : (isDark ? '#0F172A' : '#F8FAFC'),
+                            color: isSelected ? (isDark ? '#FFFFFF' : '#1E3A8A') : (isDark ? '#94A3B8' : '#555555'),
                             fontSize: '13px',
                             fontWeight: 600,
                             cursor: 'pointer',
@@ -199,7 +199,7 @@ export default function ProposalSection({ onOpenDemo }) {
                             gap: '8px'
                           }}
                         >
-                          <div style={{ width: '16px', height: '16px', borderRadius: '2px', border: '1px solid', borderColor: isSelected ? '#00B589' : '#CCCCCC', background: isSelected ? '#00B589' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <div style={{ width: '16px', height: '16px', borderRadius: '4px', border: '1px solid', borderColor: isSelected ? '#1E3A8A' : '#CCCCCC', background: isSelected ? '#1E3A8A' : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                             {isSelected && <Check size={12} color="white" />}
                           </div>
                           <span>{mod}</span>
@@ -265,10 +265,10 @@ export default function ProposalSection({ onOpenDemo }) {
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0', gap: '8px' }}>
               <div>
-                <div style={{ fontSize: '10px', fontWeight: 900, color: '#00B589', letterSpacing: '1px' }}>PROPOSAL SUMMARY</div>
+                <div style={{ fontSize: '10px', fontWeight: 900, color: '#0EA5E9', letterSpacing: '1px' }}>PROPOSAL SUMMARY</div>
                 <div style={{ fontSize: isMobile ? '15px' : '18px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C' }}>{societyType}</div>
               </div>
-              <span style={{ fontSize: '10px', fontWeight: 900, background: '#ECFDF5', color: '#00B589', padding: '4px 8px', borderRadius: '2px', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: '10px', fontWeight: 900, background: '#EFF6FF', color: '#1E3A8A', padding: '4px 8px', borderRadius: '6px', whiteSpace: 'nowrap' }}>
                 14-DAY FREE TRIAL
               </span>
             </div>
@@ -276,7 +276,7 @@ export default function ProposalSection({ onOpenDemo }) {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '13px', color: isDark ? '#E2E8F0' : '#444444' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
                 <span style={{ color: isDark ? '#94A3B8' : '#666666' }}>Est. Deployment Time:</span>
-                <strong style={{ color: '#00B589', textAlign: 'right' }}>24 - 48 Hours</strong>
+                <strong style={{ color: '#0EA5E9', textAlign: 'right' }}>24 - 48 Hours</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
                 <span style={{ color: isDark ? '#94A3B8' : '#666666' }}>Dedicated Manager:</span>
@@ -288,7 +288,7 @@ export default function ProposalSection({ onOpenDemo }) {
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
                 <span style={{ color: isDark ? '#94A3B8' : '#666666' }}>Selected Modules:</span>
-                <strong style={{ color: '#00B589', textAlign: 'right' }}>{selectedModules.length} Active</strong>
+                <strong style={{ color: '#0EA5E9', textAlign: 'right' }}>{selectedModules.length} Active</strong>
               </div>
             </div>
 

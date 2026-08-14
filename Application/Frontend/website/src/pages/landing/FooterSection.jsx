@@ -31,13 +31,13 @@ export default function FooterSection() {
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#CBD5E1', marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Phone size={14} color="#00B589" /> <a href="tel:+919999999999" style={{ color: '#CBD5E1', textDecoration: 'none' }}>+91 99999 99999</a>
+                <Phone size={14} color="#0EA5E9" /> <a href="tel:+919999999999" style={{ color: '#CBD5E1', textDecoration: 'none' }}>+91 99999 99999</a>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Mail size={14} color="#00B589" /> <a href="mailto:support@gatelink.in" style={{ color: '#CBD5E1', textDecoration: 'none' }}>support@gatelink.in</a>
+                <Mail size={14} color="#0EA5E9" /> <a href="mailto:support@gatelink.in" style={{ color: '#CBD5E1', textDecoration: 'none' }}>support@gatelink.in</a>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <MapPin size={14} color="#00B589" /> HITEC City, Hyderabad, Telangana
+                <MapPin size={14} color="#0EA5E9" /> HITEC City, Hyderabad, Telangana
               </div>
             </div>
 
@@ -109,7 +109,7 @@ export default function FooterSection() {
                 <Apple size={16} /> iOS Resident App
               </Link>
               <Link to="/download" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '8px 14px', borderRadius: '4px', background: '#1E293B', color: 'white', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.1)', fontSize: '12px', fontWeight: 700 }}>
-                <Play size={16} color="#00B589" /> Android Guard & Resident
+                <Play size={16} color="#0EA5E9" /> Android Guard & Resident
               </Link>
             </div>
           </div>

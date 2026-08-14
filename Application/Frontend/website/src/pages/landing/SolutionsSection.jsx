@@ -33,7 +33,7 @@ export default function SolutionsSection({ onOpenDemo }) {
   const residentFeatures = [
     {
       img: '/assets/visitor_management.png',
-      icon: <UserCheck size={24} color="#00B589" />,
+      icon: <UserCheck size={24} color="#0EA5E9" />,
       title: 'Visitor Management System',
       desc: 'Easy tracking of visitors, cabs, and even your deliveries! It\'s a one-stop solution to manage all your visitors whether you are inside the society or not.'
     },
@@ -111,7 +111,7 @@ export default function SolutionsSection({ onOpenDemo }) {
   const securityFeatures = [
     {
       img: '/assets/guard_app_mockup.png',
-      icon: <ShieldCheck size={24} color="#00B589" />,
+      icon: <ShieldCheck size={24} color="#0EA5E9" />,
       title: '5-Second Guard Gatekeeper Console',
       desc: 'High-speed entry verification with OTP passcode scanning, guest photo logging, and instant gatekeeper entry records.'
     },

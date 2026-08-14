@@ -112,19 +112,19 @@ export default function HeroSection({ onOpenDemo }) {
           {!isMobileScreen ? (
             submitted ? (
               <div style={{
-                background: '#ECFDF5',
-                border: '1px solid #A7F3D0',
-                borderRadius: '8px',
+                background: '#EFF6FF',
+                border: '1px solid #BFDBFE',
+                borderRadius: '12px',
                 padding: '20px',
                 marginBottom: '28px',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '14px'
               }}>
-                <CheckCircle2 size={32} color="#059669" />
+                <CheckCircle2 size={32} color="#1E3A8A" />
                 <div>
-                  <div style={{ fontSize: '16px', fontWeight: 900, color: '#065F46' }}>Enrollment Request Received!</div>
-                  <div style={{ fontSize: '13px', color: '#047857', marginTop: '2px' }}>Our onboarding team will call +91 {formData.phone} shortly.</div>
+                  <div style={{ fontSize: '16px', fontWeight: 900, color: '#1E3A8A' }}>Enrollment Request Received!</div>
+                  <div style={{ fontSize: '13px', color: '#1E40AF', marginTop: '2px' }}>Our onboarding team will call +91 {formData.phone} shortly.</div>
                 </div>
               </div>
             ) : (
@@ -271,11 +271,11 @@ export default function HeroSection({ onOpenDemo }) {
               alignItems: 'center',
               gap: '10px',
               padding: '8px 16px',
-              borderRadius: '4px',
+              borderRadius: '8px',
               background: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC',
               border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0'
             }}>
-              <Globe size={20} color="#00B589" />
+              <Globe size={20} color="#0EA5E9" />
               <div>
                 <div style={{ fontSize: '11px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', lineHeight: 1.1 }}>ISO 27001</div>
                 <div style={{ fontSize: '9px', color: isDark ? '#94A3B8' : '#666666', fontWeight: 700, textTransform: 'uppercase' }}>CERTIFIED</div>
@@ -288,11 +288,11 @@ export default function HeroSection({ onOpenDemo }) {
               alignItems: 'center',
               gap: '10px',
               padding: '8px 16px',
-              borderRadius: '4px',
+              borderRadius: '8px',
               background: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC',
               border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0'
             }}>
-              <ShieldCheck size={20} color="#00B589" />
+              <ShieldCheck size={20} color="#0EA5E9" />
               <div>
                 <div style={{ fontSize: '11px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', lineHeight: 1.1 }}>PCI DSS</div>
                 <div style={{ fontSize: '9px', color: isDark ? '#94A3B8' : '#666666', fontWeight: 700, textTransform: 'uppercase' }}>Level 1 CERTIFIED</div>

@@ -75,7 +75,7 @@ export default function LandingPage() {
               To schedule a free demo,
             </div>
             <div style={{ fontSize: '12px', fontWeight: 600, color: isDark ? '#94A3B8' : '#666666', marginTop: '2px' }}>
-              call us on <a href="tel:+919999999999" style={{ color: '#00B589', textDecoration: 'none', fontWeight: 800 }}>+91 99999 99999</a>
+              call us on <a href="tel:+919999999999" style={{ color: '#0EA5E9', textDecoration: 'none', fontWeight: 800 }}>+91 99999 99999</a>
             </div>
           </div>
           <a
@@ -86,16 +86,16 @@ export default function LandingPage() {
               height: '42px',
               borderRadius: '50%',
               backgroundColor: '#FFFFFF',
-              border: '1.5px solid #00B589',
-              boxShadow: '0 2px 10px rgba(0,181,137,0.25)',
+              border: '1.5px solid #0EA5E9',
+              boxShadow: '0 2px 10px rgba(14, 165, 233, 0.25)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#00B589',
+              color: '#0EA5E9',
               textDecoration: 'none'
             }}
           >
-            <Phone size={18} color="#00B589" />
+            <Phone size={18} color="#0EA5E9" />
           </a>
         </div>
       )}

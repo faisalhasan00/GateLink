@@ -96,7 +96,7 @@ export default function FaqPage() {
         textAlign: 'center'
       }}>
         <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
-          <span style={{ fontSize: '12px', fontWeight: 900, color: '#00B589', textTransform: 'uppercase', letterSpacing: '1px' }}>
+          <span style={{ fontSize: '12px', fontWeight: 900, color: '#0EA5E9', textTransform: 'uppercase', letterSpacing: '1px' }}>
             HELP & KNOWLEDGE BASE
           </span>
           <h1 style={{ fontSize: '40px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-1px', margin: '10px 0 16px 0' }}>
@@ -115,7 +115,7 @@ export default function FaqPage() {
                 placeholder="Search FAQs by keyword..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                style={{ width: '100%', padding: '12px 14px 12px 48px', borderRadius: '4px', border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid #CCCCCC', background: isDark ? '#1E293B' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '14px', outline: 'none' }}
+                style={{ width: '100%', padding: '12px 14px 12px 48px', borderRadius: '12px', border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid #CCCCCC', background: isDark ? '#1E293B' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '14px', outline: 'none' }}
               />
             </div>
 
@@ -127,10 +127,11 @@ export default function FaqPage() {
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
                     style={{
-                      padding: '8px 18px', borderRadius: '2px', border: '1px solid',
-                      borderColor: isSelected ? '#00B589' : (isDark ? 'rgba(255,255,255,0.1)' : '#CCCCCC'),
-                      backgroundColor: isSelected ? '#00B589' : 'transparent',
-                      color: isSelected ? '#FFFFFF' : (isDark ? '#94A3B8' : '#444444'), fontSize: '13px', fontWeight: 600, cursor: 'pointer'
+                      padding: '8px 18px', borderRadius: '12px', border: '1px solid',
+                      borderColor: isSelected ? '#1E3A8A' : (isDark ? 'rgba(255,255,255,0.1)' : '#CCCCCC'),
+                      backgroundColor: isSelected ? '#1E3A8A' : 'transparent',
+                      color: isSelected ? '#FFFFFF' : (isDark ? '#94A3B8' : '#444444'), fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                      transition: 'all 0.2s ease'
                     }}
                   >
                     {cat}
@@ -179,12 +180,12 @@ export default function FaqPage() {
                     }}
                   >
                     <span style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ fontSize: '11px', fontWeight: 900, background: '#ECFDF5', color: '#00B589', padding: '3px 8px', borderRadius: '2px' }}>{faq.category}</span>
+                      <span style={{ fontSize: '11px', fontWeight: 900, background: '#EFF6FF', color: '#1E3A8A', padding: '3px 8px', borderRadius: '6px' }}>{faq.category}</span>
                       {faq.q}
                     </span>
                     <ChevronDown
                       size={18}
-                      color="#00B589"
+                      color="#0EA5E9"
                       style={{
                         transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
                         transition: 'transform 0.3s ease',

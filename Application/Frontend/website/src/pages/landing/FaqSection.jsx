@@ -53,7 +53,7 @@ export default function FaqSection() {
         
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, color: '#00B589', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, color: '#0EA5E9', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>
             <HelpCircle size={16} /> GOT QUESTIONS? WE HAVE ANSWERS
           </div>
           <h2 style={{ fontSize: '36px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-0.5px', margin: '0 0 16px 0' }}>
@@ -73,7 +73,7 @@ export default function FaqSection() {
                 key={idx}
                 style={{
                   background: isDark ? '#1E293B' : '#FFFFFF',
-                  borderRadius: '4px',
+                  borderRadius: '12px',
                   border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E5E7EB',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
                   overflow: 'hidden',
@@ -99,12 +99,12 @@ export default function FaqSection() {
                   }}
                 >
                   <span style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ color: '#00B589', fontSize: '15px', fontWeight: 900 }}>0{idx + 1}.</span>
+                    <span style={{ color: '#0EA5E9', fontSize: '15px', fontWeight: 900 }}>0{idx + 1}.</span>
                     {faq.q}
                   </span>
                   <ChevronDown
                     size={18}
-                    color="#00B589"
+                    color="#0EA5E9"
                     style={{
                       transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
                       transition: 'transform 0.3s ease',

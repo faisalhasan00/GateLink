@@ -29,7 +29,7 @@ export default function PrivacyPolicyPage() {
           
           {/* Header */}
           <div style={{ marginBottom: '40px', textAlign: 'center' }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, color: '#00B589', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, color: '#0EA5E9', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>
               <ShieldCheck size={16} /> DATA PROTECTION & TRUST
             </div>
             <h1 style={{ fontSize: '38px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-0.5px', marginBottom: '12px' }}>
@@ -43,7 +43,7 @@ export default function PrivacyPolicyPage() {
           {/* Privacy Content Card */}
           <div style={{
             background: isDark ? '#1E293B' : '#FFFFFF',
-            borderRadius: '4px',
+            borderRadius: '16px',
             padding: '40px',
             border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E5E7EB',
             boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
@@ -56,7 +56,7 @@ export default function PrivacyPolicyPage() {
             </p>
 
             <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginTop: '32px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Lock size={18} color="#00B589" /> 1. Information We Collect
+              <Lock size={18} color="#0EA5E9" /> 1. Information We Collect
             </h3>
             <p>
               To operate our gated community security and society management system, we collect:
@@ -68,28 +68,28 @@ export default function PrivacyPolicyPage() {
             </ul>
 
             <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginTop: '32px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <ShieldCheck size={18} color="#00B589" /> 2. Data Encryption & Storage Security
+              <ShieldCheck size={18} color="#0EA5E9" /> 2. Data Encryption & Storage Security
             </h3>
             <p>
               All personal data transmitted between resident mobile apps, guard tablets, and society admin web consoles is protected using <strong>256-Bit SSL TLS v1.3 encryption</strong> in transit and AES-256 encryption at rest. All database servers are hosted in secure MeitY-empaneled tier-4 data centers within India.
             </p>
 
             <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginTop: '32px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Eye size={18} color="#00B589" /> 3. Data Protection Rights & Erasure
+              <Eye size={18} color="#0EA5E9" /> 3. Data Protection Rights & Erasure
             </h3>
             <p>
-              Under DPDP regulations, flat owners and residents retain full control over their personal profile records. You may request profile data correction, access export logs, or submit erasure requests upon moving out of the housing society by contacting your RWA admin or emailing our Data Officer at <a href="mailto:privacy@gatelink.in" style={{ color: '#00B589', textDecoration: 'none', fontWeight: 700 }}>privacy@gatelink.in</a>.
+              Under DPDP regulations, flat owners and residents retain full control over their personal profile records. You may request profile data correction, access export logs, or submit erasure requests upon moving out of the housing society by contacting your RWA admin or emailing our Data Officer at <a href="mailto:privacy@gatelink.in" style={{ color: '#0EA5E9', textDecoration: 'none', fontWeight: 700 }}>privacy@gatelink.in</a>.
             </p>
 
             <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginTop: '32px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FileText size={18} color="#00B589" /> 4. Third-Party Sharing Restrictions
+              <FileText size={18} color="#0EA5E9" /> 4. Third-Party Sharing Restrictions
             </h3>
             <p>
               We maintain a strict zero-selling policy. GateLink <strong>never sells, rents, or monetizes resident personal contact information</strong> or gate traffic logs to third-party telemarketers or advertisers.
             </p>
 
             <div style={{ marginTop: '36px', paddingTop: '24px', borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: isDark ? '#94A3B8' : '#666666' }}>
-              <CheckCircle2 size={16} color="#00B589" />
+              <CheckCircle2 size={16} color="#0EA5E9" />
               <span>For questions regarding our privacy practices, contact Data Protection Officer at privacy@gatelink.in</span>
             </div>
           </div>

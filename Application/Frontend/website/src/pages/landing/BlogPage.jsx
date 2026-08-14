@@ -160,7 +160,7 @@ export default function BlogPage() {
         textAlign: 'center'
       }}>
         <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, color: '#00B589', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', fontWeight: 900, color: '#0EA5E9', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '12px' }}>
             <BookOpen size={14} /> GateLink Knowledge Hub
           </div>
           <h1 style={{ fontSize: '40px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-1px', margin: '0 0 16px 0' }}>
@@ -179,7 +179,7 @@ export default function BlogPage() {
                 placeholder="Search articles by keyword, topic, or tag..."
                 value={searchQuery}
                 onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                style={{ width: '100%', padding: '12px 14px 12px 48px', borderRadius: '4px', border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid #CCCCCC', background: isDark ? '#1E293B' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '14px', outline: 'none' }}
+                style={{ width: '100%', padding: '12px 14px 12px 48px', borderRadius: '12px', border: isDark ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid #CCCCCC', background: isDark ? '#1E293B' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '14px', outline: 'none' }}
               />
             </div>
 
@@ -191,10 +191,11 @@ export default function BlogPage() {
                     key={cat}
                     onClick={() => { setSelectedCategory(cat); setCurrentPage(1); }}
                     style={{
-                      padding: '8px 18px', borderRadius: '2px', border: '1px solid',
-                      borderColor: isSelected ? '#00B589' : (isDark ? 'rgba(255,255,255,0.1)' : '#CCCCCC'),
-                      backgroundColor: isSelected ? '#00B589' : 'transparent',
-                      color: isSelected ? '#FFFFFF' : (isDark ? '#94A3B8' : '#444444'), fontSize: '13px', fontWeight: 600, cursor: 'pointer'
+                      padding: '8px 18px', borderRadius: '12px', border: '1px solid',
+                      borderColor: isSelected ? '#1E3A8A' : (isDark ? 'rgba(255,255,255,0.1)' : '#CCCCCC'),
+                      backgroundColor: isSelected ? '#1E3A8A' : 'transparent',
+                      color: isSelected ? '#FFFFFF' : (isDark ? '#94A3B8' : '#444444'), fontSize: '13px', fontWeight: 600, cursor: 'pointer',
+                      transition: 'all 0.2s ease'
                     }}
                   >
                     {cat}
@@ -215,7 +216,7 @@ export default function BlogPage() {
             {currentPosts.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '60px 20px', color: isDark ? '#94A3B8' : '#666666' }}>
                 <h3>No articles found matching "{searchQuery}"</h3>
-                <button onClick={() => { setSearchQuery(''); setSelectedCategory('All'); }} style={{ marginTop: '12px', padding: '8px 20px', borderRadius: '2px', background: '#00B589', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 700 }}>
+                <button onClick={() => { setSearchQuery(''); setSelectedCategory('All'); }} style={{ marginTop: '12px', padding: '8px 20px', borderRadius: '12px', background: '#1E3A8A', color: 'white', border: 'none', cursor: 'pointer', fontWeight: 700 }}>
                   Reset Filters
                 </button>
               </div>
@@ -227,7 +228,7 @@ export default function BlogPage() {
                     onClick={() => setSelectedPost(post)}
                     style={{
                       background: isDark ? '#1E293B' : '#FFFFFF',
-                      borderRadius: '4px',
+                      borderRadius: '16px',
                       padding: '24px',
                       border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E5E7EB',
                       boxShadow: '0 2px 10px rgba(0,0,0,0.03)',
@@ -239,7 +240,7 @@ export default function BlogPage() {
                   >
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                        <span style={{ fontSize: '11px', fontWeight: 900, padding: '4px 10px', borderRadius: '2px', background: '#ECFDF5', color: '#00B589' }}>
+                        <span style={{ fontSize: '11px', fontWeight: 900, padding: '4px 10px', borderRadius: '6px', background: '#EFF6FF', color: '#1E3A8A' }}>
                           {post.category}
                         </span>
                         <span style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#666666', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -258,7 +259,7 @@ export default function BlogPage() {
 
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '14px', borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #F1F5F9' }}>
                       <span style={{ fontSize: '12px', fontWeight: 600, color: isDark ? '#94A3B8' : '#666666' }}>{post.date}</span>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#00B589', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#0EA5E9', display: 'flex', alignItems: 'center', gap: '4px' }}>
                         Read Article <ArrowRight size={14} />
                       </span>
                     </div>
@@ -293,9 +294,9 @@ export default function BlogPage() {
 
           {/* Right Sidebar: Recent & Trending */}
           <aside style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-            <div style={{ background: isDark ? '#1E293B' : '#FFFFFF', borderRadius: '4px', padding: '24px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB' }}>
+            <div style={{ background: isDark ? '#1E293B' : '#FFFFFF', borderRadius: '16px', padding: '24px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB' }}>
               <h4 style={{ fontSize: '16px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <TrendingUp size={18} color="#00B589" /> Trending Topics
+                <TrendingUp size={18} color="#0EA5E9" /> Trending Topics
               </h4>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 {articles.slice(0, 4).map(art => (
@@ -307,14 +308,27 @@ export default function BlogPage() {
               </div>
             </div>
 
-            <div style={{ background: isDark ? '#1E293B' : '#F8FAFC', borderRadius: '4px', padding: '24px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB', textAlign: 'center' }}>
+            <div style={{ background: isDark ? '#1E293B' : '#F8FAFC', borderRadius: '16px', padding: '24px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB', textAlign: 'center' }}>
               <h4 style={{ fontSize: '18px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '8px' }}>Enroll Your Society</h4>
               <p style={{ fontSize: '13px', color: isDark ? '#94A3B8' : '#666666', lineHeight: 1.5, marginBottom: '16px' }}>
                 Deploy GateLink OS in 24 hours with dedicated guard training and 14-day free trial.
               </p>
               <button
                 onClick={() => setIsDemoModalOpen(true)}
-                style={{ width: '100%', padding: '10px', borderRadius: '2px', backgroundColor: '#00B589', color: '#FFFFFF', border: 'none', fontSize: '14px', fontWeight: 700, cursor: 'pointer' }}
+                style={{ 
+                  width: '100%', 
+                  padding: '12px', 
+                  borderRadius: '12px', 
+                  backgroundColor: '#1E3A8A', 
+                  color: '#FFFFFF', 
+                  border: 'none', 
+                  fontSize: '14px', 
+                  fontWeight: 700, 
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
               >
                 Enroll your society
               </button>
@@ -327,11 +341,11 @@ export default function BlogPage() {
       {/* Article Detail Modal */}
       {selectedPost && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-          <div style={{ background: isDark ? '#1E293B' : '#FFFFFF', borderRadius: '4px', maxWidth: '700px', width: '100%', maxHeight: '85vh', overflowY: 'auto', padding: '32px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB', position: 'relative' }}>
+          <div style={{ background: isDark ? '#1E293B' : '#FFFFFF', borderRadius: '16px', maxWidth: '700px', width: '100%', maxHeight: '85vh', overflowY: 'auto', padding: '32px', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB', position: 'relative' }}>
             <button onClick={() => setSelectedPost(null)} style={{ position: 'absolute', top: '16px', right: '16px', background: 'transparent', border: 'none', cursor: 'pointer', color: isDark ? '#FFFFFF' : '#333333' }}>
               <X size={20} />
             </button>
-            <span style={{ fontSize: '11px', fontWeight: 900, background: '#ECFDF5', color: '#00B589', padding: '4px 10px', borderRadius: '2px' }}>{selectedPost.category}</span>
+            <span style={{ fontSize: '11px', fontWeight: 900, background: '#EFF6FF', color: '#1E3A8A', padding: '4px 10px', borderRadius: '6px' }}>{selectedPost.category}</span>
             <h2 style={{ fontSize: '24px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: '14px 0 8px 0' }}>{selectedPost.title}</h2>
             <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#666666', marginBottom: '20px' }}>By {selectedPost.author} • {selectedPost.date} • {selectedPost.readTime}</div>
             <p style={{ fontSize: '15px', color: isDark ? '#E2E8F0' : '#444444', lineHeight: 1.7 }}>{selectedPost.content}</p>

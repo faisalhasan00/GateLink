@@ -374,7 +374,7 @@ export default function SocietyOnboardingWizard({ isOpen, onClose, existingSocie
                   type="text"
                   value={formData.name}
                   onChange={handleNameChange}
-                  placeholder="e.g. HomeHni Residency"
+                  placeholder="e.g. GateLink Residency"
                   style={{ borderColor: errors.name ? 'var(--danger)' : undefined }}
                 />
                 {errors.name && <span style={{ fontSize: '12px', color: 'var(--danger)', marginTop: '4px' }}>{errors.name}</span>}

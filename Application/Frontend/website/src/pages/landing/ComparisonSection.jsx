@@ -15,7 +15,7 @@ export default function ComparisonSection() {
     'Lack of emergency siren alerts during fire or medical incidents'
   ];
 
-  const societySphereSolutions = [
+  const gateLinkSolutions = [
     '5-Second digital QR passcode verification on guard app',
     '1-Tap lock screen visitor approval & photo logging',
     'Automated maintenance invoices with instant PDF receipts & GST',
@@ -71,25 +71,25 @@ export default function ComparisonSection() {
           {/* GateLink OS Way */}
           <div style={{
             background: isDark ? '#1E293B' : '#FFFFFF',
-            borderRadius: '4px',
+            borderRadius: '16px',
             padding: '32px',
-            border: '2px solid #00B589',
-            boxShadow: '0 4px 20px rgba(0, 181, 137, 0.08)'
+            border: '2px solid #1E3A8A',
+            boxShadow: '0 4px 20px rgba(30, 58, 138, 0.12)'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', paddingBottom: '16px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #ECFDF5' }}>
-              <div style={{ width: '38px', height: '38px', borderRadius: '4px', backgroundColor: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <ShieldCheck size={20} color="#00B589" />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px', paddingBottom: '16px', borderBottom: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #EFF6FF' }}>
+              <div style={{ width: '38px', height: '38px', borderRadius: '10px', backgroundColor: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <ShieldCheck size={20} color="#1E3A8A" />
               </div>
               <div>
-                <h3 style={{ fontSize: '19px', fontWeight: 900, color: '#00B589', margin: 0 }}>GateLink OS</h3>
+                <h3 style={{ fontSize: '19px', fontWeight: 900, color: '#1E3A8A', margin: 0 }}>GateLink OS</h3>
                 <div style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#666666' }}>100% Verified, Automated & Instant</div>
               </div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {societySphereSolutions.map((sol) => (
+              {gateLinkSolutions.map((sol) => (
                 <div key={sol} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', fontSize: '14px', fontWeight: 700, color: isDark ? '#FFFFFF' : '#2C2C2C', lineHeight: 1.5 }}>
-                  <CheckCircle2 size={18} color="#00B589" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <CheckCircle2 size={18} color="#0EA5E9" style={{ flexShrink: 0, marginTop: '2px' }} />
                   <span>{sol}</span>
                 </div>
               ))}

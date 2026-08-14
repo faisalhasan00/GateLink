@@ -13,17 +13,17 @@ export default function AboutUsPage() {
 
   const pillars = [
     {
-      icon: <ShieldCheck size={28} color="#00B589" />,
+      icon: <ShieldCheck size={28} color="#1E3A8A" />,
       title: 'ISO 27001 & PCI DSS Security',
       desc: 'Bank-grade encryption protecting resident contact data, visitor photo logs, and automated online maintenance transactions.'
     },
     {
-      icon: <Award size={28} color="#00B589" />,
+      icon: <Award size={28} color="#0EA5E9" />,
       title: '99.9% Gatekeeper Uptime',
       desc: 'High-speed offline-first guard app built for uninterrupted gate operations even in weak cellular signal areas.'
     },
     {
-      icon: <HeartHandshake size={28} color="#00B589" />,
+      icon: <HeartHandshake size={28} color="#F59E0B" />,
       title: 'Dedicated Society Onboarding',
       desc: 'On-site security guard training in local languages, flat owner data migration from Excel, and 24/7 helpline support.'
     }
@@ -46,8 +46,8 @@ export default function AboutUsPage() {
           
           {/* Header Banner */}
           <div style={{ textAlign: 'center', maxWidth: '850px', margin: '0 auto 60px auto' }}>
-            <span style={{ fontSize: '12px', fontWeight: 900, color: '#00B589', letterSpacing: '1px', textTransform: 'uppercase' }}>
-              ABOUT HOMEHNI HOOD
+            <span style={{ fontSize: '12px', fontWeight: 900, color: '#0EA5E9', letterSpacing: '1px', textTransform: 'uppercase' }}>
+              ABOUT GATELINK
             </span>
             <h1 style={{ fontSize: '42px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-1px', margin: '12px 0 16px 0', lineHeight: 1.15 }}>
               Pioneering Gated Community & Gatekeeper Security OS
@@ -61,14 +61,14 @@ export default function AboutUsPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px', marginBottom: '70px' }}>
             <div style={{
               background: isDark ? '#1E293B' : '#FFFFFF',
-              borderRadius: '4px',
+              borderRadius: '16px',
               padding: '36px',
               border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB',
               boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '4px', backgroundColor: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Building size={22} color="#00B589" />
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Building size={22} color="#1E3A8A" />
                 </div>
                 <h2 style={{ fontSize: '22px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: 0 }}>Our Mission</h2>
               </div>
@@ -79,14 +79,14 @@ export default function AboutUsPage() {
 
             <div style={{
               background: isDark ? '#1E293B' : '#FFFFFF',
-              borderRadius: '4px',
+              borderRadius: '16px',
               padding: '36px',
               border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB',
               boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '4px', backgroundColor: '#ECFDF5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Globe size={22} color="#00B589" />
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', backgroundColor: '#E0F2FE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Globe size={22} color="#0EA5E9" />
                 </div>
                 <h2 style={{ fontSize: '22px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: 0 }}>Our Vision</h2>
               </div>
@@ -106,7 +106,7 @@ export default function AboutUsPage() {
               {pillars.map((p) => (
                 <div key={p.title} style={{
                   background: isDark ? '#1E293B' : '#FFFFFF',
-                  borderRadius: '4px',
+                  borderRadius: '16px',
                   padding: '30px',
                   border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB',
                   boxShadow: '0 2px 10px rgba(0,0,0,0.03)'
@@ -122,7 +122,7 @@ export default function AboutUsPage() {
           {/* Call to Action Banner */}
           <div style={{
             background: isDark ? '#1E293B' : '#F8FAFC',
-            borderRadius: '4px',
+            borderRadius: '16px',
             padding: '40px',
             border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB',
             textAlign: 'center',
