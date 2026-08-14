@@ -902,7 +902,7 @@ export default function SocietyOnboardingWizard({ isOpen, onClose, existingSocie
               disabled={submitting}
               style={{ display: 'flex', alignItems: 'center', gap: '6px', background: 'var(--secondary)' }}
             >
-              {submitting ? 'Provisioning...' : 'Confirm & Create Society 🚀'}
+              {submitting ? 'Provisioning...' : 'Confirm & Create Society'}
             </button>
           )}
         </div>

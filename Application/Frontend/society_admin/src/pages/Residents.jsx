@@ -176,7 +176,7 @@ export default function Residents() {
             gap: '6px'
           }}
         >
-          <span>🔥 Pending Approvals</span>
+          <span>Pending Approvals</span>
           {pendingList.length > 0 && (
             <span style={{ background: activeTab === 'pending' ? '#FFFFFF' : '#D97706', color: activeTab === 'pending' ? '#D97706' : '#FFFFFF', borderRadius: '10px', padding: '2px 8px', fontSize: '11px', fontWeight: 900 }}>
               {pendingList.length}
@@ -269,7 +269,7 @@ export default function Residents() {
         <div className="card">
           <div className="card-header">
             <div>
-              <h3 className="card-title" style={{ color: '#B45309' }}>🔥 Self-Registered Pending Approvals</h3>
+              <h3 className="card-title" style={{ color: '#B45309' }}>Self-Registered Pending Approvals</h3>
               <p style={{ margin: '2px 0 0 0', fontSize: '12px', color: 'var(--text-secondary)' }}>Verify residency documents and approve flat access permissions.</p>
             </div>
             <span style={{ fontSize: '13px', fontWeight: 800, color: '#B45309' }}>{pendingList.length} pending</span>

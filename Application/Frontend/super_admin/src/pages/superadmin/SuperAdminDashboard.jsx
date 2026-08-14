@@ -114,7 +114,7 @@ export default function SuperAdminDashboard() {
         <div className="card" style={{ padding: '24px' }}>
           <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
-              <h3 className="card-title" style={{ fontSize: '16px', fontWeight: 800, margin: 0 }}>🔥 Live Website Inbound Leads ({leads.length})</h3>
+              <h3 className="card-title" style={{ fontSize: '16px', fontWeight: 800, margin: 0 }}>Live Website Inbound Leads ({leads.length})</h3>
             </div>
             <Link to="/crm" className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '12px', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <span>Open CRM</span>

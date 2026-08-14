@@ -39,7 +39,7 @@ export default function ContactSection() {
       });
 
       await addDoc(collection(db, 'notifications'), {
-        title: '🔥 New Inbound Sales Lead',
+        title: 'New Inbound Sales Lead',
         message: `${formData.fullName} requested a demo for ${formData.societyName || 'Housing Society'} (${formData.flatCount} flats).`,
         type: 'lead',
         read: false,

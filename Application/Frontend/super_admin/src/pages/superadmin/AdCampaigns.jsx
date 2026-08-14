@@ -112,7 +112,7 @@ export default function AdCampaigns() {
               </div>
               <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>
                 <button className="btn btn-primary" style={{ flex: 1 }} onClick={handlePublish} disabled={saving}>
-                  {saving ? 'Publishing...' : 'Publish Ad Live 🚀'}
+                  {saving ? 'Publishing...' : 'Publish Ad Live'}
                 </button>
                 <button className="btn btn-outline" onClick={() => setShowModal(false)}>Cancel</button>
               </div>
