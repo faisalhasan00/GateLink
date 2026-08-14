@@ -9,15 +9,23 @@ export default function SuperAdminDashboard() {
   const [selectedLead, setSelectedLead] = useState(null);
 
   useEffect(() => {
-    const unsubSoc = superAdminService.subscribeSocieties(
-      (data) => setSocieties(data),
-      (err) => console.error(err)
-    );
+    let unsubSoc;
+    if (typeof superAdminService?.subscribeSocieties === 'function') {
+      unsubSoc = superAdminService.subscribeSocieties(
+        (data) => setSocieties(data),
+        (err) => console.error(err)
+      );
+    }
 
-    const unsubLeads = superAdminService.subscribeLeads(
-      (data) => setLeads(data),
-      (err) => console.error(err)
-    );
+    let unsubLeads;
+    const subLeadsFn = superAdminService?.subscribeLeads || superAdminService?.subscribeCrmLeads;
+    if (typeof subLeadsFn === 'function') {
+      unsubLeads = subLeadsFn.call(
+        superAdminService,
+        (data) => setLeads(data),
+        (err) => console.error(err)
+      );
+    }
 
     return () => {
       if (unsubSoc) unsubSoc();

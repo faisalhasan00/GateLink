@@ -19,16 +19,23 @@ export default function CrmLeads() {
   const stages = ['New', 'Contacted', 'Demo Scheduled', 'Proposal Sent', 'Closed Won', 'Lost'];
 
   useEffect(() => {
-    const unsub = superAdminService.subscribeLeads(
-      (docs) => {
-        setLeads(docs);
-        setLoading(false);
-      },
-      (err) => {
-        console.error('Real-time leads listener error:', err);
-        setLoading(false);
-      }
-    );
+    let unsub;
+    const subLeadsFn = superAdminService?.subscribeLeads || superAdminService?.subscribeCrmLeads;
+    if (typeof subLeadsFn === 'function') {
+      unsub = subLeadsFn.call(
+        superAdminService,
+        (docs) => {
+          setLeads(docs);
+          setLoading(false);
+        },
+        (err) => {
+          console.error('Real-time leads listener error:', err);
+          setLoading(false);
+        }
+      );
+    } else {
+      setLoading(false);
+    }
 
     return () => {
       if (unsub) unsub();
