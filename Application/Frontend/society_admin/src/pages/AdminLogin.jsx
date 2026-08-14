@@ -128,7 +128,7 @@ export default function AdminLogin() {
 
       <div style={{
         background: isDark ? '#1E293B' : '#FFFFFF',
-        borderRadius: '4px',
+        borderRadius: '16px',
         border: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E5E7EB',
         boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
         width: '100%',
@@ -136,7 +136,7 @@ export default function AdminLogin() {
         padding: '36px'
       }}>
         <div style={{ marginBottom: '24px', textAlign: 'center' }}>
-          <span style={{ fontSize: '11px', fontWeight: 900, background: '#ECFDF5', color: '#00B589', padding: '4px 10px', borderRadius: '2px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
+          <span style={{ fontSize: '11px', fontWeight: 900, background: '#EFF6FF', color: '#1E3A8A', padding: '4px 10px', borderRadius: '6px', textTransform: 'uppercase', letterSpacing: '0.8px' }}>
             RWA COMMITTEE PORTAL
           </span>
           <h2 style={{ fontSize: '24px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: '12px 0 6px 0' }}>
@@ -148,7 +148,7 @@ export default function AdminLogin() {
         </div>
 
         {error && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#DC2626', padding: '12px 14px', borderRadius: '4px', fontSize: '13px', fontWeight: 600, marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#DC2626', padding: '12px 14px', borderRadius: '10px', fontSize: '13px', fontWeight: 600, marginBottom: '20px' }}>
             <AlertCircle size={16} />
             <span>{error}</span>
           </div>
@@ -165,7 +165,7 @@ export default function AdminLogin() {
                 placeholder="admin@society.com"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
-                style={{ width: '100%', padding: '12px 12px 12px 38px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '14px', outline: 'none' }}
+                style={{ width: '100%', padding: '12px 12px 12px 38px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '14px', outline: 'none' }}
               />
             </div>
           </div>
@@ -180,7 +180,7 @@ export default function AdminLogin() {
                 placeholder="••••••••"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                style={{ width: '100%', padding: '12px 12px 12px 38px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '14px', outline: 'none' }}
+                style={{ width: '100%', padding: '12px 12px 12px 38px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '14px', outline: 'none' }}
               />
             </div>
           </div>
@@ -190,8 +190,8 @@ export default function AdminLogin() {
             disabled={loading}
             style={{
               padding: '12px',
-              borderRadius: '2px',
-              backgroundColor: '#00B589',
+              borderRadius: '12px',
+              backgroundColor: '#1E3A8A',
               color: '#FFFFFF',
               fontWeight: 700,
               fontSize: '14px',
@@ -201,8 +201,11 @@ export default function AdminLogin() {
               alignItems: 'center',
               justifyContent: 'center',
               gap: '8px',
-              marginTop: '8px'
+              marginTop: '8px',
+              transition: 'background-color 0.2s ease'
             }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
           >
             <span>{loading ? 'Authenticating...' : 'Sign In to Dashboard'}</span>
             <ArrowRight size={16} />
@@ -211,7 +214,7 @@ export default function AdminLogin() {
 
         <div style={{ borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #F1F5F9', marginTop: '24px', paddingTop: '16px', textAlign: 'center', fontSize: '13px', color: isDark ? '#94A3B8' : '#666666' }}>
           <span>Need to register your society? </span>
-          <a href={websiteContactUrl} style={{ color: '#00B589', textDecoration: 'none', fontWeight: 700 }}>Enroll Your Society</a>
+          <a href={websiteContactUrl} style={{ color: '#0EA5E9', textDecoration: 'none', fontWeight: 700 }}>Enroll Your Society</a>
         </div>
       </div>
     </div>
