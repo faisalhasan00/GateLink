@@ -25,7 +25,8 @@ import {
 } from 'firebase/firestore';
 import { initializeApp, deleteApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { db, firebaseConfig } from '../firebase';
+import { httpsCallable } from 'firebase/functions';
+import { db, functions, firebaseConfig } from '../firebase';
 import { generateUUID } from '../utils/security';
 
 export const societyAdminService = {
@@ -483,7 +484,26 @@ export const societyAdminService = {
     const password = (staffData.password || '').trim() || 'SecGuard@2026';
     const name = staffData.name || 'Security Guard';
 
-    // 1. Auto-provision Firebase Auth Account
+    // 1. Try Cloud Function first (Uses Admin SDK - always works)
+    try {
+      const createStaffCallable = httpsCallable(functions, 'createStaffUser');
+      const res = await createStaffCallable({
+        societyId,
+        email,
+        password,
+        name,
+        phone: staffData.phone || '',
+        department: staffData.department || 'Security & Gate',
+        role: 'guard',
+      });
+      if (res?.data?.success && res.data.uid) {
+        return res.data.uid;
+      }
+    } catch (cfErr) {
+      console.warn("Cloud function provisioning fallback to client:", cfErr?.message || cfErr);
+    }
+
+    // 2. Client-side secondary app fallback
     let staffUid = null;
     let provisionApp = null;
     if (email && password) {

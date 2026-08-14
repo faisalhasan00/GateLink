@@ -45,6 +45,66 @@ const setSuperAdminRole = onCall(async (request) => {
   return { success: true, message: `Successfully assigned super_admin claim to user ${targetUid}` };
 });
 
+/**
+ * SEC-P0: Safe Server-Side Staff / Guard User Provisioning
+ */
+const createStaffUser = onCall(async (request) => {
+  await verifyActiveCallableUser(request);
+  const { email, password, name, role, societyId, phone, department } = request.data || {};
+  if (!email || !password || !societyId) {
+    throw new HttpsError("invalid-argument", "email, password, and societyId are required.");
+  }
+
+  const cleanEmail = email.trim().toLowerCase();
+  const cleanRole = role || "guard";
+
+  let userRecord;
+  try {
+    userRecord = await auth.getUserByEmail(cleanEmail);
+    // Update password if existing
+    await auth.updateUser(userRecord.uid, {
+      password: password.trim(),
+      displayName: name || "Security Guard",
+    });
+  } catch (err) {
+    if (err.code === "auth/user-not-found") {
+      userRecord = await auth.createUser({
+        email: cleanEmail,
+        password: password.trim(),
+        displayName: name || "Security Guard",
+      });
+    } else {
+      logger.error("Error creating staff auth record", { error: err.message });
+      throw new HttpsError("internal", err.message);
+    }
+  }
+
+  const uid = userRecord.uid;
+  const timestamp = FieldValue.serverTimestamp();
+
+  const userPayload = {
+    uid,
+    name: name || "Security Guard",
+    email: cleanEmail,
+    phone: phone || "",
+    department: department || "Security & Gate",
+    role: cleanRole,
+    status: "active",
+    societyId,
+    createdAt: timestamp,
+    updatedAt: timestamp,
+  };
+
+  const batch = db.batch();
+  batch.set(db.doc(`users/${uid}`), userPayload, { merge: true });
+  batch.set(db.doc(`societies/${societyId}/users/${uid}`), userPayload, { merge: true });
+  await batch.commit();
+
+  logger.info("Successfully provisioned staff account", { uid, email: cleanEmail, societyId });
+  return { success: true, uid };
+});
+
 module.exports = {
   setSuperAdminRole,
+  createStaffUser,
 };

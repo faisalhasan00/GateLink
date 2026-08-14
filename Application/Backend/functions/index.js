@@ -14,8 +14,8 @@ const {
   validateVisitorPasscode,
 } = require("./visitors/visitor_passcode");
 
-// 2. Super Admin Authorization
-const { setSuperAdminRole } = require("./admin/super_admin");
+// 2. Super Admin Authorization & Staff Provisioning
+const { setSuperAdminRole, createStaffUser } = require("./admin/super_admin");
 
 // 3. Payment Gateway & Webhook Handlers
 const {
@@ -38,8 +38,9 @@ module.exports = {
   generateVisitorPasscode,
   validateVisitorPasscode,
 
-  // Admin Management
+  // Admin & Staff Management
   setSuperAdminRole,
+  createStaffUser,
 
   // Payment Processing
   createCashfreeOrder,
