@@ -14,8 +14,6 @@ const LandingPage = lazy(() => import('./pages/landing/LandingPage'))
 const AboutUsPage = lazy(() => import('./pages/landing/AboutUsPage'))
 const FeaturesPage = lazy(() => import('./pages/landing/FeaturesPage'))
 const SolutionsPage = lazy(() => import('./pages/landing/SolutionsPage'))
-const EcosystemPage = lazy(() => import('./pages/landing/EcosystemPage'))
-const PricingPage = lazy(() => import('./pages/landing/PricingPage'))
 const LeadGenerationPage = lazy(() => import('./pages/landing/LeadGenerationPage'))
 const DownloadAppPage = lazy(() => import('./pages/landing/DownloadAppPage'))
 const BlogPage = lazy(() => import('./pages/landing/BlogPage'))
@@ -42,8 +40,6 @@ export default function App() {
             <Route path="/about" element={<AboutUsPage />} />
             <Route path="/features" element={<FeaturesPage />} />
             <Route path="/solutions" element={<SolutionsPage />} />
-            <Route path="/ecosystem" element={<EcosystemPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
             <Route path="/contact" element={<LeadGenerationPage />} />
             <Route path="/book-demo" element={<LeadGenerationPage />} />
             <Route path="/download" element={<DownloadAppPage />} />

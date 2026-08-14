@@ -70,7 +70,6 @@ export default function FooterSection() {
               <li><Link to="/features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Guard Gatekeeper</Link></li>
               <li><Link to="/features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Pay Maintenance Bill Online</Link></li>
               <li><Link to="/features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Emergency SOS</Link></li>
-              <li><Link to="/ecosystem" style={{ color: '#94A3B8', textDecoration: 'none' }}>Connected Ecosystem</Link></li>
             </ul>
           </div>
 
@@ -129,7 +128,7 @@ export default function FooterSection() {
           color: '#64748B'
         }}>
           <div>
-            © {new Date().getFullYear()} GateLink. All rights reserved. Built for Indian & UAE Housing Societies.
+            © {new Date().getFullYear()} GateLink. All rights reserved. Built for Modern Housing Societies & Gated Communities.
           </div>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <Link to="/privacy" style={{ color: '#64748B', textDecoration: 'none' }}>Privacy Policy</Link>

@@ -33,7 +33,7 @@ export default function AboutUsPage() {
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <SeoHead
         title="About Us - GateLink Society OS"
-        description="Learn about GateLink's mission to digitize gatekeeper security, resident management, and accounting for housing societies across India and UAE."
+        description="Learn about GateLink's mission to digitize gatekeeper security, resident management, and accounting for modern housing societies."
         canonicalUrl="https://gatelink.in/about"
       />
 
@@ -53,7 +53,7 @@ export default function AboutUsPage() {
               Pioneering Gated Community & Gatekeeper Security OS
             </h1>
             <p style={{ fontSize: '16px', color: isDark ? '#94A3B8' : '#555555', lineHeight: 1.6, margin: 0 }}>
-              GateLink is designed to simplify daily apartment living, replace paper gate registers, eliminate payment chasing, and protect housing societies across India and UAE.
+              GateLink is designed to simplify daily apartment living, replace paper gate registers, eliminate payment chasing, and protect modern housing societies.
             </p>
           </div>
 

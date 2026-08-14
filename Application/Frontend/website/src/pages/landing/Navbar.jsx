@@ -29,7 +29,6 @@ export default function Navbar({ onOpenDemo }) {
 
   const aboutItems = [
     { label: 'About Us', to: '/about' },
-    { label: 'UAE Ecosystem', to: '/ecosystem' },
     { label: 'Blog', to: '/blog' },
     { label: 'Privacy Policy', to: '/privacy' },
   ];
@@ -37,7 +36,6 @@ export default function Navbar({ onOpenDemo }) {
   const featureItems = [
     { label: 'All Features', to: '/features' },
     { label: 'Solutions', to: '/solutions' },
-    { label: 'Pricing Plans', to: '/pricing' },
   ];
 
   return (

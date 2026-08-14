@@ -79,18 +79,6 @@ export default function MobileMenu({
               About Us
             </Link>
             <Link
-              to="/ecosystem"
-              onClick={onClose}
-              style={{
-                color: isDark ? '#94A3B8' : '#64748B',
-                textDecoration: 'none',
-                fontSize: '14px',
-                fontWeight: 500,
-              }}
-            >
-              UAE Ecosystem
-            </Link>
-            <Link
               to="/blog"
               onClick={onClose}
               style={{
@@ -175,18 +163,6 @@ export default function MobileMenu({
               }}
             >
               Solutions
-            </Link>
-            <Link
-              to="/pricing"
-              onClick={onClose}
-              style={{
-                color: isDark ? '#94A3B8' : '#64748B',
-                textDecoration: 'none',
-                fontSize: '14px',
-                fontWeight: 500,
-              }}
-            >
-              Pricing Plans
             </Link>
           </div>
         )}
