@@ -1,7 +1,7 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { onAuthStateChanged } from 'firebase/auth'
-import { doc, setDoc } from 'firebase/firestore'
+import { onAuthStateChanged, signOut } from 'firebase/auth'
+import { doc, setDoc, getDoc } from 'firebase/firestore'
 import { auth, db } from './firebase'
 
 import { ThemeProvider } from './context/ThemeContext'
@@ -44,25 +44,26 @@ export default function App() {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
-          const nowStr = new Date().toISOString();
+          // Check if society or user profile exists in database
+          const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid));
           const session = getSocietyAdminSession();
-          const societyId = session?.societyId || 'SOC-ADMIN';
-          await setDoc(doc(db, 'users', firebaseUser.uid), {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            role: 'admin',
-            societyId: societyId,
-            updatedAt: nowStr
-          }, { merge: true });
-          await setDoc(doc(db, `societies/${societyId}/users`, firebaseUser.uid), {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            role: 'admin',
-            societyId: societyId,
-            updatedAt: nowStr
-          }, { merge: true });
+          const societyId = userDocSnap.data()?.societyId || session?.societyId;
+
+          let societyExists = false;
+          if (societyId && societyId !== 'SOC-ADMIN') {
+            const socDocSnap = await getDoc(doc(db, 'societies', societyId));
+            societyExists = socDocSnap.exists();
+          }
+
+          // If database was wiped or user document was deleted, auto-logout
+          if (!userDocSnap.exists() && !societyExists) {
+            clearSocietyAdminSession();
+            await signOut(auth);
+            setUser(null);
+            return;
+          }
         } catch (e) {
-          console.warn('Could not sync admin profile doc:', e);
+          console.warn('Session verification notice:', e);
         }
       }
       setUser(firebaseUser || null);
