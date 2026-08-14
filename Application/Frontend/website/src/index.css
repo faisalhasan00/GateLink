@@ -1,13 +1,17 @@
-:root {
-  --primary: #2563EB;
-  --primary-hover: #1D4ED8;
-  --primary-light: #EFF6FF;
-  --secondary: #059669;
-  --secondary-light: #ECFDF5;
-  --warning: #D97706;
-  --warning-light: #FFFBEB;
-  --danger: #DC2626;
-  --danger-light: #FEF2F2;
+@import './gatelink_tokens.css';
+
+:root, html.light-theme {
+  --primary: var(--gl-navy);
+  --primary-hover: var(--gl-navy-hover);
+  --primary-light: var(--gl-sky-100);
+  --secondary: var(--gl-sky);
+  --secondary-light: var(--gl-sky-100);
+  --accent: var(--gl-amber);
+  --accent-light: var(--gl-amber-100);
+  --warning: var(--gl-pending);
+  --warning-light: var(--gl-pending-bg);
+  --danger: var(--gl-danger);
+  --danger-light: var(--gl-danger-bg);
   
   --bg-color: #F8FAFC;
   --surface-color: #FFFFFF;

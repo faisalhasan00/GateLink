@@ -15,11 +15,9 @@ class AppTheme {
         primary: AppColors.primary,
         secondary: AppColors.secondary,
         error: AppColors.error,
-        background: AppColors.background,
         surface: AppColors.surface,
         onPrimary: Colors.white,
         onSecondary: Colors.white,
-        onBackground: AppColors.textPrimary,
         onSurface: AppColors.textPrimary,
       ),
       textTheme: _buildTextTheme(AppColors.textPrimary),
@@ -28,9 +26,9 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0.5,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.inter(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
+        titleTextStyle: GoogleFonts.manrope(
+          fontSize: 20,
+          fontWeight: FontWeight.w800,
           color: AppColors.textPrimary,
         ),
         iconTheme: const IconThemeData(color: AppColors.textPrimary),
@@ -39,7 +37,7 @@ class AppTheme {
         color: Colors.white,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
           side: const BorderSide(color: AppColors.border, width: 1),
         ),
         margin: EdgeInsets.zero,
@@ -126,7 +124,7 @@ class AppTheme {
         space: 0,
       ),
       scaffoldBackgroundColor: AppColors.background,
-      splashColor: AppColors.primary.withOpacity(0.05),
+      splashColor: AppColors.primary.withValues(alpha: 0.05),
       highlightColor: Colors.transparent,
     );
   }
@@ -146,24 +144,27 @@ class AppTheme {
 
   static TextTheme _buildTextTheme(Color textColor) {
     return TextTheme(
-      displayLarge: GoogleFonts.inter(
-          fontSize: 32, fontWeight: FontWeight.w700, color: textColor),
-      displayMedium: GoogleFonts.inter(
-          fontSize: 28, fontWeight: FontWeight.w600, color: textColor),
-      displaySmall: GoogleFonts.inter(
-          fontSize: 24, fontWeight: FontWeight.w600, color: textColor),
-      headlineLarge: GoogleFonts.inter(
-          fontSize: 22, fontWeight: FontWeight.w600, color: textColor),
-      headlineMedium: GoogleFonts.inter(
-          fontSize: 20, fontWeight: FontWeight.w500, color: textColor),
-      headlineSmall: GoogleFonts.inter(
-          fontSize: 18, fontWeight: FontWeight.w500, color: textColor),
+      // Display / H1 use Manrope 800
+      displayLarge: GoogleFonts.manrope(
+          fontSize: 32, fontWeight: FontWeight.w800, color: textColor),
+      displayMedium: GoogleFonts.manrope(
+          fontSize: 28, fontWeight: FontWeight.w800, color: textColor),
+      displaySmall: GoogleFonts.manrope(
+          fontSize: 24, fontWeight: FontWeight.w800, color: textColor),
+      headlineLarge: GoogleFonts.manrope(
+          fontSize: 24, fontWeight: FontWeight.w800, color: textColor),
+      headlineMedium: GoogleFonts.manrope(
+          fontSize: 20, fontWeight: FontWeight.w700, color: textColor),
+      headlineSmall: GoogleFonts.manrope(
+          fontSize: 18, fontWeight: FontWeight.w700, color: textColor),
+      
+      // Titles, Body, and Captions use Inter
       titleLarge: GoogleFonts.inter(
           fontSize: 16, fontWeight: FontWeight.w600, color: textColor),
       titleMedium: GoogleFonts.inter(
-          fontSize: 14, fontWeight: FontWeight.w500, color: textColor),
+          fontSize: 14, fontWeight: FontWeight.w600, color: textColor),
       titleSmall: GoogleFonts.inter(
-          fontSize: 12, fontWeight: FontWeight.w500, color: textColor),
+          fontSize: 12, fontWeight: FontWeight.w600, color: textColor),
       bodyLarge: GoogleFonts.inter(
           fontSize: 16, fontWeight: FontWeight.w400, color: textColor),
       bodyMedium: GoogleFonts.inter(
@@ -173,9 +174,9 @@ class AppTheme {
       labelLarge: GoogleFonts.inter(
           fontSize: 14, fontWeight: FontWeight.w600, color: textColor),
       labelMedium: GoogleFonts.inter(
-          fontSize: 12, fontWeight: FontWeight.w500, color: textColor),
+          fontSize: 12, fontWeight: FontWeight.w600, color: textColor),
       labelSmall: GoogleFonts.inter(
-          fontSize: 10, fontWeight: FontWeight.w400, color: textColor),
+          fontSize: 10, fontWeight: FontWeight.w600, color: textColor),
     );
   }
 }

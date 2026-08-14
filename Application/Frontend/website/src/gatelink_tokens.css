@@ -1,0 +1,154 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   GateLink Global Design System Tokens
+   Source of Truth for Colors, Typography, Shapes & Components
+   ══════════════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@800&display=swap');
+
+:root {
+  /* ── BRAND COLORS ─────────────────────────────────────────────────────── */
+  --gl-navy: #1E3A8A;
+  --gl-navy-hover: #172554;
+  --gl-navy-light: #EFF6FF;
+  --gl-sky: #0EA5E9;
+  --gl-sky-hover: #0284C7;
+  --gl-sky-100: #E0F2FE;
+  --gl-amber: #F59E0B;
+  --gl-amber-hover: #D97706;
+  --gl-amber-100: #FEF3C7;
+
+  /* ── STATUS COLORS ─────────────────────────────────────────────────────── */
+  --gl-pending: #F59E0B;
+  --gl-pending-bg: #FEF3C7;
+  --gl-success: #16A34A;
+  --gl-success-bg: #DCFCE7;
+  --gl-danger: #DC2626;
+  --gl-danger-bg: #FEE2E2;
+  --gl-info: #0369A1;
+  --gl-info-bg: #E0F2FE;
+
+  /* ── COMPONENT ALIASES (Overriding legacy blues with GateLink Navy) ──── */
+  --primary: var(--gl-navy);
+  --primary-hover: var(--gl-navy-hover);
+  --primary-light: var(--gl-sky-100);
+  --secondary: var(--gl-sky);
+  --secondary-light: var(--gl-sky-100);
+  --accent: var(--gl-amber);
+  --accent-light: var(--gl-amber-100);
+  --warning: var(--gl-pending);
+  --warning-light: var(--gl-pending-bg);
+  --danger: var(--gl-danger);
+  --danger-light: var(--gl-danger-bg);
+  --success: var(--gl-success);
+  --success-light: var(--gl-success-bg);
+  --info: var(--gl-info);
+  --info-light: var(--gl-info-bg);
+
+  /* ── NEUTRALS & SURFACES ──────────────────────────────────────────────── */
+  --bg-color: #F8FAFC;
+  --surface-color: #FFFFFF;
+  --border-color: #E2E8F0;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+
+  /* ── SHAPES & CORNER RADIUS ───────────────────────────────────────────── */
+  --radius-card: 16px;
+  --radius-button: 12px;
+  --radius-pill: 999px;
+  --radius-md: 12px;
+
+  /* ── SPACING TOKENS ───────────────────────────────────────────────────── */
+  --screen-padding: 20px;
+  --card-gap: 16px;
+  --card-padding: 22px;
+
+  /* ── TYPOGRAPHY ───────────────────────────────────────────────────────── */
+  --font-display: 'Manrope', sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ── TYPOGRAPHY ENFORCEMENT ──────────────────────────────────────────────── */
+h1, .page-title, .screen-title, .wordmark, .display-h1 {
+  font-family: var(--font-display) !important;
+  font-weight: 800 !important;
+  color: var(--text-primary);
+}
+
+body, button, input, select, textarea, p, span, a, label, table, td, th {
+  font-family: var(--font-body);
+}
+
+/* ── COMPONENT STYLING ──────────────────────────────────────────────────── */
+.card, .dashboard-card {
+  border-radius: var(--radius-card) !important;
+  padding: var(--card-padding);
+}
+
+.btn-primary, button.primary {
+  background-color: var(--gl-navy) !important;
+  color: #FFFFFF !important;
+  border-radius: var(--radius-button) !important;
+  font-weight: 600;
+  border: none;
+  transition: all 0.2s ease;
+}
+.btn-primary:hover, button.primary:hover {
+  background-color: var(--gl-navy-hover) !important;
+}
+
+.btn-accent {
+  background-color: var(--gl-amber) !important;
+  color: #FFFFFF !important;
+  border-radius: var(--radius-button) !important;
+  font-weight: 600;
+  border: none;
+  transition: all 0.2s ease;
+}
+.btn-accent:hover {
+  background-color: var(--gl-amber-hover) !important;
+}
+
+.btn-outline, .btn-ghost {
+  background-color: #FFFFFF !important;
+  color: var(--gl-navy) !important;
+  border: 1.5px solid var(--gl-navy) !important;
+  border-radius: var(--radius-button) !important;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.btn-outline:hover, .btn-ghost:hover {
+  background-color: var(--gl-sky-100) !important;
+}
+
+/* Status Badges */
+.badge-pending {
+  background-color: var(--gl-pending-bg) !important;
+  color: var(--gl-pending) !important;
+  border-radius: var(--radius-pill) !important;
+  font-weight: 600;
+}
+.badge-success, .badge-paid, .badge-active {
+  background-color: var(--gl-success-bg) !important;
+  color: var(--gl-success) !important;
+  border-radius: var(--radius-pill) !important;
+  font-weight: 600;
+}
+.badge-danger, .badge-urgent {
+  background-color: var(--gl-danger-bg) !important;
+  color: var(--gl-danger) !important;
+  border-radius: var(--radius-pill) !important;
+  font-weight: 600;
+}
+.badge-info {
+  background-color: var(--gl-info-bg) !important;
+  color: var(--gl-info) !important;
+  border-radius: var(--radius-pill) !important;
+  font-weight: 600;
+}
+
+/* Sponsored ad card distinct styling */
+.ad-card, .sponsored-banner {
+  background: #F8FAFC !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: var(--radius-card) !important;
+}

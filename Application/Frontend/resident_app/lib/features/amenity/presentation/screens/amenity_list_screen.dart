@@ -120,88 +120,129 @@ class _AmenityListScreenState extends ConsumerState<AmenityListScreen> {
               final color = _colorMap[amenity.iconKey] ?? AppColors.primary;
 
               return Container(
-                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                margin: const EdgeInsets.only(bottom: AppSpacing.cardGap),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppRadius.xl),
+                  borderRadius: BorderRadius.circular(AppRadius.card),
                   border: Border.all(color: AppColors.border),
                 ),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(AppSpacing.md),
-                  leading: Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                    ),
-                    child: Icon(icon, color: color, size: 24),
-                  ),
-                  title: Text(amenity.name,
-                      style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary)),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 4),
-                      Row(children: [
-                        const Icon(Icons.access_time_rounded,
-                            size: 12, color: AppColors.textSecondary),
-                        const SizedBox(width: 4),
-                        Text(amenity.timing,
-                            style: const TextStyle(
-                                fontSize: 12, color: AppColors.textSecondary)),
-                        const SizedBox(width: 8),
-                        Text('• ${amenity.fee}',
-                            style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary)),
-                      ]),
-                      const SizedBox(height: 4),
-                      Text(
-                        !isFacilityOpen
-                            ? '● Facility Maintenance / Closed'
-                            : isFullyBooked
-                                ? '● Fully Booked / Sold Out (0 Left)'
-                                : '● $remainingSlots Slots Available (Quota: ${amenity.capacity})',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: canBook ? AppColors.success : AppColors.error,
-                        ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
                       ),
-                    ],
-                  ),
-                  trailing: canBook
-                      ? ElevatedButton(
-                          onPressed: () => context
-                              .go('${AppRoutes.amenities}/${amenity.id}'),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            minimumSize: Size.zero,
-                          ),
-                          child: const Text('Book',
-                              style: TextStyle(fontSize: 12)),
-                        )
-                      : Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 5),
-                          decoration: BoxDecoration(
-                            color: AppColors.error.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(AppRadius.full),
-                          ),
-                          child: Text(
-                            !isFacilityOpen ? 'Closed' : 'Sold Out',
+                      child: Icon(icon, color: color, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            amenity.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              const Icon(Icons.access_time_rounded,
+                                  size: 12, color: AppColors.textSecondary),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  amenity.timing,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                '• ${amenity.fee}',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            !isFacilityOpen
+                                ? '● Closed'
+                                : isFullyBooked
+                                    ? '● Fully Booked'
+                                    : '● $remainingSlots Left (Quota: ${amenity.capacity})',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              color:
+                                  canBook ? AppColors.success : AppColors.error,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    canBook
+                        ? ElevatedButton(
+                            onPressed: () => context
+                                .go('${AppRoutes.amenities}/${amenity.id}'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 8),
+                              minimumSize: Size.zero,
+                              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.button),
+                              ),
+                            ),
+                            child: const Text(
+                              'Book',
+                              style: TextStyle(
+                                  fontSize: 12, fontWeight: FontWeight.w700),
+                            ),
+                          )
+                        : Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 5),
+                            decoration: BoxDecoration(
+                              color: AppColors.error.withValues(alpha: 0.1),
+                              borderRadius:
+                                  BorderRadius.circular(AppRadius.pill),
+                            ),
+                            child: Text(
+                              !isFacilityOpen ? 'Closed' : 'Sold Out',
+                              style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.error),
+                                color: AppColors.error,
+                              ),
+                            ),
                           ),
-                        ),
+                  ],
                 ),
               );
             },

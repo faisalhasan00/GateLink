@@ -5,23 +5,27 @@ class AppColors {
   AppColors._();
 
   // --- Brand Colors ---
-  static const Color primary = Color(0xFF2563EB);
-  static const Color primaryLight = Color(0xFF3B82F6);
-  static const Color primaryDark = Color(0xFF1D4ED8);
-  static const Color primarySurface = Color(0xFFEFF6FF);
+  static const Color primary = Color(0xFF1E3A8A); // Navy
+  static const Color primaryLight = Color(0xFF0EA5E9); // Sky Blue
+  static const Color primaryDark = Color(0xFF172554); // Deep Navy
+  static const Color primarySurface = Color(0xFFE0F2FE); // Sky-100
 
-  // --- Secondary ---
-  static const Color secondary = Color(0xFF0F172A);
+  // --- Secondary & Accent ---
+  static const Color secondary = Color(0xFF0EA5E9); // Sky Blue
+  static const Color accent = Color(0xFFF59E0B); // Amber
+  static const Color accentSurface = Color(0xFFFEF3C7);
 
-  // --- Semantic Colors ---
-  static const Color success = Color(0xFF22C55E);
-  static const Color successSurface = Color(0xFFF0FDF4);
-  static const Color warning = Color(0xFFF59E0B);
-  static const Color warningSurface = Color(0xFFFFFBEB);
-  static const Color error = Color(0xFFEF4444);
-  static const Color errorSurface = Color(0xFFFEF2F2);
-  static const Color info = Color(0xFF06B6D4);
-  static const Color infoSurface = Color(0xFFECFEFF);
+  // --- Status Colors ---
+  static const Color success = Color(0xFF16A34A); // Green
+  static const Color successSurface = Color(0xFFDCFCE7);
+  static const Color warning = Color(0xFFF59E0B); // Amber / Pending
+  static const Color warningSurface = Color(0xFFFEF3C7);
+  static const Color pending = Color(0xFFF59E0B);
+  static const Color pendingSurface = Color(0xFFFEF3C7);
+  static const Color error = Color(0xFFDC2626); // Red / Danger
+  static const Color errorSurface = Color(0xFFFEE2E2);
+  static const Color info = Color(0xFF0369A1); // Info
+  static const Color infoSurface = Color(0xFFE0F2FE);
 
   // --- Neutral Colors ---
   static const Color background = Color(0xFFF8FAFC);

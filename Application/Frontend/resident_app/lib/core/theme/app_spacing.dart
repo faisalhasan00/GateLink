@@ -15,22 +15,26 @@ class AppSpacing {
   static const double pagePadding = 20.0;
 
   // Card padding
-  static const double cardPadding = 16.0;
+  static const double cardPadding = 22.0;
+  static const double cardGap = 16.0;
 
   // Bottom safe area buffer
   static const double bottomSafe = 24.0;
 }
 
-/// Border radius tokens from UI-003
+/// Border radius tokens from GateLink Design System Brief
 class AppRadius {
   AppRadius._();
 
   static const double sm = 4.0;
   static const double md = 8.0;
+  static const double button = 12.0;
   static const double lg = 12.0;
+  static const double card = 16.0;
   static const double xl = 16.0;
   static const double xxl = 20.0;
-  static const double full = 9999.0;
+  static const double pill = 999.0;
+  static const double full = 999.0;
 }
 
 /// Animation duration tokens from UI-003
