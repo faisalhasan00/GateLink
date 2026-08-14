@@ -21,7 +21,9 @@ import {
   orderBy,
   writeBatch
 } from 'firebase/firestore';
-import { db } from '../firebase';
+import { initializeApp, deleteApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { db, firebaseConfig } from '../firebase';
 import { generateUUID } from '../utils/security';
 
 export const superAdminService = {
@@ -51,7 +53,46 @@ export const superAdminService = {
     const tempPassword = cleanData.password || `${cleanData.name.substring(0, 3).toUpperCase()}#${Math.floor(1000 + Math.random() * 9000)}`;
     const timestamp = new Date().toISOString();
 
+    // 1. Auto-provision Firebase Auth Account for Society Admin
+    let adminUid = null;
+    let provisionApp = null;
+    try {
+      const appName = `AdminProvisioner-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+      provisionApp = initializeApp(firebaseConfig, appName);
+      const provisionAuth = getAuth(provisionApp);
+      const userCredential = await createUserWithEmailAndPassword(provisionAuth, adminEmail, tempPassword);
+      adminUid = userCredential.user?.uid;
+    } catch (authErr) {
+      console.warn("Auth user provisioning info:", authErr?.message || authErr);
+    } finally {
+      if (provisionApp) {
+        try {
+          await deleteApp(provisionApp);
+        } catch (e) {
+          console.error("Secondary app cleanup error:", e);
+        }
+      }
+    }
+
     const batch = writeBatch(db);
+
+    // If Auth user was created, bind their profile document in /users/{uid}
+    if (adminUid) {
+      const userRef = doc(db, 'users', adminUid);
+      batch.set(userRef, {
+        uid: adminUid,
+        email: adminEmail,
+        name: cleanData.presidentName || `${cleanData.name} Admin`,
+        role: 'society_admin',
+        societyId: societyId,
+        societyName: cleanData.name,
+        phone: cleanData.phone || '',
+        status: 'active',
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        createdBy: 'super_admin'
+      });
+    }
 
     const blockNamesRaw = cleanData.blockNames || cleanData.buildings || 'A, B, C, D';
     const parsedBlocks = blockNamesRaw.split(',').map(s => s.trim()).filter(Boolean);
