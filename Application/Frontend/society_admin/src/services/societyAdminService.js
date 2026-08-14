@@ -27,12 +27,37 @@ import { db } from '../firebase';
 import { generateUUID } from '../utils/security';
 
 export const societyAdminService = {
-  // ── SOCIETY DETAILS ───────────────────────────────────────────────────
+  // ── SOCIETY DETAILS & BANK SETTLEMENTS ──────────────────────────────────
   async getSocietyDetails(societyId) {
     if (!societyId) return null;
     const docRef = doc(db, 'societies', societyId);
     const docSnap = await getDoc(docRef);
     return docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } : null;
+  },
+
+  async getSocietyBankDetails(societyId) {
+    if (!societyId) return null;
+    const docRef = doc(db, `societies/${societyId}/metadata/bankDetails`);
+    const docSnap = await getDoc(docRef);
+    return docSnap.exists() ? docSnap.data() : null;
+  },
+
+  async updateSocietyBankDetails(societyId, bankData) {
+    if (!societyId) throw new Error('Missing societyId');
+    const docRef = doc(db, `societies/${societyId}/metadata/bankDetails`);
+    const timestamp = new Date().toISOString();
+    await setDoc(docRef, {
+      ...bankData,
+      updatedAt: timestamp,
+      status: 'Verified',
+      settlementMode: 'Cashfree Auto-Settlement (T+1)'
+    }, { merge: true });
+
+    await this.logAuditAction(societyId, {
+      action: 'Bank Details Updated',
+      description: `Updated settlement bank account: ${bankData.bankName} (Ending in ${bankData.accountNumber?.slice(-4) || '****'})`
+    });
+    return true;
   },
 
   async onboardSocietyBatch(cleanData) {

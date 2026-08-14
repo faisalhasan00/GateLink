@@ -9,15 +9,19 @@ import {
   FileText, 
   DollarSign, 
   AlertCircle,
-  ShieldCheck
+  ShieldCheck,
+  Landmark
 } from 'lucide-react';
 import { getSocietyAdminSession } from '../services/sessionManager';
 import { societyAdminService } from '../services/societyAdminService';
+import BankAccountCard from '../components/finance/BankAccountCard';
+import Button from '../components/ui/Button';
 
 export default function Maintenance() {
   const session = getSocietyAdminSession();
   const societyId = session?.societyId;
 
+  const [activeTab, setActiveTab] = useState('invoices'); // 'invoices' | 'bank_account'
   const [bills, setBills] = useState([]);
   const [residents, setResidents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -234,36 +238,87 @@ export default function Maintenance() {
         </div>
       </div>
 
-      {pendingVerifications.length > 0 && (
-        <div className="card" style={{ padding: '20px', borderLeft: '4px solid #F59E0B', backgroundColor: '#FFFBEB' }}>
-          <h4 style={{ margin: '0 0 10px 0', color: '#92400E' }}>Pending Payment Verifications Queue ({pendingVerifications.length})</h4>
-          <table className="data-table" style={{ width: '100%', backgroundColor: '#FFFFFF', borderRadius: '8px' }}>
-            <thead>
-              <tr>
-                <th>Invoice & Resident</th>
-                <th>UTR / Ref</th>
-                <th>Amount</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pendingVerifications.map(b => (
-                <tr key={b.id}>
-                  <td><strong>{b.billNumber || b.id}</strong> — {b.residentName} ({b.flatNumber})</td>
-                  <td><code>{b.utrNumber || 'N/A'}</code></td>
-                  <td>₹{b.amount}</td>
-                  <td>
-                    <button onClick={() => handleApproveVerification(b)} className="btn btn-primary" style={{ padding: '4px 8px', fontSize: '11px', marginRight: '6px' }}>Approve</button>
-                    <button onClick={() => handleRejectVerification(b)} className="btn btn-outline" style={{ padding: '4px 8px', fontSize: '11px', color: 'var(--danger)' }}>Reject</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+      {/* Tab Switcher Bar */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
+        <button
+          type="button"
+          onClick={() => setActiveTab('invoices')}
+          style={{
+            padding: '8px 18px',
+            borderRadius: '10px',
+            border: 'none',
+            backgroundColor: activeTab === 'invoices' ? '#1E3A8A' : 'transparent',
+            color: activeTab === 'invoices' ? '#FFFFFF' : '#475569',
+            fontWeight: 700,
+            fontSize: '13px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <CreditCard size={15} />
+          <span>All Invoices & Ledger</span>
+        </button>
 
-      <div className="card" style={{ padding: '16px 20px' }}>
+        <button
+          type="button"
+          onClick={() => setActiveTab('bank_account')}
+          style={{
+            padding: '8px 18px',
+            borderRadius: '10px',
+            border: 'none',
+            backgroundColor: activeTab === 'bank_account' ? '#1E3A8A' : 'transparent',
+            color: activeTab === 'bank_account' ? '#FFFFFF' : '#475569',
+            fontWeight: 700,
+            fontSize: '13px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            transition: 'all 0.2s ease'
+          }}
+        >
+          <Landmark size={15} />
+          <span>Auto-Settlement Bank A/C</span>
+        </button>
+      </div>
+
+      {activeTab === 'bank_account' ? (
+        <BankAccountCard societyId={societyId} />
+      ) : (
+        <>
+          {pendingVerifications.length > 0 && (
+            <div className="card" style={{ padding: '20px', borderLeft: '4px solid #F59E0B', backgroundColor: '#FFFBEB' }}>
+              <h4 style={{ margin: '0 0 10px 0', color: '#92400E' }}>Pending Payment Verifications Queue ({pendingVerifications.length})</h4>
+              <table className="data-table" style={{ width: '100%', backgroundColor: '#FFFFFF', borderRadius: '8px' }}>
+                <thead>
+                  <tr>
+                    <th>Invoice & Resident</th>
+                    <th>UTR / Ref</th>
+                    <th>Amount</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pendingVerifications.map(b => (
+                    <tr key={b.id}>
+                      <td><strong>{b.billNumber || b.id}</strong> — {b.residentName} ({b.flatNumber})</td>
+                      <td><code>{b.utrNumber || 'N/A'}</code></td>
+                      <td>₹{b.amount}</td>
+                      <td>
+                        <button onClick={() => handleApproveVerification(b)} className="btn btn-primary" style={{ padding: '4px 8px', fontSize: '11px', marginRight: '6px' }}>Approve</button>
+                        <button onClick={() => handleRejectVerification(b)} className="btn btn-outline" style={{ padding: '4px 8px', fontSize: '11px', color: 'var(--danger)' }}>Reject</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          <div className="card" style={{ padding: '16px 20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center', flex: 1 }}>
             <input 
@@ -329,6 +384,8 @@ export default function Maintenance() {
           </table>
         </div>
       </div>
+    </>
+  )}
 
       {isGenerateModalOpen && (
         <div className="modal-overlay" onClick={() => setIsGenerateModalOpen(false)}>

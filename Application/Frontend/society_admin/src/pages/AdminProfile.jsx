@@ -11,6 +11,7 @@ import { auth } from '../firebase';
 import { updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { getSocietyAdminSession } from '../services/sessionManager';
 import { societyAdminService } from '../services/societyAdminService';
+import BankAccountCard from '../components/finance/BankAccountCard';
 
 export default function AdminProfile() {
   const session = getSocietyAdminSession();
@@ -127,6 +128,9 @@ export default function AdminProfile() {
           </div>
         </div>
       </div>
+
+      {/* Society Bank Account & Auto-Settlement Details */}
+      <BankAccountCard societyId={societyId} />
 
       {isEditing && (
         <div className="modal-overlay" onClick={() => setIsEditing(false)}>
