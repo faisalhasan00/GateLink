@@ -1,12 +1,12 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { onAuthStateChanged, signOut } from 'firebase/auth'
-import { doc, setDoc, getDoc } from 'firebase/firestore'
+import { onAuthStateChanged } from 'firebase/auth'
+import { doc, onSnapshot, getDoc } from 'firebase/firestore'
 import { auth, db } from './firebase'
 
 import { ThemeProvider } from './context/ThemeContext'
 import SkeletonLoader from './components/ui/SkeletonLoader'
-import { getSocietyAdminSession } from './services/sessionManager'
+import { getSocietyAdminSession, performCentralizedLogout, clearSocietyAdminSession } from './services/sessionManager'
 import './index.css'
 
 // Lazy Loaded Society Admin Pages
@@ -29,9 +29,11 @@ const AdminLogin = lazy(() => import('./pages/AdminLogin'))
 const AdminProfile = lazy(() => import('./pages/AdminProfile'))
 
 function ProtectedRoute({ user, children }) {
+  // undefined = Auth verification in-flight
   if (user === undefined) return <SkeletonLoader />;
-  const session = getSocietyAdminSession();
-  if (!user && !session) {
+  
+  // Authoritative Check: Must have a validated Firebase User. Stale localStorage is blocked.
+  if (!user) {
     return <Navigate to="/login" replace />;
   }
   return children;
@@ -41,34 +43,70 @@ export default function App() {
   const [user, setUser] = useState(undefined); // undefined = loading
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        try {
-          // Check if society or user profile exists in database
-          const userDocSnap = await getDoc(doc(db, 'users', firebaseUser.uid));
-          const session = getSocietyAdminSession();
-          const societyId = userDocSnap.data()?.societyId || session?.societyId;
+    let unsubscribeSnapshot = null;
 
-          let societyExists = false;
-          if (societyId && societyId !== 'SOC-ADMIN') {
-            const socDocSnap = await getDoc(doc(db, 'societies', societyId));
-            societyExists = socDocSnap.exists();
-          }
-
-          // If database was wiped or user document was deleted, auto-logout
-          if (!userDocSnap.exists() && !societyExists) {
-            clearSocietyAdminSession();
-            await signOut(auth);
-            setUser(null);
-            return;
-          }
-        } catch (e) {
-          console.warn('Session verification notice:', e);
-        }
+    const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+        unsubscribeSnapshot = null;
       }
-      setUser(firebaseUser || null);
+
+      if (!firebaseUser) {
+        clearSocietyAdminSession();
+        setUser(null);
+        return;
+      }
+
+      // Real-Time Authoritative Account Presence Listener
+      // If user document is deleted or status changed in database, auto-logout instantly
+      const userDocRef = doc(db, 'users', firebaseUser.uid);
+      unsubscribeSnapshot = onSnapshot(
+        userDocRef,
+        async (docSnap) => {
+          if (!docSnap.exists()) {
+            // Check fallback society owner verification
+            let hasValidSocFallback = false;
+            try {
+              const session = getSocietyAdminSession();
+              if (session?.societyId && session.societyId !== 'SOC-ADMIN') {
+                const socSnap = await getDoc(doc(db, 'societies', session.societyId));
+                if (socSnap.exists() && socSnap.data()?.status !== 'deleted' && socSnap.data()?.adminEmail?.toLowerCase() === firebaseUser.email?.toLowerCase()) {
+                  hasValidSocFallback = true;
+                }
+              }
+            } catch (e) {
+              console.warn('Fallback verification error:', e);
+            }
+
+            if (!hasValidSocFallback) {
+              console.warn('Authoritative verification failed: User account deleted in database. Logging out...');
+              await performCentralizedLogout(auth);
+              setUser(null);
+              return;
+            }
+          } else {
+            const data = docSnap.data() || {};
+            if (data.status === 'deleted' || data.status === 'suspended' || data.status === 'inactive') {
+              console.warn('Authoritative verification failed: Account status inactive/suspended. Logging out...');
+              await performCentralizedLogout(auth);
+              setUser(null);
+              return;
+            }
+          }
+
+          setUser(firebaseUser);
+        },
+        async (err) => {
+          console.warn('Real-time session snapshot notice:', err);
+          setUser(firebaseUser);
+        }
+      );
     });
-    return () => unsubscribe();
+
+    return () => {
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+      unsubscribeAuth();
+    };
   }, []);
 
   return (

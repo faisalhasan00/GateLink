@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../../firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../../firebase';
 import { useNavigate, Link } from 'react-router-dom';
-import { setSuperAdminSession } from '../../services/sessionManager';
+import { setSuperAdminSession, performCentralizedLogout } from '../../services/sessionManager';
 import GateLinkLogo from '../../components/ui/GateLinkLogo';
 import SeoHead from '../../components/seo/SeoHead';
 import { Lock, Mail, ArrowRight, AlertCircle, ShieldAlert } from 'lucide-react';
@@ -31,7 +32,7 @@ export default function SuperAdminLogin() {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // Enforce Super Admin email restriction
+    // 1. Enforce Super Admin email restriction
     if (cleanEmail !== SUPER_ADMIN_EMAIL.toLowerCase()) {
       setError('Access Denied: Unrecognized Super Admin email address.');
       setLoading(false);
@@ -39,31 +40,42 @@ export default function SuperAdminLogin() {
     }
 
     try {
-      // 1. Try standard Firebase Auth login
+      // 2. Authoritative Firebase Auth Sign In
       const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
-      setSuperAdminSession({ email: cleanEmail, token: res.user?.uid });
+      const uid = res.user?.uid;
+
+      if (!uid) {
+        throw new Error('Authentication failed: Invalid credentials.');
+      }
+
+      // 3. Authoritative Database Account Verification
+      const userDocSnap = await getDoc(doc(db, 'users', uid));
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data() || {};
+        if (userData.status === 'deleted' || userData.status === 'suspended') {
+          await performCentralizedLogout(auth);
+          throw new Error('Account not found or account is no longer active.');
+        }
+      }
+
+      setSuperAdminSession({ email: cleanEmail, token: uid });
       navigate('/');
     } catch (err) {
-      // 2. Auto-create account in Firebase Auth on first initialization if password is strong (>= 6 chars)
-      if (password.length >= 6) {
-        try {
-          const newRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
-          setSuperAdminSession({ email: cleanEmail, token: newRes.user?.uid });
-          navigate('/');
-          return;
-        } catch (innerErr) {
-          if (innerErr.code === 'auth/email-already-in-use' || innerErr.code === 'auth/wrong-password') {
-            setError('Invalid password. Please enter your correct Super Admin password.');
-          } else if (innerErr.code === 'auth/operation-not-allowed') {
-            setError('Email/Password sign-in is disabled in Firebase Console. Enable Email/Password under Firebase Console -> Authentication -> Sign-in method.');
-          } else {
-            console.error("Super Admin auth setup error:", innerErr);
-            setError(innerErr.message.replace('Firebase: ', '').replace(/\(.*\)\.?/, '').trim());
-          }
-        }
+      await performCentralizedLogout(auth);
+      let msg = err.message || 'Authentication failed.';
+      if (err.code === 'auth/operation-not-allowed') {
+        msg = 'Email/Password sign-in is disabled in Firebase Console.';
+      } else if (
+        err.code === 'auth/invalid-credential' || 
+        err.code === 'auth/wrong-password' || 
+        err.code === 'auth/user-not-found' ||
+        err.code === 'auth/invalid-email'
+      ) {
+        msg = 'Invalid email or password. Please verify your credentials.';
       } else {
-        setError('Invalid credentials or password too short (minimum 6 characters).');
+        msg = msg.replace('Firebase: ', '').replace(/\(.*\)\.?/, '').trim();
       }
+      setError(msg);
     } finally {
       setLoading(false);
     }

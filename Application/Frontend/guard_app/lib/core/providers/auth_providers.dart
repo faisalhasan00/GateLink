@@ -101,6 +101,14 @@ final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
     }
   }
 
+  if (profileData == null ||
+      profileData['status'] == 'deleted' ||
+      profileData['status'] == 'suspended' ||
+      profileData['status'] == 'inactive') {
+    await ref.read(authServiceProvider).signOut();
+    return null;
+  }
+
   return profileData;
 });
 

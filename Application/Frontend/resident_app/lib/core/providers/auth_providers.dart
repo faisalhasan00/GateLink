@@ -22,12 +22,23 @@ final currentUserProvider = Provider<User?>((ref) {
   return ref.watch(authStateProvider).value;
 });
 
-/// Directly fetches the user profile using UserRepository
+/// Directly fetches the user profile using UserRepository with authoritative deletion auto-signout
 final userProfileProvider = FutureProvider<UserProfileModel?>((ref) async {
   final user = ref.watch(currentUserProvider);
   if (user == null) return null;
   final repository = ref.watch(userRepositoryProvider);
-  return repository.getUserProfile(user.uid);
+  final profile = await repository.getUserProfile(user.uid);
+
+  // If user was deleted from database or suspended, instantly sign out
+  if (profile == null || 
+      profile.status == 'deleted' || 
+      profile.status == 'suspended' || 
+      profile.status == 'inactive') {
+    await ref.read(authServiceProvider).signOut();
+    return null;
+  }
+
+  return profile;
 });
 
 /// Convenience provider for user account status ('active', 'pending_approval', 'suspended', 'rejected')

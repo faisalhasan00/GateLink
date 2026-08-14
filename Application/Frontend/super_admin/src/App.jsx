@@ -1,11 +1,12 @@
 import React, { useState, useEffect, lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from './firebase'
+import { doc, onSnapshot } from 'firebase/firestore'
+import { auth, db } from './firebase'
 
 import { ThemeProvider } from './context/ThemeContext'
 import SkeletonLoader from './components/ui/SkeletonLoader'
-import { getSuperAdminSession } from './services/sessionManager'
+import { getSuperAdminSession, performCentralizedLogout, clearSuperAdminSession } from './services/sessionManager'
 import './index.css'
 
 // Lazy Loaded Super Admin Pages & Layouts
@@ -18,16 +19,10 @@ const SuperAdminProfile = lazy(() => import('./pages/superadmin/SuperAdminProfil
 const SuperAdminLogin = lazy(() => import('./pages/superadmin/SuperAdminLogin'))
 
 function ProtectedSuperRoute({ user, children }) {
-  const session = getSuperAdminSession();
-  const isSuperUser = Boolean(
-    session?.role === 'super_admin' ||
-    session?.email ||
-    (user && user.email)
-  );
+  if (user === undefined) return <SkeletonLoader />;
 
-  if (user === undefined && !session) return <SkeletonLoader />;
-
-  if (!isSuperUser) {
+  // Authoritative Check: Must have a validated Firebase User. Stale localStorage is blocked.
+  if (!user || !user.email) {
     return <Navigate to="/login" replace />;
   }
   return children;
@@ -37,10 +32,47 @@ export default function App() {
   const [user, setUser] = useState(undefined); // undefined = loading
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      setUser(firebaseUser || null);
+    let unsubscribeSnapshot = null;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (unsubscribeSnapshot) {
+        unsubscribeSnapshot();
+        unsubscribeSnapshot = null;
+      }
+
+      if (!firebaseUser) {
+        clearSuperAdminSession();
+        setUser(null);
+        return;
+      }
+
+      // Real-Time Authoritative Account Presence Listener for Super Admin
+      const userDocRef = doc(db, 'users', firebaseUser.uid);
+      unsubscribeSnapshot = onSnapshot(
+        userDocRef,
+        async (docSnap) => {
+          if (docSnap.exists()) {
+            const data = docSnap.data() || {};
+            if (data.status === 'deleted' || data.status === 'suspended' || data.status === 'inactive') {
+              console.warn('Super Admin account status inactive/suspended in database. Logging out...');
+              await performCentralizedLogout(auth);
+              setUser(null);
+              return;
+            }
+          }
+          setUser(firebaseUser);
+        },
+        async (err) => {
+          console.warn('Super admin session snapshot notice:', err);
+          setUser(firebaseUser);
+        }
+      );
     });
-    return () => unsubscribe();
+
+    return () => {
+      if (unsubscribeSnapshot) unsubscribeSnapshot();
+      unsubscribeAuth();
+    };
   }, []);
 
   return (

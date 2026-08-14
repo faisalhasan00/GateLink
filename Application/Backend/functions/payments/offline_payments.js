@@ -1,29 +1,18 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
-const { db, auth, FieldValue } = require("../config/firebase");
+const { db, FieldValue } = require("../config/firebase");
+const { verifyActiveUser } = require("../config/auth_middleware");
 
 /**
  * 3. Approve Offline UTR Payment (Society Admin)
  */
 const approveOfflinePayment = onRequest({ cors: true }, async (req, res) => {
   try {
-    let authUser = null;
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      const idToken = authHeader.split("Bearer ")[1];
-      try {
-        authUser = await auth.verifyIdToken(idToken);
-      } catch (authErr) {
-        logger.error("Auth token verification error", {
-          functionName: "approveOfflinePayment",
-          error: authErr.message,
-        });
-      }
+    const authResult = await verifyActiveUser(req, ["admin", "society_admin", "super_admin"]);
+    if (!authResult.authenticated) {
+      return res.status(authResult.statusCode || 401).json({ error: authResult.error });
     }
-
-    if (!authUser) {
-      return res.status(401).json({ error: "Unauthorized: Admin auth required" });
-    }
+    const authUser = authResult.authUser;
 
     const { societyId, maintenanceBillId } = req.body || {};
     if (!societyId || !maintenanceBillId) {
@@ -66,23 +55,11 @@ const approveOfflinePayment = onRequest({ cors: true }, async (req, res) => {
  */
 const rejectOfflinePayment = onRequest({ cors: true }, async (req, res) => {
   try {
-    let authUser = null;
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      const idToken = authHeader.split("Bearer ")[1];
-      try {
-        authUser = await auth.verifyIdToken(idToken);
-      } catch (authErr) {
-        logger.error("Auth token verification error", {
-          functionName: "rejectOfflinePayment",
-          error: authErr.message,
-        });
-      }
+    const authResult = await verifyActiveUser(req, ["admin", "society_admin", "super_admin"]);
+    if (!authResult.authenticated) {
+      return res.status(authResult.statusCode || 401).json({ error: authResult.error });
     }
-
-    if (!authUser) {
-      return res.status(401).json({ error: "Unauthorized: Admin auth required" });
-    }
+    const authUser = authResult.authUser;
 
     const { societyId, maintenanceBillId, rejectionReason } = req.body || {};
     if (!societyId || !maintenanceBillId) {

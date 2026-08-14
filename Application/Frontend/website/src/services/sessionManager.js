@@ -35,6 +35,7 @@ export const setSocietyAdminSession = (sessionData) => {
 export const clearSocietyAdminSession = () => {
   try {
     localStorage.removeItem(SOCIETY_ADMIN_KEY);
+    sessionStorage.clear();
   } catch (e) {
     console.error('Error clearing society admin session:', e);
   }
@@ -68,7 +69,27 @@ export const setSuperAdminSession = (sessionData) => {
 export const clearSuperAdminSession = () => {
   try {
     localStorage.removeItem(SUPER_ADMIN_KEY);
+    sessionStorage.clear();
   } catch (e) {
     console.error('Error clearing super admin session:', e);
+  }
+};
+
+/**
+ * Authoritative Centralized Logout Function
+ */
+export const performCentralizedLogout = async (authInstance) => {
+  try {
+    clearSocietyAdminSession();
+    clearSuperAdminSession();
+    localStorage.removeItem('user');
+    localStorage.removeItem('auth');
+    sessionStorage.clear();
+    if (authInstance) {
+      const { signOut } = await import('firebase/auth');
+      await signOut(authInstance);
+    }
+  } catch (e) {
+    console.error('Centralized logout error:', e);
   }
 };

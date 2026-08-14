@@ -2,15 +2,14 @@ const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const crypto = require("crypto");
 const { db } = require("../config/firebase");
+const { verifyActiveCallableUser } = require("../config/auth_middleware");
 
 /**
  * SEC-P0: Trusted Server-Side Visitor Passcode Generation
  * Generates a cryptographically secure 6-digit numeric passcode and 24-hour expiration timestamp.
  */
 const generateVisitorPasscode = onCall(async (request) => {
-  if (!request.auth) {
-    throw new HttpsError("unauthenticated", "Authentication required to generate visitor passcode.");
-  }
+  const caller = await verifyActiveCallableUser(request);
 
   const { societyId, name, phone, purpose, hostFlat, expectedDate, expectedTime } = request.data || {};
   if (!societyId || !name || !hostFlat) {
@@ -62,9 +61,7 @@ const generateVisitorPasscode = onCall(async (request) => {
  * Prevents passcode replay attacks and concurrent scan race conditions using Firestore Transaction.
  */
 const validateVisitorPasscode = onCall(async (request) => {
-  if (!request.auth) {
-    throw new HttpsError("unauthenticated", "Authentication required to validate visitor passcode.");
-  }
+  const caller = await verifyActiveCallableUser(request, ["guard", "admin", "society_admin", "super_admin"]);
 
   const { societyId, passCode } = request.data || {};
   if (!societyId || !passCode) {

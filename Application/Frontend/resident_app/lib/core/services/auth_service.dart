@@ -13,121 +13,44 @@ class AuthService {
 
   // ── EMAIL + PASSWORD ─────────────────────────────────────────────────────────
 
-  /// Sign in with email and password (with pre-provisioned account checks for residents and staff)
+  /// Sign in with email and password with authoritative backend database verification
   Future<UserCredential> signInWithEmail(String email, String password) async {
     final cleanEmail = email.trim().toLowerCase();
     final cleanPass = password.trim();
 
-    try {
-      return await _auth.signInWithEmailAndPassword(
-        email: cleanEmail,
-        password: cleanPass,
+    final cred = await _auth.signInWithEmailAndPassword(
+      email: cleanEmail,
+      password: cleanPass,
+    );
+
+    if (cred.user == null) {
+      throw FirebaseAuthException(
+        code: 'user-not-found',
+        message: 'Account not found or account is no longer active.',
       );
-    } catch (e) {
-      // If user not in Firebase Auth yet, check if RWA Admin pre-added them in Firestore (staff or users)
-      try {
-        // 1. Check collectionGroup('staff')
-        final staffQuery = await _db.collectionGroup('staff').get();
-        for (final docSnap in staffQuery.docs) {
-          final docData = docSnap.data();
-          if ((docData['email'] as String? ?? '').trim().toLowerCase() ==
-              cleanEmail) {
-            final parentSocId = docSnap.reference.parent.parent?.id ??
-                docData['societyId'] ??
-                'SOC-001';
-
-            UserCredential cred;
-            try {
-              cred = await _auth.createUserWithEmailAndPassword(
-                email: cleanEmail,
-                password: cleanPass,
-              );
-            } catch (authErr) {
-              if (authErr is FirebaseAuthException &&
-                  authErr.code == 'email-already-in-use') {
-                cred = await _auth.signInWithEmailAndPassword(
-                    email: cleanEmail, password: cleanPass);
-              } else {
-                rethrow;
-              }
-            }
-
-            if (cred.user != null) {
-              final updatedData = Map<String, dynamic>.from(docData);
-              updatedData['uid'] = cred.user!.uid;
-              updatedData.remove('password');
-
-              await docSnap.reference.set(updatedData, SetOptions(merge: true));
-
-              // Populate direct /users/{uid} index mapping for Auth & RBAC
-              await _db.doc('users/${cred.user!.uid}').set({
-                'uid': cred.user!.uid,
-                'email': cleanEmail,
-                'societyId': parentSocId,
-                'role': 'guard',
-                'department': docData['department'] ?? 'Security',
-                'name': docData['name'] ?? 'Gate Guard',
-                'phone': docData['phone'] ?? '',
-                'status': 'active',
-                'createdAt': DateTime.now().toIso8601String(),
-              }, SetOptions(merge: true));
-
-              return cred;
-            }
-          }
-        }
-
-        // 2. Check collectionGroup('users')
-        final usersQuery = await _db.collectionGroup('users').get();
-        for (final docSnap in usersQuery.docs) {
-          final docData = docSnap.data();
-          if ((docData['email'] as String? ?? '').trim().toLowerCase() ==
-              cleanEmail) {
-            final parentSocId = docSnap.reference.parent.parent?.id ??
-                docData['societyId'] ??
-                'SOC-001';
-
-            UserCredential cred;
-            try {
-              cred = await _auth.createUserWithEmailAndPassword(
-                email: cleanEmail,
-                password: cleanPass,
-              );
-            } catch (authErr) {
-              if (authErr is FirebaseAuthException &&
-                  authErr.code == 'email-already-in-use') {
-                cred = await _auth.signInWithEmailAndPassword(
-                    email: cleanEmail, password: cleanPass);
-              } else {
-                rethrow;
-              }
-            }
-
-            if (cred.user != null) {
-              final updatedData = Map<String, dynamic>.from(docData);
-              updatedData['uid'] = cred.user!.uid;
-              updatedData.remove('password');
-
-              await docSnap.reference.set(updatedData, SetOptions(merge: true));
-
-              await _db.doc('users/${cred.user!.uid}').set({
-                'uid': cred.user!.uid,
-                'email': cleanEmail,
-                'societyId': parentSocId,
-                'role': docData['role'] ?? 'resident',
-                'flatNumber': docData['flatNumber'] ?? '',
-                'name': docData['name'] ?? '',
-                'phone': docData['phone'] ?? '',
-                'createdAt': DateTime.now().toIso8601String(),
-              }, SetOptions(merge: true));
-
-              return cred;
-            }
-          }
-        }
-      } catch (_) {}
-      rethrow;
     }
+
+    // Authoritative Server Database Check: Verify user document exists and is active
+    final userDoc = await _db.doc('users/${cred.user!.uid}').get();
+    if (!userDoc.exists) {
+      await _auth.signOut();
+      throw FirebaseAuthException(
+        code: 'user-not-found',
+        message: 'Account not found or account is no longer active.',
+      );
+    }
+
+    final data = userDoc.data() ?? {};
+    final status = (data['status'] as String?)?.toLowerCase();
+    if (status == 'deleted' || status == 'suspended' || status == 'inactive') {
+      await _auth.signOut();
+      throw FirebaseAuthException(
+        code: 'user-disabled',
+        message: 'Account not found or account is no longer active.',
+      );
+    }
+
+    return cred;
   }
 
   /// Register resident with email & password after verifying Society Code or Name
@@ -269,13 +192,19 @@ class AuthService {
 
     final userCred = await _auth.signInWithCredential(credential);
     if (userCred.user != null) {
-      // Ensure global mapping exists
-      await _db.collection('users').doc(userCred.user!.uid).set({
-        'uid': userCred.user!.uid,
-        'email': userCred.user!.email ?? '',
-        'name': userCred.user!.displayName ?? '',
-        'updatedAt': DateTime.now().toIso8601String(),
-      }, SetOptions(merge: true));
+      final userDoc = await _db.doc('users/${userCred.user!.uid}').get();
+      if (userDoc.exists) {
+        final data = userDoc.data() ?? {};
+        final status = (data['status'] as String?)?.toLowerCase();
+        if (status == 'deleted' || status == 'suspended' || status == 'inactive') {
+          await _auth.signOut();
+          await _googleSignIn.signOut();
+          throw FirebaseAuthException(
+            code: 'user-disabled',
+            message: 'Account not found or account is no longer active.',
+          );
+        }
+      }
     }
     return userCred;
   }

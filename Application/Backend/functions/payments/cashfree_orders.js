@@ -2,6 +2,7 @@ const { onRequest } = require("firebase-functions/v2/https");
 const { defineSecret } = require("firebase-functions/params");
 const logger = require("firebase-functions/logger");
 const { db, auth, FieldValue } = require("../config/firebase");
+const { verifyActiveUser } = require("../config/auth_middleware");
 const { CashfreePaymentProvider } = require("../cashfree_service");
 
 const cashfreeClientId = defineSecret("CASHFREE_CLIENT_ID");
@@ -15,24 +16,12 @@ const createCashfreeOrder = onRequest(
   { cors: true, secrets: [cashfreeClientId, cashfreeClientSecret] },
   async (req, res) => {
     try {
-      // 1. Firebase Authentication Verification
-      let authUser = null;
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith("Bearer ")) {
-        const idToken = authHeader.split("Bearer ")[1];
-        try {
-          authUser = await auth.verifyIdToken(idToken);
-        } catch (authErr) {
-          logger.error("Firebase Auth ID Token verification failed", {
-            functionName: "createCashfreeOrder",
-            error: authErr.message,
-          });
-        }
+      // 1. Authoritative Backend Authentication & User Verification
+      const authResult = await verifyActiveUser(req);
+      if (!authResult.authenticated) {
+        return res.status(authResult.statusCode || 401).json({ error: authResult.error });
       }
-
-      if (!authUser) {
-        return res.status(401).json({ error: "Unauthorized: Valid Firebase Auth Bearer token required" });
-      }
+      const authUser = authResult.authUser;
 
       const { societyId, maintenanceBillId, residentUid } = req.body || {};
 
@@ -172,24 +161,12 @@ const verifyCashfreePaymentStatus = onRequest(
   { cors: true, secrets: [cashfreeClientId, cashfreeClientSecret] },
   async (req, res) => {
     try {
-      // 1. Firebase Authentication Verification
-      let authUser = null;
-      const authHeader = req.headers.authorization;
-      if (authHeader && authHeader.startsWith("Bearer ")) {
-        const idToken = authHeader.split("Bearer ")[1];
-        try {
-          authUser = await auth.verifyIdToken(idToken);
-        } catch (authErr) {
-          logger.error("Firebase Auth ID Token verification failed", {
-            functionName: "verifyCashfreePaymentStatus",
-            error: authErr.message,
-          });
-        }
+      // 1. Authoritative Backend Authentication & User Verification
+      const authResult = await verifyActiveUser(req);
+      if (!authResult.authenticated) {
+        return res.status(authResult.statusCode || 401).json({ error: authResult.error });
       }
-
-      if (!authUser) {
-        return res.status(401).json({ error: "Unauthorized: Valid Firebase Auth Bearer token required" });
-      }
+      const authUser = authResult.authUser;
 
       const { societyId, orderId } = req.body || {};
 

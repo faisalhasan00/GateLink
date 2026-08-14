@@ -1,6 +1,7 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const { db, auth, FieldValue } = require("../config/firebase");
+const { verifyActiveCallableUser } = require("../config/auth_middleware");
 
 /**
  * SEC-P0: Server-Side Super Admin Custom Claim Assignment
@@ -8,9 +9,7 @@ const { db, auth, FieldValue } = require("../config/firebase");
  * Client-side self-assignment is strictly blocked.
  */
 const setSuperAdminRole = onCall(async (request) => {
-  if (!request.auth) {
-    throw new HttpsError("unauthenticated", "Authentication required.");
-  }
+  await verifyActiveCallableUser(request);
 
   // Security check: Only existing super_admin or bootstrap master key allowed
   const callerClaims = request.auth.token || {};

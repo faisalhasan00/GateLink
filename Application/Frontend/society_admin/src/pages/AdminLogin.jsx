@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { auth, db } from '../firebase';
 import { useNavigate } from 'react-router-dom';
-import { setSocietyAdminSession } from '../services/sessionManager';
+import { setSocietyAdminSession, performCentralizedLogout } from '../services/sessionManager';
 import GateLinkLogo from '../components/ui/GateLinkLogo';
 import SeoHead from '../components/seo/SeoHead';
 import { Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
@@ -24,28 +24,6 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const syncAdminProfile = async (uid, cleanEmail, targetSocietyId = 'SOC-ADMIN') => {
-    try {
-      const nowStr = new Date().toISOString();
-      await setDoc(doc(db, 'users', uid), {
-        uid: uid,
-        email: cleanEmail,
-        role: 'admin',
-        societyId: targetSocietyId,
-        updatedAt: nowStr
-      }, { merge: true });
-      await setDoc(doc(db, `societies/${targetSocietyId}/users`, uid), {
-        uid: uid,
-        email: cleanEmail,
-        role: 'admin',
-        societyId: targetSocietyId,
-        updatedAt: nowStr
-      }, { merge: true });
-    } catch (e) {
-      console.warn('Error syncing admin profile on login:', e);
-    }
-  };
-
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -53,77 +31,89 @@ export default function AdminLogin() {
     const cleanEmail = email.trim().toLowerCase();
 
     try {
-      try {
-        const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
-        
-        // Dynamically resolve matching society
-        let resolvedSocietyId = 'SOC-ADMIN';
-        let resolvedSocietyName = 'Society Management Committee';
-        try {
-          const userDocSnap = await getDoc(doc(db, 'users', res.user.uid));
-          if (userDocSnap.exists() && userDocSnap.data().societyId) {
-            resolvedSocietyId = userDocSnap.data().societyId;
-            resolvedSocietyName = userDocSnap.data().societyName || resolvedSocietyName;
-          } else {
-            const socQuery = query(collection(db, 'societies'), where('adminEmail', '==', cleanEmail));
-            const socSnap = await getDocs(socQuery);
-            if (!socSnap.empty) {
-              const matchedDoc = socSnap.docs[0];
-              resolvedSocietyId = matchedDoc.data().societyId || matchedDoc.id;
-              resolvedSocietyName = matchedDoc.data().name || resolvedSocietyName;
-            }
-          }
-        } catch (resolveErr) {
-          console.warn('Could not resolve societyId dynamically:', resolveErr);
-        }
+      // 1. Authoritative Firebase Authentication
+      const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
+      const uid = res.user?.uid;
 
-        await syncAdminProfile(res.user.uid, cleanEmail, resolvedSocietyId);
-        setSocietyAdminSession({ 
-          email: cleanEmail, 
-          token: res.user?.uid, 
-          societyId: resolvedSocietyId,
-          societyName: resolvedSocietyName
-        });
-        navigate('/');
-      } catch (authErr) {
-        if (password.length >= 6) {
-          try {
-            const newRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
-            let resolvedSocietyId = 'SOC-ADMIN';
-            let resolvedSocietyName = 'Society Management Committee';
-            try {
-              const socQuery = query(collection(db, 'societies'), where('adminEmail', '==', cleanEmail));
-              const socSnap = await getDocs(socQuery);
-              if (!socSnap.empty) {
-                const matchedDoc = socSnap.docs[0];
-                resolvedSocietyId = matchedDoc.data().societyId || matchedDoc.id;
-                resolvedSocietyName = matchedDoc.data().name || resolvedSocietyName;
-              }
-            } catch (e) {}
-
-            await syncAdminProfile(newRes.user.uid, cleanEmail, resolvedSocietyId);
-            setSocietyAdminSession({ 
-              email: cleanEmail, 
-              token: newRes.user?.uid, 
-              societyId: resolvedSocietyId,
-              societyName: resolvedSocietyName
-            });
-            navigate('/');
-            return;
-          } catch (createErr) {
-            if (createErr.code === 'auth/email-already-in-use') {
-              throw new Error('Invalid password. Please enter your correct account password.');
-            }
-            throw createErr;
-          }
-        }
-        throw authErr;
+      if (!uid) {
+        throw new Error('Authentication failed: Missing user credentials.');
       }
+
+      // 2. Authoritative Server/Database Verification
+      // Check if user record exists in Firestore and is not deleted/inactive
+      let resolvedSocietyId = null;
+      let resolvedSocietyName = 'Society Management Committee';
+      let isValidAccount = false;
+
+      const userDocSnap = await getDoc(doc(db, 'users', uid));
+
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data() || {};
+        const status = userData.status || 'active';
+        const role = userData.role;
+
+        // Check if user was deleted or suspended in database
+        if (status === 'deleted' || status === 'suspended' || status === 'inactive') {
+          await performCentralizedLogout(auth);
+          throw new Error('Account not found or account is no longer active.');
+        }
+
+        if (role === 'admin' || role === 'society_admin' || role === 'super_admin') {
+          resolvedSocietyId = userData.societyId || 'SOC-ADMIN';
+          resolvedSocietyName = userData.societyName || resolvedSocietyName;
+          isValidAccount = true;
+        }
+      }
+
+      // If user profile is not in /users/{uid}, check if admin is listed under societies directory
+      if (!isValidAccount) {
+        const socQuery = query(collection(db, 'societies'), where('adminEmail', '==', cleanEmail));
+        const socSnap = await getDocs(socQuery);
+        if (!socSnap.empty) {
+          const matchedDoc = socSnap.docs[0];
+          const socData = matchedDoc.data() || {};
+          if (socData.status !== 'deleted' && socData.status !== 'suspended') {
+            resolvedSocietyId = socData.societyId || matchedDoc.id;
+            resolvedSocietyName = socData.name || resolvedSocietyName;
+            isValidAccount = true;
+          }
+        }
+      }
+
+      // 3. Strict Rejection if Account Does Not Exist in Database
+      if (!isValidAccount || !resolvedSocietyId) {
+        await performCentralizedLogout(auth);
+        throw new Error('Account not found or account is no longer active.');
+      }
+
+      // Verify society itself exists and is not deleted (if not default SOC-ADMIN)
+      if (resolvedSocietyId !== 'SOC-ADMIN') {
+        const socDocSnap = await getDoc(doc(db, 'societies', resolvedSocietyId));
+        if (!socDocSnap.exists() || socDocSnap.data()?.status === 'deleted') {
+          await performCentralizedLogout(auth);
+          throw new Error('Associated society account not found or has been deactivated.');
+        }
+      }
+
+      // 4. Session Initialization on Successful Authoritative Verification
+      setSocietyAdminSession({ 
+        email: cleanEmail, 
+        token: uid, 
+        societyId: resolvedSocietyId,
+        societyName: resolvedSocietyName
+      });
+
+      navigate('/');
     } catch (err) {
       let msg = err.message || 'Authentication failed.';
       if (err.code === 'auth/operation-not-allowed') {
         msg = 'Email/Password sign-in is disabled in Firebase Console.';
-      } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+      } else if (
+        err.code === 'auth/invalid-credential' || 
+        err.code === 'auth/wrong-password' || 
+        err.code === 'auth/user-not-found' ||
+        err.code === 'auth/invalid-email'
+      ) {
         msg = 'Invalid email or password. Please verify your credentials.';
       } else {
         msg = msg.replace('Firebase: ', '').replace(/\(.*\)\.?/, '').trim();
