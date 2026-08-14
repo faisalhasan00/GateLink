@@ -129,8 +129,8 @@ service cloud.firestore {
         allow read: if isAuthenticated() && belongsToSociety(societyId);
         allow update: if isSocietyAdmin(societyId) || (
           isAuthenticated() && belongsToSociety(societyId) &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'paymentMethod', 'referenceNumber', 'residentName', 'flatNumber', 'invoiceNumber', 'updatedAt']) &&
-          request.resource.data.status == 'pending_verification'
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'paymentMethod', 'referenceNumber', 'residentName', 'flatNumber', 'invoiceNumber', 'transactionId', 'paidAt', 'updatedAt']) &&
+          (request.resource.data.status == 'pending_verification' || request.resource.data.status == 'paid')
         );
         allow create, delete: if isSocietyAdmin(societyId);
       }
