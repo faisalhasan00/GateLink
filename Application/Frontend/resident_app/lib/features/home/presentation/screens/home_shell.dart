@@ -2,21 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 
-class HomeShell extends StatefulWidget {
+class HomeShell extends StatelessWidget {
   final Widget child;
   const HomeShell({super.key, required this.child});
 
-  @override
-  State<HomeShell> createState() => _HomeShellState();
-}
-
-class _HomeShellState extends State<HomeShell> {
-  int _currentIndex = 0;
-
-  final List<_NavItem> _navItems = const [
+  static const List<_NavItem> _navItems = [
     _NavItem(
         label: 'Home',
-        icon: Icons.home_rounded,
+        icon: Icons.home_outlined,
         activeIcon: Icons.home_rounded,
         route: '/home/dashboard'),
     _NavItem(
@@ -43,15 +36,20 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
+    final currentPath = GoRouterState.of(context).uri.path;
+
     return Scaffold(
-      body: widget.child,
+      body: child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Colors.white,
+          border: const Border(
+            top: BorderSide(color: AppColors.border, width: 1),
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
-              blurRadius: 12,
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 16,
               offset: const Offset(0, -4),
             ),
           ],
@@ -59,19 +57,19 @@ class _HomeShellState extends State<HomeShell> {
         child: SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: List.generate(_navItems.length, (index) {
                 final item = _navItems[index];
-                final isActive = _currentIndex == index;
-                return _NavBarItem(
-                  item: item,
-                  isActive: isActive,
-                  onTap: () {
-                    setState(() => _currentIndex = index);
-                    context.go(item.route);
-                  },
+                final isActive = currentPath.startsWith(item.route) ||
+                    (item.route == '/home/dashboard' && currentPath == '/home');
+                return Expanded(
+                  child: _NavBarItem(
+                    item: item,
+                    isActive: isActive,
+                    onTap: () => context.go(item.route),
+                  ),
                 );
               }),
             ),

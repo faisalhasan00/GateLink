@@ -43,8 +43,9 @@ class DashboardAppBar extends ConsumerWidget {
     final String greeting = _getTimeBasedGreeting();
 
     return SliverAppBar(
-      floating: true,
-      snap: true,
+      pinned: true,
+      floating: false,
+      snap: false,
       backgroundColor: Colors.white,
       elevation: 0,
       titleSpacing: AppSpacing.pagePadding,

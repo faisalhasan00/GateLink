@@ -100,7 +100,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       if (isSplash) {
         if (!isAuth) return AppRoutes.onboarding;
-        final status = userProfile?['status'];
+        final status = userProfile?.status ?? 'active';
         if (status == 'active' || status == 'approved') {
           return AppRoutes.dashboard;
         }
