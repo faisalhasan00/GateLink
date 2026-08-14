@@ -1,10 +1,8 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/providers/firebase_providers.dart';
-import '../../../../core/providers/auth_providers.dart';
+import '../../providers/maintenance_providers.dart';
 
 class MaintenanceListScreen extends ConsumerStatefulWidget {
   const MaintenanceListScreen({super.key});
@@ -31,7 +29,7 @@ class _MaintenanceListScreenState extends ConsumerState<MaintenanceListScreen>
 
   @override
   Widget build(BuildContext context) {
-    final billsAsync = ref.watch(maintenanceBillsStreamProvider);
+    final billsAsync = ref.watch(guardMaintenanceBillsStreamProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -49,24 +47,15 @@ class _MaintenanceListScreenState extends ConsumerState<MaintenanceListScreen>
         ),
       ),
       body: billsAsync.when(
-        data: (snapshot) {
-          final allDocs = snapshot.docs;
-
-          final pending = allDocs.where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            return data['status'] != 'paid';
-          }).toList();
-
-          final paid = allDocs.where((doc) {
-            final data = doc.data() as Map<String, dynamic>;
-            return data['status'] == 'paid';
-          }).toList();
+        data: (bills) {
+          final pending = bills.where((b) => b['status'] != 'paid').toList();
+          final paid = bills.where((b) => b['status'] == 'paid').toList();
 
           return TabBarView(
             controller: _tabController,
             children: [
-              _BillsListView(docs: pending, isPaid: false, ref: ref),
-              _BillsListView(docs: paid, isPaid: true, ref: ref),
+              _BillsListView(bills: pending, isPaid: false),
+              _BillsListView(bills: paid, isPaid: true),
             ],
           );
         },
@@ -78,96 +67,45 @@ class _MaintenanceListScreenState extends ConsumerState<MaintenanceListScreen>
 }
 
 class _BillsListView extends StatelessWidget {
-  final List<dynamic> docs;
+  final List<Map<String, dynamic>> bills;
   final bool isPaid;
-  final WidgetRef ref;
-  const _BillsListView({required this.docs, required this.isPaid, required this.ref});
+
+  const _BillsListView({required this.bills, required this.isPaid});
 
   @override
   Widget build(BuildContext context) {
-    if (docs.isEmpty) {
+    if (bills.isEmpty) {
       return Center(
-        child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Icon(isPaid ? Icons.check_circle_outline_rounded : Icons.receipt_long_rounded,
-              size: 56, color: AppColors.textDisabled),
-          const SizedBox(height: AppSpacing.md),
-          Text(isPaid ? 'No paid bills recorded' : 'No pending maintenance bills 🎉',
-              style: const TextStyle(color: AppColors.textSecondary)),
-          const SizedBox(height: AppSpacing.lg),
-          if (!isPaid)
-            ElevatedButton.icon(
-              onPressed: () async {
-                try {
-                  final user = ref.read(currentUserProvider);
-                  final db = FirebaseFirestore.instance;
-                  final batch = db.batch();
-
-                  final userProfile = ref.read(userProfileProvider).value;
-                  final activeSocId = userProfile?['societyId'] as String? ?? '';
-                  if (activeSocId.isEmpty) return;
-
-                  final bills = [
-                    {
-                      'month': 'August 2026',
-                      'invoiceNumber': 'INV-2026-08-101',
-                      'amount': 3500.0,
-                      'maintenanceCharges': 2500.0,
-                      'waterCharges': 400.0,
-                      'electricityCharges': 600.0,
-                      'lateFee': 0.0,
-                      'dueDate': '10 Aug 2026',
-                      'status': 'pending',
-                      'residentUid': user?.uid ?? '',
-                      'societyId': activeSocId,
-                      'createdAt': DateTime.now().toIso8601String(),
-                    },
-                    {
-                      'month': 'July 2026',
-                      'invoiceNumber': 'INV-2026-07-101',
-                      'amount': 3700.0,
-                      'maintenanceCharges': 2500.0,
-                      'waterCharges': 450.0,
-                      'electricityCharges': 550.0,
-                      'lateFee': 200.0,
-                      'dueDate': '10 Jul 2026',
-                      'status': 'overdue',
-                      'residentUid': user?.uid ?? '',
-                      'societyId': activeSocId,
-                      'createdAt': DateTime.now().subtract(const Duration(days: 30)).toIso8601String(),
-                    },
-                  ];
-
-                  for (final b in bills) {
-                    final docRef = db.collection('societies/$activeSocId/maintenance_bills').doc();
-                    batch.set(docRef, b);
-                  }
-
-                  await batch.commit();
-                } catch (e) {
-                  debugPrint('Seeding error: $e');
-                }
-              },
-              icon: const Icon(Icons.receipt_rounded),
-              label: const Text('Generate Sample Maintenance Bills'),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              isPaid ? Icons.check_circle_outline_rounded : Icons.receipt_long_rounded,
+              size: 56,
+              color: AppColors.textDisabled,
             ),
-        ]),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              isPaid ? 'No paid bills recorded' : 'No pending maintenance bills 🎉',
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
+          ],
+        ),
       );
     }
 
     return ListView.separated(
       padding: const EdgeInsets.all(AppSpacing.pagePadding),
-      itemCount: docs.length,
+      itemCount: bills.length,
       separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
       itemBuilder: (context, index) {
-        final doc = docs[index];
-        final data = doc.data() as Map<String, dynamic>;
+        final data = bills[index];
         return _BillCard(
-          docId: doc.id,
-          month: data['month'] ?? 'Unknown',
+          docId: data['id'] as String? ?? '',
+          month: data['month'] as String? ?? 'Unknown',
           amount: (data['amount'] ?? 0).toDouble(),
-          dueDate: data['dueDate'] ?? '',
-          status: data['status'] ?? 'pending',
-          ref: ref,
+          dueDate: data['dueDate'] as String? ?? '',
+          status: data['status'] as String? ?? 'pending',
         );
       },
     );
@@ -177,25 +115,34 @@ class _BillsListView extends StatelessWidget {
 class _BillCard extends StatelessWidget {
   final String docId, month, dueDate, status;
   final double amount;
-  final WidgetRef ref;
+
   const _BillCard({
-    required this.docId, required this.month, required this.amount,
-    required this.dueDate, required this.status, required this.ref,
+    required this.docId,
+    required this.month,
+    required this.amount,
+    required this.dueDate,
+    required this.status,
   });
 
   Color get _statusColor {
     switch (status) {
-      case 'paid': return AppColors.success;
-      case 'overdue': return AppColors.error;
-      default: return AppColors.warning;
+      case 'paid':
+        return AppColors.success;
+      case 'overdue':
+        return AppColors.error;
+      default:
+        return AppColors.warning;
     }
   }
 
   String get _statusLabel {
     switch (status) {
-      case 'paid': return 'Paid';
-      case 'overdue': return 'Overdue';
-      default: return 'Pending';
+      case 'paid':
+        return 'Paid';
+      case 'overdue':
+        return 'Overdue';
+      default:
+        return 'Pending';
     }
   }
 
@@ -208,79 +155,41 @@ class _BillCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(color: AppColors.border),
       ),
-      child: Column(
+      child: Row(
         children: [
-          Row(
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: AppColors.maintenance.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppRadius.md),
+            ),
+            child: const Icon(Icons.receipt_long_rounded, color: AppColors.maintenance, size: 22),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(month, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                Text('Due: $dueDate', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
+              Text('₹${amount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
               Container(
-                width: 44, height: 44,
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.maintenance.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(AppRadius.md),
+                  color: _statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(AppRadius.full),
                 ),
-                child: const Icon(Icons.receipt_long_rounded, color: AppColors.maintenance, size: 22),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(month, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                    Text('Due: $dueDate', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                  ],
-                ),
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text('₹${amount.toStringAsFixed(0)}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: _statusColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(AppRadius.full),
-                    ),
-                    child: Text(_statusLabel, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _statusColor)),
-                  ),
-                ],
+                child: Text(_statusLabel, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _statusColor)),
               ),
             ],
           ),
-          if (status != 'paid') ...[
-            const SizedBox(height: AppSpacing.md),
-            const Divider(height: 0),
-            const SizedBox(height: AppSpacing.md),
-            ElevatedButton(
-              onPressed: () async {
-                final firestoreService = ref.read(firestoreServiceProvider);
-                final user = ref.read(currentUserProvider);
-                if (firestoreService == null || user == null) return;
-                try {
-                  await firestoreService.payMaintenanceBill(
-                    billId: docId,
-                    residentUid: user.uid,
-                    amount: amount,
-                    paymentMethod: 'UPI / Card',
-                    invoiceNumber: 'INV-$month',
-                    billingPeriod: month,
-                  );
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('✅ Payment recorded!'), backgroundColor: AppColors.success),
-                    );
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
-                    );
-                  }
-                }
-              },
-              style: ElevatedButton.styleFrom(minimumSize: const Size(double.infinity, 44)),
-              child: const Text('Pay Now'),
-            ),
-          ],
         ],
       ),
     );

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
-import { Send, CheckCircle2, Phone, Mail, MapPin, Building, Sparkles } from 'lucide-react';
+import { Send, CheckCircle2, Phone, Mail, MapPin, Sparkles } from 'lucide-react';
+import { societyAdminService } from '../../services/societyAdminService';
 
 export default function ContactSection() {
   const [formData, setFormData] = useState({
@@ -25,7 +24,7 @@ export default function ContactSection() {
     setSubmitting(true);
 
     try {
-      await addDoc(collection(db, 'leads'), {
+      await societyAdminService.createLead({
         fullName: formData.fullName,
         phone: formData.phone,
         email: formData.email,
@@ -34,8 +33,7 @@ export default function ContactSection() {
         city: formData.city,
         message: formData.message,
         source: 'Landing Page Lead Form',
-        status: 'New',
-        createdAt: serverTimestamp()
+        status: 'New'
       });
 
       setSubmitted(true);
@@ -59,10 +57,7 @@ export default function ContactSection() {
   return (
     <section id="contact" style={{ padding: '100px 0', background: '#090D16', position: 'relative' }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 24px' }}>
-        
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px', alignItems: 'center' }}>
-          
-          {/* Left Column: Contact info */}
           <div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 14px', borderRadius: '20px', background: 'rgba(99, 102, 241, 0.15)', color: '#818CF8', fontSize: '12px', fontWeight: 800, marginBottom: '16px' }}>
               <Sparkles size={14} /> GET IN TOUCH
@@ -109,7 +104,6 @@ export default function ContactSection() {
             </div>
           </div>
 
-          {/* Right Column: Lead Form Card */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -153,7 +147,6 @@ export default function ContactSection() {
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <h3 style={{ fontSize: '22px', fontWeight: 900, color: '#FFFFFF', margin: 0 }}>Request Free Live Demo</h3>
-                
                 {error && <div style={{ background: 'rgba(239, 68, 68, 0.2)', border: '1px solid #EF4444', color: '#FCA5A5', padding: '10px', borderRadius: '8px', fontSize: '12px' }}>{error}</div>}
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
@@ -195,11 +188,6 @@ export default function ContactSection() {
                   </div>
                 </div>
 
-                <div>
-                  <label style={{ fontSize: '12px', fontWeight: 700, color: '#CBD5E1', display: 'block', marginBottom: '6px' }}>Message / Requirements</label>
-                  <textarea rows={3} placeholder="Tell us about your society requirements..." value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.15)', background: 'rgba(15, 23, 42, 0.6)', color: 'white', fontSize: '14px', outline: 'none', resize: 'none' }} />
-                </div>
-
                 <button
                   type="submit"
                   disabled={submitting}
@@ -213,7 +201,6 @@ export default function ContactSection() {
                     fontSize: '15px',
                     border: 'none',
                     cursor: 'pointer',
-                    boxShadow: '0 4px 20px rgba(79, 70, 229, 0.5)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -226,9 +213,7 @@ export default function ContactSection() {
               </form>
             )}
           </motion.div>
-
         </div>
-
       </div>
     </section>
   );

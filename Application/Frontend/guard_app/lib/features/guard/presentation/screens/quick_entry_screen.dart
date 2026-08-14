@@ -9,6 +9,8 @@ import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/services/firestore_service.dart';
 import '../../../../core/services/storage_service.dart';
+import '../../../visitor/domain/models/visitor_model.dart';
+import '../../../visitor/presentation/controllers/visitor_controller.dart';
 import '../../models/gate_entry_model.dart';
 
 class QuickEntryScreen extends ConsumerStatefulWidget {
@@ -36,7 +38,6 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
   File? _photoFile;
   final _picker = ImagePicker();
 
-  // Real-time Flat Validation State
   bool _isValidatingFlat = false;
   FlatValidationResult? _flatValidationResult;
 
@@ -80,7 +81,14 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
 
     setState(() => _isValidatingFlat = true);
     final profile = ref.read(userProfileProvider).value;
-    final societyId = profile?['societyId'] ?? 'SOC-001';
+    final societyId = profile?['societyId'] as String?;
+    if (societyId == null || societyId.isEmpty) {
+      setState(() {
+        _flatValidationResult = FlatValidationResult(isValid: false, error: 'Society ID missing');
+        _isValidatingFlat = false;
+      });
+      return;
+    }
     final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: societyId);
     final res = await firestoreService.validateFlat(formattedFlat);
     if (mounted) {
@@ -97,7 +105,14 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
 
     final targetFlat = _getFormattedFlatNumber(_flatController.text);
     final profile = ref.read(userProfileProvider).value;
-    final societyId = profile?['societyId'] ?? 'SOC-001';
+    final societyId = profile?['societyId'] as String?;
+    if (societyId == null || societyId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('❌ Society ID is missing from profile'), backgroundColor: AppColors.error),
+      );
+      return;
+    }
+
     final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: societyId);
 
     // 1. Explicit Flat Validation
@@ -139,22 +154,26 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
                   : 'Daily Help';
 
       final user = FirebaseAuth.instance.currentUser;
-      final profile = ref.read(userProfileProvider).value;
 
-      await firestoreService.logVisitorEntry(
+      final newVisitor = VisitorModel(
+        id: '',
         name: _nameController.text.trim(),
+        phone: _phoneController.text.trim(),
         type: visitorType,
         hostFlat: targetFlat,
-        phone: _phoneController.text.trim(),
         vehicleNumber: _vehicleController.text.trim(),
         vehicleType: _selectedVehicleType,
         company: _companyController.text.trim(),
         gender: _selectedGender,
         photoUrl: photoUrl,
         notes: _notesController.text.trim(),
+        status: 'pending',
+        createdAt: DateTime.now(),
         guardUid: user?.uid,
         gateName: profile?['gateName'] ?? 'Gate 1 — Main Entry',
       );
+
+      await ref.read(visitorControllerProvider.notifier).logVisitorEntry(newVisitor);
 
       if (mounted) {
         _clearForm();
@@ -214,7 +233,6 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Auto-filled Society & Guard Information Header
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppSpacing.md),
@@ -244,7 +262,6 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Entry Category Selection
               const Text('Select Entry Category', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
               const SizedBox(height: AppSpacing.sm),
               Row(
@@ -301,7 +318,6 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Photo Attachment (Camera)
               Row(
                 children: [
                   GestureDetector(
@@ -347,7 +363,6 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Visitor Name & Mobile
               Row(
                 children: [
                   Expanded(
@@ -391,7 +406,6 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
                 const SizedBox(height: AppSpacing.md),
               ],
 
-              // Flat & Tower Selection + Real-Time Validation
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -430,7 +444,6 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
               ),
               const SizedBox(height: 6),
 
-              // Live Flat Validation Display Banner
               if (_isValidatingFlat)
                 const Padding(
                   padding: EdgeInsets.symmetric(vertical: 4),
@@ -477,7 +490,6 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
                 ),
               const SizedBox(height: AppSpacing.md),
 
-              // Vehicle Information
               Row(
                 children: [
                   Expanded(
@@ -501,7 +513,6 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
               ),
               const SizedBox(height: AppSpacing.md),
 
-              // Remarks / Additional Notes
               TextFormField(
                 controller: _notesController,
                 maxLines: 2,
@@ -512,7 +523,6 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
               ),
               const SizedBox(height: AppSpacing.xl),
 
-              // Submit Button
               SizedBox(
                 width: double.infinity,
                 height: 52,

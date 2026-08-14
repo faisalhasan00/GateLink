@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, CheckCircle, XCircle, ShieldCheck, ShieldAlert, FileText, UserCheck, Phone, Mail, Eye, EyeOff, ExternalLink, RefreshCw, Copy, Trash2 } from 'lucide-react';
-import { collection, onSnapshot, query, orderBy, doc, updateDoc, setDoc, deleteDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { Plus, CheckCircle, XCircle, FileText, Eye, EyeOff, RefreshCw, Copy, Trash2 } from 'lucide-react';
 import { getSocietyAdminSession } from '../services/sessionManager';
+import { societyAdminService } from '../services/societyAdminService';
 
-/**
- * Helper: Generate Random Alphanumeric Password
- */
 const generateSecurePassword = () => {
   const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789@#$';
   let pass = '';
@@ -19,7 +15,7 @@ const generateSecurePassword = () => {
 export default function Residents() {
   const [residents, setResidents] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('active'); // 'active' or 'pending'
+  const [activeTab, setActiveTab] = useState('active');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedResidentForView, setSelectedResidentForView] = useState(null);
   const [fullscreenImage, setFullscreenImage] = useState(null);
@@ -35,21 +31,30 @@ export default function Residents() {
   });
 
   const session = getSocietyAdminSession();
-  const societyId = session?.societyId || 'SOC-001';
+  const societyId = session?.societyId;
 
   useEffect(() => {
-    const q = query(collection(db, `societies/${societyId}/users`), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setResidents(data);
+    if (!societyId) {
       setLoading(false);
-    });
+      return;
+    }
+    const unsubscribe = societyAdminService.subscribeResidents(
+      societyId,
+      (data) => {
+        setResidents(data);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('Error fetching residents:', err);
+        setLoading(false);
+      }
+    );
     return () => unsubscribe();
   }, [societyId]);
 
   const handleApprove = async (userId) => {
     try {
-      await updateDoc(doc(db, `societies/${societyId}/users`, userId), { status: 'active' });
+      await societyAdminService.updateResidentStatus(societyId, userId, 'active');
     } catch (e) {
       alert("Error approving resident: " + e.message);
     }
@@ -58,7 +63,7 @@ export default function Residents() {
   const handleReject = async (userId) => {
     if (window.confirm("Are you sure you want to decline this resident registration?")) {
       try {
-        await updateDoc(doc(db, `societies/${societyId}/users`, userId), { status: 'rejected' });
+        await societyAdminService.updateResidentStatus(societyId, userId, 'rejected');
       } catch (e) {
         alert("Error declining resident: " + e.message);
       }
@@ -67,7 +72,11 @@ export default function Residents() {
 
   const toggleStatus = async (userId, currentStatus) => {
     const newStatus = currentStatus === 'active' || currentStatus === 'approved' ? 'suspended' : 'active';
-    await updateDoc(doc(db, `societies/${societyId}/users`, userId), { status: newStatus });
+    try {
+      await societyAdminService.updateResidentStatus(societyId, userId, newStatus);
+    } catch (e) {
+      alert("Error updating status: " + e.message);
+    }
   };
 
   const handleDeleteResident = async (userId, name, flatNumber) => {
@@ -75,7 +84,7 @@ export default function Residents() {
       return;
     }
     try {
-      await deleteDoc(doc(db, `societies/${societyId}/users`, userId));
+      await societyAdminService.deleteResident(societyId, userId);
       alert(`Successfully deleted resident record for "${name}".`);
     } catch (e) {
       alert("Error deleting resident: " + e.message);
@@ -101,16 +110,9 @@ export default function Residents() {
   const handleAddResident = async (e) => {
     e.preventDefault();
     try {
-      const newId = `manual_${Date.now()}`;
-      await setDoc(doc(db, `societies/${societyId}/users`, newId), {
-        uid: newId,
-        ...formData,
-        status: 'active',
-        societyId: societyId,
-        createdAt: new Date().toISOString()
-      });
+      await societyAdminService.addResident(societyId, formData);
       setIsModalOpen(false);
-      setFormData({ name: '', flatNumber: '', phone: '', email: '', password: '', role: 'resident', ownershipType: 'Owner' });
+      setFormData({ name: '', flatNumber: '', phone: '', email: '', password: generateSecurePassword(), role: 'resident', ownershipType: 'Owner' });
     } catch (error) {
       alert("Error adding resident: " + error.message);
     }
@@ -123,7 +125,6 @@ export default function Residents() {
 
   return (
     <div>
-      {/* Top Header & Actions */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
         <div>
           <h2 style={{ fontSize: '24px', fontWeight: 900, margin: 0, color: 'var(--text-primary)' }}>Resident Directory & Access Control</h2>
@@ -137,7 +138,6 @@ export default function Residents() {
         </button>
       </div>
 
-      {/* Filter Tabs Header */}
       <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
         <button
           onClick={() => setActiveTab('active')}
@@ -179,7 +179,6 @@ export default function Residents() {
         </button>
       </div>
 
-      {/* Active Tab View */}
       {activeTab === 'active' ? (
         <div className="card">
           <div className="card-header">
@@ -261,7 +260,6 @@ export default function Residents() {
           </div>
         </div>
       ) : (
-        /* Pending Approvals Tab View */
         <div className="card">
           <div className="card-header">
             <div>
@@ -358,7 +356,6 @@ export default function Residents() {
       </div>
       )}
 
-      {/* View Details Drawer / Modal */}
       {selectedResidentForView && (
         <div className="modal-overlay" onClick={() => setSelectedResidentForView(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '560px' }}>
@@ -368,7 +365,6 @@ export default function Residents() {
             </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '12px 0' }}>
-              {/* Main Profile Info */}
               <div style={{ background: '#F8FAFC', padding: '16px', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <h4 style={{ margin: 0, fontSize: '18px', fontWeight: 800 }}>{selectedResidentForView.name}</h4>
@@ -379,7 +375,6 @@ export default function Residents() {
                 </span>
               </div>
 
-              {/* Contact Grid */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '13px' }}>
                 <div>
                   <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-muted)' }}>MOBILE PHONE</label>
@@ -391,7 +386,6 @@ export default function Residents() {
                 </div>
               </div>
 
-              {/* Resident Role & Occupancy */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', background: '#FFFBEB', padding: '12px 16px', borderRadius: '8px', border: '1px solid #FDE68A' }}>
                 <div>
                   <label style={{ fontSize: '11px', fontWeight: 700, color: '#B45309' }}>RESIDENT ROLE TYPE</label>
@@ -403,7 +397,6 @@ export default function Residents() {
                 </div>
               </div>
 
-              {/* Login Password (if manually onboarded or available) */}
               {selectedResidentForView.password && (
                 <div style={{ background: '#EFF6FF', padding: '12px 16px', borderRadius: '8px', border: '1px solid #BFDBFE', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
@@ -422,7 +415,7 @@ export default function Residents() {
                   </button>
                 </div>
               )}
-              {/* Modal Actions Footer */}
+
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px', paddingTop: '16px', borderTop: '1px solid var(--border-color)' }}>
                 <button 
                   type="button"
@@ -441,7 +434,6 @@ export default function Residents() {
         </div>
       )}
 
-      {/* Manual Add Resident Modal */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -467,7 +459,6 @@ export default function Residents() {
                 <input required type="tel" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })} placeholder="+91 98765 43210" />
               </div>
 
-              {/* Password Configuration Box */}
               <div style={{ background: 'var(--bg-color)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-color)', marginTop: '14px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                   <label style={{ fontSize: '12px', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>

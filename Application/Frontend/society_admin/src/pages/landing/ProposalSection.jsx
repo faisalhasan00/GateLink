@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
 import { 
   CheckCircle2, 
   Send, 
   Check
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { societyAdminService } from '../../services/societyAdminService';
 
 export default function ProposalSection({ onOpenDemo }) {
   const { theme } = useTheme();
@@ -64,14 +63,13 @@ export default function ProposalSection({ onOpenDemo }) {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await addDoc(collection(db, 'leads'), {
+      await societyAdminService.createLead({
         ...formData,
         societyType,
         flatCount,
         selectedModules,
         source: 'Interactive Proposal Generator',
-        status: 'New',
-        createdAt: serverTimestamp()
+        status: 'New'
       });
       setSubmitted(true);
     } catch (err) {
@@ -84,8 +82,6 @@ export default function ProposalSection({ onOpenDemo }) {
   return (
     <section id="proposal" style={{ padding: isMobile ? '40px 0' : '80px 0', background: isDark ? '#0F172A' : '#FFFFFF', borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB' }}>
       <div style={{ maxWidth: '1320px', margin: '0 auto', padding: isMobile ? '0 16px' : '0 24px' }}>
-        
-        {/* Section Header */}
         <div style={{ textAlign: 'center', maxWidth: '800px', margin: '0 auto 36px auto' }}>
           <h2 style={{ fontSize: isMobile ? '24px' : '36px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-0.5px', marginBottom: '12px', lineHeight: 1.25 }}>
             Get a Customized Onboarding Proposal
@@ -95,7 +91,6 @@ export default function ProposalSection({ onOpenDemo }) {
           </p>
         </div>
 
-        {/* Proposal Interactive Form Container */}
         <div style={{
           background: isDark ? '#1E293B' : '#FFFFFF',
           borderRadius: '6px',
@@ -107,8 +102,6 @@ export default function ProposalSection({ onOpenDemo }) {
           gap: isMobile ? '24px' : '40px',
           alignItems: 'start'
         }}>
-          
-          {/* Controls Left Column */}
           <div style={{ width: '100%' }}>
             {submitted ? (
               <div style={{ textAlign: 'center', padding: '30px 16px' }}>
@@ -128,8 +121,6 @@ export default function ProposalSection({ onOpenDemo }) {
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                
-                {/* 1. Society Type & Flat Count */}
                 <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
                   <div>
                     <label style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#CBD5E1' : '#444444', display: 'block', marginBottom: '6px' }}>Society Category</label>
@@ -161,7 +152,6 @@ export default function ProposalSection({ onOpenDemo }) {
                   </div>
                 </div>
 
-                {/* 2. Select Desired Modules */}
                 <div>
                   <label style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#CBD5E1' : '#444444', display: 'block', marginBottom: '10px' }}>Select Required Modules</label>
                   <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(180px, 1fr))', gap: '8px' }}>
@@ -196,7 +186,6 @@ export default function ProposalSection({ onOpenDemo }) {
                   </div>
                 </div>
 
-                {/* 3. Contact Inputs */}
                 <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
                   <input required type="text" placeholder="Your Full Name *" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
                   <input required type="tel" placeholder="Mobile Phone *" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '13px', outline: 'none', boxSizing: 'border-box' }} />
@@ -224,11 +213,8 @@ export default function ProposalSection({ onOpenDemo }) {
                     alignItems: 'center',
                     justifyContent: 'center',
                     gap: '8px',
-                    boxSizing: 'border-box',
-                    transition: 'background-color 0.2s ease'
+                    boxSizing: 'border-box'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#009E77'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#00B589'}
                 >
                   <Send size={16} />
                   <span>{submitting ? 'Generating Proposal...' : 'Request Onboarding Proposal'}</span>
@@ -237,7 +223,6 @@ export default function ProposalSection({ onOpenDemo }) {
             )}
           </div>
 
-          {/* Right Live Proposal Summary Card */}
           <div style={{
             background: isDark ? '#0F172A' : '#F8FAFC',
             borderRadius: '4px',
@@ -270,22 +255,12 @@ export default function ProposalSection({ onOpenDemo }) {
                 <strong style={{ color: isDark ? '#FFFFFF' : '#2C2C2C', textAlign: 'right' }}>Included Free</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
-                <span style={{ color: isDark ? '#94A3B8' : '#666666' }}>Guard On-Site Training:</span>
-                <strong style={{ color: isDark ? '#FFFFFF' : '#2C2C2C', textAlign: 'right' }}>Included</strong>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
                 <span style={{ color: isDark ? '#94A3B8' : '#666666' }}>Selected Modules:</span>
                 <strong style={{ color: '#00B589', textAlign: 'right' }}>{selectedModules.length} Active</strong>
               </div>
             </div>
-
-            <div style={{ background: isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF', padding: '12px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E2E8F0', fontSize: '12px', color: isDark ? '#94A3B8' : '#666666', lineHeight: 1.5 }}>
-              🛡️ Zero setup fee guarantee. Full data migration from Excel/WhatsApp included.
-            </div>
           </div>
-
         </div>
-
       </div>
     </section>
   );

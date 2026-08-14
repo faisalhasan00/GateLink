@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/auth_providers.dart';
+import '../../domain/models/guard_alert_model.dart';
+import '../controllers/alert_controller.dart';
 
 class EmergencySosDialog extends ConsumerStatefulWidget {
   const EmergencySosDialog({super.key});
@@ -38,43 +39,33 @@ class _EmergencySosDialogState extends ConsumerState<EmergencySosDialog> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       final profile = ref.read(userProfileProvider).value;
-      final societyId = profile?['societyId'] ?? 'SOC-001';
       final residentName = profile?['name'] ?? user?.displayName ?? 'Resident';
       final flatNumber = profile?['flatNumber'] ?? 'A-402';
       final phone = profile?['phone'] ?? '+91 98765 43210';
 
-      final timestampStr = DateTime.now().toIso8601String();
+      final alert = GuardAlertModel(
+        id: '',
+        residentUid: user?.uid,
+        residentName: residentName,
+        flatNumber: flatNumber,
+        phone: phone,
+        type: _selectedType,
+        status: 'Triggered',
+        notes: _notesController.text.trim(),
+        createdAt: DateTime.now(),
+        message: '🚨 EMERGENCY SOS TRIGGERED: $_selectedType',
+      );
 
-      // 1. Create Broadcast SOS Alert Document
-      await FirebaseFirestore.instance.collection('societies/$societyId/sos_alerts').add({
-        'residentUid': user?.uid,
-        'residentName': residentName,
-        'flatNumber': flatNumber,
-        'phone': phone,
-        'type': _selectedType,
-        'status': 'Triggered', // 'Triggered', 'Acknowledged', 'In Progress', 'Resolved'
-        'notes': _notesController.text.trim(),
-        'createdAt': timestampStr,
-        'timestamp': timestampStr,
-      });
-
-      // 2. Broadcast to Society Guards & Admin Notifications
-      await FirebaseFirestore.instance.collection('societies/$societyId/notifications').add({
-        'title': '🚨 EMERGENCY SOS TRIGGERED: $_selectedType',
-        'body': 'Emergency SOS triggered by $residentName (Flat $flatNumber). Type: $_selectedType. Immediate assistance required!',
-        'createdAt': timestampStr,
-        'isRead': false,
-        'type': 'sos'
-      });
+      await ref.read(alertControllerProvider.notifier).broadcastSosAlert(alert);
 
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Row(
+            content: const Row(
               children: [
-                const Icon(Icons.warning_amber_rounded, color: Colors.white),
-                const SizedBox(width: 8),
+                Icon(Icons.warning_amber_rounded, color: Colors.white),
+                SizedBox(width: 8),
                 Expanded(child: Text('🚨 SOS Alert Sent to Gate Security & Society Admin!')),
               ],
             ),

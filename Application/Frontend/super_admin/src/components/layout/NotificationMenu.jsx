@@ -1,25 +1,25 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, CheckCheck, Building2, CreditCard, Mail, ShieldAlert, X, UserCheck, Inbox } from 'lucide-react';
-import { collection, onSnapshot, query, orderBy, doc, updateDoc, writeBatch } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { superAdminService } from '../../services/superAdminService';
 
 export default function NotificationMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const [filter, setFilter] = useState('all'); // 'all' or 'unread'
+  const [filter, setFilter] = useState('all');
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const menuRef = useRef(null);
 
   useEffect(() => {
-    const q = query(collection(db, 'notifications'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(docSnap => ({ id: docSnap.id, ...docSnap.data() }));
-      setNotifications(data);
-      setLoading(false);
-    }, (err) => {
-      console.error('Real-time notification snapshot error:', err);
-      setLoading(false);
-    });
+    const unsubscribe = superAdminService.subscribeNotifications(
+      (data) => {
+        setNotifications(data);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('Real-time notification snapshot error:', err);
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, []);
@@ -38,12 +38,8 @@ export default function NotificationMenu() {
 
   const markAllAsRead = async () => {
     try {
-      const batch = writeBatch(db);
-      notifications.filter(n => !n.read).forEach(n => {
-        const ref = doc(db, 'notifications', n.id);
-        batch.update(ref, { read: true });
-      });
-      await batch.commit();
+      const unreadIds = notifications.filter(n => !n.read).map(n => n.id);
+      await superAdminService.markAllNotificationsRead(unreadIds);
     } catch (e) {
       console.error('Error marking all notifications read:', e);
     }
@@ -52,7 +48,7 @@ export default function NotificationMenu() {
   const markAsRead = async (id, currentStatus) => {
     if (currentStatus) return;
     try {
-      await updateDoc(doc(db, 'notifications', id), { read: true });
+      await superAdminService.markNotificationRead(id);
     } catch (e) {
       console.error('Error marking notification read:', e);
     }
@@ -96,7 +92,6 @@ export default function NotificationMenu() {
 
   return (
     <div ref={menuRef} style={{ position: 'relative' }}>
-      {/* Bell Trigger Button */}
       <button 
         aria-label="View Notifications"
         onClick={() => setIsOpen(!isOpen)}
@@ -138,7 +133,6 @@ export default function NotificationMenu() {
         )}
       </button>
 
-      {/* Notifications Dropdown Popover */}
       {isOpen && (
         <div
           style={{
@@ -157,7 +151,6 @@ export default function NotificationMenu() {
             overflow: 'hidden'
           }}
         >
-          {/* Header */}
           <div style={{ padding: '16px 18px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-primary)' }}>System Notifications</h4>
@@ -175,7 +168,6 @@ export default function NotificationMenu() {
             </button>
           </div>
 
-          {/* Filter Bar & Mark All Read */}
           <div style={{ padding: '10px 18px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--bg-color)' }}>
             <div style={{ display: 'flex', gap: '6px' }}>
               <button
@@ -230,7 +222,6 @@ export default function NotificationMenu() {
             )}
           </div>
 
-          {/* Notification List */}
           <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
             {loading ? (
               <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', fontSize: '13px' }}>

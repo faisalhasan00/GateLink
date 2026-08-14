@@ -1,9 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
-import { Plus, CheckCircle, XCircle, Copy, Check, Trash2, Building2 } from 'lucide-react';
-import { collection, onSnapshot, query, doc, updateDoc, deleteDoc, getDocs, where } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { Plus, CheckCircle, XCircle, Copy, Check, Trash2 } from 'lucide-react';
 import SocietyOnboardingWizard from '../../components/superadmin/SocietyOnboardingWizard';
+import { superAdminService } from '../../services/superAdminService';
 
 export default function SocietyManagement() {
   const [societies, setSocieties] = useState([]);
@@ -14,24 +12,32 @@ export default function SocietyManagement() {
   const [selectedSocietyDetails, setSelectedSocietyDetails] = useState(null);
 
   useEffect(() => {
-    const q = query(collection(db, 'societies'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setSocieties(data);
-      setLoading(false);
-    });
+    const unsubscribe = superAdminService.subscribeSocieties(
+      (data) => {
+        setSocieties(data);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('Error fetching societies:', err);
+        setLoading(false);
+      }
+    );
     return () => unsubscribe();
   }, []);
 
   const toggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
-    await updateDoc(doc(db, 'societies', id), { status: newStatus });
+    try {
+      await superAdminService.updateSocietyStatus(id, newStatus);
+    } catch (e) {
+      alert('Error updating status: ' + e.message);
+    }
   };
 
   const handleUpdatePlan = async (id, newPlan) => {
     try {
       const mrrMap = { Trial: 0, Standard: 5000, Premium: 10000, Enterprise: 25000 };
-      await updateDoc(doc(db, 'societies', id), {
+      await superAdminService.updateSocietyFeatures(id, {
         plan: newPlan,
         mrr: mrrMap[newPlan] || 10000
       });
@@ -42,40 +48,13 @@ export default function SocietyManagement() {
   };
 
   const handleDeleteSociety = async (id, name) => {
-    if (!window.confirm(`Are you sure you want to permanently delete society "${name}" (ID: ${id})?\n\nThis action cannot be undone and will purge all associated residents, staff, and records.`)) {
+    if (!window.confirm(`Are you sure you want to permanently delete society "${name}" (ID: ${id})?\n\nThis action cannot be undone.`)) {
       return;
     }
 
     try {
-      // 1. Delete all nested subcollection documents
-      const subcollections = [
-        'users', 'staff', 'visitors', 'complaints', 'notices', 
-        'maintenance', 'amenities', 'documents', 'helpers', 
-        'sos_alerts', 'user_sessions', 'roles'
-      ];
-
-      for (const sub of subcollections) {
-        try {
-          const subSnap = await getDocs(collection(db, `societies/${id}/${sub}`));
-          const deletePromises = subSnap.docs.map(document => deleteDoc(doc(db, `societies/${id}/${sub}`, document.id)));
-          await Promise.all(deletePromises);
-        } catch (subErr) {
-          console.warn(`Subcollection cleanup notice for ${sub}:`, subErr);
-        }
-      }
-
-      // 2. Delete top-level user documents associated with this society
-      try {
-        const topUsersSnap = await getDocs(query(collection(db, 'users'), where('societyId', '==', id)));
-        const topUserDeletes = topUsersSnap.docs.map(uDoc => deleteDoc(doc(db, 'users', uDoc.id)));
-        await Promise.all(topUserDeletes);
-      } catch (topErr) {
-        console.warn('Top-level user cleanup notice:', topErr);
-      }
-
-      // 2. Delete top-level society document
-      await deleteDoc(doc(db, 'societies', id));
-      alert(`Successfully deleted society "${name}" (${id})!`);
+      await superAdminService.updateSocietyStatus(id, 'Deleted');
+      alert(`Successfully marked society "${name}" (${id}) as deleted!`);
     } catch (e) {
       console.error('Error deleting society:', e);
       alert('Error deleting society: ' + e.message);
@@ -192,7 +171,6 @@ Portal Link: http://localhost:3000/login`;
         </div>
       </div>
 
-      {/* Production-Grade Multi-Step Onboarding Wizard */}
       <SocietyOnboardingWizard
         isOpen={showWizard}
         onClose={() => setShowWizard(false)}
@@ -200,7 +178,6 @@ Portal Link: http://localhost:3000/login`;
         onSuccess={handleWizardSuccess}
       />
 
-      {/* Modal: Credentials Receipt Card */}
       {createdCredentials && (
         <div className="modal-overlay" onClick={() => setCreatedCredentials(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ textAlign: 'center' }}>
@@ -240,7 +217,6 @@ Portal Link: http://localhost:3000/login`;
         </div>
       )}
 
-      {/* Modal: Full Society Details & Plan Management */}
       {selectedSocietyDetails && (
         <div className="modal-overlay" onClick={() => setSelectedSocietyDetails(null)}>
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '580px' }}>
@@ -263,7 +239,6 @@ Portal Link: http://localhost:3000/login`;
                 <div><strong>Monthly Revenue:</strong> ₹{Number(selectedSocietyDetails.mrr || 10000).toLocaleString()}</div>
               </div>
 
-              {/* Upgrade / Downgrade Subscription Plan */}
               <div style={{ background: 'var(--bg-color)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-color)' }}>
                 <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-secondary)', marginBottom: '8px' }}>
                   CHANGE SUBSCRIPTION PLAN

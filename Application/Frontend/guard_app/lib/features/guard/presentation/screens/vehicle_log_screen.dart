@@ -1,10 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/providers/firebase_providers.dart';
+import '../providers/visitor_providers.dart';
+import '../presentation/controllers/visitor_controller.dart';
 
 class VehicleLogScreen extends ConsumerStatefulWidget {
   const VehicleLogScreen({super.key});
@@ -23,10 +23,9 @@ class _VehicleLogScreenState extends ConsumerState<VehicleLogScreen> {
     super.dispose();
   }
 
-  Future<void> _markVehicleExited(String docId) async {
+  Future<void> _markVehicleExited(String visitorId) async {
     try {
-      final firestoreService = ref.read(firestoreServiceProvider);
-      await firestoreService.markVisitorExit(docId);
+      await ref.read(visitorControllerProvider.notifier).markVisitorExit(visitorId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -53,6 +52,8 @@ class _VehicleLogScreenState extends ConsumerState<VehicleLogScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final visitorsAsync = ref.watch(todayVisitorsStreamProvider);
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
@@ -63,7 +64,6 @@ class _VehicleLogScreenState extends ConsumerState<VehicleLogScreen> {
       ),
       body: Column(
         children: [
-          // Search Bar Header
           Container(
             color: AppColors.secondary,
             padding: const EdgeInsets.fromLTRB(
@@ -100,33 +100,18 @@ class _VehicleLogScreenState extends ConsumerState<VehicleLogScreen> {
             ),
           ),
 
-          // Live Firestore stream
           Expanded(
-            child: StreamBuilder<QuerySnapshot>(
-              stream: ref.watch(firestoreServiceProvider).visitorsStream(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+            child: visitorsAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, st) => Center(child: Text('Error: $err')),
+              data: (visitors) {
+                var vehicleVisitors = visitors.where((v) => v.vehicleNumber != null && v.vehicleNumber!.isNotEmpty).toList();
 
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-
-                // Filter: only entries that have a vehicleNumber
-                var docs = (snapshot.data?.docs ?? []).where((d) {
-                  final data = d.data() as Map<String, dynamic>;
-                  final vn = data['vehicleNumber'] as String? ?? '';
-                  return vn.isNotEmpty;
-                }).toList();
-
-                // Apply search filter
                 if (_searchQuery.isNotEmpty) {
-                  docs = docs.where((d) {
-                    final data = d.data() as Map<String, dynamic>;
-                    final vn = (data['vehicleNumber'] as String? ?? '').toLowerCase();
-                    final name = (data['name'] as String? ?? '').toLowerCase();
-                    final flat = (data['hostFlat'] as String? ?? '').toLowerCase();
+                  vehicleVisitors = vehicleVisitors.where((v) {
+                    final vn = (v.vehicleNumber ?? '').toLowerCase();
+                    final name = v.name.toLowerCase();
+                    final flat = v.hostFlat.toLowerCase();
                     final q = _searchQuery.toLowerCase();
                     return vn.contains(q) || name.contains(q) || flat.contains(q);
                   }).toList();
@@ -134,7 +119,6 @@ class _VehicleLogScreenState extends ConsumerState<VehicleLogScreen> {
 
                 return Column(
                   children: [
-                    // Count banner
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding, vertical: AppSpacing.sm),
                       color: AppColors.primarySurface,
@@ -143,7 +127,7 @@ class _VehicleLogScreenState extends ConsumerState<VehicleLogScreen> {
                           const Icon(Icons.directions_car_filled_rounded, color: AppColors.primary, size: 18),
                           const SizedBox(width: 8),
                           Text(
-                            '${docs.length} Vehicle${docs.length == 1 ? '' : 's'} Currently Inside',
+                            '${vehicleVisitors.length} Vehicle${vehicleVisitors.length == 1 ? '' : 's'} Currently Inside',
                             style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
                           ),
                           const Spacer(),
@@ -158,9 +142,8 @@ class _VehicleLogScreenState extends ConsumerState<VehicleLogScreen> {
                       ),
                     ),
 
-                    // Vehicle Cards
                     Expanded(
-                      child: docs.isEmpty
+                      child: vehicleVisitors.isEmpty
                           ? const Center(
                               child: Column(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -176,21 +159,16 @@ class _VehicleLogScreenState extends ConsumerState<VehicleLogScreen> {
                             )
                           : ListView.builder(
                               padding: const EdgeInsets.all(AppSpacing.pagePadding),
-                              itemCount: docs.length,
+                              itemCount: vehicleVisitors.length,
                               itemBuilder: (context, index) {
-                                final doc = docs[index];
-                                final data = doc.data() as Map<String, dynamic>;
-                                final vehicleNumber = data['vehicleNumber'] as String? ?? 'NO PLATE';
-                                final name = data['name'] as String? ?? 'Unknown';
-                                final hostFlat = data['hostFlat'] as String? ?? '-';
-                                final type = data['type'] as String? ?? 'Guest';
+                                final v = vehicleVisitors[index];
+                                final vehicleNumber = v.vehicleNumber ?? 'NO PLATE';
+                                final name = v.name;
+                                final hostFlat = v.hostFlat;
+                                final type = v.type;
 
-                                DateTime? entryTime;
-                                try {
-                                  entryTime = DateTime.parse(data['entryTime'] as String? ?? '');
-                                } catch (_) {}
-                                final entryStr = entryTime != null
-                                    ? DateFormat('hh:mm a').format(entryTime)
+                                final entryStr = v.entryTime != null
+                                    ? DateFormat('hh:mm a').format(v.entryTime!)
                                     : '--';
 
                                 return Container(
@@ -210,7 +188,6 @@ class _VehicleLogScreenState extends ConsumerState<VehicleLogScreen> {
                                   ),
                                   child: Row(
                                     children: [
-                                      // License Plate Badge
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                                         decoration: BoxDecoration(
@@ -229,7 +206,6 @@ class _VehicleLogScreenState extends ConsumerState<VehicleLogScreen> {
                                       ),
                                       const SizedBox(width: AppSpacing.md),
 
-                                      // Details
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -261,9 +237,8 @@ class _VehicleLogScreenState extends ConsumerState<VehicleLogScreen> {
                                         ),
                                       ),
 
-                                      // Exit Button
                                       OutlinedButton.icon(
-                                        onPressed: () => _markVehicleExited(doc.id),
+                                        onPressed: () => _markVehicleExited(v.id),
                                         icon: const Icon(Icons.exit_to_app_rounded, size: 16),
                                         label: const Text('Exit'),
                                         style: OutlinedButton.styleFrom(

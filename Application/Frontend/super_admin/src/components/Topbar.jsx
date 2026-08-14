@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, Search, Menu } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth } from '../firebase';
 
 import GlobalSearchModal from './GlobalSearchModal';
 

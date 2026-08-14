@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, XCircle, Trash2, Edit3 } from 'lucide-react';
-import { collection, onSnapshot, query, orderBy, doc, updateDoc, addDoc, deleteDoc, getDocs, writeBatch } from 'firebase/firestore';
-import { db } from '../firebase';
 import { getSocietyAdminSession } from '../services/sessionManager';
+import { societyAdminService } from '../services/societyAdminService';
 
 const CATEGORIES = ['General', 'Maintenance', 'Safety', 'Event', 'Emergency', 'Rules'];
 
 export default function Notices() {
   const session = getSocietyAdminSession();
-  const societyId = session?.societyId || 'SOC-001';
+  const societyId = session?.societyId;
 
   const [notices, setNotices] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,12 +17,23 @@ export default function Notices() {
   const [formData, setFormData] = useState({ title: '', body: '', category: 'General' });
 
   useEffect(() => {
-    const q = query(collection(db, `societies/${societyId}/notices`), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      setNotices(data);
+    if (!societyId) {
       setLoading(false);
-    });
+      return;
+    }
+
+    const unsubscribe = societyAdminService.subscribeNotices(
+      societyId,
+      (data) => {
+        setNotices(data);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('Error fetching notices:', err);
+        setLoading(false);
+      }
+    );
+
     return () => unsubscribe();
   }, [societyId]);
 
@@ -44,40 +54,19 @@ export default function Notices() {
     setIsSending(true);
     try {
       if (editingNotice) {
-        // Update existing notice
-        await updateDoc(doc(db, `societies/${societyId}/notices`, editingNotice.id), {
+        // Edit existing notice logic can be called
+        await societyAdminService.createNotice(societyId, {
           title: formData.title,
           body: formData.body,
           category: formData.category,
-          updatedAt: new Date().toISOString(),
         });
       } else {
-        // Create new notice
-        const noticeData = {
+        await societyAdminService.createNotice(societyId, {
           title: formData.title,
           body: formData.body,
           category: formData.category,
           isNew: true,
-          createdAt: new Date().toISOString(),
-        };
-        await addDoc(collection(db, `societies/${societyId}/notices`), noticeData);
-
-        // Also send a notification to every resident
-        const usersSnap = await getDocs(collection(db, `societies/${societyId}/users`));
-        const batch = writeBatch(db);
-        usersSnap.forEach((userDoc) => {
-          const userData = userDoc.data();
-          if (userData.role === 'resident') {
-            const notifRef = doc(collection(db, `societies/${societyId}/users/${userDoc.id}/notifications`));
-            batch.set(notifRef, {
-              title: '📢 New Notice: ' + formData.title,
-              body: formData.body.length > 100 ? formData.body.substring(0, 100) + '...' : formData.body,
-              type: 'notice',
-              createdAt: new Date().toISOString(),
-            });
-          }
         });
-        await batch.commit();
       }
 
       setIsModalOpen(false);
@@ -92,7 +81,7 @@ export default function Notices() {
   const handleDelete = async (id) => {
     if (!window.confirm('Are you sure you want to delete this notice?')) return;
     try {
-      await deleteDoc(doc(db, `societies/${societyId}/notices`, id));
+      await societyAdminService.deleteNotice(societyId, id);
     } catch (error) {
       alert('Error deleting notice: ' + error.message);
     }
@@ -187,7 +176,6 @@ export default function Notices() {
         </div>
       </div>
 
-      {/* Create / Edit Notice Modal */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>

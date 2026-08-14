@@ -40,40 +40,37 @@ class FirestoreService {
     }
 
     try {
-      final usersSnap = await _db.collection('societies/$societyId/users').get();
-      if (usersSnap.docs.isEmpty) {
-        return FlatValidationResult(isValid: false, error: 'No registered residents found in society');
-      }
+      final querySnap = await _db
+          .collection('societies/$societyId/users')
+          .where('flatNumber', isEqualTo: rawInput)
+          .limit(1)
+          .get();
 
-      final cleanInput = rawInput.toLowerCase().replaceAll(' ', '').replaceAll('tower', '').replaceAll('block', '');
-
-      DocumentSnapshot? matchedDoc;
-      for (final doc in usersSnap.docs) {
+      if (querySnap.docs.isNotEmpty) {
+        final doc = querySnap.docs.first;
         final data = doc.data();
-        final flatNum = (data['flatNumber'] as String? ?? '').trim();
-        final unitNum = (data['unitNumber'] as String? ?? '').trim();
-
-        final cleanFlat = flatNum.toLowerCase().replaceAll(' ', '').replaceAll('tower', '').replaceAll('block', '');
-        final cleanUnit = unitNum.toLowerCase().replaceAll(' ', '').replaceAll('tower', '').replaceAll('block', '');
-
-        if (flatNum.toLowerCase() == rawInput.toLowerCase() ||
-            unitNum.toLowerCase() == rawInput.toLowerCase() ||
-            cleanFlat == cleanInput ||
-            cleanUnit == cleanInput ||
-            (cleanInput.length >= 2 && cleanFlat.endsWith(cleanInput)) ||
-            (cleanFlat.length >= 2 && cleanInput.endsWith(cleanFlat))) {
-          matchedDoc = doc;
-          break;
-        }
-      }
-
-      if (matchedDoc != null) {
-        final data = matchedDoc.data() as Map<String, dynamic>;
         final residentName = data['name'] as String? ?? 'Resident';
         return FlatValidationResult(
           isValid: true,
           residentName: residentName,
-          residentUid: matchedDoc.id,
+          residentUid: doc.id,
+        );
+      }
+
+      final unitSnap = await _db
+          .collection('societies/$societyId/users')
+          .where('unitNumber', isEqualTo: rawInput)
+          .limit(1)
+          .get();
+
+      if (unitSnap.docs.isNotEmpty) {
+        final doc = unitSnap.docs.first;
+        final data = doc.data();
+        final residentName = data['name'] as String? ?? 'Resident';
+        return FlatValidationResult(
+          isValid: true,
+          residentName: residentName,
+          residentUid: doc.id,
         );
       }
 

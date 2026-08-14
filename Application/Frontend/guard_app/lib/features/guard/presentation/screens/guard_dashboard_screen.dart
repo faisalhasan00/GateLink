@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,9 +6,12 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/providers/auth_providers.dart';
-import '../../../../core/services/firestore_service.dart';
+import '../../../sos/domain/models/guard_alert_model.dart';
+import '../../../sos/presentation/controllers/alert_controller.dart';
+import '../../domain/models/visitor_model.dart';
+import '../../presentation/controllers/visitor_controller.dart';
+import '../../providers/visitor_providers.dart';
 
 class GuardDashboardScreen extends ConsumerStatefulWidget {
   const GuardDashboardScreen({super.key});
@@ -37,12 +39,9 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
     super.dispose();
   }
 
-  FirestoreService get _service =>
-      ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: 'SOC-001');
-
-  Future<void> _markCheckedOut(String docId) async {
+  Future<void> _markCheckedOut(String visitorId) async {
     try {
-      await _service.markVisitorExit(docId);
+      await ref.read(visitorControllerProvider.notifier).markVisitorExit(visitorId);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -69,11 +68,9 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
     }
   }
 
-  Future<void> _approveEntry(String docId) async {
+  Future<void> _approveEntry(String visitorId) async {
     try {
-      await FirebaseFirestore.instance
-          .doc('societies/${_service.societyId}/visitors/$docId')
-          .update({'status': 'inside', 'entryTime': DateTime.now().toIso8601String()});
+      await ref.read(visitorControllerProvider.notifier).approveVisitorEntry(visitorId);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -107,18 +104,19 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(context);
-              // Write SOS alert to Firestore
               final messenger = ScaffoldMessenger.of(context);
               try {
-                await FirebaseFirestore.instance
-                    .collection('societies/${_service.societyId}/alerts')
-                    .add({
-                  'type': 'SOS',
-                  'guardEmail': FirebaseAuth.instance.currentUser?.email ?? 'Guard',
-                  'message': 'Emergency SOS triggered by Guard at Gate 1',
-                  'createdAt': DateTime.now().toIso8601String(),
-                  'status': 'active',
-                });
+                final user = FirebaseAuth.instance.currentUser;
+                await ref.read(alertControllerProvider.notifier).broadcastSosAlert(
+                  GuardAlertModel(
+                    id: '',
+                    guardEmail: user?.email ?? 'Guard',
+                    message: 'Emergency SOS triggered by Guard at Gate 1',
+                    type: 'SOS',
+                    status: 'active',
+                    createdAt: DateTime.now(),
+                  ),
+                );
               } catch (_) {}
               messenger.showSnackBar(
                 SnackBar(
@@ -147,19 +145,19 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
     );
   }
 
-  List<QueryDocumentSnapshot> _filterDocs(List<QueryDocumentSnapshot> docs) {
+  List<VisitorModel> _filterDocs(List<VisitorModel> docs) {
     switch (_selectedFilter) {
       case 'Inside':
-        return docs.where((d) => (d.data() as Map)['status'] == 'inside').toList();
+        return docs.where((d) => d.status == 'inside').toList();
       case 'Pending':
         return docs.where((d) {
-          final s = (d.data() as Map)['status'];
+          final s = d.status;
           return s == 'pending' || s == 'approved' || s == 'denied';
         }).toList();
       case 'Delivery':
-        return docs.where((d) => (d.data() as Map)['type'] == 'Delivery').toList();
+        return docs.where((d) => d.type == 'Delivery').toList();
       case 'Cab':
-        return docs.where((d) => (d.data() as Map)['type'] == 'Cab').toList();
+        return docs.where((d) => d.type == 'Cab').toList();
       default:
         return docs;
     }
@@ -167,12 +165,12 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final visitorsAsync = ref.watch(visitorsStreamProvider);
+    final visitorsAsync = ref.watch(todayVisitorsStreamProvider);
     final timeStr = DateFormat('hh:mm:ss a').format(_now);
     final dateStr = DateFormat('EEEE, d MMM').format(_now);
     final user = FirebaseAuth.instance.currentUser;
     final profile = ref.watch(userProfileProvider).value;
-    
+
     final guardName = profile?['name'] ?? user?.displayName ?? user?.email ?? 'Security Guard';
     final societyName = profile?['societyName'] ?? 'Housing Society';
     final gateName = profile?['gateName'] ?? 'Gate 1 — Main Entry';
@@ -180,19 +178,18 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
     return visitorsAsync.when(
       loading: () => const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (e, _) => Scaffold(body: Center(child: Text('Error: $e'))),
-      data: (snapshot) {
-        final docs = snapshot.docs;
-        final insideCount = docs.where((d) => (d.data() as Map)['status'] == 'inside').length;
-        final pendingCount = docs.where((d) => (d.data() as Map)['status'] == 'pending').length;
-        final approvedCount = docs.where((d) => (d.data() as Map)['status'] == 'approved').length;
-        final exitedCount = docs.where((d) => (d.data() as Map)['status'] == 'left').length;
-        final filtered = _filterDocs(docs);
+      data: (visitors) {
+        final insideCount = visitors.where((d) => d.status == 'inside').length;
+        final pendingCount = visitors.where((d) => d.status == 'pending').length;
+        final approvedCount = visitors.where((d) => d.status == 'approved').length;
+        final exitedCount = visitors.where((d) => d.status == 'left').length;
+        final filtered = _filterDocs(visitors);
 
         return Scaffold(
           backgroundColor: AppColors.background,
           body: CustomScrollView(
             slivers: [
-              // ── Header ──
+              // Header
               SliverToBoxAdapter(
                 child: Container(
                   decoration: const BoxDecoration(
@@ -214,7 +211,6 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Guard info + SOS
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -249,7 +245,6 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                                   ),
                                 ),
                               ),
-                              // SOS Button
                               GestureDetector(
                                 onTap: _showSosDialog,
                                 child: Container(
@@ -284,7 +279,6 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              // Logout Button
                               IconButton(
                                 onPressed: () async {
                                   await FirebaseAuth.instance.signOut();
@@ -300,7 +294,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                           ),
                           const SizedBox(height: AppSpacing.xl),
 
-                          // Live Clock
+                          // Clock
                           Row(
                             children: [
                               Column(
@@ -360,7 +354,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ── Stat Cards ──
+                      // Stat Cards
                       Row(
                         children: [
                           Expanded(
@@ -410,7 +404,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                           Expanded(
                             child: _StatCard(
                               title: 'Total Today',
-                              value: '${docs.length}',
+                              value: '${visitors.length}',
                               icon: Icons.groups_rounded,
                               color: AppColors.info,
                               trend: 'Total entries',
@@ -420,7 +414,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                       ),
                       const SizedBox(height: AppSpacing.lg),
 
-                      // ── Quick Actions ──
+                      // Quick Actions
                       Row(
                         children: [
                           Expanded(
@@ -453,7 +447,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                       ),
                       const SizedBox(height: AppSpacing.lg),
 
-                      // ── Live Gate Feed Header + Filters ──
+                      // Live Feed Header
                       Row(
                         children: [
                           const Text(
@@ -511,7 +505,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                       ),
                       const SizedBox(height: AppSpacing.md),
 
-                      // ── Entries List ──
+                      // Entries List
                       if (filtered.isEmpty)
                         Container(
                           padding: const EdgeInsets.symmetric(vertical: 48),
@@ -528,15 +522,13 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                           ),
                         )
                       else
-                        ...filtered.map((doc) {
-                          final data = doc.data() as Map<String, dynamic>;
+                        ...filtered.map((visitor) {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                             child: _GateEntryCard(
-                              docId: doc.id,
-                              data: data,
-                              onMarkOut: () => _markCheckedOut(doc.id),
-                              onApprove: () => _approveEntry(doc.id),
+                              visitor: visitor,
+                              onMarkOut: () => _markCheckedOut(visitor.id),
+                              onApprove: () => _approveEntry(visitor.id),
                             ),
                           );
                         }),
@@ -552,9 +544,6 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
   }
 }
 
-// ───────────────────────────────────────────────
-// Compact 3-column stat card
-// ───────────────────────────────────────────────
 class _StatCard extends StatelessWidget {
   final String title;
   final String value;
@@ -612,9 +601,6 @@ class _StatCard extends StatelessWidget {
   }
 }
 
-// ───────────────────────────────────────────────
-// Quick Action Button
-// ───────────────────────────────────────────────
 class _QuickActionButton extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -664,24 +650,19 @@ class _QuickActionButton extends StatelessWidget {
   }
 }
 
-// ───────────────────────────────────────────────
-// Gate Entry Card (Firestore data)
-// ───────────────────────────────────────────────
 class _GateEntryCard extends StatelessWidget {
-  final String docId;
-  final Map<String, dynamic> data;
+  final VisitorModel visitor;
   final VoidCallback onMarkOut;
   final VoidCallback onApprove;
 
   const _GateEntryCard({
-    required this.docId,
-    required this.data,
+    required this.visitor,
     required this.onMarkOut,
     required this.onApprove,
   });
 
   Color get _typeColor {
-    switch (data['type'] as String? ?? '') {
+    switch (visitor.type) {
       case 'Delivery':
         return const Color(0xFFEA580C);
       case 'Cab':
@@ -694,7 +675,7 @@ class _GateEntryCard extends StatelessWidget {
   }
 
   IconData get _typeIcon {
-    switch (data['type'] as String? ?? '') {
+    switch (visitor.type) {
       case 'Delivery':
         return Icons.local_shipping_rounded;
       case 'Cab':
@@ -706,192 +687,183 @@ class _GateEntryCard extends StatelessWidget {
     }
   }
 
-  String get _status => data['status'] as String? ?? 'inside';
+  String get _status => visitor.status;
 
   @override
   Widget build(BuildContext context) {
-    DateTime? entryTime;
-    try {
-      entryTime = DateTime.parse(data['entryTime'] as String? ?? '');
-    } catch (_) {}
-    final timeStr = entryTime != null ? DateFormat('hh:mm a').format(entryTime) : '--';
+    final timeStr = visitor.entryTime != null ? DateFormat('hh:mm a').format(visitor.entryTime!) : '--';
 
     return GestureDetector(
-      onTap: () => context.go('/visitors/$docId'),
+      onTap: () => context.go('/visitors/${visitor.id}'),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(
-          color: _status == 'pending' ? AppColors.warning : AppColors.border,
-          width: _status == 'pending' ? 1.5 : 1.0,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          border: Border.all(
+            color: _status == 'pending' ? AppColors.warning : AppColors.border,
+            width: _status == 'pending' ? 1.5 : 1.0,
           ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: _typeColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                ),
-                child: Icon(_typeIcon, color: _typeColor, size: 22),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            data['name'] as String? ?? 'Unknown',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        _StatusBadge(status: _status),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      'Flat ${data['hostFlat'] ?? ''} • ${data['type'] ?? 'Guest'}',
-                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
-                    ),
-                    Row(
-                      children: [
-                        const Icon(Icons.access_time_rounded, size: 11, color: AppColors.textSecondary),
-                        const SizedBox(width: 3),
-                        Text(
-                          'Entry: $timeStr',
-                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                        ),
-                        if (data['vehicleNumber'] != null && (data['vehicleNumber'] as String).isNotEmpty) ...[
-                          const SizedBox(width: 8),
-                          const Icon(Icons.directions_car_rounded, size: 11, color: AppColors.primary),
-                          const SizedBox(width: 2),
-                          Text(
-                            data['vehicleNumber'] as String,
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          // Action buttons
-          if (_status == 'inside') ...[
-            const SizedBox(height: AppSpacing.sm),
-            const Divider(height: 1),
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                OutlinedButton.icon(
-                  onPressed: onMarkOut,
-                  icon: const Icon(Icons.logout_rounded, size: 14),
-                  label: const Text('Mark Exit'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.error,
-                    side: const BorderSide(color: AppColors.error),
-                    minimumSize: const Size(100, 32),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-          ] else if (_status == 'pending') ...[
-            const SizedBox(height: AppSpacing.sm),
-            const Divider(height: 1),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.hourglass_top_rounded, size: 14, color: AppColors.warning),
-                const SizedBox(width: 4),
-                const Expanded(
-                  child: Text(
-                    'Waiting for resident approval...',
-                    style: TextStyle(fontSize: 11, color: AppColors.warning, fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ],
-            ),
-          ] else if (_status == 'approved') ...[
-            const SizedBox(height: AppSpacing.sm),
-            const Divider(height: 1),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.check_circle_rounded, size: 14, color: AppColors.success),
-                const SizedBox(width: 4),
-                const Expanded(
-                  child: Text(
-                    'Approved by Resident',
-                    style: TextStyle(fontSize: 11, color: AppColors.success, fontWeight: FontWeight.w500),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: onApprove,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.success,
-                    foregroundColor: Colors.white,
-                    minimumSize: const Size(90, 32),
-                    padding: const EdgeInsets.symmetric(horizontal: 12),
-                    textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-                  ),
-                  child: const Text('Check In'),
-                ),
-              ],
-            ),
-          ] else if (_status == 'denied') ...[
-            const SizedBox(height: AppSpacing.sm),
-            const Divider(height: 1),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(Icons.cancel_rounded, size: 14, color: AppColors.error),
-                const SizedBox(width: 4),
-                const Expanded(
-                  child: Text(
-                    'Entry Denied by Resident',
-                    style: TextStyle(fontSize: 11, color: AppColors.error, fontWeight: FontWeight.w500),
-                  ),
-                ),
-              ],
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
           ],
-        ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: _typeColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                  ),
+                  child: Icon(_typeIcon, color: _typeColor, size: 22),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              visitor.name,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          _StatusBadge(status: _status),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Flat ${visitor.hostFlat} • ${visitor.type}',
+                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                      ),
+                      Row(
+                        children: [
+                          const Icon(Icons.access_time_rounded, size: 11, color: AppColors.textSecondary),
+                          const SizedBox(width: 3),
+                          Text(
+                            'Entry: $timeStr',
+                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          ),
+                          if (visitor.vehicleNumber != null && visitor.vehicleNumber!.isNotEmpty) ...[
+                            const SizedBox(width: 8),
+                            const Icon(Icons.directions_car_rounded, size: 11, color: AppColors.primary),
+                            const SizedBox(width: 2),
+                            Text(
+                              visitor.vehicleNumber!,
+                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            if (_status == 'inside') ...[
+              const SizedBox(height: AppSpacing.sm),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: onMarkOut,
+                    icon: const Icon(Icons.logout_rounded, size: 14),
+                    label: const Text('Mark Exit'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.error,
+                      side: const BorderSide(color: AppColors.error),
+                      minimumSize: const Size(100, 32),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+            ] else if (_status == 'pending') ...[
+              const SizedBox(height: AppSpacing.sm),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              const Row(
+                children: [
+                  Icon(Icons.hourglass_top_rounded, size: 14, color: AppColors.warning),
+                  SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      'Waiting for resident approval...',
+                      style: TextStyle(fontSize: 11, color: AppColors.warning, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+            ] else if (_status == 'approved') ...[
+              const SizedBox(height: AppSpacing.sm),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  const Icon(Icons.check_circle_rounded, size: 14, color: AppColors.success),
+                  const SizedBox(width: 4),
+                  const Expanded(
+                    child: Text(
+                      'Approved by Resident',
+                      style: TextStyle(fontSize: 11, color: AppColors.success, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: onApprove,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.success,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(90, 32),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                    ),
+                    child: const Text('Check In'),
+                  ),
+                ],
+              ),
+            ] else if (_status == 'denied') ...[
+              const SizedBox(height: AppSpacing.sm),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+              const Row(
+                children: [
+                  Icon(Icons.cancel_rounded, size: 14, color: AppColors.error),
+                  SizedBox(width: 4),
+                  Expanded(
+                    child: Text(
+                      'Entry Denied by Resident',
+                      style: TextStyle(fontSize: 11, color: AppColors.error, fontWeight: FontWeight.w500),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        ),
       ),
-    ),
-  );
+    );
   }
 }
 
-// ───────────────────────────────────────────────
-// Status Badge
-// ───────────────────────────────────────────────
 class _StatusBadge extends StatelessWidget {
   final String status;
   const _StatusBadge({required this.status});

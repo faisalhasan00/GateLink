@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
 import { X, CheckCircle2, Send } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { societyAdminService } from '../../services/societyAdminService';
 
 export default function DemoModal({ isOpen, onClose }) {
   const { theme } = useTheme();
@@ -18,11 +17,10 @@ export default function DemoModal({ isOpen, onClose }) {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await addDoc(collection(db, 'leads'), {
+      await societyAdminService.createLead({
         ...formData,
         source: 'Enroll Society Modal',
-        status: 'New',
-        createdAt: serverTimestamp()
+        status: 'New'
       });
       setSubmitted(true);
     } catch (err) {

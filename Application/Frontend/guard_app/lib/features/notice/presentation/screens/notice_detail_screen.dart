@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/providers/auth_providers.dart';
+import '../../providers/notice_providers.dart';
 
 class NoticeDetailScreen extends ConsumerWidget {
   final String noticeId;
@@ -11,33 +10,27 @@ class NoticeDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final userProfileAsync = ref.watch(userProfileProvider);
-    final societyId = userProfileAsync.value?['societyId'] as String? ?? '';
+    final noticeAsync = ref.watch(noticeDetailProvider(noticeId));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Notice Details')),
       backgroundColor: AppColors.background,
-      body: FutureBuilder<DocumentSnapshot>(
-        future: societyId.isNotEmpty 
-            ? FirebaseFirestore.instance.doc('societies/$societyId/notices/$noticeId').get()
-            : FirebaseFirestore.instance.collectionGroup('notices').where(FieldPath.documentId, isEqualTo: noticeId).get().then((snap) => snap.docs.first),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.exists) {
+      body: noticeAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (e, _) => Center(child: Text('Error: $e', style: const TextStyle(color: AppColors.textSecondary))),
+        data: (data) {
+          if (data == null) {
             return const Center(child: Text('Notice not found', style: TextStyle(color: AppColors.textSecondary)));
           }
 
-          final data = snapshot.data!.data() as Map<String, dynamic>;
-          final title = data['title'] ?? 'Notice';
-          final body = data['body'] ?? '';
-          final category = data['category'] ?? 'General';
+          final title = data['title'] as String? ?? 'Notice';
+          final body = data['body'] as String? ?? '';
+          final category = data['category'] as String? ?? 'General';
 
           String dateStr = '';
           if (data['createdAt'] != null) {
             try {
-              final dt = DateTime.parse(data['createdAt']);
+              final dt = DateTime.parse(data['createdAt'] as String);
               dateStr = '${dt.day}/${dt.month}/${dt.year}';
             } catch (_) {}
           }
@@ -59,7 +52,7 @@ class NoticeDetailScreen extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                         decoration: BoxDecoration(
-                          color: AppColors.notice.withOpacity(0.12),
+                          color: AppColors.notice.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(AppRadius.sm),
                         ),
                         child: Text(category, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.notice)),

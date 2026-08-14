@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Search, X, Users, UserCheck, ShieldAlert, FileText, Wrench, Megaphone, Truck, Shield, Building2 } from 'lucide-react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
+import { Search, X, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { superAdminService } from '../services/superAdminService';
 
 export default function GlobalSearchModal({ isOpen, onClose }) {
   const [query, setQuery] = useState('');
@@ -29,30 +28,16 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
     }
 
     setLoading(true);
-    const q = val.toLowerCase().trim();
-    const searchResults = [];
-
     try {
-      // 1. Search Societies across platform
-      const snapSocieties = await getDocs(collection(db, 'societies'));
-      snapSocieties.forEach(d => {
-        const s = d.data();
-        if ((s.name || '').toLowerCase().includes(q) || (s.code || d.id).toLowerCase().includes(q) || (s.city || '').toLowerCase().includes(q)) {
-          searchResults.push({
-            id: d.id,
-            title: s.name || 'Society',
-            subtitle: `Code: ${s.code || d.id} • ${s.city || 'Active'}`,
-            type: 'Society',
-            path: '/societies',
-            icon: <Building2 size={16} color="var(--primary)" />
-          });
-        }
-      });
-
-      setResults(searchResults.slice(0, 10));
-      setLoading(false);
+      const searchResults = await superAdminService.searchGlobalSocieties(val);
+      const mappedResults = searchResults.map(r => ({
+        ...r,
+        icon: <Building2 size={16} color="var(--primary)" />
+      }));
+      setResults(mappedResults);
     } catch (e) {
       console.error(e);
+    } finally {
       setLoading(false);
     }
   };
@@ -66,8 +51,6 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
       display: 'flex', justifyContent: 'center', paddingTop: '80px', paddingLeft: '20px', paddingRight: '20px'
     }} onClick={onClose}>
       <div className="card" style={{ width: '100%', maxWidth: '640px', maxHeight: '500px', borderRadius: '16px', padding: '0', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
-        
-        {/* Search Header */}
         <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--border-color)' }}>
           <Search size={20} color="var(--primary)" />
           <input 
@@ -81,7 +64,6 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
           <button className="btn-icon" onClick={onClose}><X size={20} /></button>
         </div>
 
-        {/* Search Results List */}
         <div style={{ padding: '12px', maxHeight: '420px', overflowY: 'auto' }}>
           {loading ? (
             <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)' }}>Searching society database...</div>
@@ -121,7 +103,6 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
             ))
           )}
         </div>
-
       </div>
     </div>
   );

@@ -4,45 +4,26 @@ import {
   Users, 
   UserCheck, 
   ShieldAlert, 
-  Car, 
   CreditCard, 
-  Calendar, 
-  FileText, 
-  Shield, 
   UserPlus, 
   CheckCircle, 
-  XCircle, 
-  PlusCircle, 
   Upload, 
   Activity,
   Building2,
   Clock,
-  TrendingUp,
-  AlertCircle
+  TrendingUp
 } from 'lucide-react';
-import { 
-  collection, 
-  onSnapshot, 
-  query, 
-  where, 
-  orderBy, 
-  limit, 
-  doc, 
-  updateDoc,
-  getDoc 
-} from 'firebase/firestore';
-import { db } from '../firebase';
 import { getSocietyAdminSession } from '../services/sessionManager';
+import { societyAdminService } from '../services/societyAdminService';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const session = getSocietyAdminSession();
-  const societyId = session?.societyId || 'SOC-001';
+  const societyId = session?.societyId;
 
-  // Society Metadata State
   const [society, setSociety] = useState({
     name: session?.societyName || 'Society Management Committee',
-    code: societyId,
+    code: societyId || 'N/A',
     address: 'Gated Community Operations Hub',
     city: 'N/A',
     state: 'N/A',
@@ -50,78 +31,65 @@ export default function Dashboard() {
     plan: 'BASIC'
   });
 
-  // Aggregated Real-time Metrics State
   const [stats, setStats] = useState({
-    // 1. Residents
     residentsTotal: 0,
     residentsActive: 0,
     residentsInactive: 0,
-    // 2. Visitors Today
     visitorsToday: 0,
     visitorsInside: 0,
     visitorsPending: 0,
     visitorsDenied: 0,
-    // 3. Complaints
     complaintsTotal: 0,
     complaintsOpen: 0,
     complaintsInProgress: 0,
     complaintsResolved: 0,
-    // 4. Billing
     billsTotal: 0,
     billsPaid: 0,
     billsPending: 0,
     billsOverdue: 0,
     collectionTotal: 0,
     outstandingTotal: 0,
-    // 5. Amenities
     amenitiesBookingsToday: 0,
     amenitiesBookingsUpcoming: 0,
     amenitiesActive: 4,
-    // 6. Documents
     documentsTotal: 0,
-    // 7. Staff
     staffGuards: 6,
     staffMaintenance: 3,
     staffHousekeeping: 4,
     staffActive: 13
   });
 
-  // Recent Data Collections
   const [pendingVisitors, setPendingVisitors] = useState([]);
   const [recentActivities, setRecentActivities] = useState([]);
   const [recentComplaints, setRecentComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
+    if (!societyId) {
+      setLoading(false);
+      return;
+    }
+
     let unsubUsers, unsubVisitors, unsubComplaints, unsubBills, unsubDocs, unsubAmenity, unsubStaff;
 
-    try {
-      // 0. Fetch Society Metadata
-      getDoc(doc(db, 'societies', societyId)).then((snap) => {
-        if (snap.exists()) {
-          setSociety((prev) => ({ ...prev, ...snap.data() }));
-        }
-      }).catch((e) => console.error('Society metadata fetch error:', e));
-
-      // 1. Listen to Users (Residents)
-      const qUsers = query(collection(db, `societies/${societyId}/users`), where('role', '==', 'resident'));
-      unsubUsers = onSnapshot(qUsers, (snapshot) => {
-        const total = snapshot.docs.length;
-        const active = snapshot.docs.filter(d => d.data().status !== 'inactive').length;
+    unsubUsers = societyAdminService.subscribeResidents(
+      societyId,
+      (docs) => {
+        const total = docs.length;
+        const active = docs.filter(d => d.status !== 'inactive').length;
         setStats(prev => ({
           ...prev,
           residentsTotal: total,
           residentsActive: active,
           residentsInactive: total - active
         }));
-      });
+      },
+      (err) => console.error('Error fetching residents:', err)
+    );
 
-      // 2. Listen to Visitors (Live Stream)
-      const qVisitors = query(collection(db, `societies/${societyId}/visitors`), orderBy('createdDate', 'desc'), limit(30));
-      unsubVisitors = onSnapshot(qVisitors, (snapshot) => {
-        const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-        
+    unsubVisitors = societyAdminService.subscribeVisitors(
+      societyId,
+      (docs) => {
         const todayStr = new Date().toISOString().split('T')[0];
         const todayVisitors = docs.filter(v => (v.createdDate || '').startsWith(todayStr));
         const inside = docs.filter(v => v.status === 'inside').length;
@@ -137,7 +105,6 @@ export default function Dashboard() {
           visitorsDenied: denied
         }));
 
-        // Generate Recent Activity Timeline Stream from visitors
         const activityList = docs.slice(0, 15).map(v => ({
           id: v.id,
           type: v.status === 'inside' ? 'Visitor Checked In' : v.status === 'pending' ? 'Visitor Approval Requested' : 'Visitor Activity',
@@ -148,12 +115,13 @@ export default function Dashboard() {
         }));
         setRecentActivities(activityList);
         setLoading(false);
-      });
+      },
+      (err) => console.error('Error fetching visitors:', err)
+    );
 
-      // 3. Listen to Complaints
-      const qComplaints = query(collection(db, `societies/${societyId}/complaints`), orderBy('createdAt', 'desc'), limit(10));
-      unsubComplaints = onSnapshot(qComplaints, (snapshot) => {
-        const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    unsubComplaints = societyAdminService.subscribeComplaints(
+      societyId,
+      (docs) => {
         const open = docs.filter(c => c.status === 'open' || c.status === 'Pending').length;
         const inProgress = docs.filter(c => c.status === 'in_progress').length;
         const resolved = docs.filter(c => c.status === 'resolved' || c.status === 'Closed').length;
@@ -166,12 +134,13 @@ export default function Dashboard() {
           complaintsInProgress: inProgress,
           complaintsResolved: resolved
         }));
-      });
+      },
+      (err) => console.error('Error fetching complaints:', err)
+    );
 
-      // 4. Listen to Maintenance Bills
-      const qBills = query(collection(db, `societies/${societyId}/maintenance`), limit(20));
-      unsubBills = onSnapshot(qBills, (snapshot) => {
-        const docs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    unsubBills = societyAdminService.subscribeMaintenanceBills(
+      societyId,
+      (docs) => {
         const paid = docs.filter(b => b.status === 'paid' || b.status === 'Paid').length;
         const pending = docs.filter(b => b.status === 'pending' || b.status === 'Unpaid').length;
 
@@ -182,45 +151,46 @@ export default function Dashboard() {
           billsPending: pending,
           billsOverdue: Math.max(0, pending - 2)
         }));
-      });
+      },
+      (err) => console.error('Error fetching bills:', err)
+    );
 
-      // 5. Listen to Documents
-      const qDocs = query(collection(db, `societies/${societyId}/documents`));
-      unsubDocs = onSnapshot(qDocs, (snapshot) => {
-        setStats(prev => ({ ...prev, documentsTotal: snapshot.docs.length }));
-      });
+    unsubDocs = societyAdminService.subscribeDocuments(
+      societyId,
+      (docs) => {
+        setStats(prev => ({ ...prev, documentsTotal: docs.length }));
+      },
+      (err) => console.error('Error fetching documents:', err)
+    );
 
-      // 6. Listen to Amenity Bookings
-      const qAmenity = query(collection(db, `societies/${societyId}/amenities`));
-      unsubAmenity = onSnapshot(qAmenity, (snapshot) => {
+    unsubAmenity = societyAdminService.subscribeAmenities(
+      societyId,
+      (docs) => {
         setStats(prev => ({
           ...prev,
-          amenitiesBookingsToday: snapshot.docs.length > 0 ? 2 : 0,
-          amenitiesBookingsUpcoming: snapshot.docs.length
+          amenitiesBookingsToday: docs.length > 0 ? 2 : 0,
+          amenitiesBookingsUpcoming: docs.length
         }));
-      });
+      },
+      (err) => console.error('Error fetching amenities:', err)
+    );
 
-      // 7. Listen to Staff Directory
-      const qStaff = query(collection(db, `societies/${societyId}/staff`));
-      unsubStaff = onSnapshot(qStaff, (snapshot) => {
-        const docs = snapshot.docs.map(d => d.data());
+    unsubStaff = societyAdminService.subscribeStaff(
+      societyId,
+      (docs) => {
         const guards = docs.filter(s => (s.department || '').toLowerCase().includes('security') || (s.role || '').toLowerCase().includes('guard')).length;
         const maint = docs.filter(s => (s.department || '').toLowerCase().includes('maintenance') || (s.department || '').toLowerCase().includes('electrical') || (s.department || '').toLowerCase().includes('plumbing')).length;
         const house = docs.filter(s => (s.department || '').toLowerCase().includes('housekeeping') || (s.department || '').toLowerCase().includes('cleaning')).length;
         setStats(prev => ({
           ...prev,
-          staffActive: docs.filter(s => s.status === 'Active').length,
+          staffActive: docs.filter(s => s.status === 'Active' || s.status === 'active').length,
           staffGuards: guards,
           staffMaintenance: maint,
           staffHousekeeping: house
         }));
-      });
-
-    } catch (err) {
-      console.error('Error attaching dashboard Firestore listeners:', err);
-      setError(err.message);
-      setLoading(false);
-    }
+      },
+      (err) => console.error('Error fetching staff:', err)
+    );
 
     return () => {
       if (unsubUsers) unsubUsers();
@@ -235,10 +205,7 @@ export default function Dashboard() {
 
   const handleApproveVisitor = async (docId) => {
     try {
-      await updateDoc(doc(db, `societies/${societyId}/visitors`, docId), {
-        status: 'approved',
-        approvedAt: new Date().toISOString()
-      });
+      await societyAdminService.updateVisitorStatus(societyId, docId, 'approved');
     } catch (e) {
       alert('Error approving visitor: ' + e.message);
     }
@@ -246,10 +213,7 @@ export default function Dashboard() {
 
   const handleDenyVisitor = async (docId) => {
     try {
-      await updateDoc(doc(db, `societies/${societyId}/visitors`, docId), {
-        status: 'denied',
-        rejectedAt: new Date().toISOString()
-      });
+      await societyAdminService.updateVisitorStatus(societyId, docId, 'denied');
     } catch (e) {
       alert('Error denying visitor: ' + e.message);
     }
@@ -338,9 +302,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* 3. Stat Cards Grid (7 Key Modules) */}
+      {/* 3. Stat Cards Grid */}
       <div className="dashboard-grid">
-        {/* Total Residents */}
         <div className="stat-card" onClick={() => navigate('/residents')} style={{ cursor: 'pointer' }}>
           <div className="stat-icon" style={{ backgroundColor: 'var(--primary-light)' }}>
             <Users size={24} color="var(--primary)" />
@@ -352,7 +315,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Visitors Today */}
         <div className="stat-card" onClick={() => navigate('/visitors')} style={{ cursor: 'pointer' }}>
           <div className="stat-icon" style={{ backgroundColor: 'var(--secondary-light)' }}>
             <UserCheck size={24} color="var(--secondary)" />
@@ -364,7 +326,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Complaints Summary */}
         <div className="stat-card" onClick={() => navigate('/complaints')} style={{ cursor: 'pointer' }}>
           <div className="stat-icon" style={{ backgroundColor: 'var(--danger-light)' }}>
             <ShieldAlert size={24} color="var(--danger)" />
@@ -376,7 +337,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Maintenance Billing */}
         <div className="stat-card" onClick={() => navigate('/maintenance')} style={{ cursor: 'pointer' }}>
           <div className="stat-icon" style={{ backgroundColor: 'rgba(16, 185, 129, 0.15)' }}>
             <CreditCard size={24} color="#10B981" />
@@ -391,8 +351,6 @@ export default function Dashboard() {
 
       {/* 4. Real-Time Charts & Analytics Section */}
       <div className="dashboard-grid" style={{ gridTemplateColumns: '2fr 1fr' }}>
-        
-        {/* Visitor & Gate Trend Analytics */}
         <div className="card" style={{ padding: '20px' }}>
           <div className="card-header" style={{ marginBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -402,7 +360,6 @@ export default function Dashboard() {
             <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontWeight: 600 }}>Live Data</span>
           </div>
           
-          {/* Custom SVG Bar Chart */}
           <div style={{ height: '180px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '16px', padding: '10px 20px 0' }}>
             {[
               { day: 'Mon', count: 18, height: '45%' },
@@ -428,7 +385,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Complaint Status Donut Breakdown */}
         <div className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
           <div className="card-header">
             <h3 className="card-title">Complaint Status</h3>
@@ -442,7 +398,7 @@ export default function Dashboard() {
               background: 'conic-gradient(#EF4444 0% 35%, #F59E0B 35% 60%, #10B981 60% 100%)',
               display: 'flex',
               alignItems: 'center',
-              justifyInContent: 'center',
+              justifyContent: 'center',
               position: 'relative'
             }}>
               <div style={{ 
@@ -470,10 +426,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* 5. Pending Visitor Approvals & Recent Activity Stream */}
+      {/* 5. Pending Visitor Approvals & Live Activity */}
       <div className="dashboard-grid" style={{ gridTemplateColumns: '1.2fr 1fr' }}>
-        
-        {/* Pending Visitor Approvals Widget */}
         <div className="card">
           <div className="card-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -558,7 +512,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Live Recent Activity Stream */}
         <div className="card">
           <div className="card-header">
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

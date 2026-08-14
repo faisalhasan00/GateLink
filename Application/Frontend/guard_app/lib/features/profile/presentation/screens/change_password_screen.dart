@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/auth_providers.dart';
+import '../../providers/profile_providers.dart';
 
 class ChangePasswordScreen extends ConsumerStatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -33,7 +33,6 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     super.dispose();
   }
 
-  // Password Policy Enforcer: Minimum 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
   bool _validatePasswordPolicy(String pwd) {
     if (pwd.length < 8) return false;
     if (!pwd.contains(RegExp(r'[A-Z]'))) return false;
@@ -57,27 +56,24 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
     setState(() => _submitting = true);
 
     try {
-      // 1. Re-authenticate user with current password
       final cred = EmailAuthProvider.credential(
         email: user.email!,
         password: _currentPasswordController.text,
       );
       await user.reauthenticateWithCredential(cred);
-
-      // 2. Update to new password
       await user.updatePassword(_newPasswordController.text);
 
-      // 3. Log Activity to Firestore
       final profile = ref.read(userProfileProvider).value;
-      final societyId = profile?['societyId'] ?? 'SOC-001';
+      final societyId = profile?['societyId'] as String?;
 
-      await FirebaseFirestore.instance
-          .collection('societies/$societyId/users/${user.uid}/activity_logs')
-          .add({
-        'action': 'Password Changed',
-        'description': 'Account security password updated successfully.',
-        'timestamp': DateTime.now().toIso8601String(),
-      });
+      if (societyId != null && societyId.isNotEmpty) {
+        final userRepo = ref.read(userRepositoryProvider);
+        await userRepo.logAuditAction(societyId, {
+          'action': 'Password Changed',
+          'description': 'Account security password updated successfully.',
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -123,7 +119,6 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Security Rules Info Banner
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
@@ -148,7 +143,6 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Current Password
               const Text('Current Password *', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               TextFormField(
@@ -167,7 +161,6 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
               ),
               const SizedBox(height: AppSpacing.md),
 
-              // New Password
               const Text('New Password *', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               TextFormField(
@@ -191,7 +184,6 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
               ),
               const SizedBox(height: AppSpacing.md),
 
-              // Confirm New Password
               const Text('Confirm New Password *', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               TextFormField(
@@ -215,7 +207,6 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
 
               const SizedBox(height: AppSpacing.xl),
 
-              // Submit Button
               SizedBox(
                 width: double.infinity,
                 height: 50,

@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/auth_providers.dart';
+import '../../providers/alert_providers.dart';
 
 class EmergencySosDialog extends ConsumerStatefulWidget {
   const EmergencySosDialog({super.key});
@@ -36,52 +35,45 @@ class _EmergencySosDialogState extends ConsumerState<EmergencySosDialog> {
     setState(() => _submitting = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
+      final user = ref.read(currentUserProvider);
       final profile = ref.read(userProfileProvider).value;
       final societyId = profile?['societyId'] ?? 'SOC-001';
       final residentName = profile?['name'] ?? user?.displayName ?? 'Resident';
       final flatNumber = profile?['flatNumber'] ?? 'A-402';
       final phone = profile?['phone'] ?? '+91 98765 43210';
 
-      final timestampStr = DateTime.now().toIso8601String();
-
-      // 1. Create Broadcast SOS Alert Document
-      await FirebaseFirestore.instance.collection('societies/$societyId/sos_alerts').add({
-        'residentUid': user?.uid,
-        'residentName': residentName,
-        'flatNumber': flatNumber,
-        'phone': phone,
-        'type': _selectedType,
-        'status': 'Triggered', // 'Triggered', 'Acknowledged', 'In Progress', 'Resolved'
-        'notes': _notesController.text.trim(),
-        'createdAt': timestampStr,
-        'timestamp': timestampStr,
-      });
-
-      // 2. Broadcast to Society Guards & Admin Notifications
-      await FirebaseFirestore.instance.collection('societies/$societyId/notifications').add({
-        'title': '🚨 EMERGENCY SOS TRIGGERED: $_selectedType',
-        'body': 'Emergency SOS triggered by $residentName (Flat $flatNumber). Type: $_selectedType. Immediate assistance required!',
-        'createdAt': timestampStr,
-        'isRead': false,
-        'type': 'sos'
-      });
+      final success = await ref.read(alertControllerProvider.notifier).broadcastSosAlert(
+        societyId: societyId,
+        residentUid: user?.uid ?? '',
+        residentName: residentName,
+        flatNumber: flatNumber,
+        phone: phone,
+        type: _selectedType,
+        notes: _notesController.text.trim(),
+      );
 
       if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(Icons.warning_amber_rounded, color: Colors.white),
-                const SizedBox(width: 8),
-                Expanded(child: Text('🚨 SOS Alert Sent to Gate Security & Society Admin!')),
-              ],
+        if (success) {
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Row(
+                children: [
+                  Icon(Icons.warning_amber_rounded, color: Colors.white),
+                  SizedBox(width: 8),
+                  Expanded(child: Text('🚨 SOS Alert Sent to Gate Security & Society Admin!')),
+                ],
+              ),
+              backgroundColor: AppColors.error,
+              duration: Duration(seconds: 5),
             ),
-            backgroundColor: AppColors.error,
-            duration: const Duration(seconds: 5),
-          ),
-        );
+          );
+        } else {
+          final errorMsg = ref.read(alertControllerProvider).errorMessage ?? 'Failed to send alert';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMsg), backgroundColor: AppColors.error),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {

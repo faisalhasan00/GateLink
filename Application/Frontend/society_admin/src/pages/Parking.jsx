@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, XCircle, CheckCircle } from 'lucide-react';
-import { collection, onSnapshot, query, orderBy, doc, updateDoc, addDoc } from 'firebase/firestore';
-import { db } from '../firebase';
 import { getSocietyAdminSession } from '../services/sessionManager';
+import { societyAdminService } from '../services/societyAdminService';
 
 export default function Parking() {
   const session = getSocietyAdminSession();
-  const societyId = session?.societyId || 'SOC-001';
+  const societyId = session?.societyId;
 
   const [parkingSlots, setParkingSlots] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,24 +13,37 @@ export default function Parking() {
   const [formData, setFormData] = useState({ slot: '', level: 'Basement 1', number: '', type: 'Car', model: '', color: '', status: 'Active' });
 
   useEffect(() => {
-    const q = query(collection(db, `societies/${societyId}/parking`), orderBy('slot'));
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setParkingSlots(data);
+    if (!societyId) {
       setLoading(false);
-    });
+      return;
+    }
+
+    const unsubscribe = societyAdminService.subscribeParkingSlots(
+      societyId,
+      (data) => {
+        setParkingSlots(data);
+        setLoading(false);
+      },
+      (err) => console.error('Error fetching parking slots:', err)
+    );
+
     return () => unsubscribe();
   }, [societyId]);
 
   const toggleStatus = async (id, currentStatus) => {
     const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
-    await updateDoc(doc(db, `societies/${societyId}/parking`, id), { status: newStatus });
+    try {
+      await societyAdminService.assignParkingSlot(societyId, id, { status: newStatus });
+    } catch (e) {
+      alert("Error updating parking status: " + e.message);
+    }
   };
 
   const handleAllocate = async (e) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, `societies/${societyId}/parking`), {
+      const slotId = formData.slot.trim().replace(/[^a-zA-Z0-9_-]/g, '_');
+      await societyAdminService.assignParkingSlot(societyId, slotId, {
         ...formData,
         createdAt: new Date().toISOString()
       });
@@ -101,7 +113,6 @@ export default function Parking() {
         </div>
       </div>
 
-      {/* Allocate Parking Modal */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -133,14 +144,6 @@ export default function Parking() {
                     <option value="Car">Car</option>
                     <option value="Bike">Bike</option>
                   </select>
-                </div>
-                <div className="form-group">
-                  <label>Vehicle Model</label>
-                  <input required type="text" value={formData.model} onChange={e => setFormData({...formData, model: e.target.value})} placeholder="e.g. Honda City" />
-                </div>
-                <div className="form-group">
-                  <label>Color</label>
-                  <input required type="text" value={formData.color} onChange={e => setFormData({...formData, color: e.target.value})} placeholder="e.g. White" />
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>

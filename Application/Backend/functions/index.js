@@ -1,5 +1,6 @@
 const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
 const { onRequest, onCall, HttpsError } = require("firebase-functions/v2/https");
+const logger = require("firebase-functions/logger");
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getAuth } = require("firebase-admin/auth");
@@ -30,7 +31,13 @@ exports.notifyResidentOnVisitorArrival = onDocumentCreated(
 
     if (!hostFlat) return;
 
-    console.log(`New pending visitor '${visitorName}' for flat '${hostFlat}' in society '${societyId}'`);
+    logger.info("New pending visitor arrival", {
+      functionName: "notifyResidentOnVisitorArrival",
+      societyId,
+      visitorId,
+      hostFlat,
+      visitorType,
+    });
 
     const db = getFirestore();
     const residentsQuery = await db
@@ -40,7 +47,12 @@ exports.notifyResidentOnVisitorArrival = onDocumentCreated(
       .get();
 
     if (residentsQuery.empty) {
-      console.log(`No resident found for flat ${hostFlat}`);
+      logger.warn("No resident found for visitor host flat", {
+        functionName: "notifyResidentOnVisitorArrival",
+        societyId,
+        visitorId,
+        hostFlat,
+      });
       return;
     }
 
@@ -89,12 +101,26 @@ exports.notifyResidentOnVisitorArrival = onDocumentCreated(
             },
           },
         };
-        promises.push(messaging.send(message).catch((err) => console.error("FCM Send Error:", err)));
+        promises.push(
+          messaging.send(message).catch((err) =>
+            logger.error("FCM Send Error", {
+              functionName: "notifyResidentOnVisitorArrival",
+              societyId,
+              visitorId,
+              residentUid: residentId,
+              error: err.message,
+            })
+          )
+        );
       }
     }
 
     await Promise.all(promises);
-    console.log("Visitor notification dispatch complete.");
+    logger.info("Visitor notification dispatch complete", {
+      functionName: "notifyResidentOnVisitorArrival",
+      societyId,
+      visitorId,
+    });
   }
 );
 
@@ -116,7 +142,13 @@ exports.notifyGuardOnVisitorDecision = onDocumentUpdated(
 
     if (status !== "approved" && status !== "denied" && status !== "rejected") return;
 
-    console.log(`Visitor ${visitorId} status changed from ${before.status} to ${status}`);
+    logger.info("Visitor decision status changed", {
+      functionName: "notifyGuardOnVisitorDecision",
+      societyId,
+      visitorId,
+      previousStatus: before.status,
+      newStatus: status,
+    });
 
     const db = getFirestore();
     const guardsQuery = await db
@@ -141,7 +173,15 @@ exports.notifyGuardOnVisitorDecision = onDocumentUpdated(
               notification: { title, body },
               data: { type: "visitor_decision", visitorId, status, societyId },
             })
-            .catch((err) => console.error("FCM Guard Notify Error:", err))
+            .catch((err) =>
+              logger.error("FCM Guard Notify Error", {
+                functionName: "notifyGuardOnVisitorDecision",
+                societyId,
+                visitorId,
+                guardId: guardDoc.id,
+                error: err.message,
+              })
+            )
         );
       }
     }
@@ -189,6 +229,14 @@ exports.generateVisitorPasscode = onCall(async (request) => {
     createdAt: now.toISOString(),
   });
 
+  logger.info("Visitor passcode generated", {
+    functionName: "generateVisitorPasscode",
+    societyId,
+    visitorId: visitorRef.id,
+    residentUid: request.auth.uid,
+    hostFlat,
+  });
+
   return {
     visitorId: visitorRef.id,
     passCode,
@@ -219,6 +267,11 @@ exports.validateVisitorPasscode = onCall(async (request) => {
     .get();
 
   if (querySnapshot.empty) {
+    logger.warn("Visitor passcode validation failed: Invalid passcode", {
+      functionName: "validateVisitorPasscode",
+      societyId,
+      guardUid: request.auth.uid,
+    });
     return { isValid: false, message: "Invalid visitor passcode." };
   }
 
@@ -234,6 +287,13 @@ exports.validateVisitorPasscode = onCall(async (request) => {
     const data = doc.data();
 
     if (data.status !== "expected") {
+      logger.warn("Visitor passcode already used or invalid status", {
+        functionName: "validateVisitorPasscode",
+        societyId,
+        visitorId: doc.id,
+        status: data.status,
+        guardUid: request.auth.uid,
+      });
       return {
         isValid: false,
         message: `Passcode already used or invalid status: ${data.status.toUpperCase()}`,
@@ -244,6 +304,12 @@ exports.validateVisitorPasscode = onCall(async (request) => {
       const expiresAt = new Date(data.passCodeExpiresAt);
       if (new Date() > expiresAt) {
         transaction.update(visitorRef, { status: "expired" });
+        logger.info("Visitor pass expired", {
+          functionName: "validateVisitorPasscode",
+          societyId,
+          visitorId: doc.id,
+          guardUid: request.auth.uid,
+        });
         return { isValid: false, message: "Visitor pass has expired." };
       }
     }
@@ -254,6 +320,14 @@ exports.validateVisitorPasscode = onCall(async (request) => {
       entryTime: nowIso,
       scannedByGuardUid: request.auth.uid,
       updatedAt: nowIso,
+    });
+
+    logger.info("Visitor passcode validated and entry granted", {
+      functionName: "validateVisitorPasscode",
+      societyId,
+      visitorId: doc.id,
+      guardUid: request.auth.uid,
+      hostFlat: data.hostFlat,
     });
 
     return {
@@ -284,6 +358,10 @@ exports.setSuperAdminRole = onCall(async (request) => {
   const isBootstrapKeyMatch = request.data.bootstrapKey && request.data.bootstrapKey === process.env.SUPER_ADMIN_BOOTSTRAP_KEY;
 
   if (!isExistingSuperAdmin && !isBootstrapKeyMatch) {
+    logger.error("Unauthorized attempt to assign super_admin role", {
+      functionName: "setSuperAdminRole",
+      callerUid: request.auth.uid,
+    });
     throw new HttpsError("permission-denied", "Unauthorized to assign super_admin role.");
   }
 
@@ -296,6 +374,12 @@ exports.setSuperAdminRole = onCall(async (request) => {
 
   const db = getFirestore();
   await db.doc(`users/${targetUid}`).set({ role: "super_admin", updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+
+  logger.info("Successfully assigned super_admin claim", {
+    functionName: "setSuperAdminRole",
+    callerUid: request.auth.uid,
+    targetUid,
+  });
 
   return { success: true, message: `Successfully assigned super_admin claim to user ${targetUid}` };
 });
@@ -318,7 +402,10 @@ exports.createCashfreeOrder = onRequest({ cors: true, secrets: [cashfreeClientId
       try {
         authUser = await getAuth().verifyIdToken(idToken);
       } catch (authErr) {
-        console.error("Firebase Auth ID Token verification failed:", authErr.message);
+        logger.error("Firebase Auth ID Token verification failed", {
+          functionName: "createCashfreeOrder",
+          error: authErr.message,
+        });
       }
     }
 
@@ -334,6 +421,12 @@ exports.createCashfreeOrder = onRequest({ cors: true, secrets: [cashfreeClientId
 
     // Enforce user ownership match
     if (authUser.uid !== residentUid) {
+      logger.warn("Forbidden payment order creation attempt for different user", {
+        functionName: "createCashfreeOrder",
+        authUserUid: authUser.uid,
+        residentUid,
+        societyId,
+      });
       return res.status(403).json({ error: "Forbidden: You can only create payment orders for your own account" });
     }
 
@@ -381,6 +474,13 @@ exports.createCashfreeOrder = onRequest({ cors: true, secrets: [cashfreeClientId
       const existingDoc = existingPaymentQuery.docs[0];
       const existingData = existingDoc.data();
       if (existingData.cashfreeOrderId && existingData.cashfreePaymentSessionId) {
+        logger.info("Existing active Cashfree payment session reused", {
+          functionName: "createCashfreeOrder",
+          societyId,
+          residentUid,
+          maintenanceBillId,
+          orderId: existingData.cashfreeOrderId,
+        });
         return res.status(200).json({
           status: "SUCCESS",
           orderId: existingData.cashfreeOrderId,
@@ -418,7 +518,14 @@ exports.createCashfreeOrder = onRequest({ cors: true, secrets: [cashfreeClientId
       updatedAt: FieldValue.serverTimestamp(),
     });
 
-    console.log(`Cashfree order '${orderId}' created successfully for resident '${residentUid}', bill '${maintenanceBillId}'`);
+    logger.info("Cashfree order created successfully", {
+      functionName: "createCashfreeOrder",
+      societyId,
+      residentUid,
+      maintenanceBillId,
+      orderId,
+      amount: officialAmount,
+    });
 
     return res.status(200).json({
       status: "SUCCESS",
@@ -428,7 +535,11 @@ exports.createCashfreeOrder = onRequest({ cors: true, secrets: [cashfreeClientId
       currency: "INR",
     });
   } catch (err) {
-    console.error("createCashfreeOrder error:", err);
+    logger.error("createCashfreeOrder error", {
+      functionName: "createCashfreeOrder",
+      error: err.message,
+      stack: err.stack,
+    });
     return res.status(500).json({ error: err.message || "Internal Server Error" });
   }
 });
@@ -449,7 +560,9 @@ exports.cashfreeWebhook = onRequest({ secrets: [cashfreeClientId, cashfreeClient
 
     const isSigValid = CashfreePaymentProvider.verifyWebhookSignature(rawBody, timestamp, signature);
     if (!isSigValid) {
-      console.error("Cashfree Webhook HMAC SHA256 Signature Verification FAILED!");
+      logger.error("Cashfree Webhook HMAC SHA256 Signature Verification FAILED!", {
+        functionName: "cashfreeWebhook",
+      });
       return res.status(401).send("Invalid signature");
     }
 
@@ -464,7 +577,10 @@ exports.cashfreeWebhook = onRequest({ secrets: [cashfreeClientId, cashfreeClient
     const paymentDoc = await paymentRef.get();
 
     if (!paymentDoc.exists) {
-      console.warn(`Webhook received for unknown order: ${orderId}`);
+      logger.warn("Webhook received for unknown order", {
+        functionName: "cashfreeWebhook",
+        orderId,
+      });
       return res.status(200).send("ORDER_NOT_FOUND");
     }
 
@@ -476,13 +592,22 @@ exports.cashfreeWebhook = onRequest({ secrets: [cashfreeClientId, cashfreeClient
     // Server-to-Server Independent API Verification
     const cfVerify = await CashfreePaymentProvider.verifyPaymentWithCashfree(orderId);
     if (!cfVerify.isSuccess) {
-      console.warn(`Cashfree API verification failed for ${orderId}: ${cfVerify.message}`);
+      logger.warn("Cashfree API verification failed", {
+        functionName: "cashfreeWebhook",
+        orderId,
+        verificationMessage: cfVerify.message,
+      });
       await paymentRef.update({ status: "FAILED", updatedAt: FieldValue.serverTimestamp() });
       return res.status(200).send("PAYMENT_NOT_SUCCESSFUL");
     }
 
     if (cfVerify.paymentAmount !== paymentData.amount) {
-      console.error(`AMOUNT MISMATCH! Cashfree=${cfVerify.paymentAmount}, Expected=${paymentData.amount}`);
+      logger.error("Cashfree payment amount mismatch flagged", {
+        functionName: "cashfreeWebhook",
+        orderId,
+        receivedAmount: cfVerify.paymentAmount,
+        expectedAmount: paymentData.amount,
+      });
       await paymentRef.update({ status: "FLAGGED_AMOUNT_MISMATCH", updatedAt: FieldValue.serverTimestamp() });
       return res.status(200).send("AMOUNT_MISMATCH_FLAGGED");
     }
@@ -533,7 +658,13 @@ exports.cashfreeWebhook = onRequest({ secrets: [cashfreeClientId, cashfreeClient
       });
     });
 
-    console.log(`Payment '${orderId}' verified and processed atomically. Bill '${billId}' marked paid.`);
+    logger.info("Payment verified and processed atomically", {
+      functionName: "cashfreeWebhook",
+      orderId,
+      societyId,
+      maintenanceBillId: billId,
+      residentUid: paymentData.residentUid,
+    });
 
     // Dispatch FCM Notification to Resident User
     try {
@@ -556,12 +687,21 @@ exports.cashfreeWebhook = onRequest({ secrets: [cashfreeClientId, cashfreeClient
         });
       }
     } catch (fcmErr) {
-      console.error("FCM Notification error on payment success:", fcmErr.message);
+      logger.error("FCM Notification error on payment success", {
+        functionName: "cashfreeWebhook",
+        orderId,
+        societyId,
+        error: fcmErr.message,
+      });
     }
 
     return res.status(200).send("OK");
   } catch (err) {
-    console.error("cashfreeWebhook error:", err);
+    logger.error("cashfreeWebhook error", {
+      functionName: "cashfreeWebhook",
+      error: err.message,
+      stack: err.stack,
+    });
     return res.status(500).send("Internal Server Error");
   }
 });
@@ -578,7 +718,10 @@ exports.approveOfflinePayment = onRequest({ cors: true }, async (req, res) => {
       try {
         authUser = await getAuth().verifyIdToken(idToken);
       } catch (authErr) {
-        console.error("Auth token error:", authErr.message);
+        logger.error("Auth token verification error", {
+          functionName: "approveOfflinePayment",
+          error: authErr.message,
+        });
       }
     }
 
@@ -606,11 +749,19 @@ exports.approveOfflinePayment = onRequest({ cors: true }, async (req, res) => {
       updatedAt: FieldValue.serverTimestamp(),
     });
 
-    console.log(`Offline UTR bill '${maintenanceBillId}' approved by admin '${authUser.uid}'`);
+    logger.info("Offline UTR payment approved by admin", {
+      functionName: "approveOfflinePayment",
+      societyId,
+      maintenanceBillId,
+      adminUid: authUser.uid,
+    });
 
     return res.status(200).json({ status: "SUCCESS", message: "Offline UTR payment approved successfully" });
   } catch (err) {
-    console.error("approveOfflinePayment error:", err);
+    logger.error("approveOfflinePayment error", {
+      functionName: "approveOfflinePayment",
+      error: err.message,
+    });
     return res.status(500).json({ error: err.message });
   }
 });
@@ -627,7 +778,10 @@ exports.rejectOfflinePayment = onRequest({ cors: true }, async (req, res) => {
       try {
         authUser = await getAuth().verifyIdToken(idToken);
       } catch (authErr) {
-        console.error("Auth token error:", authErr.message);
+        logger.error("Auth token verification error", {
+          functionName: "rejectOfflinePayment",
+          error: authErr.message,
+        });
       }
     }
 
@@ -656,11 +810,20 @@ exports.rejectOfflinePayment = onRequest({ cors: true }, async (req, res) => {
       updatedAt: FieldValue.serverTimestamp(),
     });
 
-    console.log(`Offline UTR bill '${maintenanceBillId}' rejected by admin '${authUser.uid}'`);
+    logger.info("Offline UTR payment rejected by admin", {
+      functionName: "rejectOfflinePayment",
+      societyId,
+      maintenanceBillId,
+      adminUid: authUser.uid,
+      rejectionReason,
+    });
 
     return res.status(200).json({ status: "SUCCESS", message: "Offline UTR payment reference rejected" });
   } catch (err) {
-    console.error("rejectOfflinePayment error:", err);
+    logger.error("rejectOfflinePayment error", {
+      functionName: "rejectOfflinePayment",
+      error: err.message,
+    });
     return res.status(500).json({ error: err.message });
   }
 });

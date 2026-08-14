@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,35 +19,30 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
 
   Future<void> _checkStatus() async {
     setState(() => _isChecking = true);
-    final user = FirebaseAuth.instance.currentUser;
+    final user = ref.read(currentUserProvider);
     if (user == null) {
       if (mounted) context.go(AppRoutes.login);
       return;
     }
 
     try {
-      final socSnap = await FirebaseFirestore.instance.collection('societies').get();
-      for (final soc in socSnap.docs) {
-        final userDoc = await FirebaseFirestore.instance
-            .doc('societies/${soc.id}/users/${user.uid}')
-            .get();
-        if (userDoc.exists) {
-          final status = userDoc.data()?['status'] ?? 'pending_approval';
-          if (status == 'active' || status == 'approved') {
-            ref.invalidate(userProfileProvider);
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('🎉 Your account is approved! Welcome to SocietySphere.'),
-                  backgroundColor: AppColors.success,
-                ),
-              );
-              context.go(AppRoutes.dashboard);
-            }
-            return;
-          }
+      ref.invalidate(userProfileProvider);
+      final profile = await ref.read(userProfileProvider.future);
+      final status = profile?.status ?? 'pending_approval';
+
+      if (status == 'active' || status == 'approved') {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('🎉 Your account is approved! Welcome to SocietySphere.'),
+              backgroundColor: AppColors.success,
+            ),
+          );
+          context.go(AppRoutes.dashboard);
         }
+        return;
       }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

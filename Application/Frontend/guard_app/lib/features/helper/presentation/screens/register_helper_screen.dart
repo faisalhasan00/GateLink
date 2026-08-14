@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/auth_providers.dart';
+import '../../domain/models/helper_model.dart';
+import '../controllers/helper_controller.dart';
 
 class RegisterHelperScreen extends ConsumerStatefulWidget {
   const RegisterHelperScreen({super.key});
@@ -63,28 +64,26 @@ class _RegisterHelperScreenState extends ConsumerState<RegisterHelperScreen> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       final profile = ref.read(userProfileProvider).value;
-      final societyId = profile?['societyId'] ?? 'SOC-001';
       final residentName = profile?['name'] ?? user?.displayName ?? 'Resident';
       final flatNumber = profile?['flatNumber'] ?? 'A-402';
 
-      final newDoc = {
-        'name': _nameController.text.trim(),
-        'phone': _phoneController.text.trim(),
-        'type': _selectedType,
-        'govtIdType': _selectedGovtIdType,
-        'govtIdNumber': _idNumberController.text.trim(),
-        'workingDays': _workingDays,
-        'emergencyContact': _emergencyController.text.trim(),
-        'residentUid': user?.uid,
-        'residentName': residentName,
-        'flatNumber': flatNumber,
-        'status': 'Active',
-        'createdAt': DateTime.now().toIso8601String(),
-      };
+      final helper = HelperModel(
+        id: '',
+        name: _nameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        type: _selectedType,
+        govtIdType: _selectedGovtIdType,
+        govtIdNumber: _idNumberController.text.trim(),
+        workingDays: _workingDays,
+        emergencyContact: _emergencyController.text.trim(),
+        residentUid: user?.uid,
+        residentName: residentName,
+        flatNumber: flatNumber,
+        status: 'Active',
+        createdAt: DateTime.now(),
+      );
 
-      await FirebaseFirestore.instance
-          .collection('societies/$societyId/helpers')
-          .add(newDoc);
+      await ref.read(helperControllerProvider.notifier).registerHelper(helper);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

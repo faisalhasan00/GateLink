@@ -3,8 +3,7 @@ import {
   Building2, MapPin, Layers, Users, PhoneCall, CheckCircle2, 
   ChevronRight, ChevronLeft, X, AlertTriangle, Lock, ShieldCheck, Map
 } from 'lucide-react';
-import { writeBatch, doc, collection } from 'firebase/firestore';
-import { db } from '../../firebase';
+import { superAdminService } from '../../services/superAdminService';
 import { 
   validateStep1, validateStep2, validateStep3, validateStep4, validateStep5, 
   generateSocietyCode 
@@ -150,169 +149,13 @@ export default function SocietyOnboardingWizard({ isOpen, onClose, existingSocie
     setSubmitting(true);
 
     try {
-      // XSS & Payload Sanitization
       const cleanData = sanitizePayload(formData);
-
-      const societyUUID = generateUUID();
-      const societyId = `SOC-${cleanData.code.substring(0, 6)}`;
-      const cleanName = cleanData.name.toLowerCase().replace(/[^a-z0-9]/g, '');
-      const adminEmail = cleanData.email.toLowerCase();
-      const tempPassword = cleanData.password || `${cleanData.name.substring(0, 3).toUpperCase()}#${Math.floor(1000 + Math.random() * 9000)}`;
-
-      const timestamp = new Date().toISOString();
-
-      // Atomic Transaction using Firestore Write Batch
-      const batch = writeBatch(db);
-
-      const blockNamesRaw = cleanData.blockNames || cleanData.buildings || 'A, B, C, D';
-      const parsedBlocks = blockNamesRaw.split(',').map(s => s.trim()).filter(Boolean);
-
-      // 1. Main Society Document (`societies`)
-      const societyRef = doc(db, 'societies', societyId);
-      batch.set(societyRef, {
-        id: societyUUID,
-        societyId: societyId,
-        name: cleanData.name,
-        code: cleanData.code,
-        type: cleanData.type,
-        registrationNumber: cleanData.registrationNumber || null,
-        yearEstablished: Number(cleanData.yearEstablished) || null,
-        mrr: Number(cleanData.mrr) || 10000,
-        adminEmail: adminEmail,
-        tempPassword: tempPassword,
-        president: cleanData.presidentName || 'Management Committee',
-        phone: cleanData.phone,
-        city: cleanData.city,
-        country: cleanData.country || 'India',
-        buildings: blockNamesRaw,
-        blocksList: parsedBlocks,
-        blocks: parsedBlocks.length || Number(cleanData.blocks) || 4,
-        flats: Number(cleanData.flats) || 100,
-        flatsPerBlock: Number(cleanData.flatsPerBlock) || 50,
-        startFlatNumber: Number(cleanData.startFlatNumber) || 101,
-        floors: Number(cleanData.floors) || 10,
-        status: 'Active',
-        createdAt: timestamp,
-        updatedAt: timestamp,
-        deletedAt: null,
-        createdBy: 'super_admin',
-        updatedBy: 'super_admin'
-      });
-
-      // 2. Sub-Collection / Metadata: Address (`society_addresses`)
-      const addressRef = doc(db, `societies/${societyId}/metadata/address`);
-      batch.set(addressRef, {
-        id: generateUUID(),
-        societyId: societyId,
-        addressLine1: cleanData.addressLine1,
-        addressLine2: cleanData.addressLine2 || null,
-        area: cleanData.area,
-        landmark: cleanData.landmark || null,
-        city: cleanData.city,
-        state: cleanData.state,
-        country: cleanData.country,
-        pinCode: cleanData.pinCode,
-        location: {
-          latitude: cleanData.latitude ? Number(cleanData.latitude) : null,
-          longitude: cleanData.longitude ? Number(cleanData.longitude) : null,
-          fullAddress: cleanData.fullAddress || `${cleanData.addressLine1}, ${cleanData.area}, ${cleanData.city}, ${cleanData.pinCode}`
-        },
-        createdAt: timestamp,
-        updatedAt: timestamp,
-        deletedAt: null
-      });
-
-      // 3. Sub-Collection / Metadata: Structure (`society_structure`)
-      const structureRef = doc(db, `societies/${societyId}/metadata/structure`);
-      batch.set(structureRef, {
-        id: generateUUID(),
-        societyId: societyId,
-        buildings: Number(cleanData.buildings) || null,
-        blocks: Number(cleanData.blocks) || 1,
-        floors: Number(cleanData.floors) || 1,
-        flats: Number(cleanData.flats) || 1,
-        villas: Number(cleanData.villas) || 0,
-        parkingSlots: Number(cleanData.parkingSlots) || 0,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-        deletedAt: null
-      });
-
-      // 4. Sub-Collection / Metadata: Occupancy (`society_occupancy`)
-      const occupancyRef = doc(db, `societies/${societyId}/metadata/occupancy`);
-      batch.set(occupancyRef, {
-        id: generateUUID(),
-        societyId: societyId,
-        occupiedFlats: Number(cleanData.occupiedFlats) || 0,
-        vacantFlats: Number(cleanData.vacantFlats) || 0,
-        rentalFlats: Number(cleanData.rentalFlats) || 0,
-        ownerOccupiedFlats: Number(cleanData.ownerOccupiedFlats) || 0,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-        deletedAt: null
-      });
-
-      // 5. Sub-Collection / Metadata: Committee (`society_committee`)
-      const committeeRef = doc(db, `societies/${societyId}/metadata/committee`);
-      batch.set(committeeRef, {
-        id: generateUUID(),
-        societyId: societyId,
-        presidentName: cleanData.presidentName || null,
-        secretaryName: cleanData.secretaryName || null,
-        treasurerName: cleanData.treasurerName || null,
-        managerName: cleanData.managerName || null,
-        phone: cleanData.phone,
-        email: adminEmail,
-        emergencyContact: cleanData.emergencyContact || null,
-        createdAt: timestamp,
-        updatedAt: timestamp,
-        deletedAt: null
-      });
-
-      // 6. Audit Log (`audit_logs`)
-      const auditRef = doc(collection(db, 'audit_logs'));
-      batch.set(auditRef, {
-        id: generateUUID(),
-        action: 'CREATE_SOCIETY',
-        entityId: societyId,
-        performedBy: 'super_admin',
-        timestamp: timestamp,
-        payloadSummary: {
-          name: cleanData.name,
-          code: cleanData.code,
-          adminEmail: adminEmail,
-          city: cleanData.city
-        }
-      });
-
-      // Commit entire transaction atomically
-      await batch.commit();
-
-      // Trigger Real Super Admin Notification
-      try {
-        await addDoc(collection(db, 'notifications'), {
-          title: '🏛️ New Society Onboarded',
-          message: `${cleanData.name} (${cleanData.code}) onboarded successfully in ${cleanData.city}.`,
-          type: 'society',
-          read: false,
-          createdAt: new Date().toISOString()
-        });
-      } catch (notifErr) {
-        console.error("Error creating onboarding notification:", notifErr);
-      }
-
+      const res = await superAdminService.onboardSocietyBatch(cleanData);
       setSubmitting(false);
 
       if (onSuccess) {
-        onSuccess({
-          societyName: cleanData.name,
-          societyId: societyId,
-          accessCode: cleanData.code,
-          adminEmail: adminEmail,
-          tempPassword: tempPassword
-        });
+        onSuccess(res);
       }
-
     } catch (error) {
       console.error("Batch onboarding error:", error);
       alert("Database error onboarding society: " + error.message);

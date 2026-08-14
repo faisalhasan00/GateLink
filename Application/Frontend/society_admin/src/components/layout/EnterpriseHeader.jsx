@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, Sun, Moon } from 'lucide-react';
-import { auth, db } from '../../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { auth } from '../../firebase';
 import SearchBar from './SearchBar';
 import SubscriptionBadge from './SubscriptionBadge';
 import NotificationMenu from './NotificationMenu';
 import ProfileDropdown from './ProfileDropdown';
 import Breadcrumb from './Breadcrumb';
 import { useTheme } from '../../context/ThemeContext';
-
 import { onAuthStateChanged } from 'firebase/auth';
 import { getSocietyAdminSession, getSuperAdminSession } from '../../services/sessionManager';
+import { societyAdminService } from '../../services/societyAdminService';
 
 export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSuperAdmin = false }) {
   const getRoleEmail = () => {
@@ -28,7 +27,7 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
   };
 
   const [userEmail, setUserEmail] = useState(getRoleEmail);
-  const [societyInfo, setSocietyInfo] = useState({ code: isSuperAdmin ? 'HQ-GLOBAL' : 'SOC-001', plan: 'ENTERPRISE' });
+  const [societyInfo, setSocietyInfo] = useState({ code: isSuperAdmin ? 'HQ-GLOBAL' : (getSocietyAdminSession()?.societyId || 'SOC-ADMIN'), plan: 'ENTERPRISE' });
 
   useEffect(() => {
     setUserEmail(getRoleEmail());
@@ -42,25 +41,20 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
       setUserEmail(getRoleEmail());
     });
 
-    const fetchSociety = async () => {
-      if (isSuperAdmin) return;
-      try {
-        const session = getSocietyAdminSession();
-        const activeSocId = session?.societyId || 'SOC-001';
-        const docRef = doc(db, 'societies', activeSocId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setSocietyInfo({
-            code: data.code || activeSocId,
-            plan: data.plan || 'ENTERPRISE',
-          });
-        }
-      } catch (e) {
-        console.error('Error fetching society:', e);
+    if (!isSuperAdmin) {
+      const session = getSocietyAdminSession();
+      const activeSocId = session?.societyId;
+      if (activeSocId) {
+        societyAdminService.getSocietyDetails(activeSocId).then(data => {
+          if (data) {
+            setSocietyInfo({
+              code: data.code || activeSocId,
+              plan: data.plan || 'ENTERPRISE',
+            });
+          }
+        }).catch(e => console.error('Error fetching society:', e));
       }
-    };
-    fetchSociety();
+    }
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
@@ -79,7 +73,7 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
         backgroundColor: 'var(--surface-color)',
         borderBottom: '1px solid var(--border-color)',
         display: 'flex',
-        justifyContent: 'space-between',
+        justify: 'space-between',
         alignItems: 'center',
         boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
         position: 'sticky',
@@ -87,7 +81,6 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
         zIndex: 100
       }}
     >
-      {/* Left Section: Hamburger + Title & Subtitle + Breadcrumb */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
         <button 
           aria-label="Toggle Sidebar Navigation"
@@ -108,18 +101,15 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
         </div>
       </div>
 
-      {/* Center Section: Global Search Bar */}
       <div className="enterprise-header-center" style={{ flex: 1, maxWidth: '400px', margin: '0 24px', display: 'flex', justifyContent: 'center' }}>
         <SearchBar />
       </div>
 
-      {/* Right Section: Subscription Badge + Notification + Theme Toggle + Profile */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
         <div style={{ marginRight: '4px' }}>
           <SubscriptionBadge plan={isSuperAdmin ? 'SUPER ADMIN' : societyInfo.plan} />
         </div>
 
-        {/* Dark / Light Mode Toggle Button */}
         <button
           onClick={toggleTheme}
           aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}

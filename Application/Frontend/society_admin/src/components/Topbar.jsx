@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, Search, Menu } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../firebase';
-
+import { auth } from '../firebase';
 import { getSocietyAdminSession } from '../services/sessionManager';
+import { societyAdminService } from '../services/societyAdminService';
 import GlobalSearchModal from './GlobalSearchModal';
 
 export default function Topbar({ title, toggleSidebar }) {
@@ -27,25 +26,16 @@ export default function Topbar({ title, toggleSidebar }) {
 
     if (!activeSocId) return;
 
-    // Fetch Society details dynamically
-    const fetchSociety = async () => {
-      try {
-        const docRef = doc(db, 'societies', activeSocId);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
-          setSociety({
-            name: data.name || 'Housing Society',
-            code: data.code || activeSocId,
-            plan: data.plan || 'ENTERPRISE',
-            city: data.city || 'Operations Hub',
-          });
-        }
-      } catch (e) {
-        console.error('Error fetching society info:', e);
+    societyAdminService.getSocietyDetails(activeSocId).then(data => {
+      if (data) {
+        setSociety({
+          name: data.name || 'Housing Society',
+          code: data.code || activeSocId,
+          plan: data.plan || 'ENTERPRISE',
+          city: data.city || 'Operations Hub',
+        });
       }
-    };
-    fetchSociety();
+    }).catch(e => console.error('Error fetching society info:', e));
   }, [activeSocId]);
 
   return (
@@ -86,7 +76,6 @@ export default function Topbar({ title, toggleSidebar }) {
           />
         </div>
 
-        {/* Society Subscription Tag */}
         <div style={{ 
           display: 'flex', 
           alignItems: 'center', 

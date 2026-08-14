@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, Sun, Moon } from 'lucide-react';
-import { auth, db } from '../../firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { auth } from '../../firebase';
 import SearchBar from './SearchBar';
 import SubscriptionBadge from './SubscriptionBadge';
 import NotificationMenu from './NotificationMenu';

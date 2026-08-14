@@ -1,19 +1,16 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
 import { 
   ArrowRight, 
   Globe, 
   CheckCircle2, 
   Apple, 
   Play, 
-  Check, 
-  ShieldCheck, 
-  PhoneCall
+  ShieldCheck 
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { societyAdminService } from '../../services/societyAdminService';
 
 export default function HeroSection({ onOpenDemo }) {
   const { theme } = useTheme();
@@ -33,11 +30,10 @@ export default function HeroSection({ onOpenDemo }) {
     if (!formData.name || !formData.phone) return;
     setSubmitting(true);
     try {
-      await addDoc(collection(db, 'leads'), {
+      await societyAdminService.createLead({
         ...formData,
         source: 'Hero Quick Enrollment Form',
-        status: 'New',
-        createdAt: serverTimestamp()
+        status: 'New'
       });
       setSubmitted(true);
     } catch (err) {
@@ -68,7 +64,6 @@ export default function HeroSection({ onOpenDemo }) {
     >
       <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px', display: 'flex', flexDirection: isMobileScreen ? 'column' : 'row', gap: '40px', alignItems: 'center' }}>
         
-        {/* Mobile Top Illustration (Rendered first on Mobile) */}
         {isMobileScreen && (
           <div style={{ width: '100%', maxWidth: '380px', margin: '0 auto 10px auto', textAlign: 'center' }}>
             <img 
@@ -79,14 +74,12 @@ export default function HeroSection({ onOpenDemo }) {
           </div>
         )}
 
-        {/* Left Side: Copy + Form + Badges */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
           style={{ flex: 1, width: '100%' }}
         >
-          {/* Main Headline */}
           <h1 style={{
             fontSize: '44px',
             fontWeight: 900,
@@ -98,7 +91,6 @@ export default function HeroSection({ onOpenDemo }) {
             Visitor, Society and Accounting Management System
           </h1>
 
-          {/* Subtitle */}
           <p style={{
             fontSize: '16px',
             color: isDark ? '#94A3B8' : '#555555',
@@ -108,7 +100,6 @@ export default function HeroSection({ onOpenDemo }) {
             A world-class technology to make your daily life more convenient and safe.
           </p>
 
-          {/* Quick Enrollment Form (Desktop: 4-Input Form | Mobile: Full-Width CTA Button) */}
           {!isMobileScreen ? (
             submitted ? (
               <div style={{
@@ -129,8 +120,6 @@ export default function HeroSection({ onOpenDemo }) {
               </div>
             ) : (
               <form id="hero-enrollment-form" onSubmit={handleSubmit} style={{ marginBottom: '28px', display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '520px' }}>
-                
-                {/* Row 1: Name & Phone */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <input
                     required
@@ -162,10 +151,6 @@ export default function HeroSection({ onOpenDemo }) {
                       color: isDark ? '#FFFFFF' : '#2C2C2C',
                       userSelect: 'none'
                     }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1 }}>
-                        <span style={{ fontSize: '15px' }}>🇮🇳</span>
-                        <span style={{ fontSize: '7px', marginTop: '2px' }}>▼</span>
-                      </div>
                       <span style={{ fontSize: '15px', fontWeight: 900 }}>+91</span>
                     </div>
                     <input
@@ -187,7 +172,6 @@ export default function HeroSection({ onOpenDemo }) {
                   </div>
                 </div>
 
-                {/* Row 2: Select Reason Dropdown & Button */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <select
                     value={formData.reason}
@@ -223,11 +207,8 @@ export default function HeroSection({ onOpenDemo }) {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      gap: '8px',
-                      transition: 'background-color 0.2s ease'
+                      gap: '8px'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#009E77'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#00B589'}
                   >
                     <span>{submitting ? 'Submitting...' : 'Enroll your society'}</span>
                     <ArrowRight size={16} />
@@ -260,9 +241,7 @@ export default function HeroSection({ onOpenDemo }) {
             </button>
           )}
 
-          {/* Security Certification Badges (ISO 27001 & PCI DSS) */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            {/* ISO Badge */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -279,7 +258,6 @@ export default function HeroSection({ onOpenDemo }) {
               </div>
             </div>
 
-            {/* PCI DSS Badge */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -299,7 +277,6 @@ export default function HeroSection({ onOpenDemo }) {
 
         </motion.div>
 
-        {/* Right Side: Hero Vector Illustration (Desktop Only) */}
         {!isMobileScreen && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
@@ -307,7 +284,6 @@ export default function HeroSection({ onOpenDemo }) {
             transition={{ duration: 0.5, delay: 0.2 }}
             style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
           >
-          {/* Main Hero Vector Artwork */}
           <div style={{ width: '100%', maxWidth: '540px', marginBottom: '24px' }}>
             <img 
               src="/assets/hero_illustration.png" 
@@ -316,13 +292,11 @@ export default function HeroSection({ onOpenDemo }) {
             />
           </div>
 
-          {/* App Download Subhead */}
           <div style={{ fontSize: '13px', fontWeight: 700, color: isDark ? '#FFFFFF' : '#333333', marginBottom: '12px' }}>
             Download SocietySphere<br />
             <span style={{ color: isDark ? '#94A3B8' : '#666666', fontWeight: 500 }}>Your Society Management App for a Convenient Life</span>
           </div>
 
-          {/* iPhone & Android Buttons */}
           <div style={{ display: 'flex', gap: '12px' }}>
             <Link
               to="/download"

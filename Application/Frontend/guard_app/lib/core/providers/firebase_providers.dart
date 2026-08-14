@@ -7,6 +7,8 @@ import 'auth_providers.dart';
 
 // ── SERVICE PROVIDER ─────────────────────────────────────────────────────────
 
+final firestoreProvider = Provider<FirebaseFirestore>((ref) => FirebaseFirestore.instance);
+
 final firestoreServiceProvider = Provider<FirestoreService>((ref) {
   final profile = ref.watch(userProfileProvider).value;
   final societyId = (profile?['societyId'] as String?)?.isNotEmpty == true

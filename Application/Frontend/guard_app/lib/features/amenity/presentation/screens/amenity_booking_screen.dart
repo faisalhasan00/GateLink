@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/providers/auth_providers.dart';
+import '../providers/amenity_providers.dart';
 
 class AmenityBookingScreen extends ConsumerStatefulWidget {
   final String amenityId;
@@ -37,17 +36,14 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
 
   Future<void> _fetchAmenityProfile() async {
     try {
-      final profile = ref.read(userProfileProvider).value;
-      final activeSocId = profile?['societyId'] as String? ?? 'SOC-001';
-      final db = FirebaseFirestore.instance;
-      final docSnap = await db.collection('societies/$activeSocId/amenities').doc(widget.amenityId).get();
-      if (docSnap.exists && mounted) {
+      final amenitiesAsync = ref.read(guardAmenitiesStreamProvider);
+      final amenities = amenitiesAsync.value ?? [];
+      final target = amenities.firstWhere((a) => a['id'] == widget.amenityId, orElse: () => {});
+      if (mounted) {
         setState(() {
-          _amenityDocData = docSnap.data();
+          _amenityDocData = target.isNotEmpty ? target : null;
           _isLoadingAmenity = false;
         });
-      } else if (mounted) {
-        setState(() => _isLoadingAmenity = false);
       }
     } catch (_) {
       if (mounted) setState(() => _isLoadingAmenity = false);
@@ -65,7 +61,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
     if (picked != null) {
       setState(() {
         _selectedDate = picked;
-        _selectedSlot = null; // Reset selected slot when date changes
+        _selectedSlot = null;
       });
       _fetchBookedSlots(picked);
     }
@@ -74,15 +70,17 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
   Future<void> _fetchBookedSlots(DateTime date) async {
     setState(() => _isFetchingSlots = true);
     try {
-      final firestoreService = ref.read(firestoreServiceProvider);
-      if (firestoreService == null) return;
-      
+      final bookingsAsync = ref.read(guardAmenityBookingsStreamProvider);
+      final bookings = bookingsAsync.value ?? [];
       final dateStr = '${date.day}/${date.month}/${date.year}';
-      final booked = await firestoreService.getBookedSlotsForDate(widget.amenityId, dateStr);
-      
+
+      final booked = bookings.where((b) {
+        return b['amenityId'] == widget.amenityId && b['date'] == dateStr && (b['status'] != 'cancelled');
+      }).map((b) => b['timeSlot'] as String? ?? '').toSet();
+
       if (mounted) {
         setState(() {
-          _bookedSlots = booked.toSet();
+          _bookedSlots = booked;
           _isFetchingSlots = false;
         });
       }
@@ -102,32 +100,35 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
     }
 
     setState(() => _isLoading = true);
-    
-    try {
-      final firestoreService = ref.read(firestoreServiceProvider);
-      final user = ref.read(currentUserProvider);
-      final profile = ref.read(userProfileProvider).value;
 
-      if (firestoreService == null || user == null) {
-        throw Exception('Not logged in');
+    try {
+      final user = ref.read(authServiceProvider).currentUser;
+      final profile = ref.read(userProfileProvider).value;
+      final societyId = profile?['societyId'] as String?;
+
+      if (user == null || societyId == null || societyId.isEmpty) {
+        throw Exception('User or Society ID not found');
       }
 
-      final userName = profile?['name'] ?? 'Unknown User';
+      final userName = profile?['name'] as String? ?? 'Unknown User';
       final flatNumber = profile?['flatNumber'] as String? ?? '';
       final phone = profile?['phone'] as String? ?? '';
       final targetAmenityName = _amenityDocData?['name'] as String? ?? 'Society Amenity';
 
-      await firestoreService.bookAmenity(
-        amenityId: widget.amenityId,
-        amenityName: targetAmenityName,
-        uid: user.uid,
-        userName: userName,
-        flatNumber: flatNumber,
-        phone: phone,
-        date: '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
-        timeSlot: _selectedSlot!,
-        guests: _guestCount,
-      );
+      final repo = ref.read(amenityRepositoryProvider);
+      await repo.bookAmenity(societyId, {
+        'amenityId': widget.amenityId,
+        'amenityName': targetAmenityName,
+        'uid': user.uid,
+        'userName': userName,
+        'flatNumber': flatNumber,
+        'phone': phone,
+        'date': '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+        'timeSlot': _selectedSlot!,
+        'guests': _guestCount,
+        'status': 'pending',
+        'createdAt': DateTime.now().toIso8601String(),
+      });
 
       if (!mounted) return;
       setState(() => _isLoading = false);
@@ -189,19 +190,21 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Amenity header
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF06B6D4), Color(0xFF0891B2)],
-                        begin: Alignment.topLeft, end: Alignment.bottomRight),
+                          colors: [Color(0xFF06B6D4), Color(0xFF0891B2)],
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight),
                       borderRadius: BorderRadius.circular(AppRadius.xl),
                     ),
                     child: Row(children: [
-                      Container(width: 52, height: 52,
-                        decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
-                        child: const Icon(Icons.sports_tennis_rounded, color: Colors.white, size: 28)),
+                      Container(
+                          width: 52,
+                          height: 52,
+                          decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.2), shape: BoxShape.circle),
+                          child: const Icon(Icons.sports_tennis_rounded, color: Colors.white, size: 28)),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -213,95 +216,97 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
                       ),
                     ]),
                   ),
-            const SizedBox(height: AppSpacing.xl),
+                  const SizedBox(height: AppSpacing.xl),
 
-            // Date Picker
-            const Text('Select Date', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-            const SizedBox(height: AppSpacing.sm),
-            GestureDetector(
-              onTap: _pickDate,
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppRadius.lg), border: Border.all(color: AppColors.border)),
-                child: Row(children: [
-                  const Icon(Icons.calendar_today_rounded, color: AppColors.primary, size: 20),
-                  const SizedBox(width: AppSpacing.sm),
-                  Text(
-                    _selectedDate == null ? 'Select booking date' : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
-                    style: TextStyle(fontSize: 14, color: _selectedDate == null ? AppColors.textSecondary : AppColors.textPrimary)),
-                  const Spacer(),
-                  const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textSecondary),
-                ]),
+                  const Text('Select Date', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                  const SizedBox(height: AppSpacing.sm),
+                  GestureDetector(
+                    onTap: _pickDate,
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppRadius.lg), border: Border.all(color: AppColors.border)),
+                      child: Row(children: [
+                        const Icon(Icons.calendar_today_rounded, color: AppColors.primary, size: 20),
+                        const SizedBox(width: AppSpacing.sm),
+                        Text(
+                          _selectedDate == null ? 'Select booking date' : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
+                          style: TextStyle(fontSize: 14, color: _selectedDate == null ? AppColors.textSecondary : AppColors.textPrimary),
+                        ),
+                        const Spacer(),
+                        const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textSecondary),
+                      ]),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+
+                  const Text('Select Time Slot', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: _slots.map((slot) {
+                      final isBooked = _bookedSlots.contains(slot);
+                      final isSelected = _selectedSlot == slot;
+                      return GestureDetector(
+                        onTap: isBooked ? null : () => setState(() => _selectedSlot = slot),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                          decoration: BoxDecoration(
+                            color: isBooked ? AppColors.gray100 : isSelected ? AppColors.primary : Colors.white,
+                            borderRadius: BorderRadius.circular(AppRadius.md),
+                            border: Border.all(
+                              color: isBooked ? AppColors.border : isSelected ? AppColors.primary : AppColors.border,
+                              width: isSelected ? 1.5 : 1,
+                            ),
+                          ),
+                          child: Text(
+                            slot,
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                              color: isBooked ? AppColors.textDisabled : isSelected ? Colors.white : AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+
+                  const Text('Number of Guests', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                  const SizedBox(height: AppSpacing.sm),
+                  Container(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppRadius.lg), border: Border.all(color: AppColors.border)),
+                    child: Row(children: [
+                      const Icon(Icons.group_rounded, color: AppColors.textSecondary, size: 20),
+                      const SizedBox(width: AppSpacing.sm),
+                      const Text('Guests', style: TextStyle(fontSize: 14, color: AppColors.textPrimary)),
+                      const Spacer(),
+                      IconButton(
+                        onPressed: _guestCount > 1 ? () => setState(() => _guestCount--) : null,
+                        icon: Icon(Icons.remove_circle_outline_rounded,
+                            color: _guestCount > 1 ? AppColors.primary : AppColors.textDisabled),
+                      ),
+                      Text('$_guestCount', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                      IconButton(
+                        onPressed: _guestCount < 10 ? () => setState(() => _guestCount++) : null,
+                        icon: Icon(Icons.add_circle_outline_rounded,
+                            color: _guestCount < 10 ? AppColors.primary : AppColors.textDisabled),
+                      ),
+                    ]),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
+                  ElevatedButton(
+                    onPressed: _isLoading || _selectedSlot == null || _selectedDate == null ? null : _bookSlot,
+                    child: _isLoading
+                        ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : const Text('Confirm Booking'),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: AppSpacing.xl),
-
-            // Time slots
-            const Text('Select Time Slot', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-            const SizedBox(height: AppSpacing.sm),
-            Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: _slots.map((slot) {
-                final isBooked = _bookedSlots.contains(slot);
-                final isSelected = _selectedSlot == slot;
-                return GestureDetector(
-                  onTap: isBooked ? null : () => setState(() => _selectedSlot = slot),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      color: isBooked ? AppColors.gray100 : isSelected ? AppColors.primary : Colors.white,
-                      borderRadius: BorderRadius.circular(AppRadius.md),
-                      border: Border.all(
-                        color: isBooked ? AppColors.border : isSelected ? AppColors.primary : AppColors.border,
-                        width: isSelected ? 1.5 : 1,
-                      ),
-                    ),
-                    child: Text(slot,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                        color: isBooked ? AppColors.textDisabled : isSelected ? Colors.white : AppColors.textPrimary,
-                      )),
-                  ),
-                );
-              }).toList(),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-
-            // Guest count
-            const Text('Number of Guests', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-            const SizedBox(height: AppSpacing.sm),
-            Container(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(AppRadius.lg), border: Border.all(color: AppColors.border)),
-              child: Row(children: [
-                const Icon(Icons.group_rounded, color: AppColors.textSecondary, size: 20),
-                const SizedBox(width: AppSpacing.sm),
-                const Text('Guests', style: TextStyle(fontSize: 14, color: AppColors.textPrimary)),
-                const Spacer(),
-                IconButton(
-                  onPressed: _guestCount > 1 ? () => setState(() => _guestCount--) : null,
-                  icon: Icon(Icons.remove_circle_outline_rounded,
-                    color: _guestCount > 1 ? AppColors.primary : AppColors.textDisabled)),
-                Text('$_guestCount', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                IconButton(
-                  onPressed: _guestCount < 10 ? () => setState(() => _guestCount++) : null,
-                  icon: Icon(Icons.add_circle_outline_rounded,
-                    color: _guestCount < 10 ? AppColors.primary : AppColors.textDisabled)),
-              ]),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            ElevatedButton(
-              onPressed: _isLoading || _selectedSlot == null || _selectedDate == null ? null : _bookSlot,
-              child: _isLoading
-                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('Confirm Booking'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

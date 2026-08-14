@@ -1,7 +1,4 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
 import Navbar from './Navbar';
 import FooterSection from './FooterSection';
 import SeoHead from '../../components/seo/SeoHead';
@@ -9,9 +6,6 @@ import DemoModal from './DemoModal';
 import { 
   Send, 
   CheckCircle2, 
-  Phone, 
-  Mail, 
-  MapPin, 
   Building, 
   Calendar, 
   PhoneCall, 
@@ -20,14 +14,14 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { societyAdminService } from '../../services/societyAdminService';
 
 export default function LeadGenerationPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
-  const [activeFormTab, setActiveFormTab] = useState('demo'); // demo, register, callback, contact, newsletter
+  const [activeFormTab, setActiveFormTab] = useState('demo');
 
-  // Form State
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -43,12 +37,10 @@ export default function LeadGenerationPage() {
   const [callbackPhone, setCallbackPhone] = useState('');
   const [callbackName, setCallbackName] = useState('');
 
-  // Status State
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [validationError, setValidationError] = useState('');
 
-  // Validation function
   const validateForm = () => {
     if (activeFormTab === 'newsletter') {
       if (!newsletterEmail || !/\S+@\S+\.\S+/.test(newsletterEmail)) {
@@ -93,7 +85,6 @@ export default function LeadGenerationPage() {
     return true;
   };
 
-  // Submit Handler
   const handleSubmit = async (e) => {
     e.preventDefault();
     setValidationError('');
@@ -125,14 +116,10 @@ export default function LeadGenerationPage() {
         };
       }
 
-      await addDoc(collection(db, 'leads'), {
-        ...leadPayload,
-        createdAt: serverTimestamp()
-      });
-
+      await societyAdminService.createLead(leadPayload);
       setSubmitted(true);
     } catch (err) {
-      console.error('Firestore lead error:', err);
+      console.error('Lead error:', err);
       setValidationError('Failed to submit request. Please try again or call support.');
     } finally {
       setSubmitting(false);
@@ -159,17 +146,14 @@ export default function LeadGenerationPage() {
 
   return (
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      {/* Dynamic SEO Head */}
       <SeoHead
         title="Contact Us & Book Demo - HomeHni Hood"
         description="Contact HomeHni Hood onboarding specialists, book a live product demo, request a callback, or register your society."
         canonicalUrl="https://societysphere.com/contact"
       />
 
-      {/* Sticky Navbar */}
       <Navbar onOpenDemo={() => setIsDemoModalOpen(true)} />
 
-      {/* Header Banner */}
       <section style={{
         paddingTop: '120px',
         paddingBottom: '40px',
@@ -188,7 +172,6 @@ export default function LeadGenerationPage() {
             Whether you want a live product demo, society registration, callback, or support inquiry, select your request below.
           </p>
 
-          {/* Form Switcher Tabs */}
           <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
             {[
               { id: 'demo', label: 'Book Demo', icon: <Calendar size={16} /> },
@@ -217,10 +200,8 @@ export default function LeadGenerationPage() {
         </div>
       </section>
 
-      {/* Main Lead Form Workspace */}
       <section style={{ padding: '60px 0 100px 0' }}>
         <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 24px' }}>
-          
           <div style={{
             background: isDark ? '#1E293B' : '#FFFFFF',
             borderRadius: '4px',
@@ -236,9 +217,6 @@ export default function LeadGenerationPage() {
                 <h3 style={{ fontSize: '24px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: '0 0 10px 0' }}>
                   {activeFormTab === 'newsletter' ? 'Subscription Confirmed!' : 'Request Received Successfully!'}
                 </h3>
-                <p style={{ color: isDark ? '#94A3B8' : '#666666', fontSize: '15px', lineHeight: 1.6, margin: '0 0 24px 0' }}>
-                  {activeFormTab === 'newsletter' ? 'Thank you for subscribing to HomeHni Hood insights.' : 'Our onboarding team will contact you within 2 hours with complete details.'}
-                </p>
                 <button
                   onClick={resetForm}
                   style={{ padding: '10px 24px', borderRadius: '2px', background: '#00B589', color: 'white', fontWeight: 700, border: 'none', cursor: 'pointer', fontSize: '14px' }}
@@ -248,22 +226,6 @@ export default function LeadGenerationPage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                
-                {/* Header title inside card */}
-                <div style={{ borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #F1F5F9', paddingBottom: '16px' }}>
-                  <h3 style={{ fontSize: '22px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: '0 0 6px 0' }}>
-                    {activeFormTab === 'demo' && 'Schedule a Live Product Demo'}
-                    {activeFormTab === 'register' && 'Register Housing Society for Onboarding'}
-                    {activeFormTab === 'callback' && 'Request an Instant Phone Callback'}
-                    {activeFormTab === 'contact' && 'Send Us a Direct Message'}
-                    {activeFormTab === 'newsletter' && 'Subscribe to RWA & Security Newsletter'}
-                  </h3>
-                  <p style={{ fontSize: '14px', color: isDark ? '#94A3B8' : '#666666', margin: 0 }}>
-                    Fill out the fields below and our team will get in touch.
-                  </p>
-                </div>
-
-                {/* Validation Error Alert */}
                 {validationError && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#FEF2F2', border: '1px solid #FCA5A5', color: '#DC2626', padding: '12px 16px', borderRadius: '4px', fontSize: '13px', fontWeight: 700 }}>
                     <AlertCircle size={16} />
@@ -271,7 +233,6 @@ export default function LeadGenerationPage() {
                   </div>
                 )}
 
-                {/* Newsletter Form */}
                 {activeFormTab === 'newsletter' && (
                   <div>
                     <label style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#CBD5E1' : '#444444', display: 'block', marginBottom: '6px' }}>Email Address *</label>
@@ -285,7 +246,6 @@ export default function LeadGenerationPage() {
                   </div>
                 )}
 
-                {/* Callback Form */}
                 {activeFormTab === 'callback' && (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div>
@@ -311,7 +271,6 @@ export default function LeadGenerationPage() {
                   </div>
                 )}
 
-                {/* Standard Full Lead Form (Demo, Register, Contact) */}
                 {(activeFormTab === 'demo' || activeFormTab === 'register' || activeFormTab === 'contact') && (
                   <>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -352,11 +311,6 @@ export default function LeadGenerationPage() {
                         </select>
                       </div>
                     </div>
-
-                    <div>
-                      <label style={{ fontSize: '12px', fontWeight: 700, color: isDark ? '#CBD5E1' : '#444444', display: 'block', marginBottom: '6px' }}>Specific Requirements / Notes</label>
-                      <textarea rows={3} placeholder="Tell us about your gate security or maintenance accounting needs..." value={formData.requirements} onChange={e => setFormData({...formData, requirements: e.target.value})} style={{ width: '100%', padding: '12px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '14px', outline: 'none', resize: 'vertical' }} />
-                    </div>
                   </>
                 )}
 
@@ -375,11 +329,8 @@ export default function LeadGenerationPage() {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    gap: '8px',
-                    transition: 'background-color 0.2s ease'
+                    gap: '8px'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#009E77'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#00B589'}
                 >
                   <Send size={16} />
                   <span>{submitting ? 'Submitting...' : 'Submit Request'}</span>
@@ -387,14 +338,10 @@ export default function LeadGenerationPage() {
               </form>
             )}
           </div>
-
         </div>
       </section>
 
-      {/* Footer */}
       <FooterSection />
-
-      {/* Demo Modal */}
       <DemoModal isOpen={isDemoModalOpen} onClose={() => setIsDemoModalOpen(false)} />
     </div>
   );

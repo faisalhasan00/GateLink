@@ -6,27 +6,20 @@ import {
   Users, 
   UserCheck, 
   ShieldAlert, 
-  Wrench, 
   Building2, 
   Truck, 
   Shield, 
-  CheckCircle, 
   TrendingUp,
-  DollarSign,
-  Layers,
-  PieChart as PieIcon
+  DollarSign
 } from 'lucide-react';
-import { collection, onSnapshot } from 'firebase/firestore';
-import { db } from '../firebase';
 import { getSocietyAdminSession } from '../services/sessionManager';
+import { societyAdminService } from '../services/societyAdminService';
 import { exportToCSV, exportToPDF } from '../utils/exportUtils';
 
 export default function Reports() {
   const session = getSocietyAdminSession();
-  const societyId = session?.societyId || 'SOC-001';
+  const societyId = session?.societyId;
 
-  const [dateRange, setDateRange] = useState('This Month');
-  const [reportType, setReportType] = useState('All');
   const [stats, setStats] = useState({
     residents: 0,
     occupied: 0,
@@ -43,79 +36,102 @@ export default function Reports() {
     staff: 0,
     helpers: 0,
     sosEvents: 0,
-    documents: 0,
   });
 
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Live Firestore Listeners across all core collections
-    const unsubUsers = onSnapshot(collection(db, `societies/${societyId}/users`), (snap) => {
-      const docs = snap.docs.map(d => d.data());
-      setStats(prev => ({
-        ...prev,
-        residents: docs.length,
-        occupied: docs.length,
-        vacant: Math.max(0, 200 - docs.length),
-      }));
-    });
-
-    const unsubVisitors = onSnapshot(collection(db, `societies/${societyId}/visitors`), (snap) => {
-      const docs = snap.docs.map(d => d.data());
-      const deliveries = docs.filter(v => v.type === 'Delivery' || v.company).length;
-      setStats(prev => ({
-        ...prev,
-        visitors: docs.length,
-        visitorsToday: docs.length,
-        deliveriesToday: deliveries,
-      }));
-    });
-
-    const unsubComplaints = onSnapshot(collection(db, `societies/${societyId}/complaints`), (snap) => {
-      const docs = snap.docs.map(d => d.data());
-      const open = docs.filter(c => c.status === 'Open' || c.status === 'In Progress').length;
-      const closed = docs.filter(c => c.status === 'Resolved' || c.status === 'Closed').length;
-      setStats(prev => ({
-        ...prev,
-        complaints: docs.length,
-        openComplaints: open,
-        closedComplaints: closed,
-      }));
-    });
-
-    const unsubBills = onSnapshot(collection(db, `societies/${societyId}/maintenance_bills`), (snap) => {
-      const docs = snap.docs.map(d => d.data());
-      const totalGen = docs.reduce((acc, b) => acc + (Number(b.amount) || 0), 0);
-      const totalColl = docs.filter(b => b.status === 'Paid').reduce((acc, b) => acc + (Number(b.amount) || 0), 0);
-      setStats(prev => ({
-        ...prev,
-        maintenanceGen: totalGen,
-        maintenanceColl: totalColl,
-        pendingPayments: totalGen - totalColl,
-      }));
-    });
-
-    const unsubStaff = onSnapshot(collection(db, `societies/${societyId}/staff`), (snap) => {
-      setStats(prev => ({ ...prev, staff: snap.docs.length }));
-    });
-
-    const unsubHelpers = onSnapshot(collection(db, `societies/${societyId}/helpers`), (snap) => {
-      setStats(prev => ({ ...prev, helpers: snap.docs.length }));
-    });
-
-    const unsubSos = onSnapshot(collection(db, `societies/${societyId}/sos_alerts`), (snap) => {
-      setStats(prev => ({ ...prev, sosEvents: snap.docs.length }));
+    if (!societyId) {
       setLoading(false);
-    });
+      return;
+    }
+
+    const unsubUsers = societyAdminService.subscribeResidents(
+      societyId,
+      (docs) => {
+        setStats(prev => ({
+          ...prev,
+          residents: docs.length,
+          occupied: docs.length,
+          vacant: Math.max(0, 200 - docs.length),
+        }));
+      },
+      (err) => console.error(err)
+    );
+
+    const unsubVisitors = societyAdminService.subscribeVisitors(
+      societyId,
+      (docs) => {
+        const deliveries = docs.filter(v => v.type === 'Delivery' || v.company).length;
+        setStats(prev => ({
+          ...prev,
+          visitors: docs.length,
+          visitorsToday: docs.length,
+          deliveriesToday: deliveries,
+        }));
+      },
+      (err) => console.error(err)
+    );
+
+    const unsubComplaints = societyAdminService.subscribeComplaints(
+      societyId,
+      (docs) => {
+        const open = docs.filter(c => c.status === 'Open' || c.status === 'In Progress').length;
+        const closed = docs.filter(c => c.status === 'Resolved' || c.status === 'Closed' || c.status === 'Completed').length;
+        setStats(prev => ({
+          ...prev,
+          complaints: docs.length,
+          openComplaints: open,
+          closedComplaints: closed,
+        }));
+      },
+      (err) => console.error(err)
+    );
+
+    const unsubBills = societyAdminService.subscribeMaintenanceBills(
+      societyId,
+      (docs) => {
+        const totalGen = docs.reduce((acc, b) => acc + (Number(b.amount) || 0), 0);
+        const totalColl = docs.filter(b => b.status === 'paid' || b.status === 'Paid').reduce((acc, b) => acc + (Number(b.amount) || 0), 0);
+        setStats(prev => ({
+          ...prev,
+          maintenanceGen: totalGen,
+          maintenanceColl: totalColl,
+          pendingPayments: totalGen - totalColl,
+        }));
+      },
+      (err) => console.error(err)
+    );
+
+    const unsubStaff = societyAdminService.subscribeStaff(
+      societyId,
+      (docs) => setStats(prev => ({ ...prev, staff: docs.length })),
+      (err) => console.error(err)
+    );
+
+    const unsubHelpers = societyAdminService.subscribeHelpers(
+      societyId,
+      (docs) => setStats(prev => ({ ...prev, helpers: docs.length })),
+      (err) => console.error(err)
+    );
+
+    const unsubSos = societyAdminService.subscribeSosAlerts(
+      societyId,
+      (docs) => {
+        setStats(prev => ({ ...prev, sosEvents: docs.length }));
+        setLoading(false);
+      },
+      (err) => console.error(err)
+    );
 
     return () => {
-      unsubUsers();
-      unsubVisitors();
-      unsubComplaints();
-      unsubBills();
-      unsubStaff();
-      unsubHelpers();
-      unsubSos();
+      if (unsubUsers) unsubUsers();
+      if (unsubVisitors) unsubVisitors();
+      if (unsubComplaints) unsubComplaints();
+      if (unsubBills) unsubBills();
+      if (unsubStaff) unsubStaff();
+      if (unsubHelpers) unsubHelpers();
+      if (unsubSos) unsubSos();
     };
   }, [societyId]);
 
@@ -140,19 +156,10 @@ export default function Reports() {
     exportToCSV(reportData, 'SocietySphere_Executive_Report.csv');
   };
 
-  if (loading) {
-    return (
-      <div style={{ padding: '32px', textAlign: 'center' }}>
-        <div className="skeleton-loader" style={{ height: '120px', borderRadius: '12px', marginBottom: '24px' }}></div>
-        <div className="skeleton-loader" style={{ height: '350px', borderRadius: '12px' }}></div>
-      </div>
-    );
-  }
+  if (loading) return <div style={{ padding: '32px', textAlign: 'center' }}>Loading Reports Console...</div>;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-
-      {/* 1. Header & Data Export Toolbar */}
       <div className="card" style={{ padding: '20px 24px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <div>
@@ -175,7 +182,6 @@ export default function Reports() {
         </div>
       </div>
 
-      {/* 2. Executive 17-KPI Statistics Grid */}
       <div className="dashboard-grid">
         <div className="stat-card">
           <div className="stat-icon" style={{ backgroundColor: 'var(--primary-light)' }}>
@@ -257,63 +263,6 @@ export default function Reports() {
           </div>
         </div>
       </div>
-
-      {/* 3. Visual Analytics Charts Section */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px' }}>
-        
-        {/* Revenue Collection Trend Chart */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="card-title">Maintenance Revenue vs Collection Trend</h3>
-          </div>
-          <div style={{ padding: '20px', height: '240px', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', gap: '12px' }}>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '24px', height: '160px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px' }}>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
-                <div style={{ width: '40px', height: '80%', backgroundColor: 'var(--primary)', borderRadius: '6px 6px 0 0' }}></div>
-                <span style={{ fontSize: '11px', fontWeight: 600, marginTop: '6px' }}>Generated</span>
-              </div>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
-                <div style={{ width: '40px', height: '65%', backgroundColor: '#10B981', borderRadius: '6px 6px 0 0' }}></div>
-                <span style={{ fontSize: '11px', fontWeight: 600, marginTop: '6px' }}>Collected</span>
-              </div>
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
-                <div style={{ width: '40px', height: '35%', backgroundColor: 'var(--warning)', borderRadius: '6px 6px 0 0' }}></div>
-                <span style={{ fontSize: '11px', fontWeight: 600, marginTop: '6px' }}>Pending</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Complaints Status & Resolution Split */}
-        <div className="card">
-          <div className="card-header">
-            <h3 className="card-title">Complaints Resolution Analytics</h3>
-          </div>
-          <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
-                <span>Open / In Progress Complaints</span>
-                <span>{stats.openComplaints} Incidents</span>
-              </div>
-              <div style={{ height: '10px', backgroundColor: 'var(--bg-color)', borderRadius: '5px', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${stats.complaints > 0 ? (stats.openComplaints / stats.complaints) * 100 : 20}%`, backgroundColor: 'var(--warning)' }}></div>
-              </div>
-            </div>
-
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 600, marginBottom: '6px' }}>
-                <span>Resolved & Closed Complaints</span>
-                <span>{stats.closedComplaints} Solved</span>
-              </div>
-              <div style={{ height: '10px', backgroundColor: 'var(--bg-color)', borderRadius: '5px', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${stats.complaints > 0 ? (stats.closedComplaints / stats.complaints) * 100 : 80}%`, backgroundColor: '#10B981' }}></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-
     </div>
   );
 }

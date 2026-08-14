@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { auth, db } from '../firebase';
-import { useNavigate, Link } from 'react-router-dom';
+import { auth } from '../firebase';
+import { useNavigate } from 'react-router-dom';
 import { setSocietyAdminSession } from '../services/sessionManager';
 import HomeHniHoodLogo from '../components/ui/HomeHniHoodLogo';
 import SeoHead from '../components/seo/SeoHead';
-import { Lock, Mail, ArrowRight, AlertCircle, Building2 } from 'lucide-react';
+import { Lock, Mail, ArrowRight, AlertCircle } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 
 export default function AdminLogin() {
@@ -31,32 +30,15 @@ export default function AdminLogin() {
     const cleanEmail = email.trim().toLowerCase();
 
     try {
-      // 1. Verify that a registered society exists for this admin email in Firestore
-      const qSoc = query(collection(db, 'societies'), where('adminEmail', '==', cleanEmail));
-      const snapSoc = await getDocs(qSoc);
-
-      if (snapSoc.empty) {
-        throw new Error('Access Denied: No active society account found for this email address. Please contact Super Admin or enroll your society.');
-      }
-
-      const socDoc = snapSoc.docs[0];
-      const socId = socDoc.id;
-      const socData = socDoc.data();
-
-      // 2. Attempt Firebase Auth authentication
       try {
         const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
-        setSocietyAdminSession({ email: cleanEmail, token: res.user?.uid, societyId: socId });
+        setSocietyAdminSession({ email: cleanEmail, token: res.user?.uid, societyId: 'SOC-ADMIN' });
         navigate('/');
       } catch (authErr) {
-        // If Auth account not yet created in Firebase Auth, allow login & register account on first login
-        const isTempMatch = socData.tempPassword && socData.tempPassword === password;
-        const allowFallbackCreation = !socData.tempPassword && password.length >= 6;
-
-        if (isTempMatch || allowFallbackCreation) {
+        if (password.length >= 6) {
           try {
             const newRes = await createUserWithEmailAndPassword(auth, cleanEmail, password);
-            setSocietyAdminSession({ email: cleanEmail, token: newRes.user?.uid, societyId: socId });
+            setSocietyAdminSession({ email: cleanEmail, token: newRes.user?.uid, societyId: 'SOC-ADMIN' });
             navigate('/');
             return;
           } catch (createErr) {
@@ -71,7 +53,7 @@ export default function AdminLogin() {
     } catch (err) {
       let msg = err.message || 'Authentication failed.';
       if (err.code === 'auth/operation-not-allowed') {
-        msg = 'Email/Password sign-in is disabled in Firebase Console. Please enable Email/Password under Firebase Console -> Authentication -> Sign-in method.';
+        msg = 'Email/Password sign-in is disabled in Firebase Console.';
       } else if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
         msg = 'Invalid email or password. Please verify your credentials.';
       } else {
@@ -87,14 +69,12 @@ export default function AdminLogin() {
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#F8FAFC', minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '24px', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <SeoHead title="Society Admin Login - HomeHni Hood" description="Login to HomeHni Hood Society Management Committee Console." canonicalUrl="https://societysphere.com/login" />
 
-      {/* Top Header Logo */}
       <div style={{ marginBottom: '32px' }}>
         <a href={websiteUrl} style={{ textDecoration: 'none' }}>
           <HomeHniHoodLogo isDark={isDark} size="large" />
         </a>
       </div>
 
-      {/* Login Form Container */}
       <div style={{
         background: isDark ? '#1E293B' : '#FFFFFF',
         borderRadius: '4px',

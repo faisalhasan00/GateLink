@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:math';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -205,12 +203,13 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
   }
 
   void _listenForPaymentCompletion(String societyId, String billId, String invNum, double amount) {
-    FirebaseFirestore.instance
-        .doc('societies/$societyId/maintenance_bills/$billId')
-        .snapshots()
-        .listen((snapshot) {
-      if (snapshot.exists && snapshot.data()?['status'] == 'paid' && mounted) {
-        final txnId = snapshot.data()?['transactionId'] ?? 'CF-PAID-OK';
+    final user = ref.read(currentUserProvider);
+    if (user == null) return;
+
+    ref.read(maintenanceRepositoryProvider).watchMaintenanceBills(user.uid).listen((bills) {
+      final bill = bills.where((b) => b.id == billId).firstOrNull;
+      if (bill != null && bill.isPaid && mounted) {
+        final txnId = (bill.transactionId != null && bill.transactionId!.isNotEmpty) ? bill.transactionId! : 'CF-PAID-OK';
         showModalBottomSheet(
           context: context,
           backgroundColor: Colors.transparent,

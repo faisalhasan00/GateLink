@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, Users, UserCheck, ShieldAlert, FileText, Wrench, Megaphone, Truck, Shield } from 'lucide-react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase';
+import { Search, X, Users, UserCheck, ShieldAlert, Wrench } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getSocietyAdminSession } from '../services/sessionManager';
+import { societyAdminService } from '../services/societyAdminService';
 
 export default function GlobalSearchModal({ isOpen, onClose }) {
   const [query, setQuery] = useState('');
@@ -13,7 +12,7 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
   const navigate = useNavigate();
 
   const session = getSocietyAdminSession();
-  const societyId = session?.societyId || 'SOC-001';
+  const societyId = session?.societyId;
 
   useEffect(() => {
     if (isOpen) {
@@ -32,78 +31,19 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
     }
 
     setLoading(true);
-    const q = val.toLowerCase().trim();
-    const searchResults = [];
-
     try {
-      // 1. Search Residents
-      const snapUsers = await getDocs(collection(db, `societies/${societyId}/users`));
-      snapUsers.forEach(d => {
-        const u = d.data();
-        if ((u.name || '').toLowerCase().includes(q) || (u.flatNumber || '').toLowerCase().includes(q) || (u.phone || '').includes(q)) {
-          searchResults.push({
-            id: d.id,
-            title: u.name || 'Resident',
-            subtitle: `Flat ${u.flatNumber || 'N/A'} • ${u.phone || 'Resident'}`,
-            type: 'Resident',
-            path: '/residents',
-            icon: <Users size={16} color="var(--primary)" />
-          });
-        }
-      });
-
-      // 2. Search Visitors
-      const snapVisitors = await getDocs(collection(db, `societies/${societyId}/visitors`));
-      snapVisitors.forEach(d => {
-        const v = d.data();
-        if ((v.name || '').toLowerCase().includes(q) || (v.hostFlat || '').toLowerCase().includes(q) || (v.phone || '').includes(q)) {
-          searchResults.push({
-            id: d.id,
-            title: v.name || 'Visitor',
-            subtitle: `Flat ${v.hostFlat} • ${v.type || 'Guest'}`,
-            type: 'Visitor',
-            path: '/visitors',
-            icon: <UserCheck size={16} color="var(--secondary)" />
-          });
-        }
-      });
-
-      // 3. Search Complaints
-      const snapComplaints = await getDocs(collection(db, `societies/${societyId}/complaints`));
-      snapComplaints.forEach(d => {
-        const c = d.data();
-        if ((c.title || '').toLowerCase().includes(q) || (c.category || '').toLowerCase().includes(q) || (c.flatNumber || '').toLowerCase().includes(q)) {
-          searchResults.push({
-            id: d.id,
-            title: c.title || 'Complaint',
-            subtitle: `Flat ${c.flatNumber || 'N/A'} • ${c.category || 'General'}`,
-            type: 'Complaint',
-            path: '/complaints',
-            icon: <ShieldAlert size={16} color="var(--danger)" />
-          });
-        }
-      });
-
-      // 4. Search Bills
-      const snapBills = await getDocs(collection(db, `societies/${societyId}/maintenance_bills`));
-      snapBills.forEach(d => {
-        const b = d.data();
-        if ((b.billNumber || d.id).toLowerCase().includes(q) || (b.residentName || '').toLowerCase().includes(q)) {
-          searchResults.push({
-            id: d.id,
-            title: `Bill #${b.billNumber || d.id.substring(0, 6)}`,
-            subtitle: `${b.residentName} • ₹${b.amount}`,
-            type: 'Maintenance Bill',
-            path: '/maintenance',
-            icon: <Wrench size={16} color="var(--warning)" />
-          });
-        }
-      });
-
-      setResults(searchResults.slice(0, 10));
-      setLoading(false);
+      const searchResults = await societyAdminService.searchSocietyData(societyId, val);
+      const mappedResults = searchResults.map(r => ({
+        ...r,
+        icon: r.type === 'Resident' ? <Users size={16} color="var(--primary)" /> :
+              r.type === 'Visitor' ? <UserCheck size={16} color="var(--secondary)" /> :
+              r.type === 'Complaint' ? <ShieldAlert size={16} color="var(--danger)" /> :
+              <Wrench size={16} color="var(--warning)" />
+      }));
+      setResults(mappedResults);
     } catch (e) {
       console.error(e);
+    } finally {
       setLoading(false);
     }
   };
@@ -117,8 +57,6 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
       display: 'flex', justifyContent: 'center', paddingTop: '80px', paddingLeft: '20px', paddingRight: '20px'
     }} onClick={onClose}>
       <div className="card" style={{ width: '100%', maxWidth: '640px', maxHeight: '500px', borderRadius: '16px', padding: '0', overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
-        
-        {/* Search Header */}
         <div style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--border-color)' }}>
           <Search size={20} color="var(--primary)" />
           <input 
@@ -132,7 +70,6 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
           <button className="btn-icon" onClick={onClose}><X size={20} /></button>
         </div>
 
-        {/* Search Results List */}
         <div style={{ padding: '12px', maxHeight: '420px', overflowY: 'auto' }}>
           {loading ? (
             <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)' }}>Searching society database...</div>
@@ -172,7 +109,6 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
             ))
           )}
         </div>
-
       </div>
     </div>
   );

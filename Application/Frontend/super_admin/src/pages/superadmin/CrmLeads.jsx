@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy, doc, updateDoc, deleteDoc, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
-import { Plus, Phone, Mail, MapPin, Building, Calendar, XCircle, Trash2, Tag, CheckCircle2, MessageSquare, Clock } from 'lucide-react';
+import { Plus, Phone, Mail, Building, Trash2, XCircle } from 'lucide-react';
+import { superAdminService } from '../../services/superAdminService';
 
 export default function CrmLeads() {
   const [leads, setLeads] = useState([]);
@@ -19,66 +18,48 @@ export default function CrmLeads() {
 
   const stages = ['New', 'Contacted', 'Demo Scheduled', 'Proposal Sent', 'Closed Won', 'Lost'];
 
-  // Subscribe to real-time Firebase Firestore leads collection
   useEffect(() => {
-    const q = query(collection(db, 'leads'), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, (snapshot) => {
-      const docs = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          name: data.name || data.fullName || 'Anonymous Lead',
-          phone: data.phone || 'N/A',
-          email: data.email || 'N/A',
-          societyName: data.societyName || data.society || 'N/A',
-          city: data.city || 'N/A',
-          flatCount: data.flatCount || data.flats || 'N/A',
-          source: data.source || 'Website Form',
-          reason: data.reason || '',
-          selectedModules: data.selectedModules || [],
-          status: data.status || 'New',
-          createdAt: data.createdAt ? new Date(data.createdAt.seconds * 1000).toLocaleString() : 'Just now'
-        };
-      });
-      setLeads(docs);
-      setLoading(false);
-    }, (err) => {
-      console.error('Real-time leads listener error:', err);
-      setLoading(false);
-    });
+    const unsub = superAdminService.subscribeLeads(
+      (docs) => {
+        setLeads(docs);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('Real-time leads listener error:', err);
+        setLoading(false);
+      }
+    );
 
-    return () => unsub();
+    return () => {
+      if (unsub) unsub();
+    };
   }, []);
 
-  // Update Lead Status Stage in Firebase
   const handleStageChange = async (leadId, newStatus) => {
     try {
-      await updateDoc(doc(db, 'leads', leadId), { status: newStatus });
+      await superAdminService.updateLeadStatus(leadId, newStatus);
     } catch (err) {
       console.error('Failed to update lead status:', err);
       alert('Could not update lead status.');
     }
   };
 
-  // Delete Lead from Firebase
   const handleDeleteLead = async (leadId) => {
     if (!window.confirm('Are you sure you want to delete this lead?')) return;
     try {
-      await deleteDoc(doc(db, 'leads', leadId));
+      await superAdminService.deleteLead(leadId);
     } catch (err) {
       console.error('Failed to delete lead:', err);
       alert('Could not delete lead.');
     }
   };
 
-  // Manually Add New Lead
   const handleAddLead = async (e) => {
     e.preventDefault();
     try {
-      await addDoc(collection(db, 'leads'), {
+      await superAdminService.createLead({
         ...formData,
         source: 'Manual Super Admin Entry',
-        createdAt: serverTimestamp()
       });
       setIsModalOpen(false);
       setFormData({ name: '', phone: '', email: '', societyName: '', city: '', flatCount: '100-250', status: 'New' });
@@ -104,7 +85,7 @@ export default function CrmLeads() {
 
       {loading ? (
         <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-          Loading real-time leads from Firebase...
+          Loading real-time leads...
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px', alignItems: 'start' }}>
@@ -141,7 +122,6 @@ export default function CrmLeads() {
                           </button>
                         </div>
 
-                        {/* Details Badges */}
                         <div style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', gap: '6px', margin: '10px 0' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <Phone size={13} color="#00B589" />
@@ -157,29 +137,8 @@ export default function CrmLeads() {
                               </a>
                             </div>
                           )}
-                          {lead.flatCount !== 'N/A' && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <Building size={13} color="#6366F1" />
-                              <span>{lead.flatCount} Flats</span>
-                            </div>
-                          )}
                         </div>
 
-                        {/* Source Badge & Modules */}
-                        <div style={{ padding: '8px', background: '#F1F5F9', borderRadius: '4px', fontSize: '11px', color: '#475569', marginBottom: '12px' }}>
-                          <div style={{ fontWeight: 700, color: '#0F172A' }}>Source: {lead.source}</div>
-                          {lead.reason && <div>Reason: {lead.reason}</div>}
-                          {lead.selectedModules.length > 0 && (
-                            <div style={{ marginTop: '4px', fontStyle: 'italic' }}>
-                              Modules: {lead.selectedModules.join(', ')}
-                            </div>
-                          )}
-                          <div style={{ fontSize: '10px', color: '#94A3B8', marginTop: '4px' }}>
-                            ⏰ {lead.createdAt}
-                          </div>
-                        </div>
-
-                        {/* Move Stage Selector Dropdown */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', borderTop: '1px solid #E2E8F0', paddingTop: '10px' }}>
                           <span style={{ fontSize: '11px', fontWeight: 700, color: '#64748B' }}>Stage:</span>
                           <select
@@ -203,7 +162,6 @@ export default function CrmLeads() {
                             ))}
                           </select>
                         </div>
-
                       </div>
                     ))
                   )}
@@ -214,7 +172,6 @@ export default function CrmLeads() {
         </div>
       )}
 
-      {/* Manual Add Lead Modal */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: '480px', width: '100%', padding: '28px' }}>
@@ -236,14 +193,6 @@ export default function CrmLeads() {
               <div className="form-group">
                 <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>Email Address</label>
                 <input type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} placeholder="vikram@example.com" style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #CBD5E1' }} />
-              </div>
-              <div className="form-group">
-                <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>Society Name</label>
-                <input type="text" value={formData.societyName} onChange={e => setFormData({...formData, societyName: e.target.value})} placeholder="e.g. Emerald Heights" style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #CBD5E1' }} />
-              </div>
-              <div className="form-group">
-                <label style={{ fontSize: '12px', fontWeight: 700, marginBottom: '4px', display: 'block' }}>City</label>
-                <input type="text" value={formData.city} onChange={e => setFormData({...formData, city: e.target.value})} placeholder="e.g. Hyderabad" style={{ width: '100%', padding: '10px', borderRadius: '4px', border: '1px solid #CBD5E1' }} />
               </div>
               <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
                 <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setIsModalOpen(false)}>Cancel</button>

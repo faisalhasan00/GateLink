@@ -15,6 +15,19 @@ class MockAlertRepository implements AlertRepository {
     if (shouldFail) throw Exception('SOS trigger failure');
     return 'alert-123';
   }
+
+  @override
+  Future<void> broadcastSosAlert({
+    required String societyId,
+    required String residentUid,
+    required String residentName,
+    required String flatNumber,
+    required String phone,
+    required String type,
+    required String notes,
+  }) async {
+    if (shouldFail) throw Exception('Failed to broadcast alert');
+  }
 }
 
 void main() {

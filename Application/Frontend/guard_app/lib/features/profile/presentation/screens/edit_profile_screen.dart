@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/auth_providers.dart';
+import '../../providers/profile_providers.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -47,28 +47,29 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     try {
       final user = FirebaseAuth.instance.currentUser;
       final profile = ref.read(userProfileProvider).value;
-      final societyId = profile?['societyId'] ?? 'SOC-001';
+      final societyId = profile?['societyId'] as String?;
+
+      if (societyId == null || societyId.isEmpty) {
+        throw Exception('Society ID is missing from user profile');
+      }
 
       if (user != null) {
-        await FirebaseFirestore.instance
-            .collection('societies/$societyId/users')
-            .doc(user.uid)
-            .set({
+        final userRepo = ref.read(userRepositoryProvider);
+        await userRepo.updateUserProfile(societyId, user.uid, {
           'name': _nameController.text.trim(),
           'email': _emailController.text.trim(),
           'gender': _selectedGender,
           'dob': _dobController.text.trim(),
           'updatedAt': DateTime.now().toIso8601String(),
-        }, SetOptions(merge: true));
+        });
 
-        // Add Activity Log
-        await FirebaseFirestore.instance
-            .collection('societies/$societyId/users/${user.uid}/activity_logs')
-            .add({
+        await userRepo.logAuditAction(societyId, {
           'action': 'Profile Updated',
           'description': 'Updated name, email, gender, and date of birth details.',
           'timestamp': DateTime.now().toIso8601String(),
         });
+
+        ref.invalidate(userProfileProvider);
       }
 
       if (mounted) {
@@ -113,7 +114,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Read-Only Banner Notice
               Container(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 decoration: BoxDecoration(
@@ -136,7 +136,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Full Name
               const Text('Full Name *', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               TextFormField(
@@ -150,7 +149,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               ),
               const SizedBox(height: AppSpacing.md),
 
-              // Email Address
               const Text('Email Address *', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
               const SizedBox(height: 6),
               TextFormField(
@@ -169,7 +167,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               ),
               const SizedBox(height: AppSpacing.md),
 
-              // Gender & DOB Row
               Row(
                 children: [
                   Expanded(
@@ -217,7 +214,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               const Divider(),
               const SizedBox(height: AppSpacing.md),
 
-              // Read Only Details Section
               const Text('READ-ONLY SYSTEM DETAILS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
               const SizedBox(height: AppSpacing.md),
 
@@ -229,7 +225,6 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
               const SizedBox(height: AppSpacing.xl),
 
-              // Save Button
               SizedBox(
                 width: double.infinity,
                 height: 50,

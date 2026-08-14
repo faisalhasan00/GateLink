@@ -1,43 +1,36 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  ShieldAlert, 
-  PhoneCall, 
-  CheckCircle, 
-  Clock, 
-  MapPin, 
-  User, 
-  AlertTriangle, 
-  Check, 
-  X,
-  FileText
-} from 'lucide-react';
-import { collection, onSnapshot, query, orderBy, doc, updateDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { ShieldAlert, CheckCircle, Clock } from 'lucide-react';
 import { getSocietyAdminSession } from '../services/sessionManager';
+import { societyAdminService } from '../services/societyAdminService';
 
 export default function EmergencySos() {
   const session = getSocietyAdminSession();
-  const societyId = session?.societyId || 'SOC-001';
+  const societyId = session?.societyId;
 
   const [sosAlerts, setSosAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(collection(db, `societies/${societyId}/sos_alerts`), orderBy('createdAt', 'desc'));
-    const unsub = onSnapshot(q, (snap) => {
-      const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setSosAlerts(data);
+    if (!societyId) {
       setLoading(false);
-    });
+      return;
+    }
+
+    const unsub = societyAdminService.subscribeSosAlerts(
+      societyId,
+      (data) => {
+        setSosAlerts(data);
+        setLoading(false);
+      },
+      (err) => console.error('Error fetching SOS alerts:', err)
+    );
+
     return () => unsub();
   }, [societyId]);
 
   const handleUpdateSosStatus = async (id, newStatus) => {
     try {
-      await updateDoc(doc(db, `societies/${societyId}/sos_alerts`, id), {
-        status: newStatus,
-        resolvedAt: newStatus === 'Resolved' ? new Date().toISOString() : null
-      });
+      await societyAdminService.updateSosAlertStatus(societyId, id, newStatus);
       alert(`SOS Alert status updated to ${newStatus}.`);
     } catch (e) {
       alert('Error updating SOS alert: ' + e.message);
@@ -47,19 +40,10 @@ export default function EmergencySos() {
   const activeAlerts = sosAlerts.filter(s => s.status !== 'Resolved' && s.status !== 'Closed');
   const resolvedAlerts = sosAlerts.filter(s => s.status === 'Resolved' || s.status === 'Closed');
 
-  if (loading) {
-    return (
-      <div style={{ padding: '32px', textAlign: 'center' }}>
-        <div className="skeleton-loader" style={{ height: '100px', borderRadius: '12px', marginBottom: '24px' }}></div>
-        <div className="skeleton-loader" style={{ height: '300px', borderRadius: '12px' }}></div>
-      </div>
-    );
-  }
+  if (loading) return <div style={{ padding: '32px', textAlign: 'center' }}>Loading SOS Alerts...</div>;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-
-      {/* 1. Incident Command Summary */}
       <div className="dashboard-grid">
         <div className="stat-card" style={{ borderColor: activeAlerts.length > 0 ? 'var(--danger)' : 'var(--border-color)' }}>
           <div className="stat-icon" style={{ backgroundColor: 'var(--danger-light)' }}>
@@ -92,7 +76,6 @@ export default function EmergencySos() {
         </div>
       </div>
 
-      {/* 2. Active SOS Incidents Banner */}
       {activeAlerts.length > 0 && (
         <div className="card" style={{ border: '2px solid var(--danger)', backgroundColor: 'var(--danger-light)', padding: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
@@ -106,7 +89,6 @@ export default function EmergencySos() {
                 <div>
                   <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--danger)' }}>{alert.type} Emergency — Flat {alert.flatNumber}</div>
                   <div style={{ fontSize: '13px', fontWeight: 700, marginTop: '2px' }}>Resident: {alert.residentName} ({alert.phone})</div>
-                  {alert.notes && <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '4px' }}>Note: "{alert.notes}"</div>}
                 </div>
 
                 <div style={{ display: 'flex', gap: '8px' }}>
@@ -123,7 +105,6 @@ export default function EmergencySos() {
         </div>
       )}
 
-      {/* 3. SOS History Table */}
       <div className="card">
         <div className="card-header">
           <h3 className="card-title">Emergency SOS Incident Log</h3>
@@ -136,36 +117,20 @@ export default function EmergencySos() {
                 <th>Emergency Type</th>
                 <th>Resident & Flat</th>
                 <th>Contact</th>
-                <th>Triggered Time</th>
                 <th>Status</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody>
               {sosAlerts.length === 0 ? (
-                <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
-                    <ShieldAlert size={36} color="var(--border-color)" style={{ marginBottom: '8px' }} />
-                    <div style={{ fontWeight: 600 }}>No emergency SOS alerts logged.</div>
-                  </td>
-                </tr>
+                <tr><td colSpan={5} style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>No emergency SOS alerts logged.</td></tr>
               ) : (
                 sosAlerts.map(s => (
                   <tr key={s.id}>
-                    <td>
-                      <span className="badge danger" style={{ fontWeight: 800 }}>{s.type || 'Medical'}</span>
-                    </td>
-                    <td>
-                      <div style={{ fontWeight: 700 }}>{s.residentName}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>Flat {s.flatNumber}</div>
-                    </td>
-                    <td><div style={{ fontSize: '13px', fontWeight: 600 }}>{s.phone}</div></td>
-                    <td><div style={{ fontSize: '12px' }}>{s.createdAt ? new Date(s.createdAt).toLocaleString() : 'Recent'}</div></td>
-                    <td>
-                      <span className={`badge ${s.status === 'Resolved' ? 'success' : 'danger'}`}>
-                        {s.status}
-                      </span>
-                    </td>
+                    <td><span className="badge danger">{s.type || 'Medical'}</span></td>
+                    <td><strong>{s.residentName}</strong> (Flat {s.flatNumber})</td>
+                    <td>{s.phone}</td>
+                    <td><span className={`badge ${s.status === 'Resolved' ? 'success' : 'danger'}`}>{s.status}</span></td>
                     <td>
                       {s.status !== 'Resolved' && (
                         <button className="btn btn-outline" style={{ padding: '4px 8px', fontSize: '11px' }} onClick={() => handleUpdateSosStatus(s.id, 'Resolved')}>
@@ -180,7 +145,6 @@ export default function EmergencySos() {
           </table>
         </div>
       </div>
-
     </div>
   );
 }

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
 import { X, CheckCircle2, Send } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { superAdminService } from '../../services/superAdminService';
 
 export default function DemoModal({ isOpen, onClose }) {
   const { theme } = useTheme();
@@ -18,11 +17,10 @@ export default function DemoModal({ isOpen, onClose }) {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await addDoc(collection(db, 'leads'), {
+      await superAdminService.createLead({
         ...formData,
         source: 'Enroll Society Modal',
-        status: 'New',
-        createdAt: serverTimestamp()
+        status: 'New'
       });
       setSubmitted(true);
     } catch (err) {
@@ -68,9 +66,6 @@ export default function DemoModal({ isOpen, onClose }) {
                 <CheckCircle2 size={32} color="#00B589" />
               </div>
               <h3 style={{ fontSize: '22px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: '0 0 8px 0' }}>Request Received!</h3>
-              <p style={{ color: isDark ? '#94A3B8' : '#666666', fontSize: '14px', lineHeight: 1.5, margin: '0 0 20px 0' }}>
-                Our onboarding team will contact you within 2 hours with full details.
-              </p>
               <button onClick={onClose} style={{ padding: '10px 24px', borderRadius: '2px', background: '#00B589', color: 'white', fontWeight: 700, border: 'none', cursor: 'pointer', fontSize: '14px' }}>
                 Done
               </button>
@@ -94,16 +89,6 @@ export default function DemoModal({ isOpen, onClose }) {
               <div>
                 <label style={{ fontSize: '12px', color: isDark ? '#CBD5E1' : '#444444', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Mobile Phone *</label>
                 <input required type="tel" placeholder="10-Digit Mobile Number" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '13px', outline: 'none' }} />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '12px', color: isDark ? '#CBD5E1' : '#444444', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Email Address *</label>
-                <input required type="email" placeholder="admin@society.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '13px', outline: 'none' }} />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '12px', color: isDark ? '#CBD5E1' : '#444444', fontWeight: 700, display: 'block', marginBottom: '4px' }}>Society / Building Name *</label>
-                <input required type="text" placeholder="Skyline Heights" value={formData.societyName} onChange={e => setFormData({...formData, societyName: e.target.value})} style={{ width: '100%', padding: '10px 12px', borderRadius: '4px', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1px solid #CCCCCC', background: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#333333', fontSize: '13px', outline: 'none' }} />
               </div>
 
               <button

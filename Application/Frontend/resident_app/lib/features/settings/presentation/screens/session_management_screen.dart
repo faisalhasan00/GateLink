@@ -1,33 +1,27 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/providers/auth_providers.dart';
+import '../../../profile/providers/session_providers.dart';
 
-class SessionManagementScreen extends StatelessWidget {
+class SessionManagementScreen extends ConsumerWidget {
   const SessionManagementScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(currentUserProvider);
+    final sessionsAsync = ref.watch(userSessionsStreamProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Active Sessions & Trusted Devices'),
       ),
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collectionGroup('user_sessions')
-            .where('userUid', isEqualTo: user?.uid)
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          final docs = snapshot.data?.docs ?? [];
-
+      body: sessionsAsync.when(
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (err, stack) => Center(child: Text('Error loading sessions: $err')),
+        data: (sessions) {
           return SingleChildScrollView(
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
             child: Column(
@@ -73,7 +67,7 @@ class SessionManagementScreen extends StatelessWidget {
                 const Text('Registered Active Device Sessions', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                 const SizedBox(height: AppSpacing.sm),
 
-                docs.isEmpty
+                sessions.isEmpty
                     ? Container(
                         padding: const EdgeInsets.all(24),
                         width: double.infinity,
@@ -93,13 +87,10 @@ class SessionManagementScreen extends StatelessWidget {
                     : ListView.separated(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        itemCount: docs.length,
+                        itemCount: sessions.length,
                         separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
                         itemBuilder: (context, index) {
-                          final data = docs[index].data() as Map<String, dynamic>;
-                          final deviceName = data['deviceName'] ?? 'Android Device';
-                          final osVersion = data['osVersion'] ?? 'Android OS';
-                          final lastLogin = data['lastLogin'] ?? 'Recent';
+                          final session = sessions[index];
 
                           return Container(
                             padding: const EdgeInsets.all(AppSpacing.md),
@@ -116,14 +107,22 @@ class SessionManagementScreen extends StatelessWidget {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(deviceName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                                      Text('$osVersion • Last Login: $lastLogin', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                      Text(session.deviceName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                      Text('${session.osVersion} • Last Login: ${session.lastLogin}', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                                     ],
                                   ),
                                 ),
                                 TextButton(
                                   onPressed: () async {
-                                    await docs[index].reference.delete();
+                                    final success = await ref.read(sessionControllerProvider.notifier).revokeSession(
+                                      userId: user?.uid ?? '',
+                                      sessionId: session.id,
+                                    );
+                                    if (context.mounted && success) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Session revoked'), backgroundColor: AppColors.success),
+                                      );
+                                    }
                                   },
                                   child: const Text('Revoke', style: TextStyle(color: AppColors.error, fontSize: 12)),
                                 ),
@@ -140,12 +139,11 @@ class SessionManagementScreen extends StatelessWidget {
                   height: 48,
                   child: OutlinedButton.icon(
                     onPressed: () async {
-                      final batch = FirebaseFirestore.instance.batch();
-                      for (final doc in docs) {
-                        batch.delete(doc.reference);
-                      }
-                      await batch.commit();
-                      if (context.mounted) {
+                      final success = await ref.read(sessionControllerProvider.notifier).revokeAllOtherSessions(
+                        userId: user?.uid ?? '',
+                        currentSessionId: 'current',
+                      );
+                      if (context.mounted && success) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('✅ Revoked all other active sessions!'), backgroundColor: AppColors.success),
                         );

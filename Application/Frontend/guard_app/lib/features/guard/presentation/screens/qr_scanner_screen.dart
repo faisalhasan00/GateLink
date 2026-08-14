@@ -1,12 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/providers/firebase_providers.dart';
-import '../../../../core/services/firestore_service.dart';
+import '../../presentation/controllers/visitor_controller.dart';
 
 class QrScannerScreen extends ConsumerStatefulWidget {
   const QrScannerScreen({super.key});
@@ -49,11 +47,10 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
     _controller.switchCamera();
   }
 
-  /// Processes QR code scan with duplicate prevention, expiry check, and validation
   Future<void> _processQrCode(String code) async {
     try {
-      final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: 'SOC-001');
-      final result = await firestoreService.validateAndProcessQrScan(code);
+      final controller = ref.read(visitorControllerProvider.notifier);
+      final result = await controller.validateAndProcessQrScan(code);
 
       if (!mounted) return;
 
@@ -85,21 +82,18 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
   }
 
   Future<void> _allowEntry(String docId) async {
-    final firestoreService = ref.read(firestoreServiceProvider);
-    await firestoreService.updateVisitorStatus(docId, 'inside');
-    await FirebaseFirestore.instance.doc('societies/${firestoreService.societyId}/visitors/$docId').update({
-      'entryTime': DateTime.now().toIso8601String(),
-    });
+    final controller = ref.read(visitorControllerProvider.notifier);
+    await controller.approveVisitorEntry(docId);
   }
 
   Future<void> _denyEntry(String docId) async {
-    final firestoreService = ref.read(firestoreServiceProvider);
-    await firestoreService.updateVisitorStatus(docId, 'denied');
+    final controller = ref.read(visitorControllerProvider.notifier);
+    await controller.updateVisitorStatus(docId, 'denied');
   }
 
   Future<void> _markExit(String docId) async {
-    final firestoreService = ref.read(firestoreServiceProvider);
-    await firestoreService.markVisitorExit(docId);
+    final controller = ref.read(visitorControllerProvider.notifier);
+    await controller.markVisitorExit(docId);
   }
 
   void _showValidationModal({
@@ -112,7 +106,6 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
   }) {
     final isAlreadyUsed = reason == 'already_used';
     final isExpired = reason == 'expired';
-    final isDenied = reason == 'denied';
 
     String headerTitle = 'PASS VERIFIED ✅';
     String headerSub = 'Pre-approved visitor pass verified for gate entry.';
@@ -157,7 +150,6 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Handle bar
             Container(
               width: 40,
               height: 4,
@@ -168,7 +160,6 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
             ),
             const SizedBox(height: AppSpacing.lg),
 
-            // Status Icon
             CircleAvatar(
               radius: 32,
               backgroundColor: primaryColor.withValues(alpha: 0.15),
@@ -194,7 +185,6 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
             const Divider(),
             const SizedBox(height: AppSpacing.sm),
 
-            // Visitor Details Card
             if (data.isNotEmpty) ...[
               _ModalInfoRow(label: 'Visitor Name', value: data['name'] as String? ?? '-'),
               _ModalInfoRow(label: 'Destination Flat', value: data['hostFlat'] as String? ?? '-'),
@@ -206,7 +196,6 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
             ],
             const SizedBox(height: AppSpacing.lg),
 
-            // Action Buttons
             Row(
               children: [
                 if (isAlreadyUsed && docId != null)
@@ -368,7 +357,6 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
       body: Stack(
         alignment: Alignment.center,
         children: [
-          // Camera Scanner View
           MobileScanner(
             controller: _controller,
             onDetect: _onDetect,
@@ -400,8 +388,6 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
               );
             },
           ),
-
-          // Scanner Overlay Frame
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
@@ -424,8 +410,6 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
               ),
             ),
           ),
-
-          // Header Text
           Positioned(
             top: 40,
             child: Container(
@@ -440,8 +424,6 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
               ),
             ),
           ),
-
-          // Manual Entry Button
           Positioned(
             bottom: 40,
             child: ElevatedButton.icon(

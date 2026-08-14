@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +6,7 @@ import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/constants/app_constants.dart';
+import '../../../profile/providers/profile_providers.dart';
 
 class PendingApprovalScreen extends ConsumerStatefulWidget {
   const PendingApprovalScreen({super.key});
@@ -28,26 +27,22 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
     }
 
     try {
-      final socSnap = await FirebaseFirestore.instance.collection('societies').get();
-      for (final soc in socSnap.docs) {
-        final userDoc = await FirebaseFirestore.instance
-            .doc('societies/${soc.id}/users/${user.uid}')
-            .get();
-        if (userDoc.exists) {
-          final status = userDoc.data()?['status'] ?? 'pending_approval';
-          if (status == 'active' || status == 'approved') {
-            ref.invalidate(userProfileProvider);
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('🎉 Your account is approved! Welcome to SocietySphere.'),
-                  backgroundColor: AppColors.success,
-                ),
-              );
-              context.go(AppRoutes.dashboard);
-            }
-            return;
+      final userRepo = ref.read(userRepositoryProvider);
+      final userData = await userRepo.checkUserStatus(user.uid);
+      if (userData != null) {
+        final status = userData['status'] as String? ?? 'pending_approval';
+        if (status == 'active' || status == 'approved') {
+          ref.invalidate(userProfileProvider);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('🎉 Your account is approved! Welcome to SocietySphere.'),
+                backgroundColor: AppColors.success,
+              ),
+            );
+            context.go(AppRoutes.dashboard);
           }
+          return;
         }
       }
       if (mounted) {
@@ -113,11 +108,11 @@ class _PendingApprovalScreenState extends ConsumerState<PendingApprovalScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: AppSpacing.xl),
-              _StepItem(step: 1, title: 'Identity & Flat Submitted', subtitle: 'Completed', isDone: true),
+              const _StepItem(step: 1, title: 'Identity & Flat Submitted', subtitle: 'Completed', isDone: true),
               const SizedBox(height: AppSpacing.md),
-              _StepItem(step: 2, title: 'RWA Admin Verification', subtitle: 'In Progress by Committee', isDone: false),
+              const _StepItem(step: 2, title: 'RWA Admin Verification', subtitle: 'In Progress by Committee', isDone: false),
               const SizedBox(height: AppSpacing.md),
-              _StepItem(step: 3, title: 'Gate & App Access Activated', subtitle: 'Pending Approval', isDone: false),
+              const _StepItem(step: 3, title: 'Gate & App Access Activated', subtitle: 'Pending Approval', isDone: false),
               const SizedBox(height: AppSpacing.xxl),
               SizedBox(
                 width: double.infinity,

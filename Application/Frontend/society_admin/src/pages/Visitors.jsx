@@ -1,26 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
-import { db } from '../firebase';
 import { getSocietyAdminSession } from '../services/sessionManager';
+import { societyAdminService } from '../services/societyAdminService';
 
 export default function Visitors() {
   const session = getSocietyAdminSession();
-  const societyId = session?.societyId || 'SOC-001';
+  const societyId = session?.societyId;
 
   const [visitors, setVisitors] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const q = query(
-      collection(db, `societies/${societyId}/visitors`),
-      orderBy('entryTime', 'desc')
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setVisitors(data);
+    if (!societyId) {
       setLoading(false);
-    });
+      return;
+    }
+
+    const unsubscribe = societyAdminService.subscribeVisitors(
+      societyId,
+      (data) => {
+        setVisitors(data);
+        setLoading(false);
+      },
+      (err) => {
+        console.error('Error fetching visitors:', err);
+        setLoading(false);
+      }
+    );
 
     return () => unsubscribe();
   }, [societyId]);
