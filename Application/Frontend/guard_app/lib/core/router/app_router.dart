@@ -100,11 +100,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 
       if (isSplash) {
         if (!isAuth) return AppRoutes.onboarding;
-        final status = userProfile?['status'];
-        if (status == 'active' || status == 'approved') {
-          return AppRoutes.dashboard;
-        }
-        return AppRoutes.pendingApproval;
+        return AppRoutes.guardDashboard;
       }
 
       if (!isAuth && !isLoggingIn) {
@@ -112,7 +108,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       if (isAuth) {
-        final status = userProfile?['status'] ?? 'pending_approval';
+        final status = userProfile?['status'] ?? 'active';
         final isApproved = status == 'active' || status == 'approved';
 
         if (!isApproved && !isPendingRoute) {
@@ -120,7 +116,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         }
 
         if (isApproved && (isLoggingIn || isPendingRoute)) {
-          return AppRoutes.dashboard;
+          return AppRoutes.guardDashboard;
         }
       }
 
@@ -128,6 +124,43 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
     debugLogDiagnostics: true,
     routes: [
+      // Top-level Aliases & Shortcuts to prevent No-Route GoExceptions
+      GoRoute(
+        path: '/dashboard',
+        redirect: (context, state) => AppRoutes.guardDashboard,
+      ),
+      GoRoute(
+        path: '/scan',
+        redirect: (context, state) => AppRoutes.guardScan,
+      ),
+      GoRoute(
+        path: '/quick-entry',
+        redirect: (context, state) => AppRoutes.guardQuickEntry,
+      ),
+      GoRoute(
+        path: '/vehicles',
+        redirect: (context, state) => AppRoutes.guardVehicles,
+      ),
+      GoRoute(
+        path: '/profile',
+        redirect: (context, state) => AppRoutes.profile,
+      ),
+      GoRoute(
+        path: '/history',
+        redirect: (context, state) => AppRoutes.guardDashboard,
+      ),
+      GoRoute(
+        path: '/all',
+        redirect: (context, state) => AppRoutes.guardDashboard,
+      ),
+      GoRoute(
+        path: '/visitors',
+        redirect: (context, state) => AppRoutes.guardDashboard,
+      ),
+      GoRoute(
+        path: '/visitors/:id',
+        redirect: (context, state) => '/home/visitors/${state.pathParameters['id']}',
+      ),
       GoRoute(
         path: AppRoutes.splash,
         builder: (context, state) => const SplashScreen(),

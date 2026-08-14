@@ -273,7 +273,7 @@ class _GuardVisitorHistoryScreenState extends ConsumerState<GuardVisitorHistoryS
                       ),
                       elevation: 0,
                       child: InkWell(
-                        onTap: () => context.go('/visitors/$docId'),
+                        onTap: () => context.go('/home/visitors/$docId'),
                         borderRadius: BorderRadius.circular(AppRadius.lg),
                         child: Padding(
                           padding: const EdgeInsets.all(AppSpacing.md),

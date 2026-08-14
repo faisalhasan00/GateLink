@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../sos/domain/models/guard_alert_model.dart';
 import '../../../sos/presentation/controllers/alert_controller.dart';
@@ -215,7 +216,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               GestureDetector(
-                                onTap: () => context.go('/profile'),
+                                onTap: () => context.go(AppRoutes.profile),
                                 child: const CircleAvatar(
                                   radius: 24,
                                   backgroundColor: AppColors.primary,
@@ -225,7 +226,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: GestureDetector(
-                                  onTap: () => context.go('/profile'),
+                                  onTap: () => context.go(AppRoutes.profile),
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
@@ -422,7 +423,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                               icon: Icons.person_add_alt_1_rounded,
                               label: 'Log Entry',
                               color: AppColors.primary,
-                              onTap: () => context.go('/quick-entry'),
+                              onTap: () => context.go(AppRoutes.guardQuickEntry),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.sm),
@@ -431,7 +432,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                               icon: Icons.qr_code_scanner_rounded,
                               label: 'Scan QR',
                               color: const Color(0xFF1A2A3A),
-                              onTap: () => context.go('/scan'),
+                              onTap: () => context.go(AppRoutes.guardScan),
                             ),
                           ),
                           const SizedBox(width: AppSpacing.sm),
@@ -440,7 +441,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                               icon: Icons.directions_car_rounded,
                               label: 'Vehicles',
                               color: AppColors.success,
-                              onTap: () => context.go('/vehicles'),
+                              onTap: () => context.go(AppRoutes.guardVehicles),
                             ),
                           ),
                         ],
@@ -694,7 +695,7 @@ class _GateEntryCard extends StatelessWidget {
     final timeStr = visitor.entryTime != null ? DateFormat('hh:mm a').format(visitor.entryTime!) : '--';
 
     return GestureDetector(
-      onTap: () => context.go('/visitors/${visitor.id}'),
+      onTap: () => context.go('/home/visitors/${visitor.id}'),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(

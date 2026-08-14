@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../providers/amenity_providers.dart';
+import '../../providers/amenity_providers.dart';
 
 class AmenityListScreen extends ConsumerStatefulWidget {
   const AmenityListScreen({super.key});

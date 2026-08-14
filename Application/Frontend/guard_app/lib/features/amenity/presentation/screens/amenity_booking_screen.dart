@@ -5,7 +5,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/auth_providers.dart';
-import '../providers/amenity_providers.dart';
+import '../../providers/amenity_providers.dart';
 
 class AmenityBookingScreen extends ConsumerStatefulWidget {
   final String amenityId;
