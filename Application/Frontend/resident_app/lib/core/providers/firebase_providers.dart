@@ -112,3 +112,35 @@ final documentsStreamProvider = StreamProvider<QuerySnapshot>((ref) {
   final service = ref.watch(firestoreServiceProvider);
   return service.documentsStream();
 });
+
+// ── SOCIETY & SECURITY CONTACT PROVIDERS ─────────────────────────────────
+
+final societyDetailsStreamProvider =
+    StreamProvider<Map<String, dynamic>>((ref) {
+  final profile = ref.watch(userProfileProvider).value;
+  final societyId = profile?.societyId ?? '';
+  if (societyId.isEmpty) return Stream.value({});
+
+  return FirebaseFirestore.instance
+      .collection('societies')
+      .doc(societyId)
+      .snapshots()
+      .map((snap) => snap.data() ?? {});
+});
+
+final societySecurityPhoneProvider = Provider<String>((ref) {
+  final societyDoc = ref.watch(societyDetailsStreamProvider).value ?? {};
+
+  final securityPhone = (societyDoc['securityPhone'] ??
+          societyDoc['gatePhone'] ??
+          societyDoc['emergencyContact'] ??
+          societyDoc['phone'] ??
+          societyDoc['contactNumber'] ??
+          '')
+      .toString()
+      .trim();
+
+  if (securityPhone.isNotEmpty) return securityPhone;
+  return 'Intercom 0';
+});
+

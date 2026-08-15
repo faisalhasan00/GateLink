@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/providers/auth_providers.dart';
+import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
@@ -20,6 +21,7 @@ class EmergencyContactsWidget extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(userProfileProvider).value;
     final societyName = profile?.displaySocietyName ?? 'Society Office';
+    final gatePhone = ref.watch(societySecurityPhoneProvider);
 
     final contacts = [
       {
@@ -46,7 +48,7 @@ class EmergencyContactsWidget extends ConsumerWidget {
       {
         'name': 'Society Gate / Security',
         'subtitle': societyName,
-        'phone': '112',
+        'phone': gatePhone,
         'icon': Icons.security_rounded,
         'color': AppColors.secondary
       },
