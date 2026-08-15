@@ -54,8 +54,8 @@ class AuthService {
           'email': cleanEmail,
           'name': cred.user!.displayName ?? 'Guard',
           'role': 'guard',
-          'societyId': 'SOC-001',
-          'societyName': 'My Home Bhooja',
+          'societyId': '',
+          'societyName': '',
           'status': 'active',
           'createdAt': DateTime.now().toIso8601String(),
         };
@@ -102,9 +102,9 @@ class AuthService {
       throw Exception('Security Guards cannot self-register. Please ask your RWA Committee to provision your Gate Access Passcode.');
     }
 
-    // 2. Validate societyCode against real societies collection (or fallback if SOC-001)
-    var societyId = 'SOC-001';
-    var societyName = 'My Home Bhooja';
+    // 2. Validate societyCode against real societies collection
+    var societyId = '';
+    var societyName = '';
 
     try {
       final societyQuery = await _db

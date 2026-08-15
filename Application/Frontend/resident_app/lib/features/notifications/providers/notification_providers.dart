@@ -16,9 +16,9 @@ final notificationsStreamProvider =
   final repository = ref.watch(notificationRepositoryProvider);
   final user = ref.watch(currentUserProvider);
   final profile = ref.watch(userProfileProvider).value;
-  final societyId = profile?.societyId ?? 'SOC-001';
+  final societyId = profile?.societyId ?? '';
 
-  if (user == null) return const Stream.empty();
+  if (user == null || societyId.isEmpty) return const Stream.empty();
   return repository.watchNotifications(societyId, user.uid);
 });
 
@@ -26,9 +26,9 @@ final unreadNotificationsCountStreamProvider = StreamProvider<int>((ref) {
   final repository = ref.watch(notificationRepositoryProvider);
   final user = ref.watch(currentUserProvider);
   final profile = ref.watch(userProfileProvider).value;
-  final societyId = profile?.societyId ?? 'SOC-001';
+  final societyId = profile?.societyId ?? '';
 
-  if (user == null) return Stream.value(0);
+  if (user == null || societyId.isEmpty) return Stream.value(0);
   return repository.watchUnreadCount(societyId, user.uid);
 });
 

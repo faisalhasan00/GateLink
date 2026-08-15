@@ -21,9 +21,9 @@ final helperControllerProvider =
 final myHelpersStreamProvider = StreamProvider<List<HelperModel>>((ref) {
   final user = ref.watch(currentUserProvider);
   final profile = ref.watch(userProfileProvider).value;
-  final societyId = profile?.societyId ?? 'SOC-001';
+  final societyId = profile?.societyId ?? '';
 
-  if (user == null) return Stream.value([]);
+  if (user == null || societyId.isEmpty) return Stream.value([]);
   final repository = ref.watch(helperRepositoryProvider);
   return repository.watchMyHelpers(societyId, user.uid);
 });
@@ -31,8 +31,9 @@ final myHelpersStreamProvider = StreamProvider<List<HelperModel>>((ref) {
 final todayHelperLogsStreamProvider =
     StreamProvider<List<HelperLogModel>>((ref) {
   final profile = ref.watch(userProfileProvider).value;
-  final societyId = profile?.societyId ?? 'SOC-001';
+  final societyId = profile?.societyId ?? '';
 
+  if (societyId.isEmpty) return Stream.value([]);
   final repository = ref.watch(helperRepositoryProvider);
   return repository.watchTodayHelperLogs(societyId);
 });

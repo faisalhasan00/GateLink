@@ -1,17 +1,24 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:io';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/services/firestore_service.dart';
 import '../../../../core/services/storage_service.dart';
+import '../../../../core/widgets/widgets.dart';
 import '../../../visitor/domain/models/visitor_model.dart';
 import '../../../visitor/presentation/controllers/visitor_controller.dart';
 import '../../models/gate_entry_model.dart';
+import '../widgets/entry_guard_header.dart';
+import '../widgets/entry_category_selector.dart';
+import '../widgets/entry_photo_picker.dart';
+import '../widgets/entry_visitor_info_form.dart';
+import '../widgets/entry_flat_selector.dart';
+import '../widgets/entry_vehicle_selector.dart';
 
 class QuickEntryScreen extends ConsumerStatefulWidget {
   const QuickEntryScreen({super.key});
@@ -21,9 +28,9 @@ class QuickEntryScreen extends ConsumerStatefulWidget {
 }
 
 class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
+  final _formKey = GlobalKey<FormState>();
   bool _isSubmitting = false;
   EntryType _selectedType = EntryType.guest;
-  final _formKey = GlobalKey<FormState>();
 
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
@@ -41,9 +48,22 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
   bool _isValidatingFlat = false;
   FlatValidationResult? _flatValidationResult;
 
-  final List<String> _towers = ['All Blocks / Direct', 'Block A', 'Block B', 'Block C', 'Block D', 'Tower 1', 'Tower 2'];
+  final List<String> _towers = [
+    'All Blocks / Direct',
+    'Block A',
+    'Block B',
+    'Block C',
+    'Block D',
+    'Tower 1',
+    'Tower 2'
+  ];
   final List<String> _genders = ['Male', 'Female', 'Other'];
-  final List<String> _vehicleTypes = ['2-Wheeler', '4-Wheeler', 'Auto/Rickshaw', 'None'];
+  final List<String> _vehicleTypes = [
+    '2-Wheeler',
+    '4-Wheeler',
+    'Auto/Rickshaw',
+    'None'
+  ];
 
   @override
   void dispose() {
@@ -66,7 +86,10 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
   }
 
   Future<void> _pickPhoto() async {
-    final picked = await _picker.pickImage(source: ImageSource.camera, imageQuality: 70);
+    final picked = await _picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 70,
+    );
     if (picked != null) {
       setState(() => _photoFile = File(picked.path));
     }
@@ -84,12 +107,16 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
     final societyId = profile?['societyId'] as String?;
     if (societyId == null || societyId.isEmpty) {
       setState(() {
-        _flatValidationResult = FlatValidationResult(isValid: false, error: 'Society ID missing');
+        _flatValidationResult = FlatValidationResult(
+          isValid: false,
+          error: 'Society ID missing',
+        );
         _isValidatingFlat = false;
       });
       return;
     }
-    final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: societyId);
+    final firestoreService = ref.read(firestoreServiceProvider) ??
+        FirestoreService(societyId: societyId);
     final res = await firestoreService.validateFlat(formattedFlat);
     if (mounted) {
       setState(() {
@@ -108,14 +135,17 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
     final societyId = profile?['societyId'] as String?;
     if (societyId == null || societyId.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('❌ Society ID is missing from profile'), backgroundColor: AppColors.error),
+        const SnackBar(
+          content: Text('❌ Society ID is missing from profile'),
+          backgroundColor: AppColors.error,
+        ),
       );
       return;
     }
 
-    final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: societyId);
+    final firestoreService = ref.read(firestoreServiceProvider) ??
+        FirestoreService(societyId: societyId);
 
-    // 1. Explicit Flat Validation
     final validation = await firestoreService.validateFlat(targetFlat);
     if (!validation.isValid) {
       if (mounted) {
@@ -141,7 +171,8 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
       if (_photoFile != null) {
         final storage = ref.read(storageServiceProvider);
         final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
-        photoUrl = await storage.uploadComplaintImage(_photoFile!, societyId, 'visitor_$uniqueId');
+        photoUrl = await storage.uploadComplaintImage(
+            _photoFile!, societyId, 'visitor_$uniqueId');
         if (photoUrl.isEmpty) photoUrl = null;
       }
 
@@ -173,13 +204,17 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
         gateName: profile?['gateName'] ?? 'Gate 1 — Main Entry',
       );
 
-      await ref.read(visitorControllerProvider.notifier).logVisitorEntry(newVisitor);
+      await ref
+          .read(visitorControllerProvider.notifier)
+          .logVisitorEntry(newVisitor);
 
       if (mounted) {
         _clearForm();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('✅ Visitor request logged & sent to ${validation.residentName} ($targetFlat)!'),
+            content: Text(
+              '✅ Visitor request logged & sent to ${validation.residentName} ($targetFlat)!',
+            ),
             backgroundColor: AppColors.secondary,
             duration: const Duration(seconds: 4),
           ),
@@ -189,7 +224,10 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
       if (mounted) {
         final errText = e.toString().replaceAll('Exception: ', '');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('❌ $errText'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('❌ $errText'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     } finally {
@@ -216,7 +254,8 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
     final user = FirebaseAuth.instance.currentUser;
     final societyName = profile?['societyName'] ?? 'Housing Society';
     final gateName = profile?['gateName'] ?? 'Gate 1 — Main Entry';
-    final guardName = profile?['name'] ?? user?.displayName ?? 'Security Guard';
+    final guardName =
+        profile?['name'] ?? user?.displayName ?? 'Security Guard';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -233,319 +272,75 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0F1923),
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                ),
-                child: Row(
-                  children: [
-                    const CircleAvatar(
-                      radius: 20,
-                      backgroundColor: AppColors.primary,
-                      child: Icon(Icons.security_rounded, color: Colors.white, size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(societyName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white)),
-                          Text('$gateName  •  Logged by: $guardName', style: const TextStyle(fontSize: 11, color: Colors.white70)),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+              // 1. Modular Gate & Guard Header
+              EntryGuardHeader(
+                societyName: societyName,
+                gateName: gateName,
+                guardName: guardName,
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              const Text('Select Entry Category', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-              const SizedBox(height: AppSpacing.sm),
-              Row(
-                children: EntryType.values.map((type) {
-                  final isSelected = _selectedType == type;
-                  final model = GateEntryModel(
-                    id: '',
-                    visitorName: '',
-                    phone: '',
-                    flatNumber: '',
-                    tower: '',
-                    status: EntryStatus.inside,
-                    entryTime: DateTime.now(),
-                    type: type,
-                  );
-                  return Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 4),
-                      child: GestureDetector(
-                        onTap: () => setState(() => _selectedType = type),
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          decoration: BoxDecoration(
-                            color: isSelected ? AppColors.secondary : Colors.white,
-                            borderRadius: BorderRadius.circular(AppRadius.md),
-                            border: Border.all(
-                              color: isSelected ? AppColors.secondary : AppColors.border,
-                            ),
-                          ),
-                          child: Column(
-                            children: [
-                              Icon(
-                                model.typeIcon,
-                                color: isSelected ? Colors.white : AppColors.textSecondary,
-                                size: 22,
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                type.name.toUpperCase(),
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w700,
-                                  color: isSelected ? Colors.white : AppColors.textSecondary,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
+              // 2. Modular Category Selector
+              EntryCategorySelector(
+                selectedType: _selectedType,
+                onTypeChanged: (t) => setState(() => _selectedType = t),
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              Row(
-                children: [
-                  GestureDetector(
-                    onTap: _pickPhoto,
-                    child: Container(
-                      width: 72,
-                      height: 72,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                        border: Border.all(color: AppColors.border),
-                        image: _photoFile != null
-                            ? DecorationImage(image: FileImage(_photoFile!), fit: BoxFit.cover)
-                            : null,
-                      ),
-                      child: _photoFile == null
-                          ? const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.camera_alt_rounded, color: AppColors.textSecondary, size: 24),
-                                SizedBox(height: 2),
-                                Text('Photo', style: TextStyle(fontSize: 10, color: AppColors.textSecondary)),
-                              ],
-                            )
-                          : null,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Visitor Photo (Optional)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-                        const SizedBox(height: 4),
-                        Text(
-                          _photoFile == null ? 'Tap camera icon to capture visitor photo' : 'Photo captured successfully!',
-                          style: TextStyle(fontSize: 12, color: _photoFile == null ? AppColors.textDisabled : AppColors.success),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+              // 3. Modular Photo Capture
+              EntryPhotoPicker(
+                photoFile: _photoFile,
+                onPickPhoto: _pickPhoto,
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextFormField(
-                      controller: _nameController,
-                      decoration: const InputDecoration(labelText: 'Visitor Name *', prefixIcon: Icon(Icons.person_outline_rounded)),
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Name is required' : null,
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    flex: 2,
-                    child: DropdownButtonFormField<String>(
-                      value: _selectedGender,
-                      decoration: const InputDecoration(labelText: 'Gender'),
-                      items: _genders.map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
-                      onChanged: (v) => setState(() => _selectedGender = v!),
-                    ),
-                  ),
-                ],
+              // 4. Modular Visitor Info Form (Name, Gender, Phone, Company, Notes)
+              EntryVisitorInfoForm(
+                nameController: _nameController,
+                phoneController: _phoneController,
+                companyController: _companyController,
+                notesController: _notesController,
+                selectedGender: _selectedGender,
+                genders: _genders,
+                selectedType: _selectedType,
+                onGenderChanged: (g) => setState(() => _selectedGender = g),
               ),
               const SizedBox(height: AppSpacing.md),
 
-              TextFormField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(labelText: 'Mobile Number *', prefixIcon: Icon(Icons.phone_outlined)),
-                validator: (v) => (v == null || v.trim().length < 10) ? 'Valid 10-digit mobile number required' : null,
+              // 5. Modular Flat Selector & Realtime Verification
+              EntryFlatSelector(
+                selectedTower: _selectedTower,
+                towers: _towers,
+                flatController: _flatController,
+                isValidating: _isValidatingFlat,
+                validationResult: _flatValidationResult,
+                onTowerChanged: (t) {
+                  setState(() => _selectedTower = t);
+                  _validateFlatNow(_flatController.text);
+                },
+                onFlatChanged: _validateFlatNow,
               ),
               const SizedBox(height: AppSpacing.md),
 
-              if (_selectedType == EntryType.delivery || _selectedType == EntryType.cab) ...[
-                TextFormField(
-                  controller: _companyController,
-                  decoration: InputDecoration(
-                    labelText: _selectedType == EntryType.delivery ? 'Company Name (e.g. Zomato, Amazon)' : 'Cab Service (e.g. Uber, Ola)',
-                    prefixIcon: const Icon(Icons.local_shipping_outlined),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.md),
-              ],
-
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 2,
-                    child: DropdownButtonFormField<String>(
-                      isExpanded: true,
-                      value: _selectedTower,
-                      decoration: const InputDecoration(labelText: 'Block / Tower'),
-                      items: _towers.map((t) => DropdownMenuItem(
-                        value: t, 
-                        child: Text(
-                          t, 
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12),
-                        )
-                      )).toList(),
-                      onChanged: (v) {
-                        setState(() => _selectedTower = v!);
-                        _validateFlatNow(_flatController.text);
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    flex: 3,
-                    child: TextFormField(
-                      controller: _flatController,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: 'Flat No. * (e.g. 101)', prefixIcon: Icon(Icons.home_outlined)),
-                      onChanged: _validateFlatNow,
-                      validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-
-              if (_isValidatingFlat)
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 4),
-                  child: Row(children: [
-                    SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
-                    SizedBox(width: 8),
-                    Text('Validating flat assignment...', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                  ]),
-                )
-              else if (_flatValidationResult != null)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: _flatValidationResult!.isValid
-                        ? AppColors.successSurface.withValues(alpha: 0.2)
-                        : AppColors.error.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    border: Border.all(
-                      color: _flatValidationResult!.isValid ? AppColors.success : AppColors.error,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        _flatValidationResult!.isValid ? Icons.check_circle_rounded : Icons.error_rounded,
-                        size: 16,
-                        color: _flatValidationResult!.isValid ? AppColors.success : AppColors.error,
-                      ),
-                      const SizedBox(width: 6),
-                      Expanded(
-                        child: Text(
-                          _flatValidationResult!.isValid
-                              ? 'Resident: ${_flatValidationResult!.residentName ?? ""}'
-                              : (_flatValidationResult!.error ?? 'Invalid Flat'),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: _flatValidationResult!.isValid ? AppColors.success : AppColors.error,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              const SizedBox(height: AppSpacing.md),
-
-              Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: TextFormField(
-                      controller: _vehicleController,
-                      decoration: const InputDecoration(labelText: 'Vehicle Number (Optional)', prefixIcon: Icon(Icons.directions_car_outlined)),
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    flex: 2,
-                    child: DropdownButtonFormField<String>(
-                      isExpanded: true,
-                      value: _selectedVehicleType,
-                      decoration: const InputDecoration(labelText: 'Type'),
-                      items: _vehicleTypes.map((v) => DropdownMenuItem(
-                        value: v, 
-                        child: Text(
-                          v, 
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12),
-                        )
-                      )).toList(),
-                      onChanged: (v) => setState(() => _selectedVehicleType = v!),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.md),
-
-              TextFormField(
-                controller: _notesController,
-                maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Remarks / Notes (Optional)',
-                  hintText: 'e.g. Carrying heavy package, verified ID card',
-                ),
+              // 6. Modular Vehicle Details
+              EntryVehicleSelector(
+                vehicleController: _vehicleController,
+                selectedVehicleType: _selectedVehicleType,
+                vehicleTypes: _vehicleTypes,
+                onVehicleTypeChanged: (v) =>
+                    setState(() => _selectedVehicleType = v),
               ),
               const SizedBox(height: AppSpacing.xl),
 
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton.icon(
-                  onPressed: _isSubmitting ? null : _submitEntry,
-                  icon: _isSubmitting
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Icon(Icons.send_rounded),
-                  label: Text(_isSubmitting ? 'Logging & Notifying...' : 'Submit Visitor Entry Request'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.secondary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-                  ),
-                ),
+              // 7. Reusable AppButton
+              AppButton(
+                text: _isSubmitting
+                    ? 'Logging & Notifying...'
+                    : 'Submit Visitor Entry Request',
+                onPressed: _submitEntry,
+                isLoading: _isSubmitting,
+                size: AppButtonSize.lg,
+                leadingIcon: Icons.send_rounded,
               ),
             ],
           ),

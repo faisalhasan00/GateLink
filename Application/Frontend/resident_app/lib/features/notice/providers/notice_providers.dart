@@ -11,7 +11,8 @@ final noticeRepositoryProvider = Provider<NoticeRepository>((ref) {
 
 final noticesStreamProvider = StreamProvider<List<NoticeModel>>((ref) {
   final profile = ref.watch(userProfileProvider).value;
-  final societyId = profile?.societyId ?? 'SOC-001';
+  final societyId = profile?.societyId ?? '';
+  if (societyId.isEmpty) return Stream.value([]);
 
   final repository = ref.watch(noticeRepositoryProvider);
   return repository.watchNotices(societyId);
@@ -20,9 +21,9 @@ final noticesStreamProvider = StreamProvider<List<NoticeModel>>((ref) {
 final noticeDetailStreamProvider =
     StreamProvider.family<NoticeModel?, String>((ref, noticeId) {
   final profile = ref.watch(userProfileProvider).value;
-  final societyId = profile?.societyId ?? 'SOC-001';
+  final societyId = profile?.societyId ?? '';
 
-  if (noticeId.isEmpty) return Stream.value(null);
+  if (noticeId.isEmpty || societyId.isEmpty) return Stream.value(null);
   final repository = ref.watch(noticeRepositoryProvider);
   return repository.watchNoticeDetail(societyId, noticeId);
 });

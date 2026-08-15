@@ -107,14 +107,14 @@ final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
     return null;
   }
 
-  // If profile document hasn't synced yet, provide fallback active guard profile
+  // If profile document hasn't synced yet, provide clean active guard profile
   profileData ??= {
     'uid': user.uid,
     'email': user.email ?? '',
     'name': user.displayName ?? 'Guard',
     'role': 'guard',
-    'societyId': 'SOC-001',
-    'societyName': 'My Home Bhooja',
+    'societyId': '',
+    'societyName': '',
     'status': 'active',
   };
 

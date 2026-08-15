@@ -20,9 +20,9 @@ final complaintControllerProvider =
 final myComplaintsStreamProvider = StreamProvider<List<ComplaintModel>>((ref) {
   final user = ref.watch(currentUserProvider);
   final profile = ref.watch(userProfileProvider).value;
-  final societyId = profile?.societyId ?? 'SOC-001';
+  final societyId = profile?.societyId ?? '';
 
-  if (user == null) return Stream.value([]);
+  if (user == null || societyId.isEmpty) return Stream.value([]);
   final repository = ref.watch(complaintRepositoryProvider);
   return repository.watchMyComplaints(societyId, user.uid);
 });
@@ -30,9 +30,9 @@ final myComplaintsStreamProvider = StreamProvider<List<ComplaintModel>>((ref) {
 final complaintDetailStreamProvider =
     StreamProvider.family<ComplaintModel?, String>((ref, complaintId) {
   final profile = ref.watch(userProfileProvider).value;
-  final societyId = profile?.societyId ?? 'SOC-001';
+  final societyId = profile?.societyId ?? '';
 
-  if (complaintId.isEmpty) return Stream.value(null);
+  if (complaintId.isEmpty || societyId.isEmpty) return Stream.value(null);
   final repository = ref.watch(complaintRepositoryProvider);
   return repository.watchComplaintDetail(societyId, complaintId);
 });

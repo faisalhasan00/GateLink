@@ -5,311 +5,194 @@ import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../providers/user_providers.dart';
+import '../widgets/profile_header_card.dart';
+import '../widgets/residency_details_card.dart';
+import '../widgets/profile_actions_menu.dart';
+import '../widgets/society_support_sheet.dart';
+import '../widgets/notification_preferences_dialog.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
 
+  void _showLogoutDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.logout_rounded, color: AppColors.error),
+            SizedBox(width: 8),
+            Text(
+              'Sign Out',
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+            ),
+          ],
+        ),
+        content: const Text(
+          'Are you sure you want to log out of your resident account?',
+          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel',
+                style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await ref.read(authServiceProvider).signOut();
+              if (context.mounted) {
+                context.go('/login');
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+            ),
+            child: const Text('Log Out'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(currentUserProvider);
     final profileAsync = ref.watch(userProfileProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('My Profile')),
-      body: profileAsync.when(
-        data: (profile) {
-          final name =
-              profile?.name.isNotEmpty == true ? profile!.name : 'Unknown User';
-          final phone =
-              profile?.phone.isNotEmpty == true ? profile!.phone : 'No Phone';
-          final role =
-              profile?.role.isNotEmpty == true ? profile!.role : 'Resident';
-          final flatNumber = profile?.flatNumber.isNotEmpty == true
-              ? profile!.flatNumber
-              : 'N/A';
-          final societyId = profile?.societyId ?? '';
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.pagePadding),
-            child: Column(
-              children: [
-                // Profile Card
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppRadius.xl),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Column(
-                    children: [
-                      const CircleAvatar(
-                        radius: 40,
-                        backgroundColor: AppColors.primarySurface,
-                        child: Icon(Icons.person_rounded,
-                            size: 48, color: AppColors.primary),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      Text(name,
-                          style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary)),
-                      const SizedBox(height: 4),
-                      Text(phone,
-                          style: const TextStyle(
-                              fontSize: 14, color: AppColors.textSecondary)),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: AppColors.primarySurface,
-                          borderRadius: BorderRadius.circular(AppRadius.full),
-                        ),
-                        child: Text('${role.toUpperCase()} • Flat $flatNumber',
-                            style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.primary)),
-                      ),
-                      if (societyId.isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Text('Society ID: $societyId',
-                            style: const TextStyle(
-                                fontSize: 12, color: AppColors.textSecondary)),
-                      ],
-                    ],
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-
-                // Options List
-                _OptionTile(
-                  icon: Icons.person_outline_rounded,
-                  title: 'Edit Profile',
-                  onTap: () => context.go(AppRoutes.editProfile),
-                ),
-                _OptionTile(
-                  icon: Icons.lock_outline_rounded,
-                  title: 'Change Password',
-                  onTap: () => context.go(AppRoutes.changePassword),
-                ),
-                _OptionTile(
-                  icon: Icons.family_restroom_rounded,
-                  title: 'Family & Vehicle Members',
-                  onTap: () => context.go(AppRoutes.parking),
-                ),
-                _OptionTile(
-                  icon: Icons.notifications_outlined,
-                  title: 'Notification Preferences',
-                  onTap: () {
-                    showDialog(
-                      context: context,
-                      builder: (ctx) =>
-                          _NotificationPreferencesDialog(ref: ref),
-                    );
-                  },
-                ),
-                _OptionTile(
-                  icon: Icons.help_outline_rounded,
-                  title: 'Help & Support',
-                  onTap: () {},
-                ),
-                _OptionTile(
-                  icon: Icons.logout_rounded,
-                  title: 'Log Out',
-                  titleColor: AppColors.error,
-                  iconColor: AppColors.error,
-                  onTap: () async {
-                    await ref.read(authServiceProvider).signOut();
-                    if (context.mounted) {
-                      context.go(AppRoutes.login);
-                    }
-                  },
-                ),
-              ],
-            ),
-          );
+      appBar: AppBar(
+        title: const Text('My Profile'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            tooltip: 'Edit Profile',
+            onPressed: () => context.push(AppRoutes.editProfile),
+          ),
+        ],
+      ),
+      body: RefreshIndicator(
+        color: AppColors.primary,
+        onRefresh: () async {
+          ref.invalidate(userProfileProvider);
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, st) => Center(child: Text('Error: $e')),
-      ),
-    );
-  }
-}
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(AppSpacing.pagePadding),
+          child: profileAsync.when(
+            data: (profile) {
+              final societyName =
+                  profile?.displaySocietyName ?? 'Housing Society';
 
-class _OptionTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
-  final Color? titleColor;
-  final Color? iconColor;
-
-  const _OptionTile({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-    this.titleColor,
-    this.iconColor,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(AppRadius.md),
-      child: ListTile(
-        onTap: onTap,
-        leading:
-            Icon(icon, color: iconColor ?? AppColors.textPrimary, size: 22),
-        title: Text(title,
-            style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: titleColor ?? AppColors.textPrimary)),
-        trailing: const Icon(Icons.arrow_forward_ios_rounded,
-            size: 14, color: AppColors.textSecondary),
-      ),
-    );
-  }
-}
-
-class _NotificationPreferencesDialog extends StatefulWidget {
-  final WidgetRef ref;
-  const _NotificationPreferencesDialog({required this.ref});
-
-  @override
-  State<_NotificationPreferencesDialog> createState() =>
-      _NotificationPreferencesDialogState();
-}
-
-class _NotificationPreferencesDialogState
-    extends State<_NotificationPreferencesDialog> {
-  bool _visitors = true;
-  bool _bills = true;
-  bool _complaints = true;
-  bool _amenities = true;
-  bool _notices = true;
-
-  @override
-  void initState() {
-    super.initState();
-    final profile = widget.ref.read(userProfileProvider).value;
-    final prefs = profile?.notificationPreferences ?? {};
-    _visitors = prefs['visitors'] ?? true;
-    _bills = prefs['bills'] ?? true;
-    _complaints = prefs['complaints'] ?? true;
-    _amenities = prefs['amenities'] ?? true;
-    _notices = prefs['notices'] ?? true;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final controllerState = widget.ref.watch(profileControllerProvider);
-
-    return AlertDialog(
-      title: const Text('Notification Preferences',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SwitchListTile(
-              title: const Text('Visitor Alerts',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              subtitle: const Text('Real-time gate arrival & approval alerts'),
-              value: _visitors,
-              onChanged: (v) => setState(() => _visitors = v),
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  ProfileHeaderCard(
+                    profile: profile,
+                    fallbackDisplayName: user?.displayName ?? 'Resident',
+                    fallbackEmail: user?.email ?? '',
+                    onAvatarTap: () => context.push(AppRoutes.editProfile),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  const Text(
+                    'RESIDENCY DETAILS',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textSecondary,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  ResidencyDetailsCard(
+                    profile: profile,
+                    fallbackPhone: user?.phoneNumber ?? '',
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  const Text(
+                    'ACCOUNT & SETTINGS',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textSecondary,
+                      letterSpacing: 0.8,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  ProfileActionsMenu(
+                    onEditProfile: () => context.push(AppRoutes.editProfile),
+                    onChangePassword: () =>
+                        context.push(AppRoutes.changePassword),
+                    onNotificationPreferences: () =>
+                        NotificationPreferencesDialog.show(context,
+                            profile: profile),
+                    onSocietySupport: () =>
+                        SocietySupportSheet.show(context,
+                            societyName: societyName),
+                    onTermsAndPrivacy: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                              'GateLink Security & Data Protection v2.4.0 (ISO/IEC 27001 Certified)'),
+                        ),
+                      );
+                    },
+                    onLogout: () => _showLogoutDialog(context, ref),
+                  ),
+                  const SizedBox(height: AppSpacing.xxl),
+                  const Center(
+                    child: Text(
+                      'GateLink Resident App • v2.4.0 (Production)',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: AppColors.gray400,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                ],
+              );
+            },
+            loading: () => const Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 60),
+                child: CircularProgressIndicator(color: AppColors.primary),
+              ),
             ),
-            SwitchListTile(
-              title: const Text('Billing & Maintenance',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              subtitle: const Text('Invoice generation & payment receipts'),
-              value: _bills,
-              onChanged: (v) => setState(() => _bills = v),
+            error: (e, _) => Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: Column(
+                  children: [
+                    const Icon(Icons.error_outline_rounded,
+                        color: AppColors.error, size: 40),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Unable to load profile data',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 8),
+                    ElevatedButton(
+                      onPressed: () => ref.invalidate(userProfileProvider),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            SwitchListTile(
-              title: const Text('Complaint Status',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              subtitle: const Text('Staff assignment & resolution updates'),
-              value: _complaints,
-              onChanged: (v) => setState(() => _complaints = v),
-            ),
-            SwitchListTile(
-              title: const Text('Amenity Bookings',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              subtitle: const Text('Slot confirmation & cancellation updates'),
-              value: _amenities,
-              onChanged: (v) => setState(() => _amenities = v),
-            ),
-            SwitchListTile(
-              title: const Text('Society Notices',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-              subtitle: const Text('Emergency announcements & circulars'),
-              value: _notices,
-              onChanged: (v) => setState(() => _notices = v),
-            ),
-          ],
+          ),
         ),
       ),
-      actions: [
-        TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel')),
-        ElevatedButton(
-          onPressed: controllerState.isLoading
-              ? null
-              : () async {
-                  final user = widget.ref.read(currentUserProvider);
-                  final profile = widget.ref.read(userProfileProvider).value;
-                  final activeSocId = profile?.societyId ?? 'SOC-001';
-
-                  if (user != null) {
-                    final success = await widget.ref
-                        .read(profileControllerProvider.notifier)
-                        .updateNotificationPreferences(
-                      societyId: activeSocId,
-                      uid: user.uid,
-                      preferences: {
-                        'visitors': _visitors,
-                        'bills': _bills,
-                        'complaints': _complaints,
-                        'amenities': _amenities,
-                        'notices': _notices,
-                      },
-                    );
-
-                    if (context.mounted) {
-                      if (success) {
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('Notification preferences saved!')),
-                        );
-                      } else {
-                        final errorMsg = widget.ref
-                                .read(profileControllerProvider)
-                                .errorMessage ??
-                            'Failed to save preferences.';
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(errorMsg),
-                              backgroundColor: AppColors.error),
-                        );
-                      }
-                    }
-                  }
-                },
-          child: controllerState.isLoading
-              ? const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2))
-              : const Text('Save Settings'),
-        ),
-      ],
     );
   }
 }

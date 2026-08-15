@@ -46,15 +46,15 @@ class AuthService {
           );
         }
       } else {
-        // Fallback: auto-create initial active resident profile so valid Auth user is never blocked
+        // Initialize user mapping document cleanly without mock strings
         final data = {
           'uid': uid,
           'email': cleanEmail,
           'name': cred.user!.displayName ?? 'Resident',
           'role': 'resident',
-          'societyId': 'SOC-001',
-          'societyName': 'My Home Bhooja',
-          'flatNumber': 'A-101',
+          'societyId': '',
+          'societyName': '',
+          'flatNumber': '',
           'status': 'active',
           'createdAt': DateTime.now().toIso8601String(),
         };
@@ -95,9 +95,9 @@ class AuthService {
           'Security Guards cannot self-register. Please ask your RWA Committee to provision your Gate Access Passcode.');
     }
 
-    // 2. Validate societyCode against real societies collection (or fallback if SOC-001)
-    var societyId = 'SOC-001';
-    var societyName = 'My Home Bhooja';
+    // 2. Validate societyCode against real societies collection
+    var societyId = '';
+    var societyName = '';
 
     try {
       final societyQuery = await _db
@@ -110,6 +110,13 @@ class AuthService {
         final societyDoc = societyQuery.docs.first;
         societyId = societyDoc.id;
         societyName = societyDoc.data()['name'] ?? 'Housing Society';
+      } else {
+        final directDoc =
+            await _db.collection('societies').doc(cleanCode).get();
+        if (directDoc.exists) {
+          societyId = directDoc.id;
+          societyName = directDoc.data()?['name'] ?? 'Housing Society';
+        }
       }
     } catch (_) {}
 

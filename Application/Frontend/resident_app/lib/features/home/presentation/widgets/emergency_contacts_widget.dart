@@ -1,44 +1,54 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
-class EmergencyContactsWidget extends StatelessWidget {
+class EmergencyContactsWidget extends ConsumerWidget {
   const EmergencyContactsWidget({super.key});
 
   void _callNumber(String phone) async {
-    final Uri uri = Uri.parse('tel:$phone');
+    final clean = phone.replaceAll(RegExp(r'\s+'), '');
+    final Uri uri = Uri.parse('tel:$clean');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
     }
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(userProfileProvider).value;
+    final societyName = profile?.displaySocietyName ?? 'Society Office';
+
     final contacts = [
       {
-        'name': 'Security Desk',
-        'phone': '+91 98201 11111',
-        'icon': Icons.security_rounded,
+        'name': 'National Emergency',
+        'subtitle': 'Police & Emergency Response',
+        'phone': '112',
+        'icon': Icons.shield_rounded,
         'color': AppColors.primary
       },
       {
-        'name': 'Society Office',
-        'phone': '+91 98201 22222',
-        'icon': Icons.business_rounded,
-        'color': AppColors.secondary
-      },
-      {
-        'name': 'Plumber & Electrician',
-        'phone': '+91 98201 33333',
-        'icon': Icons.build_rounded,
-        'color': AppColors.warning
-      },
-      {
-        'name': 'Emergency Ambulance',
+        'name': 'Ambulance & Medical',
+        'subtitle': 'National Medical Emergency',
         'phone': '108',
         'icon': Icons.local_hospital_rounded,
         'color': AppColors.error
+      },
+      {
+        'name': 'Fire Emergency',
+        'subtitle': 'Fire & Rescue Services',
+        'phone': '101',
+        'icon': Icons.local_fire_department_rounded,
+        'color': AppColors.warning
+      },
+      {
+        'name': 'Society Gate / Security',
+        'subtitle': societyName,
+        'phone': '112',
+        'icon': Icons.security_rounded,
+        'color': AppColors.secondary
       },
     ];
 
@@ -54,6 +64,7 @@ class EmergencyContactsWidget extends StatelessWidget {
           final icon = c['icon'] as IconData;
           final color = c['color'] as Color;
           final name = c['name'] as String;
+          final subtitle = c['subtitle'] as String;
           final phone = c['phone'] as String;
 
           return Padding(
@@ -61,24 +72,43 @@ class EmergencyContactsWidget extends StatelessWidget {
             child: Row(
               children: [
                 CircleAvatar(
-                  radius: 16,
-                  backgroundColor: color.withOpacity(0.1),
-                  child: Icon(icon, size: 16, color: color),
+                  radius: 18,
+                  backgroundColor: color.withValues(alpha: 0.1),
+                  child: Icon(icon, size: 18, color: color),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
-                  child: Text(name,
-                      style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.textPrimary)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(name,
+                          style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary)),
+                      Text(subtitle,
+                          style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textSecondary)),
+                    ],
+                  ),
                 ),
-                IconButton(
+                ElevatedButton.icon(
                   onPressed: () => _callNumber(phone),
-                  icon: const Icon(Icons.phone_in_talk_rounded,
-                      color: AppColors.success, size: 20),
-                  constraints: const BoxConstraints(),
-                  padding: EdgeInsets.zero,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: color.withValues(alpha: 0.1),
+                    foregroundColor: color,
+                    elevation: 0,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    minimumSize: const Size(64, 32),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.full)),
+                  ),
+                  icon: const Icon(Icons.phone_rounded, size: 14),
+                  label: Text(phone,
+                      style: const TextStyle(
+                          fontSize: 12, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),

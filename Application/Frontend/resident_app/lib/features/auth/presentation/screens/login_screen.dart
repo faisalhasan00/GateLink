@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/widgets.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -18,21 +19,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
-  bool _obscurePassword = true;
-  bool _isRegisterMode = false;
-
-  // Register fields
-  final _nameController = TextEditingController();
-  final _flatController = TextEditingController();
-  final _societyCodeController = TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _nameController.dispose();
-    _flatController.dispose();
-    _societyCodeController.dispose();
     super.dispose();
   }
 
@@ -48,46 +39,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = true);
     try {
       await ref.read(authServiceProvider).signInWithEmail(
-            _emailController.text,
+            _emailController.text.trim(),
             _passwordController.text,
           );
       if (mounted) context.go('/home');
     } on FirebaseAuthException catch (e) {
       _showError(e.message ?? 'Login failed. Please try again.');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _handleRegister() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-    try {
-      await ref.read(authServiceProvider).registerWithEmail(
-            email: _emailController.text,
-            password: _passwordController.text,
-            name: _nameController.text,
-            flatNumber: _flatController.text,
-            societyCode: _societyCodeController.text,
-            role: 'resident',
-          );
-      if (mounted) context.go('/pending-approval');
-    } on FirebaseAuthException catch (e) {
-      _showError(e.message ?? 'Registration failed. Please try again.');
-    } catch (e) {
-      _showError(e.toString().replaceAll('Exception: ', ''));
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _handleGoogleSignIn() async {
-    setState(() => _isLoading = true);
-    try {
-      final result = await ref.read(authServiceProvider).signInWithGoogle();
-      if (result != null && mounted) context.go('/home');
-    } catch (e) {
-      _showError('Google Sign-In failed. Please try again.');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -117,70 +74,59 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       color: AppColors.primary, size: 30),
                 ),
                 const SizedBox(height: AppSpacing.xl),
-                Text(
-                  _isRegisterMode ? 'Create Account' : 'Welcome Back',
-                  style: const TextStyle(
+                const Text(
+                  'Welcome Back',
+                  style: TextStyle(
                       fontSize: 28,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary),
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                Text(
-                  _isRegisterMode
-                      ? 'Register your account to get started'
-                      : 'Sign in to your GateLink account',
-                  style: const TextStyle(
+                const Text(
+                  'Sign in to your GateLink account',
+                  style: TextStyle(
                       fontSize: 15, color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: AppSpacing.xxl),
 
-                // Register-only fields
-                if (_isRegisterMode) ...[
-                  _buildField('Full Name', _nameController,
-                      hint: 'e.g. Arjun Kumar'),
-                  const SizedBox(height: AppSpacing.md),
-                  _buildField('Flat Number', _flatController,
-                      hint: 'e.g. A-101'),
-                  const SizedBox(height: AppSpacing.md),
-                  _buildField('Society Access Code', _societyCodeController,
-                      hint: 'e.g. GW-8492'),
-                  const SizedBox(height: AppSpacing.md),
-                ],
-
-                _buildField('Email Address', _emailController,
-                    hint: 'you@example.com',
-                    keyboardType: TextInputType.emailAddress),
+                // Reusable AppTextField for Email
+                AppTextField(
+                  label: 'Email Address',
+                  isRequired: true,
+                  controller: _emailController,
+                  hintText: 'you@example.com',
+                  keyboardType: TextInputType.emailAddress,
+                  prefixIcon: Icons.email_outlined,
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'Email is required';
+                    if (!v.contains('@')) return 'Enter a valid email address';
+                    return null;
+                  },
+                ),
                 const SizedBox(height: AppSpacing.md),
-                _buildPasswordField(),
+
+                // Reusable AppTextField for Password
+                AppTextField(
+                  label: 'Password',
+                  isRequired: true,
+                  controller: _passwordController,
+                  isPassword: true,
+                  hintText: 'Enter your password',
+                  prefixIcon: Icons.lock_outline_rounded,
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Password is required';
+                    if (v.length < 6) return 'Password must be at least 6 characters';
+                    return null;
+                  },
+                ),
                 const SizedBox(height: AppSpacing.xl),
 
-                // Main Action Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 52,
-                  child: ElevatedButton(
-                    onPressed: _isLoading
-                        ? null
-                        : (_isRegisterMode
-                            ? _handleRegister
-                            : _handleEmailLogin),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(AppRadius.lg)),
-                    ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                                strokeWidth: 2, color: Colors.white))
-                        : Text(_isRegisterMode ? 'Create Account' : 'Sign In',
-                            style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white)),
-                  ),
+                // Reusable AppButton for Sign In
+                AppButton(
+                  text: 'Sign In',
+                  onPressed: _handleEmailLogin,
+                  isLoading: _isLoading,
+                  size: AppButtonSize.lg,
                 ),
 
                 const SizedBox(height: AppSpacing.xl),
@@ -201,60 +147,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildField(String label, TextEditingController controller,
-      {String? hint, TextInputType? keyboardType}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label,
-            style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary)),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          decoration: InputDecoration(hintText: hint),
-          validator: (v) =>
-              (v == null || v.isEmpty) ? '$label is required' : null,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPasswordField() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Password',
-            style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary)),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: _passwordController,
-          obscureText: _obscurePassword,
-          decoration: InputDecoration(
-            hintText: 'Enter your password',
-            suffixIcon: IconButton(
-              icon: Icon(
-                  _obscurePassword ? Icons.visibility_off : Icons.visibility),
-              onPressed: () =>
-                  setState(() => _obscurePassword = !_obscurePassword),
-            ),
-          ),
-          validator: (v) {
-            if (v == null || v.isEmpty) return 'Password is required';
-            if (v.length < 6) return 'Password must be at least 6 characters';
-            return null;
-          },
-        ),
-      ],
     );
   }
 }

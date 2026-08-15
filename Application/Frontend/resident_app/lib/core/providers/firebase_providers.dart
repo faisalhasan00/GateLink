@@ -23,8 +23,7 @@ export '../../features/payment/providers/payment_providers.dart';
 
 final firestoreServiceProvider = Provider<FirestoreService>((ref) {
   final profile = ref.watch(userProfileProvider).value;
-  final societyId =
-      profile?.societyId.isNotEmpty == true ? profile!.societyId : 'SOC-001';
+  final societyId = profile?.societyId ?? '';
   return FirestoreService(societyId: societyId);
 });
 
@@ -94,7 +93,8 @@ final adRepositoryProvider = Provider<AdRepository>((ref) {
 /// A real-time stream provider for active ad campaigns.
 final adCampaignsStreamProvider = StreamProvider<List<AdModel>>((ref) {
   final profile = ref.watch(userProfileProvider).value;
-  final societyId = profile?.societyId ?? 'SOC-001';
+  final societyId = profile?.societyId ?? '';
+  if (societyId.isEmpty) return Stream.value([]);
   final repository = ref.watch(adRepositoryProvider);
   return repository.watchAdCampaigns(societyId);
 });

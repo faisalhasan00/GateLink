@@ -36,9 +36,9 @@ class DashboardAppBar extends ConsumerWidget {
             : (user?.displayName ??
                 (user?.email?.split('@').first ?? 'Resident')));
 
-    final String societyName = profile?.societyName.isNotEmpty == true
-        ? profile!.societyName
-        : 'SocietySphere Residency';
+    final String societyName = profile?.displaySocietyName ?? '';
+    final String initials = profile?.initials ??
+        (residentName.isNotEmpty ? residentName[0].toUpperCase() : 'R');
 
     final String greeting = _getTimeBasedGreeting();
 
@@ -54,13 +54,19 @@ class DashboardAppBar extends ConsumerWidget {
           CircleAvatar(
             radius: 20,
             backgroundColor: AppColors.primarySurface,
-            child: Text(
-              residentName.isNotEmpty ? residentName[0].toUpperCase() : 'R',
-              style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.primary,
-                  fontSize: 16),
-            ),
+            backgroundImage: profile?.photoUrl != null &&
+                    profile!.photoUrl!.isNotEmpty
+                ? NetworkImage(profile.photoUrl!)
+                : null,
+            child: profile?.photoUrl == null || profile!.photoUrl!.isEmpty
+                ? Text(
+                    initials,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.primary,
+                        fontSize: 14),
+                  )
+                : null,
           ),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
@@ -83,15 +89,16 @@ class DashboardAppBar extends ConsumerWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                Text(
-                  societyName,
-                  style: const TextStyle(
-                      fontSize: 11,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.w600),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                if (societyName.isNotEmpty)
+                  Text(
+                    societyName,
+                    style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
               ],
             ),
           ),

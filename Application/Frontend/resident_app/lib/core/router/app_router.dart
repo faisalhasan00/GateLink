@@ -155,6 +155,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         redirect: (context, state) => AppRoutes.profile,
       ),
       GoRoute(
+        path: '/profile/edit',
+        redirect: (context, state) => AppRoutes.editProfile,
+      ),
+      GoRoute(
+        path: '/profile/change-password',
+        redirect: (context, state) => AppRoutes.changePassword,
+      ),
+      GoRoute(
         path: '/history',
         redirect: (context, state) => AppRoutes.dashboard,
       ),

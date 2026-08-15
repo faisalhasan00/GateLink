@@ -35,19 +35,19 @@ final userProfileProvider = FutureProvider<UserProfileModel?>((ref) async {
     return null;
   }
 
-  // If profile document hasn't synced yet, provide fallback active resident profile
+  // If profile document hasn't synced yet, provide fallback from Firebase Auth session
   profile ??= UserProfileModel(
     uid: user.uid,
-    name: user.displayName ?? 'Resident',
-    displayName: user.displayName ?? 'Resident',
+    name: user.displayName ?? (user.email?.split('@').first ?? 'Resident'),
+    displayName: user.displayName ?? (user.email?.split('@').first ?? 'Resident'),
     email: user.email ?? '',
-    phone: '',
+    phone: user.phoneNumber ?? '',
     role: 'resident',
-    flatNumber: 'A-101',
-    tower: 'A',
-    gateName: 'Main Gate',
-    societyId: 'SOC-001',
-    societyName: 'My Home Bhooja',
+    flatNumber: '',
+    tower: '',
+    gateName: '',
+    societyId: '',
+    societyName: '',
     status: 'active',
   );
 

@@ -1,19 +1,67 @@
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/repositories/user_repository.dart';
+import '../../../../core/services/storage_service.dart';
 import 'profile_state.dart';
 
 class ProfileController extends StateNotifier<ProfileState> {
   final UserRepository _repository;
   final FirebaseAuth? _customFirebaseAuth;
+  final StorageService? _customStorageService;
 
-  ProfileController(this._repository, [this._customFirebaseAuth])
-      : super(ProfileState.initial());
+  ProfileController(
+    this._repository, [
+    this._customFirebaseAuth,
+    this._customStorageService,
+  ]) : super(ProfileState.initial());
 
   FirebaseAuth get _auth => _customFirebaseAuth ?? FirebaseAuth.instance;
+  StorageService get _storageService => _customStorageService ?? StorageService();
 
   void resetState() {
     state = ProfileState.initial();
+  }
+
+  Future<String?> uploadProfilePhoto({
+    required String uid,
+    required String societyId,
+    required File imageFile,
+  }) async {
+    if (state.isLoading) return null;
+
+    state = state.copyWith(status: ProfileActionStatus.loading);
+
+    try {
+      final photoUrl = await _storageService.uploadProfilePhoto(imageFile, uid);
+      
+      await _repository.updateProfilePhoto(
+        uid: uid,
+        societyId: societyId,
+        photoUrl: photoUrl,
+      );
+
+      try {
+        await _repository.logUserActivity(
+          societyId: societyId,
+          uid: uid,
+          action: 'Profile Photo Updated',
+          description: 'Resident uploaded and updated their profile photo.',
+        );
+      } catch (_) {}
+
+      state = state.copyWith(
+        status: ProfileActionStatus.success,
+        successMessage: 'Profile photo updated successfully!',
+      );
+      return photoUrl;
+    } catch (e) {
+      state = state.copyWith(
+        status: ProfileActionStatus.error,
+        errorMessage: 'Failed to upload profile photo: ${e.toString().replaceAll('Exception: ', '')}',
+      );
+      return null;
+    }
   }
 
   Future<bool> updateProfile({
@@ -133,17 +181,14 @@ class ProfileController extends StateNotifier<ProfileState> {
     state = state.copyWith(status: ProfileActionStatus.loading);
 
     try {
-      // 1. Re-authenticate user with current password
       final cred = EmailAuthProvider.credential(
         email: user.email!,
         password: currentPassword,
       );
       await user.reauthenticateWithCredential(cred);
 
-      // 2. Update to new password
       await user.updatePassword(newPassword);
 
-      // 3. Log security activity via UserRepository
       await _repository.logUserActivity(
         societyId: societyId,
         uid: user.uid,

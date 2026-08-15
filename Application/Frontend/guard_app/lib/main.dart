@@ -30,14 +30,19 @@ Future<void> saveFcmToken() async {
         .doc(user.uid)
         .get();
     final societyId =
-        (userDoc.data()?['societyId'] as String?)?.isNotEmpty == true
-            ? userDoc.data()!['societyId'] as String
-            : 'SOC-001';
+        (userDoc.data()?['societyId'] as String?)?.trim() ?? '';
+    if (societyId.isNotEmpty) {
+      await FirebaseFirestore.instance
+          .collection('societies/$societyId/users')
+          .doc(user.uid)
+          .set({'fcmToken': token}, SetOptions(merge: true));
+      debugPrint('FCM token saved for society $societyId');
+    }
+    // Also save directly to user mapping doc
     await FirebaseFirestore.instance
-        .collection('societies/$societyId/users')
+        .collection('users')
         .doc(user.uid)
         .set({'fcmToken': token}, SetOptions(merge: true));
-    debugPrint('FCM token saved for society $societyId');
   } catch (e) {
     debugPrint('Error saving FCM token: $e');
   }

@@ -76,9 +76,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
         throw Exception('Not logged in');
       }
 
-      final tower = profile?['tower'] ?? '';
-      final flatNumber = profile?['flatNumber'] ?? 'Unknown';
-      final fullHostFlat = tower.isNotEmpty ? '$tower-$flatNumber' : flatNumber;
+      final fullHostFlat = profile?.displayFlatNumber ?? 'Unknown';
 
       final inviteResult = await controller.inviteVisitor(
         name: _nameController.text.trim(),
@@ -204,10 +202,8 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
             ElevatedButton.icon(
               onPressed: () {
                 final profile = ref.read(userProfileProvider).value;
-                final tower = profile?['tower'] ?? '';
-                final flat = profile?['flatNumber'] ?? '';
-                final societyId = profile?['societyId'] ?? 'SOC-001';
-                final hostFlat = tower.isNotEmpty ? '$tower-$flat' : flat;
+                final hostFlat = profile?.displayFlatNumber ?? '';
+                final societyId = profile?.societyId ?? '';
                 QrShareService.shareQrPass(
                   qrKey: qrKey,
                   visitorName: _nameController.text.trim(),

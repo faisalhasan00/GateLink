@@ -46,6 +46,15 @@ class MockUserRepository implements UserRepository {
   }
 
   @override
+  Future<void> updateProfilePhoto({
+    required String uid,
+    required String societyId,
+    required String photoUrl,
+  }) async {
+    if (shouldFail) throw Exception('Failed to update photo');
+  }
+
+  @override
   Future<void> updateNotificationPreferences({
     required String societyId,
     required String uid,

@@ -13,9 +13,9 @@ final parkingSlotsStreamProvider =
     StreamProvider<List<ParkingSlotModel>>((ref) {
   final user = ref.watch(currentUserProvider);
   final profile = ref.watch(userProfileProvider).value;
-  final societyId = profile?.societyId ?? 'SOC-001';
+  final societyId = profile?.societyId ?? '';
 
-  if (user == null) return Stream.value([]);
+  if (user == null || societyId.isEmpty) return Stream.value([]);
   final repository = ref.watch(parkingRepositoryProvider);
   return repository.watchParkingSlots(societyId, user.uid);
 });

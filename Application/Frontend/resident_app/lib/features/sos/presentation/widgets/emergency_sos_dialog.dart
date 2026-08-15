@@ -49,10 +49,18 @@ class _EmergencySosDialogState extends ConsumerState<EmergencySosDialog> {
     try {
       final user = ref.read(currentUserProvider);
       final profile = ref.read(userProfileProvider).value;
-      final societyId = profile?['societyId'] ?? 'SOC-001';
-      final residentName = profile?['name'] ?? user?.displayName ?? 'Resident';
-      final flatNumber = profile?['flatNumber'] ?? 'A-402';
-      final phone = profile?['phone'] ?? '+91 98765 43210';
+      final societyId = profile?.societyId ?? '';
+      final residentName = profile?.name.isNotEmpty == true
+          ? profile!.name
+          : (user?.displayName ?? 'Resident');
+      final flatNumber = profile?.displayFlatNumber ?? 'Unknown';
+      final phone = profile?.phone.isNotEmpty == true
+          ? profile!.phone
+          : (user?.phoneNumber ?? '');
+
+      if (societyId.isEmpty) {
+        throw Exception('No active society profile found. Please contact support.');
+      }
 
       final success =
           await ref.read(alertControllerProvider.notifier).broadcastSosAlert(

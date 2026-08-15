@@ -147,19 +147,14 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
   @override
   Widget build(BuildContext context) {
     final profile = ref.watch(userProfileProvider).value;
-    final resName =
-        profile?.name.isNotEmpty == true ? profile!.name : 'Resident';
-    final flatNum =
-        profile?.flatNumber.isNotEmpty == true ? profile!.flatNumber : 'A-101';
-    final block =
-        profile?.tower.isNotEmpty == true ? profile!.tower : 'Tower A';
-    const floor = '1st Floor';
+    final resName = profile?.name.isNotEmpty == true
+        ? profile!.name
+        : 'Resident';
+    final flatNum = profile?.displayFlatNumber ?? '';
+    final block = profile?.tower ?? '';
 
     if (_blockController.text.isEmpty && block.isNotEmpty) {
       _blockController.text = block;
-    }
-    if (_floorController.text.isEmpty && floor.isNotEmpty) {
-      _floorController.text = floor;
     }
 
     final controllerState = ref.watch(complaintControllerProvider);
@@ -201,11 +196,14 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
                           Text(resName,
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 15)),
-                          const SizedBox(height: 2),
-                          Text('Flat: $flatNum • $block, $floor',
-                              style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary)),
+                          Text(
+                            block.isNotEmpty
+                                ? '$block • Flat $flatNum'
+                                : 'Flat $flatNum',
+                            style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.textSecondary),
+                          ),
                         ],
                       ),
                     ),

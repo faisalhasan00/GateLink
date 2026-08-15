@@ -6,6 +6,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../providers/profile_providers.dart';
+import '../widgets/guard_profile_form.dart';
+import '../widgets/guard_residency_info.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -28,7 +30,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     final profile = ref.read(userProfileProvider).value;
     _nameController = TextEditingController(text: profile?['name'] ?? '');
     _emailController = TextEditingController(text: profile?['email'] ?? '');
-    _dobController = TextEditingController(text: profile?['dob'] ?? '12 Oct 1992');
+    _dobController =
+        TextEditingController(text: profile?['dob'] ?? '12 Oct 1992');
     _selectedGender = profile?['gender'] ?? 'Male';
   }
 
@@ -65,7 +68,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
         await userRepo.logAuditAction(societyId, {
           'action': 'Profile Updated',
-          'description': 'Updated name, email, gender, and date of birth details.',
+          'description':
+              'Updated name, email, gender, and date of birth details.',
           'timestamp': DateTime.now().toIso8601String(),
         });
 
@@ -114,115 +118,22 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                decoration: BoxDecoration(
-                  color: AppColors.primarySurface,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.info_outline_rounded, color: AppColors.primary, size: 20),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        'Mobile number, society, and flat assignment are read-only and verified by society administration.',
-                        style: TextStyle(fontSize: 12, color: AppColors.primary, height: 1.3),
-                      ),
-                    ),
-                  ],
-                ),
+              // Modular Form Fields (Name, Email, Gender, DOB)
+              GuardProfileForm(
+                nameController: _nameController,
+                emailController: _emailController,
+                dobController: _dobController,
+                selectedGender: _selectedGender,
+                onGenderChanged: (g) => setState(() => _selectedGender = g),
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              const Text('Full Name *', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  hintText: 'Enter full name',
-                  prefixIcon: const Icon(Icons.person_outline_rounded),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                ),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Full name is required' : null,
+              // Modular Read-Only Residency Info
+              GuardResidencyInfo(
+                phone: phone,
+                societyName: societyName,
+                flatNumber: flatNumber,
               ),
-              const SizedBox(height: AppSpacing.md),
-
-              const Text('Email Address *', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  hintText: 'Enter email address',
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                ),
-                validator: (v) {
-                  if (v == null || v.trim().isEmpty) return 'Email is required';
-                  if (!v.contains('@')) return 'Enter a valid email address';
-                  return null;
-                },
-              ),
-              const SizedBox(height: AppSpacing.md),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Gender', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 6),
-                        DropdownButtonFormField<String>(
-                          value: _selectedGender,
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-                          ),
-                          items: ['Male', 'Female', 'Other']
-                              .map((g) => DropdownMenuItem(value: g, child: Text(g)))
-                              .toList(),
-                          onChanged: (v) => setState(() => _selectedGender = v ?? 'Male'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Date of Birth', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 6),
-                        TextFormField(
-                          controller: _dobController,
-                          decoration: InputDecoration(
-                            hintText: 'DD MMM YYYY',
-                            prefixIcon: const Icon(Icons.calendar_today_rounded, size: 18),
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.lg),
-
-              const Divider(),
-              const SizedBox(height: AppSpacing.md),
-
-              const Text('READ-ONLY SYSTEM DETAILS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: AppColors.textSecondary)),
-              const SizedBox(height: AppSpacing.md),
-
-              _ReadOnlyField(label: 'Registered Mobile Number', value: phone, icon: Icons.phone_android_rounded),
-              const SizedBox(height: AppSpacing.sm),
-              _ReadOnlyField(label: 'Assigned Society', value: societyName, icon: Icons.location_city_rounded),
-              const SizedBox(height: AppSpacing.sm),
-              _ReadOnlyField(label: 'Assigned Flat', value: 'Flat $flatNumber', icon: Icons.home_work_rounded),
-
               const SizedBox(height: AppSpacing.xl),
 
               SizedBox(
@@ -232,51 +143,32 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   onPressed: _saving ? null : _handleSave,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                    ),
                   ),
                   child: _saving
-                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5))
-                      : const Text('Save Profile Changes', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                      ? const SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2.5,
+                          ),
+                        )
+                      : const Text(
+                          'Save Profile Changes',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _ReadOnlyField extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-
-  const _ReadOnlyField({required this.label, required this.value, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.border.withValues(alpha: 0.3),
-        borderRadius: BorderRadius.circular(AppRadius.md),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: AppColors.textSecondary),
-          const SizedBox(width: 12),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-              Text(value, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-            ],
-          ),
-          const Spacer(),
-          const Icon(Icons.lock_rounded, size: 16, color: AppColors.textSecondary),
-        ],
       ),
     );
   }

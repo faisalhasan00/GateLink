@@ -59,12 +59,11 @@ class _RegisterHelperScreenState extends ConsumerState<RegisterHelperScreen> {
 
     final user = ref.read(currentUserProvider);
     final profile = ref.read(userProfileProvider).value;
-    final societyId = profile?.societyId ?? 'SOC-001';
+    final societyId = profile?.societyId ?? '';
     final residentName = profile?.name.isNotEmpty == true
         ? profile!.name
         : (user?.displayName ?? 'Resident');
-    final flatNumber =
-        profile?.flatNumber.isNotEmpty == true ? profile!.flatNumber : 'A-402';
+    final flatNumber = profile?.displayFlatNumber ?? '';
 
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(

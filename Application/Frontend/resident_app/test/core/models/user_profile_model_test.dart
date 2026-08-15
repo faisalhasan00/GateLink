@@ -3,7 +3,7 @@ import 'package:societysphere/core/models/user_profile_model.dart';
 
 void main() {
   group('UserProfileModel Unit Tests', () {
-    test('fromMap parses map correctly into typed model', () {
+    test('fromMap parses map correctly into typed model and computes dynamic getters', () {
       final map = {
         'uid': 'user-123',
         'name': 'Jane Doe',
@@ -11,10 +11,13 @@ void main() {
         'email': 'jane@example.com',
         'societyId': 'SOC-777',
         'societyName': 'Green Acres Residency',
-        'tower': 'Block B',
-        'flatNumber': 'B-304',
+        'societyCode': 'SOC-GA',
+        'buildingBlock': 'Tower B',
+        'unitNumber': '304',
+        'flat': 'B-304',
         'gateName': 'Gate 2',
         'role': 'resident',
+        'ownershipType': 'Owner',
         'status': 'active',
       };
 
@@ -26,22 +29,33 @@ void main() {
       expect(profile.email, 'jane@example.com');
       expect(profile.societyId, 'SOC-777');
       expect(profile.societyName, 'Green Acres Residency');
-      expect(profile.tower, 'Block B');
+      expect(profile.societyCode, 'SOC-GA');
+      expect(profile.tower, 'Tower B');
       expect(profile.flatNumber, 'B-304');
       expect(profile.gateName, 'Gate 2');
       expect(profile.role, 'resident');
       expect(profile.status, 'active');
       expect(profile['societyId'], 'SOC-777');
+
+      // Helper Getters
+      expect(profile.initials, 'JD');
+      expect(profile.displaySocietyName, 'Green Acres Residency');
+      expect(profile.displayFlatNumber, 'B-304');
+      expect(profile.displayRoleTitle, 'Owner');
     });
 
-    test('fromMap uses defaults when fields are missing', () {
+    test('fromMap handles empty map cleanly without crashing or dummy fallback data', () {
       final profile = UserProfileModel.fromMap({});
 
       expect(profile.name, 'Resident');
-      expect(profile.societyId, 'SOC-001');
-      expect(profile.societyName, 'SocietySphere Residency');
-      expect(profile.tower, 'Tower A');
-      expect(profile.flatNumber, 'Unknown');
+      expect(profile.societyId, '');
+      expect(profile.societyName, '');
+      expect(profile.tower, '');
+      expect(profile.flatNumber, '');
+      expect(profile.initials, 'R');
+      expect(profile.displaySocietyName, 'Housing Society');
+      expect(profile.displayFlatNumber, 'Not Assigned');
+      expect(profile.displayRoleTitle, 'Resident');
     });
   });
 }

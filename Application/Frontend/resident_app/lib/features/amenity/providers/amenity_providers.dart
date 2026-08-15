@@ -15,7 +15,8 @@ final amenityRepositoryProvider = Provider<AmenityRepository>((ref) {
 final amenitiesStreamProvider = StreamProvider<List<AmenityModel>>((ref) {
   final repository = ref.watch(amenityRepositoryProvider);
   final profile = ref.watch(userProfileProvider).value;
-  final societyId = profile?.societyId ?? 'SOC-001';
+  final societyId = profile?.societyId ?? '';
+  if (societyId.isEmpty) return Stream.value([]);
   return repository.watchAmenities(societyId);
 });
 
@@ -24,9 +25,9 @@ final myBookingsStreamProvider =
   final repository = ref.watch(amenityRepositoryProvider);
   final user = ref.watch(currentUserProvider);
   final profile = ref.watch(userProfileProvider).value;
-  final societyId = profile?.societyId ?? 'SOC-001';
+  final societyId = profile?.societyId ?? '';
 
-  if (user == null) return const Stream.empty();
+  if (user == null || societyId.isEmpty) return const Stream.empty();
   return repository.watchMyBookings(societyId, user.uid);
 });
 

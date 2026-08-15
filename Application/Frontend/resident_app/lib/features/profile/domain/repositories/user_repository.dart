@@ -11,6 +11,11 @@ abstract class UserRepository {
     required String gender,
     required String dob,
   });
+  Future<void> updateProfilePhoto({
+    required String uid,
+    required String societyId,
+    required String photoUrl,
+  });
   Future<void> updateNotificationPreferences({
     required String societyId,
     required String uid,

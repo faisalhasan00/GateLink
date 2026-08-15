@@ -10,16 +10,12 @@ class SocietyInfoCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(userProfileProvider).value;
-    final societyId =
-        profile?.societyId.isNotEmpty == true ? profile!.societyId : 'SOC-001';
-    final societyName = profile?.societyName.isNotEmpty == true
-        ? profile!.societyName
-        : 'SocietySphere Residency';
-    final tower =
-        profile?.tower.isNotEmpty == true ? profile!.tower : 'Tower A';
-    final flat = profile?.flatNumber.isNotEmpty == true
-        ? profile!.flatNumber
-        : 'Unknown';
+    final societyName = profile?.displaySocietyName ?? 'Housing Society';
+    final societyCode = profile?.societyCode ?? '';
+    final societyId = profile?.societyId ?? '';
+    final tower = profile?.tower ?? '';
+    final flat = profile?.displayFlatNumber ?? 'Not Assigned';
+    final roleTitle = profile?.displayRoleTitle ?? 'Resident';
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -43,13 +39,21 @@ class SocietyInfoCard extends ConsumerWidget {
               icon: Icons.apartment_rounded,
               label: 'Society',
               value: societyName),
-          _InfoRow(
-              icon: Icons.tag_rounded, label: 'Society ID', value: societyId),
-          _InfoRow(icon: Icons.layers_rounded, label: 'Tower', value: tower),
+          if (societyCode.isNotEmpty || societyId.isNotEmpty)
+            _InfoRow(
+                icon: Icons.tag_rounded,
+                label: 'Society Code',
+                value: societyCode.isNotEmpty ? societyCode : societyId),
+          if (tower.isNotEmpty)
+            _InfoRow(icon: Icons.layers_rounded, label: 'Tower / Block', value: tower),
           _InfoRow(
               icon: Icons.door_front_door_rounded,
-              label: 'Flat Number',
-              value: flat),
+              label: 'Flat Allotment',
+              value: 'Flat $flat'),
+          _InfoRow(
+              icon: Icons.badge_outlined,
+              label: 'Resident Type',
+              value: roleTitle),
           const _InfoRow(
               icon: Icons.verified_user_rounded,
               label: 'Account Status',

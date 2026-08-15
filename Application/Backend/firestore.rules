@@ -66,6 +66,10 @@ service cloud.firestore {
         match /notifications/{notifId} {
           allow read, write: if isAuthenticated() && (request.auth.uid == userId || isSocietyAdmin(societyId) || isSuperAdmin());
         }
+
+        match /activity_logs/{logId} {
+          allow read, write: if isAuthenticated() && (request.auth.uid == userId || isSocietyAdmin(societyId) || isSuperAdmin());
+        }
       }
 
       // Visitors Sub-collection (SEC-002: Role + Flat Ownership Enforcement)
