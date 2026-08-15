@@ -267,7 +267,7 @@ class _FeaturePreviewCard extends StatelessWidget {
                           horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: badgeColor.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(AppRadius.xs),
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
                       ),
                       child: Text(
                         badge,
