@@ -6,6 +6,7 @@ import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/widgets.dart';
 
 class DashboardAppBar extends ConsumerWidget {
   const DashboardAppBar({super.key});
@@ -38,9 +39,6 @@ class DashboardAppBar extends ConsumerWidget {
 
     final String societyName = profile?.displaySocietyName ?? '';
     final String flatNumber = profile?.displayFlatNumber ?? '';
-    final String initials = profile?.initials ??
-        (residentName.isNotEmpty ? residentName[0].toUpperCase() : 'R');
-
     final String greeting = _getTimeBasedGreeting();
 
     return SliverAppBar(
@@ -52,43 +50,14 @@ class DashboardAppBar extends ConsumerWidget {
       titleSpacing: AppSpacing.pagePadding,
       title: Row(
         children: [
-          // Resident Avatar
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: AppColors.primarySurface,
-              shape: BoxShape.circle,
-              border: Border.all(color: AppColors.border, width: 1.5),
-            ),
-            child: ClipOval(
-              child: profile?.photoUrl != null &&
-                      profile!.photoUrl!.isNotEmpty
-                  ? Image.network(
-                      profile.photoUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Center(
-                        child: Text(
-                          initials,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.primary,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                    )
-                  : Center(
-                      child: Text(
-                        initials,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-            ),
+          // Resident Avatar using AppAvatar (supporting Base64 & Network URLs)
+          AppAvatar(
+            imageUrl: profile?.photoUrl,
+            name: residentName,
+            size: AppAvatarSize.sm,
+            showBorder: true,
+            borderColor: const Color(0xFFE2E8F0),
+            onTap: () => context.go(AppRoutes.profile),
           ),
           const SizedBox(width: 12),
 
