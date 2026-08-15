@@ -13,13 +13,13 @@ class DashboardAppBar extends ConsumerWidget {
   String _getTimeBasedGreeting() {
     final hour = DateTime.now().hour;
     if (hour >= 5 && hour < 12) {
-      return '🌅 Good Morning';
+      return 'Good Morning';
     } else if (hour >= 12 && hour < 17) {
-      return '☀️ Good Afternoon';
+      return 'Good Afternoon';
     } else if (hour >= 17 && hour < 21) {
-      return '🌆 Good Evening';
+      return 'Good Evening';
     } else {
-      return '🌙 Good Night';
+      return 'Good Night';
     }
   }
 
@@ -37,6 +37,7 @@ class DashboardAppBar extends ConsumerWidget {
                 (user?.email?.split('@').first ?? 'Resident')));
 
     final String societyName = profile?.displaySocietyName ?? '';
+    final String flatNumber = profile?.displayFlatNumber ?? '';
     final String initials = profile?.initials ??
         (residentName.isNotEmpty ? residentName[0].toUpperCase() : 'R');
 
@@ -51,54 +52,101 @@ class DashboardAppBar extends ConsumerWidget {
       titleSpacing: AppSpacing.pagePadding,
       title: Row(
         children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: AppColors.primarySurface,
-            backgroundImage: profile?.photoUrl != null &&
-                    profile!.photoUrl!.isNotEmpty
-                ? NetworkImage(profile.photoUrl!)
-                : null,
-            child: profile?.photoUrl == null || profile!.photoUrl!.isEmpty
-                ? Text(
-                    initials,
-                    style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.primary,
-                        fontSize: 14),
-                  )
-                : null,
+          // Resident Avatar
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: AppColors.primarySurface,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppColors.border, width: 1.5),
+            ),
+            child: ClipOval(
+              child: profile?.photoUrl != null &&
+                      profile!.photoUrl!.isNotEmpty
+                  ? Image.network(
+                      profile.photoUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Center(
+                        child: Text(
+                          initials,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    )
+                  : Center(
+                      child: Text(
+                        initials,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.primary,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ),
+            ),
           ),
-          const SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: 12),
+
+          // Greeting & Location
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  '$greeting 👋',
+                  greeting,
                   style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w400),
+                    fontSize: 11,
+                    color: Color(0xFF64748B),
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: 0.2,
+                  ),
                 ),
+                const SizedBox(height: 1),
                 Text(
                   residentName,
                   style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A),
+                    letterSpacing: -0.3,
+                  ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                if (societyName.isNotEmpty)
-                  Text(
-                    societyName,
-                    style: const TextStyle(
-                        fontSize: 11,
+                if (societyName.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.location_on_rounded,
+                        size: 11,
                         color: AppColors.primary,
-                        fontWeight: FontWeight.w600),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(width: 3),
+                      Flexible(
+                        child: Text(
+                          flatNumber.isNotEmpty
+                              ? '$societyName • Flat $flatNumber'
+                              : societyName,
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: AppColors.primary,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
+                ],
               ],
             ),
           ),
@@ -111,43 +159,58 @@ class DashboardAppBar extends ConsumerWidget {
                 ref.watch(unreadNotificationsCountStreamProvider);
             final count = unreadCountAsync.value ?? 0;
 
-            return IconButton(
-              onPressed: () => context.go(AppRoutes.notifications),
-              icon: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  const Icon(Icons.notifications_outlined,
-                      color: AppColors.textPrimary, size: 24),
-                  if (count > 0)
-                    Positioned(
-                      right: -2,
-                      top: -2,
-                      child: Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: const BoxDecoration(
-                            color: AppColors.error, shape: BoxShape.circle),
-                        constraints:
-                            const BoxConstraints(minWidth: 16, minHeight: 16),
-                        child: Text(
-                          count > 9 ? '9+' : '$count',
-                          style: const TextStyle(
+            return Container(
+              margin: const EdgeInsets.only(right: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                shape: BoxShape.circle,
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: IconButton(
+                onPressed: () => context.go(AppRoutes.notifications),
+                icon: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const Icon(
+                      Icons.notifications_outlined,
+                      color: Color(0xFF1E293B),
+                      size: 22,
+                    ),
+                    if (count > 0)
+                      Positioned(
+                        right: -3,
+                        top: -3,
+                        child: Container(
+                          padding: const EdgeInsets.all(3),
+                          decoration: const BoxDecoration(
+                            color: AppColors.error,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 15,
+                            minHeight: 15,
+                          ),
+                          child: Text(
+                            count > 9 ? '9+' : '$count',
+                            style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 9,
-                              fontWeight: FontWeight.w800),
-                          textAlign: TextAlign.center,
+                              fontSize: 8,
+                              fontWeight: FontWeight.w800,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             );
           },
         ),
-        const SizedBox(width: 8),
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(height: 1, color: AppColors.border),
+        child: Container(height: 1, color: const Color(0xFFF1F5F9)),
       ),
     );
   }

@@ -14,8 +14,8 @@ class HomeShell extends StatelessWidget {
         route: '/home/dashboard'),
     _NavItem(
         label: 'Visitors',
-        icon: Icons.person_add_outlined,
-        activeIcon: Icons.person_add_rounded,
+        icon: Icons.shield_outlined,
+        activeIcon: Icons.shield_rounded,
         route: '/home/visitors'),
     _NavItem(
         label: 'Bills',
@@ -23,7 +23,7 @@ class HomeShell extends StatelessWidget {
         activeIcon: Icons.receipt_long_rounded,
         route: '/home/maintenance'),
     _NavItem(
-        label: 'Complaints',
+        label: 'Help',
         icon: Icons.support_agent_outlined,
         activeIcon: Icons.support_agent_rounded,
         route: '/home/complaints'),
@@ -44,11 +44,11 @@ class HomeShell extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           border: const Border(
-            top: BorderSide(color: AppColors.border, width: 1),
+            top: BorderSide(color: Color(0xFFF1F5F9), width: 1),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.06),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 16,
               offset: const Offset(0, -4),
             ),
@@ -57,7 +57,7 @@ class HomeShell extends StatelessWidget {
         child: SafeArea(
           top: false,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: List.generate(_navItems.length, (index) {
@@ -98,10 +98,10 @@ class _NavBarItem extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(vertical: 4),
         decoration: BoxDecoration(
           color: isActive
-              ? AppColors.primary.withOpacity(0.1)
+              ? AppColors.primarySurface
               : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
@@ -110,16 +110,18 @@ class _NavBarItem extends StatelessWidget {
           children: [
             Icon(
               isActive ? item.activeIcon : item.icon,
-              color: isActive ? AppColors.primary : AppColors.textSecondary,
+              color: isActive ? AppColors.primary : const Color(0xFF64748B),
               size: 22,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 3),
             Text(
               item.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 10,
-                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-                color: isActive ? AppColors.primary : AppColors.textSecondary,
+                fontSize: 11,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                color: isActive ? AppColors.primary : const Color(0xFF64748B),
               ),
             ),
           ],

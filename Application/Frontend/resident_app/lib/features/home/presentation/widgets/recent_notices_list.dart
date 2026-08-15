@@ -19,7 +19,7 @@ class RecentNoticesList extends ConsumerWidget {
         final notices = noticesList.take(3).toList();
 
         if (notices.isEmpty) {
-          return const _EmptyStateSmall(message: 'No recent notices 📢');
+          return const _EmptyStateSmall(message: 'No active notices published');
         }
 
         return Column(
