@@ -4,7 +4,7 @@ import '../../../../core/theme/app_spacing.dart';
 
 enum AppHomeMode {
   societyGate,
-  localMart,
+  communityHub,
 }
 
 class ModeSwitcherToggle extends StatelessWidget {
@@ -20,12 +20,12 @@ class ModeSwitcherToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 46,
-      padding: const EdgeInsets.all(4),
+      height: 44,
+      padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
-        color: AppColors.gray100,
+        color: const Color(0xFFF1F5F9),
         borderRadius: BorderRadius.circular(AppRadius.full),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
       ),
       child: Row(
         children: [
@@ -33,6 +33,7 @@ class ModeSwitcherToggle extends StatelessWidget {
           Expanded(
             child: GestureDetector(
               onTap: () => onModeChanged(AppHomeMode.societyGate),
+              behavior: HitTestBehavior.opaque,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 decoration: BoxDecoration(
@@ -55,21 +56,21 @@ class ModeSwitcherToggle extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.apartment_rounded,
-                      size: 16,
+                      Icons.shield_outlined,
+                      size: 15,
                       color: currentMode == AppHomeMode.societyGate
                           ? Colors.white
-                          : AppColors.textSecondary,
+                          : const Color(0xFF64748B),
                     ),
                     const SizedBox(width: 6),
                     Text(
                       'Society Gate',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
                         color: currentMode == AppHomeMode.societyGate
                             ? Colors.white
-                            : AppColors.textSecondary,
+                            : const Color(0xFF64748B),
                       ),
                     ),
                   ],
@@ -78,21 +79,22 @@ class ModeSwitcherToggle extends StatelessWidget {
             ),
           ),
 
-          // Mode 2: LocalMart & Services
+          // Mode 2: Community Hub (Classifieds, Maids, Services)
           Expanded(
             child: GestureDetector(
-              onTap: () => onModeChanged(AppHomeMode.localMart),
+              onTap: () => onModeChanged(AppHomeMode.communityHub),
+              behavior: HitTestBehavior.opaque,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 decoration: BoxDecoration(
-                  color: currentMode == AppHomeMode.localMart
-                      ? const Color(0xFF059669) // Emerald Green
+                  color: currentMode == AppHomeMode.communityHub
+                      ? const Color(0xFF0F766E) // Deep Teal
                       : Colors.transparent,
                   borderRadius: BorderRadius.circular(AppRadius.full),
-                  boxShadow: currentMode == AppHomeMode.localMart
+                  boxShadow: currentMode == AppHomeMode.communityHub
                       ? [
                           BoxShadow(
-                            color: const Color(0xFF059669).withValues(alpha: 0.3),
+                            color: const Color(0xFF0F766E).withValues(alpha: 0.25),
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -104,21 +106,21 @@ class ModeSwitcherToggle extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
-                      Icons.storefront_rounded,
-                      size: 16,
-                      color: currentMode == AppHomeMode.localMart
+                      Icons.handshake_outlined,
+                      size: 15,
+                      color: currentMode == AppHomeMode.communityHub
                           ? Colors.white
-                          : AppColors.textSecondary,
+                          : const Color(0xFF64748B),
                     ),
                     const SizedBox(width: 6),
                     Text(
-                      'LocalMart',
+                      'Community Hub',
                       style: TextStyle(
-                        fontSize: 13,
+                        fontSize: 12,
                         fontWeight: FontWeight.w700,
-                        color: currentMode == AppHomeMode.localMart
+                        color: currentMode == AppHomeMode.communityHub
                             ? Colors.white
-                            : AppColors.textSecondary,
+                            : const Color(0xFF64748B),
                       ),
                     ),
                     const SizedBox(width: 4),
@@ -126,9 +128,9 @@ class ModeSwitcherToggle extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 5, vertical: 1.5),
                       decoration: BoxDecoration(
-                        color: currentMode == AppHomeMode.localMart
+                        color: currentMode == AppHomeMode.communityHub
                             ? Colors.white
-                            : const Color(0xFF059669),
+                            : const Color(0xFF0F766E),
                         borderRadius: BorderRadius.circular(AppRadius.full),
                       ),
                       child: Text(
@@ -136,8 +138,8 @@ class ModeSwitcherToggle extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 8,
                           fontWeight: FontWeight.w800,
-                          color: currentMode == AppHomeMode.localMart
-                              ? const Color(0xFF059669)
+                          color: currentMode == AppHomeMode.communityHub
+                              ? const Color(0xFF0F766E)
                               : Colors.white,
                         ),
                       ),

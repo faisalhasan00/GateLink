@@ -14,7 +14,7 @@ import '../widgets/recent_complaints_widget.dart';
 import '../widgets/recent_notices_list.dart';
 import '../widgets/society_info_card.dart';
 import '../widgets/mode_switcher_toggle.dart';
-import '../widgets/localmart_coming_soon_view.dart';
+import '../widgets/community_hub_coming_soon_view.dart';
 
 final appHomeModeProvider =
     StateProvider<AppHomeMode>((ref) => AppHomeMode.societyGate);
@@ -35,30 +35,30 @@ class DashboardScreen extends ConsumerWidget {
             padding: const EdgeInsets.all(AppSpacing.pagePadding),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
-                // Swiggy/Instamart Style Dual Mode Switcher
+                // Dual Mode Switcher (Society Gate vs Community Hub)
                 ModeSwitcherToggle(
                   currentMode: currentMode,
                   onModeChanged: (mode) =>
                       ref.read(appHomeModeProvider.notifier).state = mode,
                 ),
-                const SizedBox(height: AppSpacing.lg),
+                const SizedBox(height: AppSpacing.md),
 
-                // Mode 2: LocalMart & Services (Coming Soon Showcase)
-                if (currentMode == AppHomeMode.localMart) ...[
-                  LocalMartComingSoonView(
+                // Mode 2: Community Hub (Classifieds, Maids, Services Showcase)
+                if (currentMode == AppHomeMode.communityHub) ...[
+                  CommunityHubComingSoonView(
                     onSwitchToGate: () => ref
                         .read(appHomeModeProvider.notifier)
                         .state = AppHomeMode.societyGate,
                   ),
                 ] else ...[
                   // Mode 1: Core Society Gate & Community
-                  // Maintenance Alert Banner (Dynamic)
+                  // Maintenance Alert Banner / All Dues Paid
                   const DynamicMaintenanceBanner(),
                   const SizedBox(height: AppSpacing.lg),
 
                   // Quick Actions Grid
                   const _SectionTitle(title: 'Quick Actions'),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.sm),
                   const QuickActionsGrid(),
                   const SizedBox(height: AppSpacing.lg),
 
@@ -74,7 +74,7 @@ class DashboardScreen extends ConsumerWidget {
                       child: const Text('View All'),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.sm),
                   const PendingVisitorsList(),
                   const SizedBox(height: AppSpacing.lg),
 
@@ -86,7 +86,7 @@ class DashboardScreen extends ConsumerWidget {
                       child: const Text('View All'),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.sm),
                   const RecentComplaintsWidget(),
                   const SizedBox(height: AppSpacing.lg),
 
@@ -98,13 +98,13 @@ class DashboardScreen extends ConsumerWidget {
                       child: const Text('View All'),
                     ),
                   ),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.sm),
                   const RecentNoticesList(),
                   const SizedBox(height: AppSpacing.lg),
 
                   // Emergency Contacts
                   const _SectionTitle(title: 'Emergency Contacts'),
-                  const SizedBox(height: AppSpacing.md),
+                  const SizedBox(height: AppSpacing.sm),
                   const EmergencyContactsWidget(),
                   const SizedBox(height: AppSpacing.lg),
 
@@ -134,9 +134,10 @@ class _SectionTitle extends StatelessWidget {
           child: Text(
             title,
             style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0F172A),
+              letterSpacing: -0.2,
             ),
           ),
         ),
