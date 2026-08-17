@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Building2, Contact, Megaphone, ArrowLeft, LogOut } from 'lucide-react';
+import { LayoutDashboard, Building2, Contact, Gift, Megaphone, ArrowLeft, LogOut } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 import { clearSuperAdminSession } from '../services/sessionManager';
@@ -26,6 +26,7 @@ export default function SuperAdminSidebar({ isOpen, setIsOpen }) {
     { name: 'SaaS Overview', path: '/', icon: <LayoutDashboard size={20} /> },
     { name: 'Societies & Licenses', path: '/societies', icon: <Building2 size={20} /> },
     { name: 'CRM & Sales Leads', path: '/crm', icon: <Contact size={20} /> },
+    { name: 'Partner & Referral Leads', path: '/partners', icon: <Gift size={20} /> },
     { name: 'Ad & Campaigns', path: '/ads', icon: <Megaphone size={20} /> },
   ];
 
