@@ -30,6 +30,8 @@ class AppRadius {
   static const double lg = 12.0;
   static const double xl = 16.0;
   static const double xxl = 20.0;
+  static const double card = 16.0;
+  static const double button = 12.0;
   static const double full = 9999.0;
 }
 

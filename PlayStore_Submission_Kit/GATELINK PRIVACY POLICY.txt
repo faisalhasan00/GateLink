@@ -1,0 +1,35 @@
+GATELINK PRIVACY POLICY
+Last Updated: August 16, 2026
+
+GateLink ("we", "our", or "us") is dedicated to protecting the privacy of residents, society administrators, and security staff using our mobile applications and web platform. This Privacy Policy describes how we collect, use, store, and safeguard your personal information.
+
+1. INFORMATION WE COLLECT
+• Personal Information: Name, phone number, email address, apartment/flat number, block/tower, and society name.
+• Visitor & Gate Records: Visitor name, vehicle number, entry/exit timestamp, purpose of visit, and host approval status.
+• Maintenance & Payments: Maintenance invoice details, payment status, transaction reference IDs (processed securely via regulated payment gateways like Cashfree; we do not store credit/debit card numbers or CVV).
+• Complaints & Requests: Tickets raised, category, description, and attached photos.
+• Device & Usage Data: Device model, OS version, push notification tokens (Firebase Cloud Messaging) for instant delivery of gate arrival and emergency SOS alerts.
+
+2. HOW WE USE YOUR INFORMATION
+• To authenticate residents and provide secure access control at society gates.
+• To send real-time visitor entry notifications and emergency SOS alerts.
+• To facilitate online maintenance bill payments and generate digital receipts.
+• To manage society notices, amenity bookings, and complaint resolution.
+• To prevent unauthorized access and maintain society safety logs.
+
+3. DATA SHARING & THIRD-PARTY DISCLOSURE
+We do NOT sell, rent, or trade your personal information to third parties. Information is only accessible to authorized society administrators, gate security personnel (for visitor verification), and certified infrastructure providers (Firebase / Google Cloud) under strict encryption in transit (HTTPS/TLS) and at rest.
+
+4. PERMISSIONS USED BY THE APPS
+• Notifications (POST_NOTIFICATIONS): To deliver real-time gate visitor arrival alerts and emergency notifications.
+• Camera & Photos (Optional): Used exclusively when uploading profile pictures, complaint evidence, or scanning visitor QR codes.
+• Phone Call (Optional): To enable direct one-touch calls to Gate Security or Emergency Helplines.
+
+5. DATA RETENTION & ACCOUNT DELETION
+Your data is retained as long as your residency in the registered society is active. You may request account deactivation and complete personal data deletion at any time by contacting your society administrator or emailing us at privacy@gatelink.in.
+
+6. CONTACT US
+If you have any questions or concerns regarding this Privacy Policy, please contact:
+GateLink Support & Privacy Team
+Email: privacy@gatelink.in / support@gatelink.in
+Website: https://gatelink.in

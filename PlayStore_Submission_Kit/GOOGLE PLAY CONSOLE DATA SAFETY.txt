@@ -1,0 +1,49 @@
+ GOOGLE PLAY CONSOLE DATA SAFETY (Exact Form Answers)
+When your friend fills out the Data Safety section on Google Play Console, tell them to follow these exact options:
+
+Section A: Data Collection & Security
+Question on Console	Answer to Select
+Does your app collect or share any of the required user data types?	Yes
+Is all of the user data collected by your app encrypted in transit?	Yes (All connections use HTTPS/TLS & Firebase Security Rules)
+Do you provide a way for users to request that their data be deleted?	Yes (Users can email 
+
+privacy@gatelink.in
+ or contact their Society Admin)
+Section B: Specific Data Types Collected
+1. Personal Info
+Name:
+Collected? Yes | Shared? No
+Purpose: App Functionality, Account Management
+Is it ephemeral (temporary)? No
+Is it optional? No
+Email Address:
+Collected? Yes | Shared? No
+Purpose: App Functionality, Account Management
+Phone Number:
+Collected? Yes | Shared? No
+Purpose: App Functionality, Account Management, Developer Communications
+Physical Address (Society, Tower, Flat Number):
+Collected? Yes | Shared? No
+Purpose: App Functionality (Gate Security & Resident Verification)
+2. Financial Info
+User Payment Info / Purchase History:
+Collected? Yes | Shared? No
+Purpose: App Functionality (Maintenance bills & payment receipts)
+Note: No credit/debit card numbers or CVV are stored. Payments are processed via PCI-DSS compliant gateways like Cashfree.
+3. Photos and Videos (Optional)
+Photos:
+Collected? Yes | Shared? No
+Purpose: App Functionality (Optional profile picture and complaint evidence upload)
+Is it optional? Yes
+4. App Info and Performance
+Crash Logs & Diagnostics:
+Collected? Yes | Shared? No
+Purpose: Analytics & App Performance
+5. Device or Other IDs
+Device ID / FCM Push Notification Token:
+Collected? Yes | Shared? No
+Purpose: App Functionality (Sending real-time gate visitor alerts and Emergency SOS)
+📜 2. COMPLETE PRIVACY POLICY
+Public URL to Enter on Play Console:
+text
+https://gatelink.in/privacy-policy.html

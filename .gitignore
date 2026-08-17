@@ -14,3 +14,10 @@ firebase-debug.*.log
 doc/
 test.md
 *.log
+
+# Large Binaries & Release Archives
+*.aab
+*.apk
+*.zip
+PlayStore_Submission_Kit/**/*.aab
+PlayStore_Submission_Kit/*.zip

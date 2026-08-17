@@ -9,8 +9,7 @@ plugins {
 
 android {
     namespace = "com.example.societysphere.guard"
-    compileSdk = 35
-    buildToolsVersion = "34.0.0"
+    compileSdk = 36
     ndkVersion = "28.2.13676358"
 
     buildFeatures {
@@ -29,7 +28,7 @@ android {
         targetSdk = 35
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        resValue("string", "app_name", "HomeHni Guard")
+        resValue("string", "app_name", "GateLink Guard")
     }
 
     buildTypes {
