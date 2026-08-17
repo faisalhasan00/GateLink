@@ -29,6 +29,7 @@ export default function Navbar({ onOpenDemo }) {
 
   const aboutItems = [
     { label: 'About Us', to: '/about' },
+    { label: 'Partner Program (Earn 2%)', to: '/partners' },
     { label: 'Blog', to: '/blog' },
     { label: 'Privacy Policy', to: '/privacy' },
   ];
@@ -88,6 +89,17 @@ export default function Navbar({ onOpenDemo }) {
                 items={featureItems}
                 isDark={isDark}
               />
+              <Link
+                to="/partners"
+                style={{
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  color: isDark ? '#38BDF8' : '#0D9488',
+                  textDecoration: 'none',
+                }}
+              >
+                Partner & Earn
+              </Link>
               <Link
                 to="/contact"
                 style={{

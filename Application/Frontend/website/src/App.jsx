@@ -23,6 +23,7 @@ const DocsPage = lazy(() => import('./pages/landing/DocsPage'))
 const PrivacyPolicyPage = lazy(() => import('./pages/landing/PrivacyPolicyPage'))
 const TermsPage = lazy(() => import('./pages/landing/TermsPage'))
 const CookiePolicyPage = lazy(() => import('./pages/landing/CookiePolicyPage'))
+const PartnersPage = lazy(() => import('./pages/landing/PartnersPage'))
 
 export default function App() {
   return (
@@ -43,6 +44,8 @@ export default function App() {
             <Route path="/contact" element={<LeadGenerationPage />} />
             <Route path="/book-demo" element={<LeadGenerationPage />} />
             <Route path="/download" element={<DownloadAppPage />} />
+            <Route path="/partners" element={<PartnersPage />} />
+            <Route path="/refer" element={<PartnersPage />} />
 
             {/* SEO Knowledge Base & Legal Pages */}
             <Route path="/blog" element={<BlogPage />} />
