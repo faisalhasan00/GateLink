@@ -92,12 +92,12 @@ export default function Navbar({ onOpenDemo }) {
                 to="/partners"
                 style={{
                   fontSize: '14px',
-                  fontWeight: 700,
-                  color: isDark ? '#38BDF8' : '#0D9488',
+                  fontWeight: 600,
+                  color: isDark ? '#E2E8F0' : '#444444',
                   textDecoration: 'none',
                 }}
               >
-                Partner & Earn
+                Partners
               </Link>
               <Link
                 to="/contact"
