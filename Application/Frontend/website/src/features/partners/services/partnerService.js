@@ -1,4 +1,4 @@
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../firebase';
 
 /**
@@ -15,7 +15,7 @@ export const submitPartnerLead = async (leadData) => {
     partnerCity: leadData.partnerCity.trim(),
     partnerUpi: leadData.partnerUpi.trim(),
     partnerType: leadData.partnerType || 'broker',
-    referredByCode: leadData.referredByCode?.trim() || null, // Auto-captured from ?ref=
+    referredByCode: leadData.referredByCode?.trim() || null,
     targetSocietyName: leadData.targetSocietyName.trim(),
     targetCity: leadData.targetCity.trim(),
     contactPerson: leadData.contactPerson.trim(),
@@ -30,4 +30,26 @@ export const submitPartnerLead = async (leadData) => {
   });
 
   return { id: docRef.id, referenceId: generatedRef };
+};
+
+/**
+ * Fetch all leads submitted by a partner's phone number or Reference ID
+ */
+export const lookupPartnerLeads = async (searchQuery) => {
+  const cleanQuery = searchQuery.trim();
+  const leadsRef = collection(db, 'partner_leads');
+  
+  // Try querying by phone first
+  const qPhone = query(leadsRef, where('partnerPhone', '==', cleanQuery));
+  const phoneSnap = await getDocs(qPhone);
+  
+  if (!phoneSnap.empty) {
+    return phoneSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  }
+
+  // Fallback: Query by referenceId (e.g. LEAD-123456)
+  const qRef = query(leadsRef, where('referenceId', '==', cleanQuery.toUpperCase()));
+  const refSnap = await getDocs(qRef);
+
+  return refSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
 };

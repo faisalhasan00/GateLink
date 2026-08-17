@@ -12,6 +12,7 @@ import PartnerMetrics from '../../features/partners/components/PartnerMetrics';
 import PartnerTierGrid from '../../features/partners/components/PartnerTierGrid';
 import PartnerEarningsCalculator from '../../features/partners/components/PartnerEarningsCalculator';
 import PromoterLinkGenerator from '../../features/partners/components/PromoterLinkGenerator';
+import PartnerStatusTracker from '../../features/partners/components/PartnerStatusTracker';
 import PartnerLeadForm from '../../features/partners/components/PartnerLeadForm';
 import PartnerFaq from '../../features/partners/components/PartnerFaq';
 
@@ -57,6 +58,7 @@ export default function PartnersPage() {
         <PartnerTierGrid onSelectTier={(tierId) => setSelectedTier(tierId)} />
         <PartnerEarningsCalculator selectedTier={selectedTier} />
         <PromoterLinkGenerator />
+        <PartnerStatusTracker />
         <PartnerLeadForm
           formData={formData}
           refCodeFromUrl={refCodeFromUrl}
