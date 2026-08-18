@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, deleteDoc, addDoc, setDoc, serverTimestamp, query, orderBy } from 'firebase/firestore';
 import { db } from '../../firebase';
-import { Handshake, Plus, Phone, Mail, Building, CheckCircle2, DollarSign, Search, Trash2, ArrowRight, ShieldCheck, X } from 'lucide-react';
+import { Handshake, Plus, Sliders, Phone, Mail, Building, CheckCircle2, DollarSign, Search, Trash2, ArrowRight, ShieldCheck, X, Percent } from 'lucide-react';
 
 export default function PartnerLeads() {
   const [leads, setLeads] = useState([]);
@@ -9,6 +9,21 @@ export default function PartnerLeads() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTier, setFilterTier] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
+
+  // Dynamic Commission Rates State
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [commissionRates, setCommissionRates] = useState({
+    tier1Month1Percent: 5,
+    tier1MonthlyPercent: 2,
+    tier2Month1Percent: 10,
+    tier2MonthlyPercent: 2,
+    tier3Month1Percent: 10,
+    tier3MonthlyPercent: 2,
+    promoterSubPartnerOverridePercent: 0.5,
+    baseRatePerFlat: 25,
+    minFlatsThreshold: 40,
+  });
+  const [savingConfig, setSavingConfig] = useState(false);
 
   // Manual Add Modal State
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -39,8 +54,9 @@ export default function PartnerLeads() {
   const [savingPayout, setSavingPayout] = useState(false);
 
   useEffect(() => {
+    // 1. Listen to partner leads
     const q = query(collection(db, 'partner_leads'), orderBy('createdAt', 'desc'));
-    const unsubscribe = onSnapshot(
+    const unsubLeads = onSnapshot(
       q,
       (snapshot) => {
         const fetched = snapshot.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -53,8 +69,41 @@ export default function PartnerLeads() {
       }
     );
 
-    return () => unsubscribe();
+    // 2. Listen to dynamic commission config
+    const configDocRef = doc(db, 'system_config', 'partner_program');
+    const unsubConfig = onSnapshot(configDocRef, (snap) => {
+      if (snap.exists()) {
+        setCommissionRates((prev) => ({ ...prev, ...snap.data() }));
+      }
+    });
+
+    return () => {
+      unsubLeads();
+      unsubConfig();
+    };
   }, []);
+
+  const handleSaveCommissionRates = async (e) => {
+    e.preventDefault();
+    setSavingConfig(true);
+    try {
+      await setDoc(
+        doc(db, 'system_config', 'partner_program'),
+        {
+          ...commissionRates,
+          updatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+      alert('✓ Partner Commission Rates updated successfully in real-time!');
+      setIsConfigModalOpen(false);
+    } catch (err) {
+      console.error('Failed to save commission config:', err);
+      alert('Failed to save commission rates.');
+    } finally {
+      setSavingConfig(false);
+    }
+  };
 
   const handleStatusChange = async (leadId, newStatus) => {
     try {
@@ -80,9 +129,24 @@ export default function PartnerLeads() {
 
   const handleOpenPayoutModal = (lead) => {
     setSelectedLeadForPayout(lead);
-    setPayoutAmount('500');
+    
+    // Dynamically calculate recommended amount based on flat count and saved commission rate %
+    let flats = 100;
+    if (lead.approxFlats === '40-100') flats = 70;
+    else if (lead.approxFlats === '100-250') flats = 175;
+    else if (lead.approxFlats === '250-500') flats = 375;
+    else if (lead.approxFlats === '500+') flats = 600;
+
+    const tier = lead.assignedTier || 'growth';
+    const month1Rate = tier === 'referral' 
+      ? commissionRates.tier1Month1Percent 
+      : (tier === 'onboarding' ? commissionRates.tier2Month1Percent : commissionRates.tier3Month1Percent);
+
+    const calculatedBonus = Math.round(flats * (commissionRates.baseRatePerFlat || 25) * (month1Rate / 100));
+
+    setPayoutAmount(String(calculatedBonus || 500));
     setUtrNumber('');
-    setPayoutNotes(`Month 1 Commission for ${lead.targetSocietyName}`);
+    setPayoutNotes(`Month 1 (${month1Rate}%) Commission for ${lead.targetSocietyName}`);
   };
 
   const handleSavePayout = async (e) => {
@@ -187,9 +251,15 @@ export default function PartnerLeads() {
         {/* Top Action & Aggregate Stats */}
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
           <button
+            onClick={() => setIsConfigModalOpen(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', backgroundColor: '#EFF6FF', color: '#1E3A8A', border: '1px solid #BFDBFE', borderRadius: '10px', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
+          >
+            <Sliders size={16} /> Edit Commission % Rates
+          </button>
+          <button
             className="btn btn-primary"
             onClick={() => setIsAddModalOpen(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', backgroundColor: '#1E3A8A', color: '#FFFFFF', borderRadius: '10px', border: 'none', fontWeight: 700, cursor: 'pointer' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', backgroundColor: '#1E3A8A', color: '#FFFFFF', borderRadius: '10px', border: 'none', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}
           >
             <Plus size={18} /> Add Partner Lead
           </button>
@@ -707,6 +777,186 @@ export default function PartnerLeads() {
                   style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#1E3A8A', color: '#FFFFFF', fontSize: '13px', fontWeight: 700, cursor: submittingLead ? 'not-allowed' : 'pointer' }}
                 >
                   {submittingLead ? 'Saving...' : 'Create Lead'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── DYNAMIC COMMISSION RATES & RULES MODAL ───────────────────────── */}
+      {isConfigModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1100,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: '16px',
+            maxWidth: '560px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflowY: 'auto',
+            padding: '28px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
+            position: 'relative'
+          }}>
+            <button
+              onClick={() => setIsConfigModalOpen(false)}
+              style={{ position: 'absolute', top: '18px', right: '18px', background: 'transparent', border: 'none', cursor: 'pointer', color: '#94A3B8' }}
+            >
+              <X size={20} />
+            </button>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px' }}>
+              <div style={{ width: '36px', height: '36px', borderRadius: '10px', backgroundColor: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Sliders size={20} color="#1E3A8A" />
+              </div>
+              <div>
+                <h3 style={{ fontSize: '18px', fontWeight: 900, margin: 0, color: '#1E293B' }}>Partner Commission Control</h3>
+                <div style={{ fontSize: '12px', color: '#64748B' }}>Adjust the payout percentages dynamically whenever you want.</div>
+              </div>
+            </div>
+
+            <form onSubmit={handleSaveCommissionRates} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Tier 1 */}
+              <div style={{ padding: '12px 14px', borderRadius: '10px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                <div style={{ fontSize: '13px', fontWeight: 800, color: '#059669', marginBottom: '8px' }}>
+                  Tier 1: Referral Partner (Intro Only)
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '3px' }}>Month 1 Bonus (%)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      required
+                      value={commissionRates.tier1Month1Percent}
+                      onChange={(e) => setCommissionRates({ ...commissionRates, tier1Month1Percent: Number(e.target.value) })}
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', fontWeight: 700 }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '3px' }}>Monthly Recurring (%)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      required
+                      value={commissionRates.tier1MonthlyPercent}
+                      onChange={(e) => setCommissionRates({ ...commissionRates, tier1MonthlyPercent: Number(e.target.value) })}
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', fontWeight: 700 }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Tier 2 */}
+              <div style={{ padding: '12px 14px', borderRadius: '10px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                <div style={{ fontSize: '13px', fontWeight: 800, color: '#0284C7', marginBottom: '8px' }}>
+                  Tier 2: Onboarding Partner (Assists Demo)
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '3px' }}>Month 1 Bonus (%)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      required
+                      value={commissionRates.tier2Month1Percent}
+                      onChange={(e) => setCommissionRates({ ...commissionRates, tier2Month1Percent: Number(e.target.value) })}
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', fontWeight: 700 }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '3px' }}>Monthly Recurring (%)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      required
+                      value={commissionRates.tier2MonthlyPercent}
+                      onChange={(e) => setCommissionRates({ ...commissionRates, tier2MonthlyPercent: Number(e.target.value) })}
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', fontWeight: 700 }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Tier 3 */}
+              <div style={{ padding: '12px 14px', borderRadius: '10px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0' }}>
+                <div style={{ fontSize: '13px', fontWeight: 800, color: '#1E3A8A', marginBottom: '8px' }}>
+                  Tier 3: Growth Partner (Exclusive / Lifetime)
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '3px' }}>Month 1 Bonus (%)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      required
+                      value={commissionRates.tier3Month1Percent}
+                      onChange={(e) => setCommissionRates({ ...commissionRates, tier3Month1Percent: Number(e.target.value) })}
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', fontWeight: 700 }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#475569', marginBottom: '3px' }}>Monthly Recurring (%) [Lifetime]</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      required
+                      value={commissionRates.tier3MonthlyPercent}
+                      onChange={(e) => setCommissionRates({ ...commissionRates, tier3MonthlyPercent: Number(e.target.value) })}
+                      style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid #CBD5E1', fontSize: '13px', fontWeight: 700 }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Base Platform Rates */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>Base SaaS Rate (₹/Flat/Mo)</label>
+                  <input
+                    type="number"
+                    value={commissionRates.baseRatePerFlat}
+                    onChange={(e) => setCommissionRates({ ...commissionRates, baseRatePerFlat: Number(e.target.value) })}
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px', fontWeight: 700 }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>Min Flat Threshold</label>
+                  <input
+                    type="number"
+                    value={commissionRates.minFlatsThreshold}
+                    onChange={(e) => setCommissionRates({ ...commissionRates, minFlatsThreshold: Number(e.target.value) })}
+                    style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '13px', fontWeight: 700 }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsConfigModalOpen(false)}
+                  style={{ padding: '10px 16px', borderRadius: '8px', border: '1px solid #CBD5E1', background: '#FFFFFF', color: '#475569', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingConfig}
+                  style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', background: '#1E3A8A', color: '#FFFFFF', fontSize: '13px', fontWeight: 700, cursor: savingConfig ? 'not-allowed' : 'pointer' }}
+                >
+                  {savingConfig ? 'Saving...' : 'Save Commission Rates'}
                 </button>
               </div>
             </form>
