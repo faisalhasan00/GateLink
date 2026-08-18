@@ -130,6 +130,7 @@ class ProfileScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.sm),
                   ProfileActionsMenu(
                     onEditProfile: () => context.push(AppRoutes.editProfile),
+                    onReferral: () => context.push(AppRoutes.referral),
                     onChangePassword: () =>
                         context.push(AppRoutes.changePassword),
                     onNotificationPreferences: () =>

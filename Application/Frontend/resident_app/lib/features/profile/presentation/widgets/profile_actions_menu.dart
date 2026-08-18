@@ -6,6 +6,7 @@ class ProfileActionsMenu extends StatelessWidget {
   final VoidCallback onEditProfile;
   final VoidCallback onChangePassword;
   final VoidCallback onNotificationPreferences;
+  final VoidCallback onReferral;
   final VoidCallback onSocietySupport;
   final VoidCallback onTermsAndPrivacy;
   final VoidCallback onLogout;
@@ -15,6 +16,7 @@ class ProfileActionsMenu extends StatelessWidget {
     required this.onEditProfile,
     required this.onChangePassword,
     required this.onNotificationPreferences,
+    required this.onReferral,
     required this.onSocietySupport,
     required this.onTermsAndPrivacy,
     required this.onLogout,
@@ -35,6 +37,13 @@ class ProfileActionsMenu extends StatelessWidget {
             title: 'Edit Profile & Details',
             subtitle: 'Name, phone, date of birth & gender',
             onTap: onEditProfile,
+          ),
+          const Divider(height: 1),
+          _MenuItem(
+            icon: Icons.card_giftcard_rounded,
+            title: 'Refer Society & Earn Cash',
+            subtitle: 'Earn 5%-10% bonus + 2% monthly recurring',
+            onTap: onReferral,
           ),
           const Divider(height: 1),
           _MenuItem(
