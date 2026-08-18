@@ -71,3 +71,71 @@ export const subscribeCommissionRates = (onUpdate) => {
     }
   );
 };
+
+/**
+ * Partner Self-Serve Direct Society Onboarding & Secret Activation Link Generator
+ */
+export const onboardSocietyByPartner = async (onboardingData) => {
+  const generatedRef = `LEAD-${Date.now().toString().slice(-6)}`;
+  const activationCode = `SOC-${Math.floor(100000 + Math.random() * 900000)}`;
+
+  // 1. Save Partner Lead & Onboarding Record
+  const leadRef = await addDoc(collection(db, 'partner_leads'), {
+    referenceId: generatedRef,
+    activationCode,
+    isOnboardedByPartner: true,
+    partnerName: onboardingData.partnerName.trim(),
+    partnerPhone: onboardingData.partnerPhone.trim(),
+    partnerEmail: onboardingData.partnerEmail?.trim() || '',
+    partnerUpi: onboardingData.partnerUpi.trim(),
+    partnerType: onboardingData.partnerType || 'onboarding_partner',
+
+    targetSocietyName: onboardingData.societyName.trim(),
+    targetCity: onboardingData.city.trim(),
+    address: onboardingData.address.trim(),
+    pincode: onboardingData.pincode?.trim() || '',
+    
+    wings: onboardingData.wings || [],
+    approxFlats: String(onboardingData.flatCount || 100),
+    flatCount: Number(onboardingData.flatCount) || 100,
+    gatesCount: Number(onboardingData.gatesCount) || 2,
+    guardDevicesCount: Number(onboardingData.guardDevicesCount) || 2,
+
+    contactPerson: onboardingData.rwaSecretaryName.trim(),
+    contactPhone: onboardingData.rwaSecretaryPhone.trim(),
+    contactEmail: onboardingData.rwaSecretaryEmail?.trim() || '',
+    contactRole: 'RWA Secretary',
+
+    status: 'won', // Self-onboarded by partner
+    assignedTier: onboardingData.assignedTier || 'onboarding',
+    source: 'partner_self_serve_onboarding_wizard',
+    createdAt: serverTimestamp(),
+  });
+
+  // 2. Create Pending Provisioned Society Record
+  await addDoc(collection(db, 'societies'), {
+    name: onboardingData.societyName.trim(),
+    city: onboardingData.city.trim(),
+    address: onboardingData.address.trim(),
+    activationCode,
+    partnerReferenceId: generatedRef,
+    partnerLeadId: leadRef.id,
+    flatCount: Number(onboardingData.flatCount) || 100,
+    wings: onboardingData.wings || [],
+    gatesCount: Number(onboardingData.gatesCount) || 2,
+    contactPerson: onboardingData.rwaSecretaryName.trim(),
+    contactPhone: onboardingData.rwaSecretaryPhone.trim(),
+    status: 'pending_rwa_activation',
+    createdAt: serverTimestamp(),
+  });
+
+  return {
+    id: leadRef.id,
+    referenceId: generatedRef,
+    activationCode,
+    activationUrl: `https://app.gatelink.in/activate?code=${activationCode}&ref=${generatedRef}`,
+    rwaPhone: onboardingData.rwaSecretaryPhone.trim(),
+    rwaName: onboardingData.rwaSecretaryName.trim(),
+    societyName: onboardingData.societyName.trim(),
+  };
+};

@@ -58,7 +58,14 @@ export default function PartnerLeadsTable({
 
               {/* Society */}
               <td style={{ padding: '14px 16px' }}>
-                <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>{lead.targetSocietyName}</div>
+                <div style={{ fontWeight: 800, color: 'var(--text-primary)' }}>
+                  {lead.targetSocietyName}
+                  {lead.isOnboardedByPartner && (
+                    <span style={{ marginLeft: '6px', fontSize: '10px', padding: '2px 6px', borderRadius: '4px', backgroundColor: '#ECFDF5', color: '#059669', fontWeight: 800 }}>
+                      Self-Onboarded ({lead.activationCode || 'SOC'})
+                    </span>
+                  )}
+                </div>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
                   {lead.targetCity || 'India'} • {lead.approxFlats} Flats
                 </div>

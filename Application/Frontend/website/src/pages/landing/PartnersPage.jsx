@@ -14,6 +14,7 @@ import PartnerEarningsCalculator from '../../features/partners/components/Partne
 import PromoterLinkGenerator from '../../features/partners/components/PromoterLinkGenerator';
 import PartnerStatusTracker from '../../features/partners/components/PartnerStatusTracker';
 import PartnerLeadForm from '../../features/partners/components/PartnerLeadForm';
+import PartnerOnboardingWizard from '../../features/partners/components/onboarding/PartnerOnboardingWizard';
 import PartnerFaq from '../../features/partners/components/PartnerFaq';
 
 export default function PartnersPage() {
@@ -81,6 +82,8 @@ export default function PartnersPage() {
         <PartnerLeadForm
           formData={formData}
           refCodeFromUrl={refCodeFromUrl}
+          selectedTier={selectedTier}
+          setSelectedTier={setSelectedTier}
           submitting={submitting}
           submittedRef={submittedRef}
           validationError={validationError}
@@ -88,6 +91,7 @@ export default function PartnersPage() {
           handleFormSubmit={handleFormSubmit}
           resetForm={resetForm}
         />
+        <PartnerOnboardingWizard />
         <PartnerFaq />
       </main>
 
