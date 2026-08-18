@@ -94,7 +94,7 @@ export default function PartnerLeadsTable({
                   backgroundColor: lead.assignedTier === 'growth' ? '#EFF6FF' : (lead.assignedTier === 'onboarding' ? '#E0F2FE' : '#ECFDF5'),
                   color: lead.assignedTier === 'growth' ? '#1E3A8A' : (lead.assignedTier === 'onboarding' ? '#0284C7' : '#059669')
                 }}>
-                  {lead.assignedTier === 'growth' ? '🟣 Growth (Life)' : (lead.assignedTier === 'onboarding' ? '🔵 Onboarding' : '🟢 Referral')}
+                  {lead.assignedTier === 'growth' ? 'Growth (Lifetime)' : (lead.assignedTier === 'onboarding' ? 'Onboarding' : 'Referral')}
                 </span>
               </td>
 
@@ -114,11 +114,11 @@ export default function PartnerLeadsTable({
                     cursor: 'pointer'
                   }}
                 >
-                  <option value="new">🟡 New Lead</option>
-                  <option value="contacted">🟣 Contacted</option>
-                  <option value="demo_scheduled">🔵 Demo Scheduled</option>
-                  <option value="won">🟢 Won / Active</option>
-                  <option value="lost">⚪ Lost</option>
+                  <option value="new">New Lead</option>
+                  <option value="contacted">Contacted</option>
+                  <option value="demo_scheduled">Demo Scheduled</option>
+                  <option value="won">Won / Active</option>
+                  <option value="lost">Lost</option>
                 </select>
               </td>
 

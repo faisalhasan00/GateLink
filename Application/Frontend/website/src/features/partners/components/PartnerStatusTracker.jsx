@@ -44,15 +44,15 @@ export default function PartnerStatusTracker() {
   const getStatusBadge = (status) => {
     switch (status) {
       case 'won':
-        return { label: '🟢 Active & Paying (Won)', bg: '#ECFDF5', color: '#059669' };
+        return { label: 'Active & Paying (Won)', bg: '#ECFDF5', color: '#059669' };
       case 'demo_scheduled':
-        return { label: '🔵 Demo Scheduled', bg: '#E0F2FE', color: '#0284C7' };
+        return { label: 'Demo Scheduled', bg: '#E0F2FE', color: '#0284C7' };
       case 'contacted':
-        return { label: '🟣 Contacted Committee', bg: '#F3E8FF', color: '#7E22CE' };
+        return { label: 'Contacted Committee', bg: '#F3E8FF', color: '#7E22CE' };
       case 'lost':
-        return { label: '⚪ Closed / Not Interested', bg: '#F1F5F9', color: '#64748B' };
+        return { label: 'Closed / Not Interested', bg: '#F1F5F9', color: '#64748B' };
       default:
-        return { label: '🟡 New Lead Under Review', bg: '#FEF3C7', color: '#B45309' };
+        return { label: 'New Lead Under Review', bg: '#FEF3C7', color: '#B45309' };
     }
   };
 

@@ -114,7 +114,7 @@ export default function PartnerEarningsCalculator({ selectedTier, rates = {} }) 
               </div>
             </div>
             <div style={{ fontSize: '13px', color: '#1E3A8A', fontWeight: 600 }}>
-              💡 10 societies = ₹{(annualTotal * 10).toLocaleString('en-IN')} / year passive income
+              10 societies = ₹{(annualTotal * 10).toLocaleString('en-IN')} / year passive income
             </div>
           </div>
         </div>

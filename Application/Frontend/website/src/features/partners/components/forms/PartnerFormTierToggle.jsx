@@ -14,7 +14,7 @@ export default function PartnerFormTierToggle({ selectedTier, onSelectTier }) {
         PARTNERSHIP REGISTRATION
       </span>
       <h2 style={{ fontSize: '30px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-0.5px', margin: '8px 0 14px 0' }}>
-        {isGrowth ? '🟣 Pro Broker / Channel Partner Application' : '🟢 Submit a Society Lead & Earn Cash'}
+        {isGrowth ? 'Pro Broker & Channel Partner Application' : 'Submit a Society Lead & Partner'}
       </h2>
       <p style={{ fontSize: '15px', color: isDark ? '#94A3B8' : '#555555', margin: '0 auto 20px auto', maxWidth: '640px', lineHeight: 1.5 }}>
         {isGrowth
