@@ -76,7 +76,7 @@ export default function PartnerEarningsCalculator({ selectedTier, rates = {} }) 
             <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '18px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E7EB' }}>
               <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#94A3B8' : '#666666', textTransform: 'uppercase' }}>ESTIMATED MONTHLY BILL</div>
               <div style={{ fontSize: '22px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: '4px 0' }}>₹{monthlySaaSRevenue.toLocaleString('en-IN')}</div>
-              <div style={{ fontSize: '11px', color: isDark ? '#64748B' : '#999999' }}>@ ₹{baseRate}/flat/mo net SaaS</div>
+              <div style={{ fontSize: '11px', color: isDark ? '#64748B' : '#999999' }}>Official Flat Slab SaaS Billing</div>
             </div>
 
             <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '18px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E7EB' }}>
