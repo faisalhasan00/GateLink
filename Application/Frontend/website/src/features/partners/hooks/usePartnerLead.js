@@ -7,13 +7,16 @@ export function usePartnerLead() {
   const refCodeFromUrl = searchParams.get('ref') || searchParams.get('code') || '';
 
   const [formData, setFormData] = useState({
+    // Core Contact & Payout
     partnerName: '',
     partnerPhone: '',
     partnerEmail: '',
     partnerCity: '',
     partnerUpi: '',
-    partnerType: 'broker',
+    partnerType: 'resident',
     referredByCode: refCodeFromUrl,
+
+    // Target Society
     targetSocietyName: '',
     targetCity: '',
     contactPerson: '',
@@ -21,6 +24,13 @@ export function usePartnerLead() {
     contactPhone: '',
     approxFlats: '100-250',
     notes: '',
+
+    // Tier-Specific Fields
+    userRoleInSociety: 'Resident / Flat Owner',
+    preferredDemoSlot: 'Weekend Morning (11:00 AM)',
+    brokerAgencyName: '',
+    estimatedSocietyPipeline: '3 - 5 Societies',
+    operatingAreas: '',
   });
 
   useEffect(() => {
@@ -29,7 +39,7 @@ export function usePartnerLead() {
     }
   }, [refCodeFromUrl]);
 
-  const [selectedTier, setSelectedTier] = useState('growth');
+  const [selectedTier, setSelectedTier] = useState('referral');
   const [submitting, setSubmitting] = useState(false);
   const [submittedRef, setSubmittedRef] = useState(null);
   const [validationError, setValidationError] = useState('');
@@ -67,7 +77,7 @@ export function usePartnerLead() {
         partnerEmail: '',
         partnerCity: '',
         partnerUpi: '',
-        partnerType: 'broker',
+        partnerType: selectedTier === 'growth' ? 'broker' : 'resident',
         referredByCode: refCodeFromUrl,
         targetSocietyName: '',
         targetCity: '',
@@ -76,6 +86,11 @@ export function usePartnerLead() {
         contactPhone: '',
         approxFlats: '100-250',
         notes: '',
+        userRoleInSociety: 'Resident / Flat Owner',
+        preferredDemoSlot: 'Weekend Morning (11:00 AM)',
+        brokerAgencyName: '',
+        estimatedSocietyPipeline: '3 - 5 Societies',
+        operatingAreas: '',
       });
     } catch (err) {
       console.error('Error submitting lead:', err);
