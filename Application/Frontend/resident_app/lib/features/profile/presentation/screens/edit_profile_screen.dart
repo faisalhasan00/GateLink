@@ -7,7 +7,6 @@ import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
-import '../controllers/profile_controller.dart';
 import '../widgets/edit_profile_photo_header.dart';
 import '../widgets/edit_profile_form.dart';
 import '../widgets/edit_profile_residency_section.dart';
