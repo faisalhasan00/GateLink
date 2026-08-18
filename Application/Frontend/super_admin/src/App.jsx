@@ -15,6 +15,7 @@ const SuperAdminDashboard = lazy(() => import('./pages/superadmin/SuperAdminDash
 const SocietyManagement = lazy(() => import('./pages/superadmin/SocietyManagement'))
 const CrmLeads = lazy(() => import('./pages/superadmin/CrmLeads'))
 const AdCampaigns = lazy(() => import('./pages/superadmin/AdCampaigns'))
+const PartnerLeads = lazy(() => import('./pages/superadmin/PartnerLeads'))
 const SuperAdminProfile = lazy(() => import('./pages/superadmin/SuperAdminProfile'))
 const SuperAdminLogin = lazy(() => import('./pages/superadmin/SuperAdminLogin'))
 
@@ -92,6 +93,7 @@ export default function App() {
               <Route index element={<SuperAdminDashboard />} />
               <Route path="societies" element={<SocietyManagement />} />
               <Route path="crm" element={<CrmLeads />} />
+              <Route path="partners" element={<PartnerLeads />} />
               <Route path="ads" element={<AdCampaigns />} />
               <Route path="profile" element={<SuperAdminProfile />} />
 
@@ -99,6 +101,7 @@ export default function App() {
               <Route path="super-admin" element={<SuperAdminDashboard />} />
               <Route path="super-admin/societies" element={<SocietyManagement />} />
               <Route path="super-admin/crm" element={<CrmLeads />} />
+              <Route path="super-admin/partners" element={<PartnerLeads />} />
               <Route path="super-admin/ads" element={<AdCampaigns />} />
               <Route path="super-admin/profile" element={<SuperAdminProfile />} />
             </Route>

@@ -5,7 +5,8 @@ import {
   Settings, 
   Megaphone, 
   Building2, 
-  Contact 
+  Contact,
+  Handshake
 } from 'lucide-react';
 import EnterpriseHeader from './EnterpriseHeader';
 import EnterpriseSidebar from './EnterpriseSidebar';
@@ -15,6 +16,7 @@ const SUPER_ADMIN_NAV = [
   { name: 'SaaS Overview', path: '/', icon: <LayoutDashboard size={20} /> },
   { name: 'Societies & Licenses', path: '/societies', icon: <Building2 size={20} /> },
   { name: 'CRM & Sales Leads', path: '/crm', icon: <Contact size={20} /> },
+  { name: 'Partners & Payouts', path: '/partners', icon: <Handshake size={20} /> },
   { name: 'Ad & Campaigns', path: '/ads', icon: <Megaphone size={20} /> },
   { name: 'System Settings', path: '/profile', icon: <Settings size={20} /> },
 ];
@@ -24,6 +26,7 @@ const PAGE_TITLES = {
   '/': { title: 'SaaS Platform Overview', subtitle: 'Global analytics, total societies, revenue, and active subscriptions' },
   '/societies': { title: 'Society Onboarding & Licensing', subtitle: 'Onboard new societies and manage subscription tiers' },
   '/crm': { title: 'Sales CRM & Lead Pipeline', subtitle: 'Track society onboarding leads, inquiries, and demo requests' },
+  '/partners': { title: 'Partner & Referral Deals CRM', subtitle: 'Manage broker leads, track conversions, and approve monthly recurring UPI payouts' },
   '/ads': { title: 'Ad Banners & Broadcast Manager', subtitle: 'Manage promotional banners and cross-society announcements' },
   '/profile': { title: 'Super Admin Profile', subtitle: 'System administrator credentials and security settings' },
 };

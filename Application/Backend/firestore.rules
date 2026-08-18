@@ -229,6 +229,28 @@ service cloud.firestore {
       allow read, update, delete: if isAuthenticated();
     }
 
+    // Partner & Referral Leads (Public Lead Submission & Status Lookup by Phone/Ref)
+    match /partner_leads/{leadId} {
+      allow create: if true;
+      allow read: if true;
+      allow update, delete: if isAuthenticated();
+    }
+
+    // Partner Accounts & Commission Payouts
+    match /partner_accounts/{accountId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    match /partner_payouts/{payoutId} {
+      allow read, write: if isAuthenticated();
+    }
+
+    // System Configuration (Global Partner Commission Rates & App Settings)
+    match /system_config/{configId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
     // Ad Campaigns Collection (Super Admin Access)
     match /ad_campaigns/{adId} {
       allow read, write: if isAuthenticated();

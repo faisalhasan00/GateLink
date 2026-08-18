@@ -81,6 +81,7 @@ export default function FooterSection() {
               <li><Link to="/solutions" style={{ color: '#94A3B8', textDecoration: 'none' }}>For Security Guards</Link></li>
               <li><Link to="/solutions" style={{ color: '#94A3B8', textDecoration: 'none' }}>For Committee Members</Link></li>
               <li><Link to="/solutions" style={{ color: '#94A3B8', textDecoration: 'none' }}>For Property Managers</Link></li>
+              <li><Link to="/partners" style={{ color: '#94A3B8', textDecoration: 'none' }}>Partner Program</Link></li>
               <li><Link to="/contact" style={{ color: '#94A3B8', textDecoration: 'none' }}>Get Custom Proposal</Link></li>
             </ul>
           </div>

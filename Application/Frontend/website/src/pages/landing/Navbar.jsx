@@ -89,6 +89,17 @@ export default function Navbar({ onOpenDemo }) {
                 isDark={isDark}
               />
               <Link
+                to="/partners"
+                style={{
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  color: isDark ? '#38BDF8' : '#0D9488',
+                  textDecoration: 'none',
+                }}
+              >
+                Partner & Earn
+              </Link>
+              <Link
                 to="/contact"
                 style={{
                   fontSize: '14px',
