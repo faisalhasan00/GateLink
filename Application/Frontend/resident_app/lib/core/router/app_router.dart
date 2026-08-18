@@ -34,6 +34,7 @@ import '../../features/guard/presentation/screens/guard_dashboard_screen.dart';
 import '../../features/guard/presentation/screens/qr_scanner_screen.dart';
 import '../../features/guard/presentation/screens/quick_entry_screen.dart';
 import '../../features/guard/presentation/screens/vehicle_log_screen.dart';
+import '../../features/referral/presentation/screens/referral_screen.dart';
 
 /// All route paths in one place
 class AppRoutes {
@@ -46,6 +47,8 @@ class AppRoutes {
   static const String home = '/home';
   static const String dashboard = '/home/dashboard';
   static const String notifications = '/home/notifications';
+  // Referral
+  static const String referral = '/home/referral';
   // Maintenance
   static const String maintenance = '/home/maintenance';
   static const String payMaintenance = '/home/maintenance/pay';
@@ -149,6 +152,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/vehicles',
         redirect: (context, state) => AppRoutes.guardVehicles,
+      ),
+      GoRoute(
+        path: '/referral',
+        redirect: (context, state) => AppRoutes.referral,
       ),
       GoRoute(
         path: '/profile',
@@ -308,6 +315,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.documents,
             builder: (context, state) => const DocumentScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.referral,
+            builder: (context, state) => const ReferralScreen(),
           ),
           GoRoute(
             path: AppRoutes.profile,
