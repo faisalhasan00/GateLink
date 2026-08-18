@@ -1,6 +1,8 @@
 import React from 'react';
-import { Send, Sparkles, Tag } from 'lucide-react';
+import { Sparkles, Tag } from 'lucide-react';
 import { useTheme } from '../../../../context/ThemeContext';
+import Input from '../../../../components/ui/Input';
+import Button from '../../../../components/ui/Button';
 
 export default function GrowthPartnerForm({
   formData,
@@ -48,76 +50,74 @@ export default function GrowthPartnerForm({
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Broker / Agency Firm Name</label>
-            <input
-              type="text"
-              name="brokerAgencyName"
-              value={formData.brokerAgencyName}
-              onChange={handleInputChange}
-              placeholder="e.g. Apex Realty & Facility Services"
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
-            />
-          </div>
+          <Input
+            label="Broker / Agency Firm Name"
+            name="brokerAgencyName"
+            value={formData.brokerAgencyName}
+            onChange={handleInputChange}
+            placeholder="e.g. Apex Realty & Facility Services"
+            isDark={isDark}
+          />
 
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Managing Partner Name *</label>
-            <input
-              type="text"
-              name="partnerName"
-              value={formData.partnerName}
-              onChange={handleInputChange}
-              placeholder="e.g. Vikram Singhal"
-              required
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
-            />
-          </div>
+          <Input
+            label="Managing Partner Name *"
+            name="partnerName"
+            value={formData.partnerName}
+            onChange={handleInputChange}
+            placeholder="e.g. Vikram Singhal"
+            required
+            isDark={isDark}
+          />
 
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Phone / WhatsApp *</label>
-            <input
-              type="tel"
-              name="partnerPhone"
-              value={formData.partnerPhone}
-              onChange={handleInputChange}
-              placeholder="e.g. 9876543210"
-              required
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
-            />
-          </div>
+          <Input
+            label="Phone / WhatsApp *"
+            type="tel"
+            name="partnerPhone"
+            value={formData.partnerPhone}
+            onChange={handleInputChange}
+            placeholder="e.g. 9876543210"
+            required
+            isDark={isDark}
+          />
 
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Business UPI ID *</label>
-            <input
-              type="text"
-              name="partnerUpi"
-              value={formData.partnerUpi}
-              onChange={handleInputChange}
-              placeholder="e.g. apexrealty@icici"
-              required
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
-            />
-          </div>
+          <Input
+            label="Business UPI ID *"
+            name="partnerUpi"
+            value={formData.partnerUpi}
+            onChange={handleInputChange}
+            placeholder="e.g. apexrealty@icici"
+            required
+            isDark={isDark}
+          />
 
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Primary Operating Cities / Localities</label>
-            <input
-              type="text"
-              name="operatingAreas"
-              value={formData.operatingAreas}
-              onChange={handleInputChange}
-              placeholder="e.g. Hitec City, Gachibowli, Kondapur"
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
-            />
-          </div>
+          <Input
+            label="Primary Operating Cities / Localities"
+            name="operatingAreas"
+            value={formData.operatingAreas}
+            onChange={handleInputChange}
+            placeholder="e.g. Hitec City, Gachibowli, Kondapur"
+            isDark={isDark}
+          />
 
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Estimated Pipeline (Next 60 Days)</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '13px', fontWeight: 600, color: isDark ? '#E2E8F0' : '#334155' }}>
+              Estimated Pipeline (Next 60 Days)
+            </label>
             <select
               name="estimatedSocietyPipeline"
               value={formData.estimatedSocietyPipeline}
               onChange={handleInputChange}
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
+              style={{
+                width: '100%',
+                boxSizing: 'border-box',
+                padding: '11px 14px',
+                borderRadius: '12px',
+                border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1.5px solid #E2E8F0',
+                backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
+                color: isDark ? '#FFFFFF' : '#0F172A',
+                fontSize: '14px',
+                outline: 'none'
+              }}
             >
               <option value="3 - 5 Societies">3 - 5 Societies (Standard Growth Tier)</option>
               <option value="5 - 10 Societies">5 - 10 Societies</option>
@@ -134,26 +134,35 @@ export default function GrowthPartnerForm({
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>First Society Name *</label>
-            <input
-              type="text"
-              name="targetSocietyName"
-              value={formData.targetSocietyName}
-              onChange={handleInputChange}
-              placeholder="e.g. Prestige High Fields"
-              required
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
-            />
-          </div>
+          <Input
+            label="First Society Name *"
+            name="targetSocietyName"
+            value={formData.targetSocietyName}
+            onChange={handleInputChange}
+            placeholder="e.g. Prestige High Fields"
+            required
+            isDark={isDark}
+          />
 
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Approx Flat Count</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '13px', fontWeight: 600, color: isDark ? '#E2E8F0' : '#334155' }}>
+              Approx Flat Count
+            </label>
             <select
               name="approxFlats"
               value={formData.approxFlats}
               onChange={handleInputChange}
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
+              style={{
+                width: '100%',
+                boxSizing: 'border-box',
+                padding: '11px 14px',
+                borderRadius: '12px',
+                border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1.5px solid #E2E8F0',
+                backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
+                color: isDark ? '#FFFFFF' : '#0F172A',
+                fontSize: '14px',
+                outline: 'none'
+              }}
             >
               <option value="100-250">100 - 250 Flats</option>
               <option value="250-500">250 - 500 Flats</option>
@@ -161,17 +170,14 @@ export default function GrowthPartnerForm({
             </select>
           </div>
 
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Society Committee Contact (Optional)</label>
-            <input
-              type="text"
-              name="contactPerson"
-              value={formData.contactPerson}
-              onChange={handleInputChange}
-              placeholder="e.g. Secretary Name & Phone"
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
-            />
-          </div>
+          <Input
+            label="Society Committee Contact (Optional)"
+            name="contactPerson"
+            value={formData.contactPerson}
+            onChange={handleInputChange}
+            placeholder="e.g. Secretary Name & Phone"
+            isDark={isDark}
+          />
         </div>
       </div>
 
@@ -180,27 +186,16 @@ export default function GrowthPartnerForm({
         <span style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#666666' }}>
           🔒 Includes Dedicated Partner Relationship Manager & Lifetime Contract.
         </span>
-        <button
+        <Button
           type="submit"
-          disabled={submitting}
-          style={{
-            padding: '12px 32px',
-            borderRadius: '12px',
-            backgroundColor: '#1E3A8A',
-            color: '#FFFFFF',
-            fontSize: '14px',
-            fontWeight: 700,
-            border: 'none',
-            cursor: submitting ? 'not-allowed' : 'pointer',
-            opacity: submitting ? 0.6 : 1,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
+          variant="primary"
+          size="medium"
+          loading={submitting}
+          icon={Sparkles}
+          iconPosition="left"
         >
-          <Sparkles size={15} />
-          <span>{submitting ? 'Registering...' : 'Register as Growth Partner'}</span>
-        </button>
+          Register as Growth Partner
+        </Button>
       </div>
     </form>
   );

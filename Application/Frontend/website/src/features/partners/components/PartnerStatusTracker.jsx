@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Search, Building, CheckCircle2, Clock, DollarSign, AlertCircle, ShieldCheck } from 'lucide-react';
 import { lookupPartnerLeads } from '../services/partnerService';
 import { useTheme } from '../../../context/ThemeContext';
+import Input from '../../../components/ui/Input';
+import Button from '../../../components/ui/Button';
 
 export default function PartnerStatusTracker() {
   const { theme } = useTheme();
@@ -76,42 +78,26 @@ export default function PartnerStatusTracker() {
         </div>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px', maxWidth: '600px', margin: '0 auto 30px auto' }}>
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Enter Phone (e.g. 9876543210) or Lead ID"
-            style={{
-              flex: 1,
-              padding: '12px 16px',
-              borderRadius: '10px',
-              border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC',
-              backgroundColor: isDark ? '#0F172A' : '#FFFFFF',
-              color: isDark ? '#FFFFFF' : '#2C2C2C',
-              fontSize: '14px'
-            }}
-          />
-          <button
+        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px', marginBottom: '24px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ flex: 1, minWidth: '260px' }}>
+            <Input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Enter Phone (e.g. 9876543210) or Lead ID"
+              isDark={isDark}
+            />
+          </div>
+          <Button
             type="submit"
-            disabled={loading}
-            style={{
-              padding: '12px 24px',
-              borderRadius: '10px',
-              backgroundColor: '#1E3A8A',
-              color: '#FFFFFF',
-              border: 'none',
-              fontSize: '14px',
-              fontWeight: 700,
-              cursor: loading ? 'not-allowed' : 'pointer',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}
+            variant="primary"
+            size="medium"
+            loading={loading}
+            icon={Search}
+            iconPosition="left"
           >
-            <Search size={16} />
-            <span>{loading ? 'Checking...' : 'Check Status'}</span>
-          </button>
+            Track Status
+          </Button>
         </form>
 
         {error && (

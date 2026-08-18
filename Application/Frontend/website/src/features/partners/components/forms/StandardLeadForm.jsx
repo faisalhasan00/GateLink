@@ -1,11 +1,12 @@
 import React from 'react';
 import { Send, Tag } from 'lucide-react';
 import { useTheme } from '../../../../context/ThemeContext';
+import Input from '../../../../components/ui/Input';
+import Button from '../../../../components/ui/Button';
 
 export default function StandardLeadForm({
   formData,
   refCodeFromUrl,
-  selectedTier,
   submitting,
   validationError,
   handleInputChange,
@@ -49,52 +50,56 @@ export default function StandardLeadForm({
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Your Full Name *</label>
-            <input
-              type="text"
-              name="partnerName"
-              value={formData.partnerName}
-              onChange={handleInputChange}
-              placeholder="e.g. Rahul Sharma"
-              required
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
-            />
-          </div>
+          <Input
+            label="Your Full Name *"
+            name="partnerName"
+            value={formData.partnerName}
+            onChange={handleInputChange}
+            placeholder="e.g. Rahul Sharma"
+            required
+            isDark={isDark}
+          />
 
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Your Phone / WhatsApp *</label>
-            <input
-              type="tel"
-              name="partnerPhone"
-              value={formData.partnerPhone}
-              onChange={handleInputChange}
-              placeholder="e.g. 9876543210"
-              required
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
-            />
-          </div>
+          <Input
+            label="Your Phone / WhatsApp *"
+            type="tel"
+            name="partnerPhone"
+            value={formData.partnerPhone}
+            onChange={handleInputChange}
+            placeholder="e.g. 9876543210"
+            required
+            isDark={isDark}
+          />
 
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Your UPI ID (For Direct Payouts) *</label>
-            <input
-              type="text"
-              name="partnerUpi"
-              value={formData.partnerUpi}
-              onChange={handleInputChange}
-              placeholder="e.g. rahul@okaxis or 9876543210@paytm"
-              required
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
-            />
-          </div>
+          <Input
+            label="Your UPI ID (For Direct Payouts) *"
+            name="partnerUpi"
+            value={formData.partnerUpi}
+            onChange={handleInputChange}
+            placeholder="e.g. rahul@okaxis or 9876543210@paytm"
+            required
+            isDark={isDark}
+          />
 
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Your Role / Profile</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '13px', fontWeight: 600, color: isDark ? '#E2E8F0' : '#334155' }}>
+              Your Role / Profile
+            </label>
             <select
               name="partnerType"
               value={formData.partnerType}
               onChange={handleInputChange}
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
+              style={{
+                width: '100%',
+                boxSizing: 'border-box',
+                padding: '11px 14px',
+                borderRadius: '12px',
+                border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1.5px solid #E2E8F0',
+                backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
+                color: isDark ? '#FFFFFF' : '#0F172A',
+                fontSize: '14px',
+                outline: 'none'
+              }}
             >
               <option value="resident">Resident / Flat Owner</option>
               <option value="committee">RWA Committee Member</option>
@@ -112,51 +117,55 @@ export default function StandardLeadForm({
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '16px' }}>
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Society Name *</label>
-            <input
-              type="text"
-              name="targetSocietyName"
-              value={formData.targetSocietyName}
-              onChange={handleInputChange}
-              placeholder="e.g. Green Valley Residency"
-              required
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
-            />
-          </div>
+          <Input
+            label="Society Name *"
+            name="targetSocietyName"
+            value={formData.targetSocietyName}
+            onChange={handleInputChange}
+            placeholder="e.g. Green Valley Residency"
+            required
+            isDark={isDark}
+          />
 
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Society City / Location</label>
-            <input
-              type="text"
-              name="targetCity"
-              value={formData.targetCity}
-              onChange={handleInputChange}
-              placeholder="e.g. Hyderabad / Farooqnagar"
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
-            />
-          </div>
+          <Input
+            label="Society City / Location"
+            name="targetCity"
+            value={formData.targetCity}
+            onChange={handleInputChange}
+            placeholder="e.g. Hyderabad / Farooqnagar"
+            isDark={isDark}
+          />
 
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Secretary / Committee Phone *</label>
-            <input
-              type="tel"
-              name="contactPhone"
-              value={formData.contactPhone}
-              onChange={handleInputChange}
-              placeholder="e.g. 9845011223"
-              required
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
-            />
-          </div>
+          <Input
+            label="Secretary / Committee Phone *"
+            type="tel"
+            name="contactPhone"
+            value={formData.contactPhone}
+            onChange={handleInputChange}
+            placeholder="e.g. 9845011223"
+            required
+            isDark={isDark}
+          />
 
-          <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#E2E8F0' : '#444444', marginBottom: '8px' }}>Approximate Flats</label>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label style={{ fontSize: '13px', fontWeight: 600, color: isDark ? '#E2E8F0' : '#334155' }}>
+              Approximate Flats
+            </label>
             <select
               name="approxFlats"
               value={formData.approxFlats}
               onChange={handleInputChange}
-              style={{ width: '100%', boxSizing: 'border-box', padding: '12px 14px', borderRadius: '10px', border: isDark ? '1px solid rgba(255,255,255,0.15)' : '1px solid #CCCCCC', backgroundColor: isDark ? '#0F172A' : '#FFFFFF', color: isDark ? '#FFFFFF' : '#2C2C2C', fontSize: '14px' }}
+              style={{
+                width: '100%',
+                boxSizing: 'border-box',
+                padding: '11px 14px',
+                borderRadius: '12px',
+                border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1.5px solid #E2E8F0',
+                backgroundColor: isDark ? '#1E293B' : '#FFFFFF',
+                color: isDark ? '#FFFFFF' : '#0F172A',
+                fontSize: '14px',
+                outline: 'none'
+              }}
             >
               <option value="50-100">50 - 100 Flats</option>
               <option value="100-250">100 - 250 Flats</option>
@@ -172,27 +181,16 @@ export default function StandardLeadForm({
         <span style={{ fontSize: '12px', color: isDark ? '#94A3B8' : '#666666' }}>
           🔒 Direct payout guarantee. We never share partner contact info.
         </span>
-        <button
+        <Button
           type="submit"
-          disabled={submitting}
-          style={{
-            padding: '12px 32px',
-            borderRadius: '12px',
-            backgroundColor: '#1E3A8A',
-            color: '#FFFFFF',
-            fontSize: '14px',
-            fontWeight: 700,
-            border: 'none',
-            cursor: submitting ? 'not-allowed' : 'pointer',
-            opacity: submitting ? 0.6 : 1,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px'
-          }}
+          variant="primary"
+          size="medium"
+          loading={submitting}
+          icon={Send}
+          iconPosition="left"
         >
-          <Send size={15} />
-          <span>{submitting ? 'Submitting Lead...' : 'Submit Society Lead'}</span>
-        </button>
+          Submit Society Lead
+        </Button>
       </div>
     </form>
   );

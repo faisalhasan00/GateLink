@@ -1,6 +1,7 @@
 import React from 'react';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Plus } from 'lucide-react';
 import { useTheme } from '../../../../context/ThemeContext';
+import Button from '../../../../components/ui/Button';
 
 export default function PartnerFormSuccess({ submittedRef, selectedTier, onReset }) {
   const { theme } = useTheme();
@@ -17,21 +18,17 @@ export default function PartnerFormSuccess({ submittedRef, selectedTier, onReset
       <p style={{ color: isDark ? '#94A3B8' : '#666666', fontSize: '15px', lineHeight: 1.6, margin: '0 auto 24px auto', maxWidth: '520px' }}>
         Your Reference ID is <strong style={{ color: isDark ? '#FFFFFF' : '#2C2C2C' }}>{submittedRef}</strong>. Our enterprise team will schedule a demo with the society committee and keep you updated via WhatsApp.
       </p>
-      <button
-        onClick={onReset}
-        style={{
-          padding: '12px 28px',
-          borderRadius: '12px',
-          backgroundColor: '#1E3A8A',
-          color: '#FFFFFF',
-          fontSize: '14px',
-          fontWeight: 700,
-          border: 'none',
-          cursor: 'pointer'
-        }}
-      >
-        Submit Another Lead
-      </button>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <Button
+          onClick={onReset}
+          variant="primary"
+          size="medium"
+          icon={Plus}
+          iconPosition="left"
+        >
+          Submit Another Lead
+        </Button>
+      </div>
     </div>
   );
 }
