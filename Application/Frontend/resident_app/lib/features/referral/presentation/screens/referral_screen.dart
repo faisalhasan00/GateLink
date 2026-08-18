@@ -244,7 +244,7 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Refer Society & Earn Cash', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Share & Earn', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF1E3A8A),
         foregroundColor: Colors.white,
         elevation: 0,
@@ -324,10 +324,11 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-            // Submit Lead Quick Trigger Box
+            // Submit Lead Quick Trigger Card (Clean Responsive Layout)
             Container(
+              width: double.infinity,
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -335,42 +336,53 @@ class _ReferralScreenState extends ConsumerState<ReferralScreen> {
                 border: Border.all(color: Colors.grey.shade200),
                 boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))],
               ),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE0F2FE),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(Icons.add_business, color: Color(0xFF0284C7), size: 24),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Know a Housing Society?',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF1E3A8A)),
+                  Row(
+                    children: [
+                      Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE0F2FE),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                        Text(
-                          'Submit their Secretary info in 30 seconds.',
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                        child: const Icon(Icons.add_business, color: Color(0xFF0284C7), size: 22),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Know a Housing Society?',
+                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E3A8A)),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Submit their Secretary info in 30 seconds.',
+                              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  ElevatedButton(
-                    onPressed: () => _openSubmitLeadSheet(name, phone, ''),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1E3A8A),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  const SizedBox(height: 14),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 46,
+                    child: ElevatedButton.icon(
+                      onPressed: () => _openSubmitLeadSheet(name, phone, ''),
+                      icon: const Icon(Icons.send_rounded, size: 18),
+                      label: const Text('Submit Society Lead', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF1E3A8A),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
                     ),
-                    child: const Text('Submit Lead', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                   ),
                 ],
               ),
