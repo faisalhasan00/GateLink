@@ -123,6 +123,30 @@ export function usePartnerAdmin() {
     setPayoutNotes(`Month 1 (${month1Rate}%) Commission for ${lead.targetSocietyName}`);
   };
 
+  const handleInstantCashfreePayout = async () => {
+    if (!selectedLeadForPayout?.partnerUpi) {
+      alert('Partner UPI ID is missing. Please enter partner UPI ID first.');
+      return;
+    }
+
+    setSavingPayout(true);
+    try {
+      const res = await partnerAdminService.triggerCashfreeInstantPayout(
+        selectedLeadForPayout.id,
+        payoutAmount,
+        selectedLeadForPayout.partnerUpi,
+        payoutNotes
+      );
+      alert(res.message || '✓ Cashfree Instant UPI Transfer Success!');
+      setSelectedLeadForPayout(null);
+    } catch (err) {
+      console.error('Instant payout failed:', err);
+      alert(`Instant Cashfree Payout Failed: ${err.message || 'Unknown error'}`);
+    } finally {
+      setSavingPayout(false);
+    }
+  };
+
   const handleSavePayout = async (e) => {
     e.preventDefault();
     if (!utrNumber.trim()) {
@@ -255,6 +279,7 @@ export function usePartnerAdmin() {
     savingPayout,
     handleOpenPayoutModal,
     handleSavePayout,
+    handleInstantCashfreePayout,
 
     // Actions
     handleStatusChange,

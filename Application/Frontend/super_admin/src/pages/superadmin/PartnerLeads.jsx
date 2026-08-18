@@ -48,6 +48,7 @@ export default function PartnerLeads() {
     savingPayout,
     handleOpenPayoutModal,
     handleSavePayout,
+    handleInstantCashfreePayout,
 
     // Actions
     handleStatusChange,
@@ -95,6 +96,7 @@ export default function PartnerLeads() {
         savingPayout={savingPayout}
         onClose={() => setSelectedLeadForPayout(null)}
         onSubmit={handleSavePayout}
+        onInstantCashfreePayout={handleInstantCashfreePayout}
       />
 
       {/* Manual Add Lead Modal */}
