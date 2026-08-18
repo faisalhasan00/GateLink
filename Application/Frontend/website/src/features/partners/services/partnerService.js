@@ -79,6 +79,9 @@ export const onboardSocietyByPartner = async (onboardingData) => {
   const generatedRef = `LEAD-${Date.now().toString().slice(-6)}`;
   const activationCode = `SOC-${Math.floor(100000 + Math.random() * 900000)}`;
 
+  const flatCountNum = Number(onboardingData.flatCount) || 100;
+  const calculatedMrr = flatCountNum * 25; // ₹25/flat/month SaaS pricing
+
   // 1. Save Partner Lead & Onboarding Record
   const leadRef = await addDoc(collection(db, 'partner_leads'), {
     referenceId: generatedRef,
@@ -96,10 +99,12 @@ export const onboardSocietyByPartner = async (onboardingData) => {
     pincode: onboardingData.pincode?.trim() || '',
     
     wings: onboardingData.wings || [],
-    approxFlats: String(onboardingData.flatCount || 100),
-    flatCount: Number(onboardingData.flatCount) || 100,
+    approxFlats: String(flatCountNum),
+    flatCount: flatCountNum,
     gatesCount: Number(onboardingData.gatesCount) || 2,
     guardDevicesCount: Number(onboardingData.guardDevicesCount) || 2,
+    mrr: calculatedMrr,
+    monthlyFee: calculatedMrr,
 
     contactPerson: onboardingData.rwaSecretaryName.trim(),
     contactPhone: onboardingData.rwaSecretaryPhone.trim(),
@@ -117,14 +122,19 @@ export const onboardSocietyByPartner = async (onboardingData) => {
     name: onboardingData.societyName.trim(),
     city: onboardingData.city.trim(),
     address: onboardingData.address.trim(),
+    code: activationCode,
     activationCode,
     partnerReferenceId: generatedRef,
     partnerLeadId: leadRef.id,
-    flatCount: Number(onboardingData.flatCount) || 100,
+    flatCount: flatCountNum,
     wings: onboardingData.wings || [],
     gatesCount: Number(onboardingData.gatesCount) || 2,
+    president: onboardingData.rwaSecretaryName.trim(),
+    phone: onboardingData.rwaSecretaryPhone.trim(),
     contactPerson: onboardingData.rwaSecretaryName.trim(),
     contactPhone: onboardingData.rwaSecretaryPhone.trim(),
+    mrr: calculatedMrr,
+    monthlyFee: calculatedMrr,
     status: 'pending_rwa_activation',
     createdAt: serverTimestamp(),
   });

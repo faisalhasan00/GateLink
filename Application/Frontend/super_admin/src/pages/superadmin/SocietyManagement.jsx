@@ -131,7 +131,9 @@ Portal Link: http://localhost:3000/login`;
                         {soc.code}
                       </span>
                     </td>
-                    <td><strong>₹{Number(soc.mrr || 0).toLocaleString()}</strong></td>
+                    <td>
+                      <strong>₹{Number(soc.mrr || soc.monthlyFee || (Number(soc.flatCount || 100) * 25)).toLocaleString()}</strong>
+                    </td>
                     <td>
                       <span className={`badge ${soc.status === 'Active' ? 'success' : 'danger'}`}>
                         {soc.status}

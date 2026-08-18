@@ -26,6 +26,7 @@ const EmergencySos = lazy(() => import('./pages/EmergencySos'))
 const Reports = lazy(() => import('./pages/Reports'))
 const Legal = lazy(() => import('./pages/Legal'))
 const AdminLogin = lazy(() => import('./pages/AdminLogin'))
+const ActivateSociety = lazy(() => import('./pages/ActivateSociety'))
 const AdminProfile = lazy(() => import('./pages/AdminProfile'))
 
 function ProtectedRoute({ user, children }) {
@@ -124,8 +125,9 @@ export default function App() {
       <BrowserRouter>
         <Suspense fallback={<SkeletonLoader />}>
           <Routes>
-            {/* Login Route */}
+            {/* Login & Activation Routes */}
             <Route path="/login" element={<AdminLogin />} />
+            <Route path="/activate" element={<ActivateSociety />} />
 
             {/* Protected Society Admin Dashboard Routes */}
             <Route path="/" element={
