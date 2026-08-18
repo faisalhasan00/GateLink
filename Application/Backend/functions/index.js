@@ -30,6 +30,7 @@ const {
 const {
   reconcilePendingPayments,
 } = require("./payments/payment_reconciliation");
+const { triggerCashfreePayout } = require("./payments/cashfree_payouts");
 
 module.exports = {
   // Visitor Management
@@ -42,11 +43,12 @@ module.exports = {
   setSuperAdminRole,
   createStaffUser,
 
-  // Payment Processing
+  // Payment Processing & Payouts
   createCashfreeOrder,
   verifyCashfreePaymentStatus,
   cashfreeWebhook,
   approveOfflinePayment,
   rejectOfflinePayment,
   reconcilePendingPayments,
+  triggerCashfreePayout,
 };

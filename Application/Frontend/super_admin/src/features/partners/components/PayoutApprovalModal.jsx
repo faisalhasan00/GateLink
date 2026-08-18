@@ -12,6 +12,7 @@ export default function PayoutApprovalModal({
   savingPayout,
   onClose,
   onSubmit,
+  onInstantCashfreePayout,
 }) {
   if (!selectedLead) return null;
 
@@ -53,6 +54,46 @@ export default function PayoutApprovalModal({
             <h3 style={{ fontSize: '18px', fontWeight: 900, margin: 0, color: '#1E293B' }}>Approve Partner Payout</h3>
             <div style={{ fontSize: '12px', color: '#64748B' }}>Society: {selectedLead.targetSocietyName}</div>
           </div>
+        </div>
+
+        {/* 1-Click Cashfree Instant Payout Header Box */}
+        <div style={{ padding: '14px', borderRadius: '12px', background: 'linear-gradient(135deg, #1E3A8A 0%, #0EA5E9 100%)', color: '#FFFFFF', marginBottom: '18px' }}>
+          <div style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.5px', opacity: 0.9, textTransform: 'uppercase' }}>
+            CASHFREE AUTOMATED PAYOUTS
+          </div>
+          <div style={{ fontSize: '15px', fontWeight: 900, margin: '4px 0' }}>
+            Instant Direct UPI Transfer
+          </div>
+          <div style={{ fontSize: '12px', opacity: 0.9, marginBottom: '12px' }}>
+            Sends ₹{payoutAmount || 500} directly to <strong>{selectedLead.partnerUpi || 'UPI'}</strong> in 2 seconds.
+          </div>
+          <button
+            type="button"
+            disabled={savingPayout || !selectedLead.partnerUpi}
+            onClick={onInstantCashfreePayout}
+            style={{
+              width: '100%',
+              padding: '10px',
+              borderRadius: '8px',
+              border: 'none',
+              backgroundColor: '#25D366',
+              color: '#FFFFFF',
+              fontSize: '13px',
+              fontWeight: 800,
+              cursor: savingPayout ? 'not-allowed' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              boxShadow: '0 4px 10px rgba(0,0,0,0.15)'
+            }}
+          >
+            ⚡ {savingPayout ? 'Processing Instant UPI...' : `Transfer ₹${payoutAmount || 500} via Cashfree UPI Now`}
+          </button>
+        </div>
+
+        <div style={{ textAlign: 'center', fontSize: '11px', color: '#94A3B8', fontWeight: 700, margin: '14px 0', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+          — OR RECORD MANUAL BANK TRANSFER —
         </div>
 
         <form onSubmit={onSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
