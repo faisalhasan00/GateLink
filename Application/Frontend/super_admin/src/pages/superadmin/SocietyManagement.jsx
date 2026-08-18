@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Plus, CheckCircle, XCircle, Copy, Check, Trash2 } from 'lucide-react';
 import SocietyOnboardingWizard from '../../components/superadmin/SocietyOnboardingWizard';
 import { superAdminService } from '../../services/superAdminService';
+import { calculateSocietyMonthlyFee } from '../../utils/pricingEngine';
 
 export default function SocietyManagement() {
   const [societies, setSocieties] = useState([]);
@@ -132,7 +133,7 @@ Portal Link: http://localhost:3000/login`;
                       </span>
                     </td>
                     <td>
-                      <strong>₹{Number(soc.mrr || soc.monthlyFee || (Number(soc.flatCount || 100) * 25)).toLocaleString()}</strong>
+                      <strong>₹{Number(soc.mrr || soc.monthlyFee || calculateSocietyMonthlyFee(soc.flatCount || 100)).toLocaleString()}</strong>
                     </td>
                     <td>
                       <span className={`badge ${soc.status === 'Active' ? 'success' : 'danger'}`}>

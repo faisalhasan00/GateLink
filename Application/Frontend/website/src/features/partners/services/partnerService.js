@@ -1,5 +1,6 @@
 import { collection, addDoc, query, where, getDocs, doc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../firebase';
+import { calculateSocietyMonthlyFee } from '../../../utils/pricingEngine';
 
 /**
  * GateLink Partner & Lead Firestore Service
@@ -80,7 +81,7 @@ export const onboardSocietyByPartner = async (onboardingData) => {
   const activationCode = `SOC-${Math.floor(100000 + Math.random() * 900000)}`;
 
   const flatCountNum = Number(onboardingData.flatCount) || 100;
-  const calculatedMrr = flatCountNum * 25; // ₹25/flat/month SaaS pricing
+  const calculatedMrr = calculateSocietyMonthlyFee(flatCountNum);
 
   // 1. Save Partner Lead & Onboarding Record
   const leadRef = await addDoc(collection(db, 'partner_leads'), {

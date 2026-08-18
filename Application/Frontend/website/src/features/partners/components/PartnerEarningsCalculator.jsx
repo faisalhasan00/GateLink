@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
+import { calculateSocietyMonthlyFee } from '../../../utils/pricingEngine';
 
 export default function PartnerEarningsCalculator({ selectedTier, rates = {} }) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [flatCount, setFlatCount] = useState(200);
+  const [flatCount, setFlatCount] = useState(150);
 
-  // Dynamic Math Calculations based on rates from Super Admin
-  const baseRate = rates.baseRatePerFlat || 25;
-  const monthlySaaSRevenue = flatCount * baseRate;
+  // Dynamic Math Calculations based on Official Flat Slab Pricing
+  const monthlySaaSRevenue = calculateSocietyMonthlyFee(flatCount);
   
   const m1Pct = selectedTier === 'referral' 
     ? (rates.tier1Month1Percent ?? 5) 
@@ -57,18 +57,17 @@ export default function PartnerEarningsCalculator({ selectedTier, rates = {} }) 
             </div>
             <input
               type="range"
-              min="50"
-              max="1500"
-              step="25"
+              min="10"
+              max="500"
+              step="5"
               value={flatCount}
               onChange={(e) => setFlatCount(Number(e.target.value))}
               style={{ width: '100%', height: '8px', borderRadius: '4px', cursor: 'pointer', accentColor: '#1E3A8A' }}
             />
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: isDark ? '#64748B' : '#999999', marginTop: '6px' }}>
-              <span>50 Flats</span>
-              <span>500 Flats</span>
-              <span>1,000 Flats</span>
-              <span>1,500+ Flats</span>
+              <span>12 Flats (₹1,000/mo)</span>
+              <span>150 Flats (₹5,500/mo)</span>
+              <span>300+ Flats (₹7,500+/mo)</span>
             </div>
           </div>
 
