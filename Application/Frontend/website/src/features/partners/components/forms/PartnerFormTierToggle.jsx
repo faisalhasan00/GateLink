@@ -1,5 +1,4 @@
 import React from 'react';
-import { Zap, Sparkles } from 'lucide-react';
 import { useTheme } from '../../../../context/ThemeContext';
 
 export default function PartnerFormTierToggle({ selectedTier, onSelectTier }) {
@@ -49,7 +48,7 @@ export default function PartnerFormTierToggle({ selectedTier, onSelectTier }) {
             transition: 'all 0.2s ease'
           }}
         >
-          <Zap size={15} /> Society Referral (Tier 1 & 2)
+          Society Referral (Tier 1 & 2)
         </button>
 
         <button
@@ -70,7 +69,7 @@ export default function PartnerFormTierToggle({ selectedTier, onSelectTier }) {
             transition: 'all 0.2s ease'
           }}
         >
-          <Sparkles size={15} /> Pro Broker Agency (Tier 3 Lifetime)
+          Pro Broker Agency (Tier 3 Lifetime)
         </button>
       </div>
     </div>

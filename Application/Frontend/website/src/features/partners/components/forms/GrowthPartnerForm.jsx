@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Tag } from 'lucide-react';
+import { Send, Tag } from 'lucide-react';
 import { useTheme } from '../../../../context/ThemeContext';
 import Input from '../../../../components/ui/Input';
 import Button from '../../../../components/ui/Button';
@@ -191,7 +191,7 @@ export default function GrowthPartnerForm({
           variant="primary"
           size="medium"
           loading={submitting}
-          icon={Sparkles}
+          icon={Send}
           iconPosition="left"
         >
           Register as Growth Partner
