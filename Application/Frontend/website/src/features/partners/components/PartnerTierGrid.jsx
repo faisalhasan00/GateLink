@@ -2,9 +2,16 @@ import React from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 
-export default function PartnerTierGrid({ onSelectTier }) {
+export default function PartnerTierGrid({ onSelectTier, rates = {} }) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+
+  const t1M1 = rates.tier1Month1Percent ?? 5;
+  const t1Rec = rates.tier1MonthlyPercent ?? 2;
+  const t2M1 = rates.tier2Month1Percent ?? 10;
+  const t2Rec = rates.tier2MonthlyPercent ?? 2;
+  const t3M1 = rates.tier3Month1Percent ?? 10;
+  const t3Rec = rates.tier3MonthlyPercent ?? 2;
 
   const tiers = [
     {
@@ -14,9 +21,9 @@ export default function PartnerTierGrid({ onSelectTier }) {
       subtitle: 'For residents & casual friends who introduce a society committee',
       badgeColor: '#059669',
       badgeBg: '#ECFDF5',
-      m1Rate: '5%',
+      m1Rate: `${t1M1}%`,
       m1Desc: 'One-time bonus on Month 1',
-      recurring: '2%',
+      recurring: `${t1Rec}%`,
       duration: '12 Months (1 Year)',
       features: [
         'Just submit Society Name & Secretary phone',
@@ -31,13 +38,13 @@ export default function PartnerTierGrid({ onSelectTier }) {
       subtitle: 'For champions who introduce and help collect flat/resident rosters',
       badgeColor: '#0284C7',
       badgeBg: '#E0F2FE',
-      m1Rate: '10%',
+      m1Rate: `${t2M1}%`,
       m1Desc: 'Doubled bonus on Month 1',
-      recurring: '2%',
+      recurring: `${t2Rec}%`,
       duration: '24 Months (2 Full Years)',
       features: [
         'Introduce committee & assist with tower/flat lists',
-        'Doubled 10% cash bonus on first invoice',
+        `Doubled ${t2M1}% cash bonus on first invoice`,
         '2 Full Years of recurring passive monthly payouts'
       ]
     },
@@ -49,12 +56,12 @@ export default function PartnerTierGrid({ onSelectTier }) {
       badgeColor: '#1E3A8A',
       badgeBg: '#EFF6FF',
       isPro: true,
-      m1Rate: '10%',
-      m1Desc: 'Full 10% bonus on Month 1',
-      recurring: '2%',
+      m1Rate: `${t3M1}%`,
+      m1Desc: `Full ${t3M1}% bonus on Month 1`,
+      recurring: `${t3Rec}%`,
       duration: 'LIFETIME (Active Soc.)',
       features: [
-        'Permanent 2% recurring monthly revenue share',
+        `Permanent ${t3Rec}% recurring monthly revenue share`,
         'Dedicated Partner Relationship Manager',
         'Automated monthly UPI payouts with invoice statements'
       ]

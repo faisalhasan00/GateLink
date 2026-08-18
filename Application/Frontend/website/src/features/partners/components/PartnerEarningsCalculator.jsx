@@ -1,16 +1,25 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 
-export default function PartnerEarningsCalculator({ selectedTier }) {
+export default function PartnerEarningsCalculator({ selectedTier, rates = {} }) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [flatCount, setFlatCount] = useState(200);
 
-  // Math Calculations (@ ₹25/flat/month net SaaS fee)
-  const monthlySaaSRevenue = flatCount * 25;
-  const m1Rate = selectedTier === 'referral' ? 0.05 : 0.10;
-  const m1Bonus = Math.round(monthlySaaSRevenue * m1Rate);
-  const recurringMonthly = Math.round(monthlySaaSRevenue * 0.02);
+  // Dynamic Math Calculations based on rates from Super Admin
+  const baseRate = rates.baseRatePerFlat || 25;
+  const monthlySaaSRevenue = flatCount * baseRate;
+  
+  const m1Pct = selectedTier === 'referral' 
+    ? (rates.tier1Month1Percent ?? 5) 
+    : (selectedTier === 'onboarding' ? (rates.tier2Month1Percent ?? 10) : (rates.tier3Month1Percent ?? 10));
+    
+  const recPct = selectedTier === 'referral' 
+    ? (rates.tier1MonthlyPercent ?? 2) 
+    : (selectedTier === 'onboarding' ? (rates.tier2MonthlyPercent ?? 2) : (rates.tier3MonthlyPercent ?? 2));
+
+  const m1Bonus = Math.round(monthlySaaSRevenue * (m1Pct / 100));
+  const recurringMonthly = Math.round(monthlySaaSRevenue * (recPct / 100));
   const annualTotal = m1Bonus + (recurringMonthly * 11);
 
   return (
@@ -68,19 +77,19 @@ export default function PartnerEarningsCalculator({ selectedTier }) {
             <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '18px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E7EB' }}>
               <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#94A3B8' : '#666666', textTransform: 'uppercase' }}>ESTIMATED MONTHLY BILL</div>
               <div style={{ fontSize: '22px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', margin: '4px 0' }}>₹{monthlySaaSRevenue.toLocaleString('en-IN')}</div>
-              <div style={{ fontSize: '11px', color: isDark ? '#64748B' : '#999999' }}>@ ₹25/flat/mo net SaaS</div>
+              <div style={{ fontSize: '11px', color: isDark ? '#64748B' : '#999999' }}>@ ₹{baseRate}/flat/mo net SaaS</div>
             </div>
 
             <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '18px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E7EB' }}>
               <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#94A3B8' : '#666666', textTransform: 'uppercase' }}>MONTH 1 CASH BONUS</div>
               <div style={{ fontSize: '22px', fontWeight: 900, color: '#059669', margin: '4px 0' }}>₹{m1Bonus.toLocaleString('en-IN')}</div>
-              <div style={{ fontSize: '11px', color: isDark ? '#64748B' : '#999999' }}>{selectedTier === 'referral' ? '5%' : '10%'} on first invoice</div>
+              <div style={{ fontSize: '11px', color: isDark ? '#64748B' : '#999999' }}>{m1Pct}% on first invoice</div>
             </div>
 
             <div style={{ background: isDark ? '#0F172A' : '#F8FAFC', padding: '18px', borderRadius: '12px', border: isDark ? '1px solid rgba(255,255,255,0.06)' : '1px solid #E5E7EB' }}>
               <div style={{ fontSize: '11px', fontWeight: 700, color: isDark ? '#94A3B8' : '#666666', textTransform: 'uppercase' }}>MONTHLY RECURRING SHARE</div>
               <div style={{ fontSize: '22px', fontWeight: 900, color: '#1E3A8A', margin: '4px 0' }}>₹{recurringMonthly.toLocaleString('en-IN')} <span style={{ fontSize: '12px', fontWeight: 500, color: isDark ? '#94A3B8' : '#666666' }}>/mo</span></div>
-              <div style={{ fontSize: '11px', color: isDark ? '#64748B' : '#999999' }}>2% every month to UPI</div>
+              <div style={{ fontSize: '11px', color: isDark ? '#64748B' : '#999999' }}>{recPct}% every month to UPI</div>
             </div>
           </div>
 

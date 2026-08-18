@@ -1,4 +1,4 @@
-import { collection, addDoc, query, where, getDocs, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, query, where, getDocs, doc, onSnapshot, serverTimestamp } from 'firebase/firestore';
 import { db } from '../../../firebase';
 
 /**
@@ -52,4 +52,22 @@ export const lookupPartnerLeads = async (searchQuery) => {
   const refSnap = await getDocs(qRef);
 
   return refSnap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+};
+
+/**
+ * Real-time listener for dynamic partner commission percentage rates
+ */
+export const subscribeCommissionRates = (onUpdate) => {
+  const configDocRef = doc(db, 'system_config', 'partner_program');
+  return onSnapshot(
+    configDocRef,
+    (snap) => {
+      if (snap.exists()) {
+        onUpdate(snap.data());
+      }
+    },
+    (err) => {
+      console.warn('Notice: system_config/partner_program using default rates:', err);
+    }
+  );
 };

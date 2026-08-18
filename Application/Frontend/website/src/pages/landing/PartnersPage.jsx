@@ -5,8 +5,8 @@ import SeoHead from '../../components/seo/SeoHead';
 import DemoModal from './DemoModal';
 import { useTheme } from '../../context/ThemeContext';
 
-// Modular Feature Components & Hook
 import { usePartnerLead } from '../../features/partners/hooks/usePartnerLead';
+import { subscribeCommissionRates } from '../../features/partners/services/partnerService';
 import PartnerHero from '../../features/partners/components/PartnerHero';
 import PartnerMetrics from '../../features/partners/components/PartnerMetrics';
 import PartnerTierGrid from '../../features/partners/components/PartnerTierGrid';
@@ -20,6 +20,25 @@ export default function PartnersPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
+
+  // Dynamic Commission Rates (Synced Live from Super Admin)
+  const [rates, setRates] = useState({
+    tier1Month1Percent: 5,
+    tier1MonthlyPercent: 2,
+    tier2Month1Percent: 10,
+    tier2MonthlyPercent: 2,
+    tier3Month1Percent: 10,
+    tier3MonthlyPercent: 2,
+    baseRatePerFlat: 25,
+    minFlatsThreshold: 40,
+  });
+
+  React.useEffect(() => {
+    const unsub = subscribeCommissionRates((data) => {
+      setRates((prev) => ({ ...prev, ...data }));
+    });
+    return () => unsub();
+  }, []);
 
   // Modular Form Hook
   const {
@@ -53,10 +72,10 @@ export default function PartnersPage() {
 
       {/* Main Feature Modules */}
       <main>
-        <PartnerHero />
-        <PartnerMetrics />
-        <PartnerTierGrid onSelectTier={(tierId) => setSelectedTier(tierId)} />
-        <PartnerEarningsCalculator selectedTier={selectedTier} />
+        <PartnerHero rates={rates} />
+        <PartnerMetrics rates={rates} />
+        <PartnerTierGrid rates={rates} onSelectTier={(tierId) => setSelectedTier(tierId)} />
+        <PartnerEarningsCalculator rates={rates} selectedTier={selectedTier} />
         <PromoterLinkGenerator />
         <PartnerStatusTracker />
         <PartnerLeadForm
