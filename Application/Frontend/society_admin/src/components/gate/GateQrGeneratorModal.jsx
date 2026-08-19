@@ -1,6 +1,5 @@
 import React, { useRef } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
-import { QrCode, Download, Printer, X, ShieldCheck, Sparkles, Building2 } from 'lucide-react';
+import { QrCode, Printer, X } from 'lucide-react';
 
 export default function GateQrGeneratorModal({ isOpen, onClose, societyId = 'SOC-001', societyName = 'Palm Meadows Residency', gateName = 'Main Gate 1' }) {
   const printRef = useRef(null);
@@ -8,6 +7,7 @@ export default function GateQrGeneratorModal({ isOpen, onClose, societyId = 'SOC
   if (!isOpen) return null;
 
   const targetQrUrl = `https://gatelink.in/gate?soc=${encodeURIComponent(societyId)}&gate=${encodeURIComponent(gateName)}`;
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(targetQrUrl)}`;
 
   const handlePrint = () => {
     const printContent = printRef.current;
@@ -117,11 +117,10 @@ export default function GateQrGeneratorModal({ isOpen, onClose, societyId = 'SOC
             borderRadius: '16px',
             boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
           }}>
-            <QRCodeSVG
-              value={targetQrUrl}
-              size={180}
-              level="H"
-              includeMargin={false}
+            <img
+              src={qrImageUrl}
+              alt="Gate Check-in QR Code"
+              style={{ width: '180px', height: '180px', display: 'block', borderRadius: '8px' }}
             />
           </div>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, CheckCircle, XCircle, Copy, Check, Trash2 } from 'lucide-react';
+import { Plus, CheckCircle, XCircle, Copy, Check, Trash2, QrCode } from 'lucide-react';
 import SocietyOnboardingWizard from '../../components/superadmin/SocietyOnboardingWizard';
+import GateQrGeneratorModal from '../../components/gate/GateQrGeneratorModal';
 import { superAdminService } from '../../services/superAdminService';
 import { calculateSocietyMonthlyFee } from '../../utils/pricingEngine';
 
@@ -11,6 +12,7 @@ export default function SocietyManagement() {
   const [createdCredentials, setCreatedCredentials] = useState(null);
   const [copied, setCopied] = useState(false);
   const [selectedSocietyDetails, setSelectedSocietyDetails] = useState(null);
+  const [selectedQrSociety, setSelectedQrSociety] = useState(null);
 
   useEffect(() => {
     const unsubscribe = superAdminService.subscribeSocieties(
@@ -144,6 +146,14 @@ Portal Link: http://localhost:3000/login`;
                       <div style={{ display: 'flex', gap: '6px' }}>
                         <button
                           className="btn btn-outline"
+                          style={{ padding: '4px 8px', fontSize: '12px', color: '#1E3A8A', borderColor: '#1E3A8A' }}
+                          onClick={() => setSelectedQrSociety(soc)}
+                          title="Generate Gate Standee QR Poster"
+                        >
+                          <QrCode size={14} /> Gate QR
+                        </button>
+                        <button
+                          className="btn btn-outline"
                           style={{ padding: '4px 8px', fontSize: '12px' }}
                           onClick={() => setSelectedSocietyDetails(soc)}
                         >
@@ -180,6 +190,17 @@ Portal Link: http://localhost:3000/login`;
         existingSocieties={societies}
         onSuccess={handleWizardSuccess}
       />
+
+      {/* Gate Standee QR Poster Generator Modal */}
+      {selectedQrSociety && (
+        <GateQrGeneratorModal
+          isOpen={Boolean(selectedQrSociety)}
+          onClose={() => setSelectedQrSociety(null)}
+          societyId={selectedQrSociety.id}
+          societyName={selectedQrSociety.name}
+          gateName="Main Gate 1"
+        />
+      )}
 
       {createdCredentials && (
         <div className="modal-overlay" onClick={() => setCreatedCredentials(null)}>

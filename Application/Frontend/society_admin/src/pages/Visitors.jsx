@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
+import { QrCode } from 'lucide-react';
 import { getSocietyAdminSession } from '../services/sessionManager';
 import { societyAdminService } from '../services/societyAdminService';
+import GateQrGeneratorModal from '../components/gate/GateQrGeneratorModal';
 
 export default function Visitors() {
   const session = getSocietyAdminSession();
-  const societyId = session?.societyId;
+  const societyId = session?.societyId || 'SOC-001';
 
   const [visitors, setVisitors] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showQrModal, setShowQrModal] = useState(false);
 
   useEffect(() => {
     if (!societyId) {
@@ -40,11 +43,20 @@ export default function Visitors() {
   return (
     <div>
       <div className="card">
-        <div className="card-header">
-          <h3 className="card-title">Live Visitor Logs</h3>
-          <span className="badge success" style={{ fontSize: '12px' }}>
-            {visitors.filter(v => v.status === 'inside').length} Currently Inside
-          </span>
+        <div className="card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h3 className="card-title">Live Visitor Logs</h3>
+            <span className="badge success" style={{ fontSize: '12px', marginTop: '4px' }}>
+              {visitors.filter(v => v.status === 'inside').length} Currently Inside
+            </span>
+          </div>
+          <button
+            className="btn btn-primary"
+            onClick={() => setShowQrModal(true)}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', fontSize: '13px', fontWeight: 800 }}
+          >
+            <QrCode size={18} /> Print Gate Standee QR
+          </button>
         </div>
         <div className="table-container">
           <table>
@@ -81,6 +93,14 @@ export default function Visitors() {
           </table>
         </div>
       </div>
+
+      <GateQrGeneratorModal
+        isOpen={showQrModal}
+        onClose={() => setShowQrModal(false)}
+        societyId={societyId}
+        societyName={session?.societyName || 'Palm Meadows Residency'}
+        gateName="Main Gate 1"
+      />
     </div>
   );
 }
