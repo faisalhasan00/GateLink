@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'core/theme/app_colors.dart';
+import 'core/providers/partner_auth_provider.dart';
+import 'features/auth/presentation/screens/partner_login_screen.dart';
 import 'features/home/presentation/screens/partner_dashboard_screen.dart';
 
 void main() async {
@@ -14,11 +16,13 @@ void main() async {
   runApp(const ProviderScope(child: GateLinkPartnerApp()));
 }
 
-class GateLinkPartnerApp extends StatelessWidget {
+class GateLinkPartnerApp extends ConsumerWidget {
   const GateLinkPartnerApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final partnerUser = ref.watch(partnerAuthProvider);
+
     return MaterialApp(
       title: 'GateLink Partner',
       debugShowCheckedModeBanner: false,
@@ -33,7 +37,7 @@ class GateLinkPartnerApp extends StatelessWidget {
         scaffoldBackgroundColor: AppColors.background,
         fontFamily: 'Inter',
       ),
-      home: const PartnerDashboardScreen(),
+      home: partnerUser != null ? const PartnerDashboardScreen() : const PartnerLoginScreen(),
     );
   }
 }
