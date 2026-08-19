@@ -88,6 +88,35 @@ class PartnerAuthNotifier extends StateNotifier<PartnerUser?> {
     } catch (_) {}
   }
 
+  Future<void> updateProfile({
+    required String name,
+    required String category,
+    required String upiId,
+    required String email,
+    required String city,
+  }) async {
+    if (state == null) return;
+    final updated = PartnerUser(
+      uid: state!.uid,
+      name: name,
+      phone: state!.phone,
+      email: email,
+      category: category,
+      upiId: upiId,
+      city: city,
+    );
+    state = updated;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('partner_name', name);
+      await prefs.setString('partner_category', category);
+      await prefs.setString('partner_upi', upiId);
+      await prefs.setString('partner_email', email);
+      await prefs.setString('partner_city', city);
+    } catch (_) {}
+  }
+
   Future<void> logout() async {
     state = null;
     try {

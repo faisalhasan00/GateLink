@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/providers/partner_auth_provider.dart';
+import '../../../profile/presentation/widgets/edit_partner_category_modal.dart';
 
-class PartnerMetricsHeader extends StatelessWidget {
+class PartnerMetricsHeader extends ConsumerWidget {
   final double lifetimeEarnings;
   final double monthlyPassives;
   final int activeSocieties;
@@ -17,7 +20,10 @@ class PartnerMetricsHeader extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final user = ref.watch(partnerAuthProvider);
+    final category = user?.category ?? 'Real Estate Broker';
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
@@ -42,31 +48,37 @@ class PartnerMetricsHeader extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(AppRadius.pill),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.workspace_premium_rounded, color: AppColors.accent, size: 14),
-                    SizedBox(width: 4),
-                    Text(
-                      'CHANNEL PARTNER EXECUTIVE',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        color: Colors.white,
-                        letterSpacing: 0.5,
+              GestureDetector(
+                onTap: () => EditPartnerCategoryModal.show(context),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.workspace_premium_rounded, color: AppColors.accent, size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        category.toUpperCase(),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          letterSpacing: 0.5,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 4),
+                      const Icon(Icons.edit_rounded, color: Colors.white70, size: 12),
+                    ],
+                  ),
                 ),
               ),
               Text(
-                'UPI: ${upiId.isNotEmpty ? upiId : "Add UPI ID"}',
+                'UPI: ${user?.upiId.isNotEmpty == true ? user!.upiId : (upiId.isNotEmpty ? upiId : "Add UPI ID")}',
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
