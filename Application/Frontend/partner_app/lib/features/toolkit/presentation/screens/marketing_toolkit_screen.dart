@@ -63,6 +63,19 @@ class MarketingToolkitScreen extends StatelessWidget {
     }
   }
 
+  void _openLinkedInPage(BuildContext context) async {
+    final uri = Uri.parse('https://www.linkedin.com/company/gatelink-technologies');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open LinkedIn.')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final targetUrl = 'https://gatelink.in/partners?ref=$refCode';
@@ -203,6 +216,21 @@ class MarketingToolkitScreen extends StatelessWidget {
                 label: const Text('Official Instagram (@gatelink.in)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE1306C),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () => _openLinkedInPage(context),
+                icon: const Icon(Icons.business_rounded, size: 18),
+                label: const Text('Official LinkedIn (GateLink Technologies)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0A66C2),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                 ),
