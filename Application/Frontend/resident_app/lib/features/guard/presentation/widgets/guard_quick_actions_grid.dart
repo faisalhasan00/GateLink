@@ -7,6 +7,7 @@ class GuardQuickActionsGrid extends StatelessWidget {
   final VoidCallback onQuickEntryTap;
   final VoidCallback onVehicleLogTap;
   final VoidCallback onInviteCodeTap;
+  final VoidCallback onShowGateQrTap;
 
   const GuardQuickActionsGrid({
     super.key,
@@ -14,6 +15,7 @@ class GuardQuickActionsGrid extends StatelessWidget {
     required this.onQuickEntryTap,
     required this.onVehicleLogTap,
     required this.onInviteCodeTap,
+    required this.onShowGateQrTap,
   });
 
   @override
@@ -21,6 +23,70 @@ class GuardQuickActionsGrid extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // 1-Tap Show Gate Standee QR Banner
+        InkWell(
+          onTap: onShowGateQrTap,
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          child: Container(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF1E3A8A), Color(0xFF0EA5E9)],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+              ),
+              borderRadius: BorderRadius.circular(AppRadius.lg),
+              boxShadow: [
+                BoxShadow(
+                  color: const Color(0xFF0EA5E9).withValues(alpha: 0.3),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.qr_code_2_rounded, color: Colors.white, size: 24),
+                ),
+                const SizedBox(width: 12),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '📱 Display Gate QR Stand',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 2),
+                      Text(
+                        'Show phone screen for visitor self check-in',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Color(0xFFE0F2FE),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.chevron_right_rounded, color: Colors.white),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
+
         const Text(
           'GATE ENTRY ACTIONS',
           style: TextStyle(

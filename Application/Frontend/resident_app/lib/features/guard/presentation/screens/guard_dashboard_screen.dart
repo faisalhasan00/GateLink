@@ -12,6 +12,7 @@ import '../../../visitor/domain/models/visitor_model.dart';
 import '../../../../core/services/firestore_service.dart';
 import '../../../sos/providers/alert_providers.dart';
 import '../../../visitor/providers/visitor_providers.dart';
+import '../widgets/gate_qr_display_dialog.dart';
 import '../widgets/guard_shift_header.dart';
 import '../widgets/guard_quick_actions_grid.dart';
 import '../widgets/live_gate_activity_log.dart';
@@ -186,6 +187,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                     onQuickEntryTap: () => context.go('/quick-entry'),
                     onVehicleLogTap: () => context.go('/vehicles'),
                     onInviteCodeTap: () => context.go('/passcode'),
+                    onShowGateQrTap: () => GateQrDisplayDialog.show(context),
                   ),
                   const SizedBox(height: AppSpacing.lg),
 
