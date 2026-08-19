@@ -76,6 +76,19 @@ class MarketingToolkitScreen extends StatelessWidget {
     }
   }
 
+  void _openYouTubeChannel(BuildContext context) async {
+    final uri = Uri.parse('https://www.youtube.com/@GateLinkIndia');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open YouTube Channel.')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final targetUrl = 'https://gatelink.in/partners?ref=$refCode';
@@ -231,6 +244,21 @@ class MarketingToolkitScreen extends StatelessWidget {
                 label: const Text('Official LinkedIn (GateLink Technologies)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0A66C2),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () => _openYouTubeChannel(context),
+                icon: const Icon(Icons.play_circle_fill_rounded, size: 18),
+                label: const Text('Official YouTube (@GateLinkIndia)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFF0000),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                 ),
