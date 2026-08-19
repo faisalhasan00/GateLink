@@ -7,7 +7,6 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../domain/models/visitor_model.dart';
 import '../../providers/visitor_providers.dart';
-import '../controllers/visitor_controller.dart';
 import '../widgets/visitor_card.dart';
 import '../widgets/visitor_pass_sheet.dart';
 

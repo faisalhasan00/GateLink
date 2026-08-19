@@ -31,6 +31,7 @@ const {
   reconcilePendingPayments,
 } = require("./payments/payment_reconciliation");
 const { triggerCashfreePayout } = require("./payments/cashfree_payouts");
+const { scheduledMonthlyPartnerPayouts } = require("./payments/scheduled_payouts");
 
 module.exports = {
   // Visitor Management
@@ -51,4 +52,5 @@ module.exports = {
   rejectOfflinePayment,
   reconcilePendingPayments,
   triggerCashfreePayout,
+  scheduledMonthlyPartnerPayouts,
 };

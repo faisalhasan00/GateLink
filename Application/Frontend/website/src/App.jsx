@@ -24,6 +24,7 @@ const PrivacyPolicyPage = lazy(() => import('./pages/landing/PrivacyPolicyPage')
 const TermsPage = lazy(() => import('./pages/landing/TermsPage'))
 const CookiePolicyPage = lazy(() => import('./pages/landing/CookiePolicyPage'))
 const PartnersPage = lazy(() => import('./pages/landing/PartnersPage'))
+const GateSelfEntryPage = lazy(() => import('./pages/gate/GateSelfEntryPage'))
 
 export default function App() {
   return (
@@ -46,6 +47,7 @@ export default function App() {
             <Route path="/download" element={<DownloadAppPage />} />
             <Route path="/partners" element={<PartnersPage />} />
             <Route path="/refer" element={<PartnersPage />} />
+            <Route path="/gate" element={<GateSelfEntryPage />} />
 
             {/* SEO Knowledge Base & Legal Pages */}
             <Route path="/blog" element={<BlogPage />} />
