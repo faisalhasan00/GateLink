@@ -7,7 +7,14 @@ import '../../../../core/providers/partner_auth_provider.dart';
 import '../../../home/presentation/screens/partner_dashboard_screen.dart';
 
 class PartnerRegisterScreen extends ConsumerStatefulWidget {
-  const PartnerRegisterScreen({super.key});
+  final String? initialName;
+  final String? initialEmail;
+
+  const PartnerRegisterScreen({
+    super.key,
+    this.initialName,
+    this.initialEmail,
+  });
 
   @override
   ConsumerState<PartnerRegisterScreen> createState() => _PartnerRegisterScreenState();
@@ -15,9 +22,9 @@ class PartnerRegisterScreen extends ConsumerStatefulWidget {
 
 class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  late final TextEditingController _nameController;
   final _phoneController = TextEditingController();
-  final _emailController = TextEditingController();
+  late final TextEditingController _emailController;
   final _upiController = TextEditingController();
   final _cityController = TextEditingController();
 
@@ -30,6 +37,13 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
     'Society Management Consultant',
     'Resident / RWA Member',
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.initialName ?? '');
+    _emailController = TextEditingController(text: widget.initialEmail ?? '');
+  }
 
   @override
   void dispose() {

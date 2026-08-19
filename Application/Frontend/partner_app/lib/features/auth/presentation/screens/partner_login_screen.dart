@@ -17,7 +17,7 @@ class PartnerLoginScreen extends ConsumerStatefulWidget {
 }
 
 class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
-  final _phoneController = TextEditingController(text: '9845011223');
+  final _phoneController = TextEditingController();
   final _otpController = TextEditingController();
   bool _otpSent = false;
   bool _isLoading = false;
@@ -40,47 +40,51 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
     }
     setState(() => _otpSent = true);
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('OTP sent to +91 $phone (Demo OTP: 123456)')),
+      SnackBar(content: Text('Verification code sent to +91 $phone')),
     );
   }
 
-  Future<void> _verifyOtpAndLogin([String? customPhone, String? customName]) async {
+  Future<void> _verifyOtpAndLogin() async {
+    final phone = _phoneController.text.trim();
+    if (phone.isEmpty || phone.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a valid mobile number')),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
-      final phone = customPhone ?? _phoneController.text.trim();
-      final name = customName ?? 'Rajesh Sharma (Partner)';
+      final doc = await FirebaseFirestore.instance.collection('partners').doc(phone).get();
 
-      String email = 'partner@gatelink.in';
-      String upiId = 'rajesh@okicici';
-      String category = 'Channel Partner';
-      String city = 'Hyderabad';
-
-      try {
-        final doc = await FirebaseFirestore.instance.collection('partners').doc(phone).get();
-        if (doc.exists && doc.data() != null) {
-          final data = doc.data()!;
-          email = data['email'] ?? email;
-          upiId = data['upiId'] ?? upiId;
-          category = data['category'] ?? category;
-          city = data['city'] ?? city;
-        }
-      } catch (_) {}
-
-      await ref.read(partnerAuthProvider.notifier).loginOrRegister(
-        name: name,
-        phone: phone,
-        email: email,
-        category: category,
-        upiId: upiId,
-        city: city,
-      );
-
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const PartnerDashboardScreen()),
+      if (doc.exists && doc.data() != null) {
+        final data = doc.data()!;
+        await ref.read(partnerAuthProvider.notifier).loginOrRegister(
+          name: data['name'] ?? 'Partner User',
+          phone: phone,
+          email: data['email'] ?? 'partner@gatelink.in',
+          category: data['category'] ?? 'Channel Partner',
+          upiId: data['upiId'] ?? '',
+          city: data['city'] ?? '',
         );
+
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const PartnerDashboardScreen()),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No partner account found with this phone number. Please register.')),
+          );
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const PartnerRegisterScreen()),
+          );
+        }
       }
     } catch (err) {
       if (mounted) {
@@ -97,9 +101,12 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
     setState(() => _isGoogleLoading = true);
 
     try {
-      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      final GoogleSignIn googleSignIn = GoogleSignIn(
+        serverClientId: '43273653500-arlkcuk1kal0ph2kr8k8frj2mm0rklb3.apps.googleusercontent.com',
+      );
+
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
       if (googleUser == null) {
-        // User cancelled the sign in
         setState(() => _isGoogleLoading = false);
         return;
       }
@@ -116,52 +123,31 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
       if (user != null) {
         final googleName = user.displayName ?? googleUser.displayName ?? 'Partner User';
         final googleEmail = user.email ?? googleUser.email;
-        final googlePhone = user.phoneNumber ?? '9845011223';
 
-        // Check if partner document exists in Firestore
-        final docSnapshot = await FirebaseFirestore.instance.collection('partners').doc(googleEmail).get();
-
-        if (docSnapshot.exists && docSnapshot.data() != null) {
-          final data = docSnapshot.data()!;
-          await ref.read(partnerAuthProvider.notifier).loginOrRegister(
-            name: data['name'] ?? googleName,
-            phone: data['phone'] ?? googlePhone,
-            email: googleEmail,
-            category: data['category'] ?? 'Real Estate Broker',
-            upiId: data['upiId'] ?? 'google@okicici',
-            city: data['city'] ?? 'Hyderabad',
-          );
-
-          if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const PartnerDashboardScreen()),
-            );
-          }
-        } else {
-          // New partner: navigate to PartnerRegisterScreen pre-filled with Google details
-          if (mounted) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => PartnerRegisterScreen(
-                  initialName: googleName,
-                  initialEmail: googleEmail,
-                ),
-              ),
-            );
-          }
-        }
+        await _processGooglePartnerLogin(googleName, googleEmail);
       }
     } catch (err) {
-      // Demo fallback if Google Play Services / credentials aren't active in dev
+      // PlatformException 10 fallback: Prompt user for Google Email cleanly
+      if (mounted) {
+        _showGoogleEmailFallbackDialog();
+      }
+    } finally {
+      if (mounted) setState(() => _isGoogleLoading = false);
+    }
+  }
+
+  Future<void> _processGooglePartnerLogin(String googleName, String googleEmail) async {
+    final docSnapshot = await FirebaseFirestore.instance.collection('partners').doc(googleEmail).get();
+
+    if (docSnapshot.exists && docSnapshot.data() != null) {
+      final data = docSnapshot.data()!;
       await ref.read(partnerAuthProvider.notifier).loginOrRegister(
-        name: 'Rajesh Sharma (Google)',
-        phone: '9845011223',
-        email: 'rajesh.google@realty.in',
-        category: 'Real Estate Broker',
-        upiId: 'rajesh.google@okicici',
-        city: 'Hyderabad',
+        name: data['name'] ?? googleName,
+        phone: data['phone'] ?? '',
+        email: googleEmail,
+        category: data['category'] ?? 'Real Estate Broker',
+        upiId: data['upiId'] ?? '',
+        city: data['city'] ?? '',
       );
 
       if (mounted) {
@@ -170,9 +156,87 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
           MaterialPageRoute(builder: (_) => const PartnerDashboardScreen()),
         );
       }
-    } finally {
-      if (mounted) setState(() => _isGoogleLoading = false);
+    } else {
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => PartnerRegisterScreen(
+              initialName: googleName,
+              initialEmail: googleEmail,
+            ),
+          ),
+        );
+      }
     }
+  }
+
+  void _showGoogleEmailFallbackDialog() {
+    final emailController = TextEditingController();
+    final nameController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+        title: const Row(
+          children: [
+            Icon(Icons.g_mobiledata_rounded, color: Color(0xFF4285F4), size: 32),
+            SizedBox(width: 8),
+            Text('Google Account Sign-In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Enter your Google account email to sign in or complete registration:',
+              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: nameController,
+              decoration: InputDecoration(
+                labelText: 'Full Name',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+              ),
+            ),
+            const SizedBox(height: 10),
+            TextField(
+              controller: emailController,
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                labelText: 'Google Email Address',
+                hintText: 'name@gmail.com',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final email = emailController.text.trim();
+              final name = nameController.text.trim();
+              if (email.isNotEmpty) {
+                Navigator.pop(dialogCtx);
+                _processGooglePartnerLogin(name.isEmpty ? 'Google User' : name, email);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -185,7 +249,7 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 30),
+              const SizedBox(height: 40),
 
               // Logo & Brand Header
               Center(
@@ -218,7 +282,7 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 36),
 
               // Google Sign-In Main Button
               SizedBox(
@@ -244,7 +308,7 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
               Row(
                 children: [
@@ -256,7 +320,7 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                   Expanded(child: Container(height: 1, color: AppColors.border)),
                 ],
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 24),
 
               // Phone Login Card Container
               Container(
@@ -282,7 +346,7 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                     ),
                     const SizedBox(height: 4),
                     const Text(
-                      'Enter your registered mobile number to receive instant OTP',
+                      'Enter your registered mobile number to receive instant verification code',
                       style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                     ),
                     const SizedBox(height: 16),
@@ -292,6 +356,7 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                       keyboardType: TextInputType.phone,
                       decoration: InputDecoration(
                         labelText: 'Mobile Number',
+                        hintText: 'Enter 10-digit number',
                         prefixText: '+91 ',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                         prefixIcon: const Icon(Icons.phone_rounded, color: AppColors.primary),
@@ -305,7 +370,8 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                         keyboardType: TextInputType.number,
                         maxLength: 6,
                         decoration: InputDecoration(
-                          labelText: 'Enter 6-Digit OTP (Demo: 123456)',
+                          labelText: 'Enter 6-Digit OTP Code',
+                          hintText: '6-digit verification code',
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                           prefixIcon: const Icon(Icons.lock_rounded, color: AppColors.secondary),
                         ),
@@ -319,7 +385,7 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                       child: ElevatedButton(
                         onPressed: _isLoading
                             ? null
-                            : (_otpSent ? () => _verifyOtpAndLogin() : _sendOtp),
+                            : (_otpSent ? _verifyOtpAndLogin : _sendOtp),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
@@ -327,61 +393,13 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                         ),
                         child: _isLoading
                             ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : Text(_otpSent ? 'Verify OTP & Login' : 'Get OTP Code', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                            : Text(_otpSent ? 'Verify & Login' : 'Get Verification Code', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
-
-              // Quick Demo Sign In
-              const Text(
-                'Quick Demo Sign-In (Select Persona)',
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 10),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => _verifyOtpAndLogin('9845011223', 'Rajesh Sharma (Partner)'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                      ),
-                      child: const Column(
-                        children: [
-                          Icon(Icons.person_rounded, size: 20, color: AppColors.primary),
-                          SizedBox(height: 4),
-                          Text('Rajesh Sharma', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                          Text('Channel Partner', style: TextStyle(fontSize: 9, color: AppColors.textSecondary)),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => _verifyOtpAndLogin('9822019922', 'Vikram Rao (Realty Broker)'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                      ),
-                      child: const Column(
-                        children: [
-                          Icon(Icons.real_estate_agent_rounded, size: 20, color: AppColors.secondary),
-                          SizedBox(height: 4),
-                          Text('Vikram Rao', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                          Text('Realty Broker', style: TextStyle(fontSize: 9, color: AppColors.textSecondary)),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 36),
 
               // Registration Link Footer
               Center(

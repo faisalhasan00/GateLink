@@ -30,9 +30,9 @@ class _OnboardSocietyModalState extends State<OnboardSocietyModal> {
   final _formKey = GlobalKey<FormState>();
   final _societyNameController = TextEditingController();
   final _addressController = TextEditingController();
-  final _cityController = TextEditingController(text: 'Hyderabad');
-  final _flatsController = TextEditingController(text: '150');
-  final _blocksController = TextEditingController(text: '3');
+  final _cityController = TextEditingController();
+  final _flatsController = TextEditingController();
+  final _blocksController = TextEditingController();
   
   final _adminNameController = TextEditingController();
   final _adminPhoneController = TextEditingController();

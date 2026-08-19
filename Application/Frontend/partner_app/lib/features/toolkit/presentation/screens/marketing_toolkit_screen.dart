@@ -50,6 +50,19 @@ class MarketingToolkitScreen extends StatelessWidget {
     );
   }
 
+  void _openInstagramPage(BuildContext context) async {
+    final uri = Uri.parse('https://www.instagram.com/gatelink.in?igsi=MWpoNXVsbDF2czQ2Ng==');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Could not open Instagram.')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final targetUrl = 'https://gatelink.in/partners?ref=$refCode';
@@ -175,6 +188,21 @@ class MarketingToolkitScreen extends StatelessWidget {
                 label: const Text('Share Digital Brochure on WhatsApp', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF25D366),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton.icon(
+                onPressed: () => _openInstagramPage(context),
+                icon: const Icon(Icons.camera_alt_rounded, size: 18),
+                label: const Text('Official Instagram (@gatelink.in)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFE1306C),
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                 ),

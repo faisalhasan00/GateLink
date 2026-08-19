@@ -23,54 +23,11 @@ class PartnerDashboardScreen extends ConsumerStatefulWidget {
 class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen> {
   String _selectedFilter = 'all';
 
-  // Demo Fallback Leads if user has 0 leads yet
-  static final List<Map<String, dynamic>> _demoLeads = [
-    {
-      'referenceId': 'LEAD-98214',
-      'targetSocietyName': 'Palm Meadows Gated Township',
-      'targetCity': 'Hyderabad',
-      'contactPerson': 'Mr. K. Rao (Secretary)',
-      'contactPhone': '9845011223',
-      'approxFlats': '220',
-      'status': 'won',
-      'payoutStatus': 'paid',
-      'payoutTotal': 500,
-      'utrNumber': 'CF9823412356',
-      'paidAt': '2026-08-15',
-    },
-    {
-      'referenceId': 'LEAD-77341',
-      'targetSocietyName': 'Royal Regency Towers',
-      'targetCity': 'Pune',
-      'contactPerson': 'Mrs. S. Deshmukh',
-      'contactPhone': '9822019922',
-      'approxFlats': '180',
-      'status': 'demo_scheduled',
-      'payoutStatus': 'pending',
-      'payoutTotal': 0,
-      'utrNumber': '',
-      'paidAt': '',
-    },
-    {
-      'referenceId': 'LEAD-55129',
-      'targetSocietyName': 'Greenwood Heights',
-      'targetCity': 'Mumbai',
-      'contactPerson': 'Mr. V. Sharma (Chairman)',
-      'contactPhone': '9819033441',
-      'approxFlats': '140',
-      'status': 'contacted',
-      'payoutStatus': 'pending',
-      'payoutTotal': 0,
-      'utrNumber': '',
-      'paidAt': '',
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
     final partnerUser = ref.watch(partnerAuthProvider);
-    final partnerPhone = partnerUser?.phone ?? '9845011223';
-    final partnerName = partnerUser?.name ?? 'Raj Sharma (Channel Partner)';
+    final partnerPhone = partnerUser?.phone ?? '';
+    final partnerName = partnerUser?.name ?? 'Partner User';
     final refCode = partnerPhone.length >= 6 ? 'PARTNER-${partnerPhone.substring(partnerPhone.length - 6)}' : 'PARTNER-001';
 
     return Scaffold(
@@ -123,30 +80,18 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
         ],
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: () {
-          try {
-            return FirebaseFirestore.instance
-                .collection('partner_leads')
-                .snapshots();
-          } catch (_) {
-            return const Stream<QuerySnapshot>.empty();
-          }
-        }(),
+        stream: FirebaseFirestore.instance
+            .collection('partner_leads')
+            .where('partnerPhone', isEqualTo: partnerPhone.replaceAll(RegExp(r'[^0-9]'), ''))
+            .snapshots(),
         builder: (context, snapshot) {
           List<Map<String, dynamic>> leadsList = [];
 
-          try {
-            if (snapshot.hasData && snapshot.data != null && snapshot.data!.docs.isNotEmpty) {
-              for (final doc in snapshot.data!.docs) {
-                final data = doc.data() as Map<String, dynamic>?;
-                if (data != null) leadsList.add(data);
-              }
+          if (snapshot.hasData && snapshot.data != null) {
+            for (final doc in snapshot.data!.docs) {
+              final data = doc.data() as Map<String, dynamic>?;
+              if (data != null) leadsList.add(data);
             }
-          } catch (_) {}
-
-          // Fallback to demo leads if no leads exist yet
-          if (leadsList.isEmpty) {
-            leadsList = List.from(_demoLeads);
           }
 
           double lifetimeEarnings = 0;
@@ -162,7 +107,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
             }
             if (status == 'won') {
               activeSocieties++;
-              final flats = double.tryParse(lead['approxFlats']?.toString() ?? '150') ?? 150;
+              final flats = double.tryParse(lead['approxFlats']?.toString() ?? '0') ?? 0;
               monthlyPassives += (flats * 2); // ₹2 per flat monthly commission
             }
           }
@@ -188,7 +133,7 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                   lifetimeEarnings: lifetimeEarnings,
                   monthlyPassives: monthlyPassives,
                   activeSocieties: activeSocieties,
-                  upiId: partnerUser?.upiId ?? 'raj@okicici',
+                  upiId: partnerUser?.upiId ?? 'Update UPI ID',
                 ),
                 const SizedBox(height: 20),
 
@@ -315,16 +260,63 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                 ),
                 const SizedBox(height: 16),
 
-                // Live Dynamic Lead List
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: filteredLeads.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    return PartnerLeadStepperCard(lead: filteredLeads[index]);
-                  },
-                ),
+                // Live Dynamic Lead List or Production Empty State
+                if (filteredLeads.isEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.business_center_outlined, size: 48, color: AppColors.primary),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'No Leads Submitted Yet',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                        ),
+                        const SizedBox(height: 6),
+                        const Text(
+                          'Start earning ₹500 instant Cashfree bonus + 2% monthly recurring commissions by submitting your first society lead or onboarding a society directly.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4),
+                        ),
+                        const SizedBox(height: 20),
+                        ElevatedButton.icon(
+                          onPressed: () => SubmitLeadModal.show(context, partnerName: partnerName, partnerPhone: partnerPhone),
+                          icon: const Icon(Icons.add_business_rounded, size: 18),
+                          label: const Text('Submit First Lead', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: filteredLeads.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      return PartnerLeadStepperCard(lead: filteredLeads[index]);
+                    },
+                  ),
               ],
             ),
           );

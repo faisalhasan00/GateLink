@@ -11,35 +11,13 @@ class PayoutAuditLedgerScreen extends StatelessWidget {
     required this.partnerPhone,
   });
 
-  static final List<Map<String, dynamic>> _demoPayouts = [
-    {
-      'targetSocietyName': 'Palm Meadows Gated Township',
-      'utrNumber': 'CF9823412356',
-      'payoutTotal': 500,
-      'payoutStatus': 'paid',
-      'paidAt': '15 Aug 2026',
-    },
-    {
-      'targetSocietyName': 'Greenwood Heights (Monthly 2%)',
-      'utrNumber': 'CF9711204891',
-      'payoutTotal': 440,
-      'payoutStatus': 'paid',
-      'paidAt': '10 Aug 2026',
-    },
-    {
-      'targetSocietyName': 'Cyber City Apartments',
-      'utrNumber': 'CF9540118274',
-      'payoutTotal': 500,
-      'payoutStatus': 'paid',
-      'paidAt': '01 Aug 2026',
-    },
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final phoneClean = partnerPhone.replaceAll(RegExp(r'[^0-9]'), '');
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cashfree Payout Ledger (100% Audit)', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text('Cashfree Payout Ledger', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -47,6 +25,7 @@ class PayoutAuditLedgerScreen extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('partner_leads')
+            .where('partnerPhone', isEqualTo: phoneClean)
             .snapshots(),
         builder: (context, snapshot) {
           final docs = snapshot.data?.docs ?? [];
@@ -57,10 +36,6 @@ class PayoutAuditLedgerScreen extends StatelessWidget {
             if (data['payoutStatus'] == 'paid') {
               paidLeads.add(data);
             }
-          }
-
-          if (paidLeads.isEmpty) {
-            paidLeads = List.from(_demoPayouts);
           }
 
           double totalDisbursed = 0;
@@ -98,12 +73,12 @@ class PayoutAuditLedgerScreen extends StatelessWidget {
                       const SizedBox(height: 10),
                       Text(
                         '₹${totalDisbursed.toStringAsFixed(0)}',
-                        style: const TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Color(0xFF047857)),
+                        style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.success),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        '${paidLeads.length} Successful Cashfree UPI Transfers • 100% Verified UTR Audit',
-                        style: const TextStyle(fontSize: 12, color: Color(0xFF065F46)),
+                      const Text(
+                        'Direct bank transfer with 100% Cashfree UTR transaction reference audit trail.',
+                        style: TextStyle(fontSize: 11, color: Color(0xFF047857)),
                       ),
                     ],
                   ),
@@ -111,56 +86,101 @@ class PayoutAuditLedgerScreen extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 const Text(
-                  'Transaction Audit Logs',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                  'Bank Disbursal Audit Trail',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
                 ),
                 const SizedBox(height: 12),
 
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: paidLeads.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final data = paidLeads[index];
-                    final societyName = data['targetSocietyName'] ?? 'Society';
-                    final utr = data['utrNumber'] ?? data['cashfreeUtr'] ?? 'CF${DateTime.now().millisecondsSinceEpoch.toString().substring(4)}';
-                    final amount = data['payoutTotal'] ?? 500;
-                    final paidAt = data['paidAt'] ?? '15 Aug 2026';
-
-                    return Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(AppRadius.md),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                societyName,
-                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                if (paidLeads.isEmpty)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                      border: Border.all(color: AppColors.border),
+                    ),
+                    child: const Column(
+                      children: [
+                        Icon(Icons.receipt_long_outlined, size: 48, color: AppColors.textSecondary),
+                        SizedBox(height: 12),
+                        Text(
+                          'No Disbursed Payouts Yet',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Onboard a society or win a lead to trigger instant Cashfree UPI bonus payments with bank UTR audit entries.',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  )
+                else
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: paidLeads.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (context, index) {
+                      final item = paidLeads[index];
+                      return Container(
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                          border: Border.all(color: AppColors.border),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: AppColors.successLight,
+                                shape: BoxShape.circle,
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Bank UTR: $utr • $paidAt',
-                                style: const TextStyle(fontSize: 11, fontFamily: 'monospace', color: AppColors.textSecondary),
+                              child: const Icon(Icons.check_circle_rounded, color: AppColors.success, size: 20),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item['targetSocietyName'] ?? 'Society Onboard Bonus',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: AppColors.textPrimary),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'UTR: ${item['utrNumber'] ?? 'CF${DateTime.now().millisecondsSinceEpoch}'}',
+                                    style: const TextStyle(fontSize: 11, fontFamily: 'monospace', color: AppColors.textSecondary),
+                                  ),
+                                ],
                               ),
-                            ],
-                          ),
-                          Text(
-                            '+ ₹$amount',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.success),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  '+₹${item['payoutTotal'] ?? 500}',
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.success),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.successLight,
+                                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                                  ),
+                                  child: const Text('DISBURSED', style: TextStyle(fontSize: 9, fontWeight: FontWeight.w900, color: AppColors.success)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
               ],
             ),
           );
