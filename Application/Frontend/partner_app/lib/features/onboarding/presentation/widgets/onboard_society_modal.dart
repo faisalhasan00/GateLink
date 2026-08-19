@@ -38,7 +38,7 @@ class _OnboardSocietyModalState extends State<OnboardSocietyModal> {
   final _adminPhoneController = TextEditingController();
   final _adminEmailController = TextEditingController();
 
-  String _selectedPlan = 'Pro (₹20/flat/mo)';
+  final String _selectedPlan = 'Pro (₹20/flat/mo)';
   bool _isLoading = false;
 
   @override

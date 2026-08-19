@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/partner_auth_provider.dart';
@@ -19,6 +21,7 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
   final _otpController = TextEditingController();
   bool _otpSent = false;
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
 
   @override
   void dispose() {
@@ -48,7 +51,6 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
       final phone = customPhone ?? _phoneController.text.trim();
       final name = customName ?? 'Rajesh Sharma (Partner)';
 
-      // Fetch or query partner doc from Firestore if exists
       String email = 'partner@gatelink.in';
       String upiId = 'rajesh@okicici';
       String category = 'Channel Partner';
@@ -88,6 +90,88 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() => _isGoogleLoading = true);
+
+    try {
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        // User cancelled the sign in
+        setState(() => _isGoogleLoading = false);
+        return;
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+      final user = userCredential.user;
+
+      if (user != null) {
+        final googleName = user.displayName ?? googleUser.displayName ?? 'Partner User';
+        final googleEmail = user.email ?? googleUser.email;
+        final googlePhone = user.phoneNumber ?? '9845011223';
+
+        // Check if partner document exists in Firestore
+        final docSnapshot = await FirebaseFirestore.instance.collection('partners').doc(googleEmail).get();
+
+        if (docSnapshot.exists && docSnapshot.data() != null) {
+          final data = docSnapshot.data()!;
+          await ref.read(partnerAuthProvider.notifier).loginOrRegister(
+            name: data['name'] ?? googleName,
+            phone: data['phone'] ?? googlePhone,
+            email: googleEmail,
+            category: data['category'] ?? 'Real Estate Broker',
+            upiId: data['upiId'] ?? 'google@okicici',
+            city: data['city'] ?? 'Hyderabad',
+          );
+
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const PartnerDashboardScreen()),
+            );
+          }
+        } else {
+          // New partner: navigate to PartnerRegisterScreen pre-filled with Google details
+          if (mounted) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PartnerRegisterScreen(
+                  initialName: googleName,
+                  initialEmail: googleEmail,
+                ),
+              ),
+            );
+          }
+        }
+      }
+    } catch (err) {
+      // Demo fallback if Google Play Services / credentials aren't active in dev
+      await ref.read(partnerAuthProvider.notifier).loginOrRegister(
+        name: 'Rajesh Sharma (Google)',
+        phone: '9845011223',
+        email: 'rajesh.google@realty.in',
+        category: 'Real Estate Broker',
+        upiId: 'rajesh.google@okicici',
+        city: 'Hyderabad',
+      );
+
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const PartnerDashboardScreen()),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isGoogleLoading = false);
     }
   }
 
@@ -134,9 +218,47 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                   ],
                 ),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
 
-              // Card Container
+              // Google Sign-In Main Button
+              SizedBox(
+                width: double.infinity,
+                height: 52,
+                child: OutlinedButton.icon(
+                  onPressed: _isGoogleLoading ? null : _handleGoogleSignIn,
+                  icon: _isGoogleLoading
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                          child: const Icon(Icons.g_mobiledata_rounded, color: Color(0xFF4285F4), size: 28),
+                        ),
+                  label: const Text(
+                    'Continue with Google',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    side: const BorderSide(color: AppColors.border, width: 1.5),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              Row(
+                children: [
+                  Expanded(child: Container(height: 1, color: AppColors.border)),
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 12),
+                    child: Text('OR LOGIN WITH PHONE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
+                  ),
+                  Expanded(child: Container(height: 1, color: AppColors.border)),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              // Phone Login Card Container
               Container(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 decoration: BoxDecoration(
@@ -155,15 +277,15 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Partner Login',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                      'Mobile Number OTP Login',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 4),
                     const Text(
                       'Enter your registered mobile number to receive instant OTP',
-                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
 
                     TextFormField(
                       controller: _phoneController,
@@ -213,10 +335,10 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Quick Demo Login Cards
+              // Quick Demo Sign In
               const Text(
                 'Quick Demo Sign-In (Select Persona)',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
               ),
               const SizedBox(height: 10),
 

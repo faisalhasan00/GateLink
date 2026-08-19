@@ -195,7 +195,7 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
               const SizedBox(height: 14),
 
               DropdownButtonFormField<String>(
-                value: _selectedCategory,
+                initialValue: _selectedCategory,
                 decoration: InputDecoration(
                   labelText: 'Partner Category *',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
