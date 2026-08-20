@@ -1,62 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from '../../firebase';
-import { 
-  ArrowRight, 
-  Globe, 
-  CheckCircle2, 
-  Apple, 
-  Play, 
-  Check, 
-  ShieldCheck, 
-  PhoneCall
-} from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import HeroQuickEnrollForm from '../../features/landing/components/HeroQuickEnrollForm';
+import HeroAppStoreBadges from '../../features/landing/components/HeroAppStoreBadges';
+import HeroVisualMockup from '../../features/landing/components/HeroVisualMockup';
 
 export default function HeroSection({ onOpenDemo }) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const [isMobileScreen, setIsMobileScreen] = useState(
+    typeof window !== 'undefined' ? window.innerWidth <= 768 : false
+  );
 
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    reason: 'Interested for demo'
-  });
-
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!formData.name || !formData.phone) return;
-    setSubmitting(true);
-    try {
-      await addDoc(collection(db, 'leads'), {
-        ...formData,
-        source: 'Hero Quick Enrollment Form',
-        status: 'New',
-        createdAt: serverTimestamp()
-      });
-      setSubmitted(true);
-    } catch (err) {
-      console.error('Hero lead submit error:', err);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const [isMobileScreen, setIsMobileScreen] = useState(typeof window !== 'undefined' ? window.innerWidth <= 768 : false);
-
-  React.useEffect(() => {
+  useEffect(() => {
     const handleResize = () => setIsMobileScreen(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   return (
-    <section 
+    <section
       id="home"
       style={{
         paddingTop: '80px',
@@ -66,15 +29,24 @@ export default function HeroSection({ onOpenDemo }) {
         borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB'
       }}
     >
-      <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '0 24px', display: 'flex', flexDirection: isMobileScreen ? 'column' : 'row', gap: '40px', alignItems: 'center' }}>
-        
-        {/* Mobile Top Illustration (Rendered first on Mobile) */}
+      <div
+        style={{
+          maxWidth: '1320px',
+          margin: '0 auto',
+          padding: '0 24px',
+          display: 'flex',
+          flexDirection: isMobileScreen ? 'column' : 'row',
+          gap: '40px',
+          alignItems: 'center'
+        }}
+      >
+        {/* Mobile Top Illustration */}
         {isMobileScreen && (
           <div style={{ width: '100%', maxWidth: '380px', margin: '0 auto 10px auto', textAlign: 'center' }}>
-            <img 
-              src="/assets/hero_illustration.png" 
-              alt="GateLink Management App Illustration" 
-              style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '12px' }} 
+            <img
+              src="/assets/hero_illustration.png"
+              alt="GateLink Management App Illustration"
+              style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '12px' }}
             />
           </div>
         )}
@@ -87,287 +59,44 @@ export default function HeroSection({ onOpenDemo }) {
           style={{ flex: 1, width: '100%' }}
         >
           {/* Main Headline */}
-          <h1 style={{
-            fontSize: '44px',
-            fontWeight: 900,
-            color: isDark ? '#FFFFFF' : '#2C2C2C',
-            letterSpacing: '-1px',
-            lineHeight: 1.15,
-            marginBottom: '16px'
-          }}>
+          <h1
+            style={{
+              fontSize: '44px',
+              fontWeight: 900,
+              color: isDark ? '#FFFFFF' : '#2C2C2C',
+              letterSpacing: '-1px',
+              lineHeight: 1.15,
+              marginBottom: '16px'
+            }}
+          >
             Visitor, Society and Accounting Management System
           </h1>
 
           {/* Subtitle */}
-          <p style={{
-            fontSize: '16px',
-            color: isDark ? '#94A3B8' : '#555555',
-            lineHeight: 1.6,
-            marginBottom: '12px'
-          }}>
+          <p
+            style={{
+              fontSize: '16px',
+              color: isDark ? '#94A3B8' : '#555555',
+              lineHeight: 1.6,
+              marginBottom: '16px'
+            }}
+          >
             A world-class technology to make your daily life more convenient and safe.
           </p>
 
-          {/* Quick Enrollment Form (Desktop: 4-Input Form | Mobile: Full-Width CTA Button) */}
-          {!isMobileScreen ? (
-            submitted ? (
-              <div style={{
-                background: '#EFF6FF',
-                border: '1px solid #BFDBFE',
-                borderRadius: '12px',
-                padding: '20px',
-                marginBottom: '28px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px'
-              }}>
-                <CheckCircle2 size={32} color="#1E3A8A" />
-                <div>
-                  <div style={{ fontSize: '16px', fontWeight: 900, color: '#1E3A8A' }}>Enrollment Request Received!</div>
-                  <div style={{ fontSize: '13px', color: '#1E40AF', marginTop: '2px' }}>Our onboarding team will call +91 {formData.phone} shortly.</div>
-                </div>
-              </div>
-            ) : (
-              <form id="hero-enrollment-form" onSubmit={handleSubmit} style={{ marginBottom: '28px', display: 'flex', flexDirection: 'column', gap: '12px', maxWidth: '520px' }}>
-                
-                {/* Row 1: Name & Phone */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <input
-                    required
-                    type="text"
-                    placeholder="Name"
-                    value={formData.name}
-                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px',
-                      borderRadius: '12px',
-                      border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1.5px solid #E2E8F0',
-                      background: isDark ? '#1E293B' : '#FFFFFF',
-                      color: isDark ? '#FFFFFF' : '#0F172A',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
-                  />
+          {/* Quick Enrollment Form Component */}
+          <HeroQuickEnrollForm
+            isDark={isDark}
+            isMobileScreen={isMobileScreen}
+            onOpenDemo={onOpenDemo}
+          />
 
-                  <div style={{ display: 'flex', border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1.5px solid #E2E8F0', borderRadius: '12px', background: isDark ? '#1E293B' : '#FFFFFF', overflow: 'hidden' }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '6px',
-                      padding: '0 12px',
-                      background: isDark ? 'rgba(255,255,255,0.05)' : '#F1F5F9',
-                      borderRight: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0',
-                      color: isDark ? '#FFFFFF' : '#0F172A',
-                      userSelect: 'none'
-                    }}>
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', lineHeight: 1 }}>
-                        <span style={{ fontSize: '15px' }}>🇮🇳</span>
-                        <span style={{ fontSize: '7px', marginTop: '2px' }}>▼</span>
-                      </div>
-                      <span style={{ fontSize: '15px', fontWeight: 900 }}>+91</span>
-                    </div>
-                    <input
-                      required
-                      type="tel"
-                      placeholder="Enter Phone No."
-                      value={formData.phone}
-                      onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                      style={{
-                        width: '100%',
-                        padding: '12px 12px',
-                        border: 'none',
-                        background: 'transparent',
-                        color: isDark ? '#FFFFFF' : '#0F172A',
-                        fontSize: '14px',
-                        outline: 'none'
-                      }}
-                    />
-                  </div>
-                </div>
-
-                {/* Row 2: Select Reason Dropdown & Button */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <select
-                    value={formData.reason}
-                    onChange={e => setFormData({ ...formData, reason: e.target.value })}
-                    style={{
-                      width: '100%',
-                      padding: '12px 14px',
-                      borderRadius: '12px',
-                      border: isDark ? '1px solid rgba(255,255,255,0.2)' : '1.5px solid #E2E8F0',
-                      background: isDark ? '#1E293B' : '#FFFFFF',
-                      color: isDark ? '#FFFFFF' : '#0F172A',
-                      fontSize: '14px',
-                      outline: 'none'
-                    }}
-                  >
-                    <option value="Interested for demo">Interested for demo</option>
-                    <option value="Existing user of GateLink">Existing user of GateLink</option>
-                  </select>
-
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    style={{
-                      width: '100%',
-                      padding: '12px 18px',
-                      borderRadius: '12px',
-                      backgroundColor: '#1E3A8A',
-                      color: '#FFFFFF',
-                      border: 'none',
-                      fontSize: '14px',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '8px',
-                      transition: 'background-color 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
-                  >
-                    <span>{submitting ? 'Submitting...' : 'Enroll your society'}</span>
-                    <ArrowRight size={16} />
-                  </button>
-                </div>
-              </form>
-            )
-          ) : (
-            <button
-              onClick={onOpenDemo}
-              style={{
-                width: '100%',
-                padding: '14px 24px',
-                borderRadius: '12px',
-                backgroundColor: '#1E3A8A',
-                color: '#FFFFFF',
-                border: 'none',
-                fontSize: '15px',
-                fontWeight: 800,
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '10px',
-                marginBottom: '28px',
-                transition: 'background-color 0.2s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#172554'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1E3A8A'}
-            >
-              <span>Enroll your society</span>
-              <ArrowRight size={18} />
-            </button>
-          )}
-
-          {/* Security Certification Badges (ISO 27001 & PCI DSS) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            {/* ISO Badge */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              background: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC',
-              border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0'
-            }}>
-              <Globe size={20} color="#0EA5E9" />
-              <div>
-                <div style={{ fontSize: '11px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', lineHeight: 1.1 }}>ISO 27001</div>
-                <div style={{ fontSize: '9px', color: isDark ? '#94A3B8' : '#666666', fontWeight: 700, textTransform: 'uppercase' }}>CERTIFIED</div>
-              </div>
-            </div>
-
-            {/* PCI DSS Badge */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '10px',
-              padding: '8px 16px',
-              borderRadius: '8px',
-              background: isDark ? 'rgba(255,255,255,0.05)' : '#F8FAFC',
-              border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E2E8F0'
-            }}>
-              <ShieldCheck size={20} color="#0EA5E9" />
-              <div>
-                <div style={{ fontSize: '11px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', lineHeight: 1.1 }}>PCI DSS</div>
-                <div style={{ fontSize: '9px', color: isDark ? '#94A3B8' : '#666666', fontWeight: 700, textTransform: 'uppercase' }}>Level 1 CERTIFIED</div>
-              </div>
-            </div>
-          </div>
-
+          {/* App Store Download Badges */}
+          <HeroAppStoreBadges isDark={isDark} />
         </motion.div>
 
-        {/* Right Side: Hero Vector Illustration (Desktop Only) */}
-        {!isMobileScreen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}
-          >
-          {/* Main Hero Vector Artwork */}
-          <div style={{ width: '100%', maxWidth: '540px', marginBottom: '24px' }}>
-            <img 
-              src="/assets/hero_illustration.png" 
-              alt="GateLink Management App Illustration" 
-              style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '12px' }} 
-            />
-          </div>
-
-          {/* App Download Subhead */}
-          <div style={{ fontSize: '13px', fontWeight: 700, color: isDark ? '#FFFFFF' : '#333333', marginBottom: '12px' }}>
-            Download GateLink<br />
-            <span style={{ color: isDark ? '#94A3B8' : '#666666', fontWeight: 500 }}>Your Society Management App for a Convenient Life</span>
-          </div>
-
-          {/* iPhone & Android Buttons */}
-          <div style={{ display: 'flex', gap: '12px' }}>
-            <Link
-              to="/download"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 20px',
-                borderRadius: '4px',
-                border: isDark ? '1px solid rgba(255,255,255,0.3)' : '1px solid #707070',
-                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-                color: isDark ? '#FFFFFF' : '#333333',
-                textDecoration: 'none',
-                fontSize: '13px',
-                fontWeight: 700
-              }}
-            >
-              <Apple size={16} /> iPhone
-            </Link>
-
-            <Link
-              to="/download"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '8px 20px',
-                borderRadius: '4px',
-                border: isDark ? '1px solid rgba(255,255,255,0.3)' : '1px solid #707070',
-                backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF',
-                color: isDark ? '#FFFFFF' : '#333333',
-                textDecoration: 'none',
-                fontSize: '13px',
-                fontWeight: 700
-              }}
-            >
-              <Play size={15} fill={isDark ? '#FFFFFF' : '#333333'} /> Android
-            </Link>
-          </div>
-        </motion.div>
-        )}
-
+        {/* Right Desktop Visual Mockup Component */}
+        <HeroVisualMockup isDark={isDark} isMobileScreen={isMobileScreen} />
       </div>
     </section>
   );
