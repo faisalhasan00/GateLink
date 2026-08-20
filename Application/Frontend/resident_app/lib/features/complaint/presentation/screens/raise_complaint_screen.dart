@@ -10,6 +10,9 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../providers/complaint_providers.dart';
 import '../controllers/complaint_controller.dart';
+import '../widgets/category_selector_grid.dart';
+import '../widgets/priority_selector_row.dart';
+import '../widgets/complaint_image_picker_card.dart';
 
 class RaiseComplaintScreen extends ConsumerStatefulWidget {
   const RaiseComplaintScreen({super.key});
@@ -149,251 +152,132 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
     final profile = ref.watch(userProfileProvider).value;
     final resName = profile?.name.isNotEmpty == true
         ? profile!.name
-        : 'Resident';
-    final flatNum = profile?.displayFlatNumber ?? '';
-    final block = profile?.tower ?? '';
-
-    if (_blockController.text.isEmpty && block.isNotEmpty) {
-      _blockController.text = block;
-    }
-
-    final controllerState = ref.watch(complaintControllerProvider);
+        : (ref.watch(currentUserProvider)?.displayName ?? 'Resident');
+    final flatNo = profile?.flatNumber ?? 'N/A';
+    final state = ref.watch(complaintControllerProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('Raise Complaint')),
+      appBar: AppBar(
+        title: const Text('Raise Complaint'),
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.pagePadding),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Resident info banner
               Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(AppSpacing.md),
+                padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
-                  color: AppColors.primarySurface,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(
-                      color: AppColors.primary.withValues(alpha: 0.3)),
+                  color: AppColors.primary.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: BorderSide(color: AppColors.primary.withOpacity(0.2)),
                 ),
                 child: Row(
                   children: [
-                    CircleAvatar(
-                      backgroundColor: AppColors.primary,
-                      child: Text(
-                        resName.substring(0, 1).toUpperCase(),
-                        style: const TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    const SizedBox(width: AppSpacing.md),
+                    const Icon(Icons.apartment, color: AppColors.primary, size: 20),
+                    const SizedBox(width: 8),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(resName,
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 15)),
-                          Text(
-                            block.isNotEmpty
-                                ? '$block • Flat $flatNum'
-                                : 'Flat $flatNum',
-                            style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary),
-                          ),
-                        ],
+                      child: Text(
+                        '$resName • Flat $flatNo',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: AppSpacing.lg),
-              const _FieldLabel(label: 'Category *'),
-              const SizedBox(height: AppSpacing.xs),
-              DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                hint: const Text('Select category'),
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.md)),
-                ),
-                items: _categories
-                    .map(
-                        (cat) => DropdownMenuItem(value: cat, child: Text(cat)))
-                    .toList(),
-                onChanged: (val) => setState(() => _selectedCategory = val),
+              const SizedBox(height: AppSpacing.md),
+
+              // Category Selector
+              const Text(
+                'Select Category *',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              CategorySelectorGrid(
+                categories: _categories,
+                selectedCategory: _selectedCategory,
+                onCategorySelected: (cat) => setState(() => _selectedCategory = cat),
               ),
               const SizedBox(height: AppSpacing.md),
-              const _FieldLabel(label: 'Complaint Title *'),
-              const SizedBox(height: AppSpacing.xs),
+
+              // Title
               TextFormField(
                 controller: _titleController,
-                decoration: InputDecoration(
-                  hintText: 'Brief summary of the issue',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.md)),
+                decoration: const InputDecoration(
+                  labelText: 'Complaint Title *',
+                  hintText: 'e.g., Water leakage in bathroom',
+                  prefixIcon: Icon(Icons.title),
                 ),
-                validator: (v) =>
-                    v == null || v.trim().isEmpty ? 'Title is required' : null,
+                validator: (val) =>
+                    val == null || val.trim().isEmpty ? 'Title is required' : null,
               ),
               const SizedBox(height: AppSpacing.md),
-              const _FieldLabel(label: 'Detailed Description *'),
-              const SizedBox(height: AppSpacing.xs),
+
+              // Description
               TextFormField(
                 controller: _descController,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  hintText:
-                      'Provide exact details (location, timing, problem)...',
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(AppRadius.md)),
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Description *',
+                  hintText: 'Describe the issue with specific details...',
+                  prefixIcon: Icon(Icons.description_outlined),
                 ),
-                validator: (v) => v == null || v.trim().isEmpty
+                validator: (val) => val == null || val.trim().isEmpty
                     ? 'Description is required'
                     : null,
               ),
               const SizedBox(height: AppSpacing.md),
-              const _FieldLabel(label: 'Priority Level'),
-              const SizedBox(height: AppSpacing.xs),
-              Row(
-                children: [
-                  _PriorityChip(
-                    label: 'Low',
-                    selected: _selectedPriority == 'low',
-                    color: AppColors.info,
-                    onTap: () => setState(() => _selectedPriority = 'low'),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  _PriorityChip(
-                    label: 'Medium',
-                    selected: _selectedPriority == 'medium',
-                    color: AppColors.warning,
-                    onTap: () => setState(() => _selectedPriority = 'medium'),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  _PriorityChip(
-                    label: 'Urgent',
-                    selected: _selectedPriority == 'high',
-                    color: AppColors.error,
-                    onTap: () => setState(() => _selectedPriority = 'high'),
-                  ),
-                ],
+
+              // Priority Selector
+              const Text(
+                'Priority Level',
+                style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+              ),
+              const SizedBox(height: 8),
+              PrioritySelectorRow(
+                selectedPriority: _selectedPriority,
+                onPriorityChanged: (p) => setState(() => _selectedPriority = p),
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              // Photo Attachment Picker
+              ComplaintImagePickerCard(
+                imageFile: _imageFile,
+                onPickImage: _pickImage,
+                onRemoveImage: () => setState(() => _imageFile = null),
               ),
               const SizedBox(height: AppSpacing.lg),
-              const _FieldLabel(label: 'Attach Photo (Optional)'),
-              const SizedBox(height: AppSpacing.xs),
-              GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  width: double.infinity,
-                  height: 120,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: _imageFile != null
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(AppRadius.md),
-                          child: Image.file(_imageFile!, fit: BoxFit.cover),
+
+              // Submit Button
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: state.isLoading ? null : _submit,
+                  child: state.isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
                         )
-                      : const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add_a_photo_outlined,
-                                color: AppColors.textSecondary, size: 32),
-                            SizedBox(height: 6),
-                            Text('Tap to take or pick photo',
-                                style: TextStyle(
-                                    color: AppColors.textSecondary,
-                                    fontSize: 12)),
-                          ],
+                      : const Text(
+                          'Submit Ticket',
+                          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 15),
                         ),
                 ),
               ),
               const SizedBox(height: AppSpacing.xl),
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: controllerState.isLoading ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppRadius.lg)),
-                  ),
-                  child: controllerState.isLoading
-                      ? const SizedBox(
-                          width: 24,
-                          height: 24,
-                          child: CircularProgressIndicator(
-                              color: Colors.white, strokeWidth: 2.5),
-                        )
-                      : const Text(
-                          'Submit Complaint',
-                          style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white),
-                        ),
-                ),
-              ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FieldLabel extends StatelessWidget {
-  final String label;
-  const _FieldLabel({required this.label});
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(label,
-        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold));
-  }
-}
-
-class _PriorityChip extends StatelessWidget {
-  final String label;
-  final bool selected;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _PriorityChip({
-    required this.label,
-    required this.selected,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: selected ? color.withValues(alpha: 0.15) : Colors.white,
-            borderRadius: BorderRadius.circular(AppRadius.md),
-            border: Border.all(color: selected ? color : AppColors.border),
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-                color: selected ? color : AppColors.textSecondary,
-              ),
-            ),
           ),
         ),
       ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
@@ -7,7 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../providers/visitor_providers.dart';
-import '../../../../core/services/qr_share_service.dart';
+import '../widgets/visitor_pass_bottom_sheet.dart';
 
 class InviteVisitorScreen extends ConsumerStatefulWidget {
   const InviteVisitorScreen({super.key});
@@ -95,7 +94,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
       setState(() => _isLoading = false);
 
       if (inviteResult != null) {
-        _showQrDialog(inviteResult.visitorId, inviteResult.passCode);
+        _showQrDialog(inviteResult.visitorId, inviteResult.passCode, fullHostFlat);
       } else {
         final errorMsg = ref.read(visitorControllerProvider).errorMessage ??
             'Failed to create visitor pass.';
@@ -114,8 +113,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
     }
   }
 
-  void _showQrDialog(String visitorId, String passCode) {
-    final qrKey = GlobalKey();
+  void _showQrDialog(String visitorId, String passCode, String hostFlat) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -123,111 +121,16 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
-      builder: (ctx) => Padding(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                    color: AppColors.border,
-                    borderRadius: BorderRadius.circular(2))),
-            const SizedBox(height: AppSpacing.lg),
-            const Icon(Icons.check_circle_rounded,
-                color: AppColors.success, size: 56),
-            const SizedBox(height: AppSpacing.md),
-            const Text('Visitor Invited!',
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary)),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-                'A QR code & Gate Pass Code has been generated for ${_nameController.text}.',
-                style: const TextStyle(
-                    color: AppColors.textSecondary, fontSize: 14),
-                textAlign: TextAlign.center),
-            const SizedBox(height: AppSpacing.md),
-
-            // Display 6-digit numeric Gate Pass Code
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppColors.primaryLight,
-                borderRadius: BorderRadius.circular(AppRadius.md),
-                border:
-                    Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
-              ),
-              child: Column(
-                children: [
-                  const Text('6-DIGIT GATE PASS CODE',
-                      style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.primary,
-                          letterSpacing: 1)),
-                  const SizedBox(height: 4),
-                  SelectableText(
-                    passCode,
-                    style: const TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 6,
-                        color: AppColors.primary),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.md),
-
-            RepaintBoundary(
-              key: qrKey,
-              child: Container(
-                padding: const EdgeInsets.all(AppSpacing.sm),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: QrImageView(
-                  data: passCode,
-                  version: QrVersions.auto,
-                  size: 160.0,
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            ElevatedButton.icon(
-              onPressed: () {
-                final profile = ref.read(userProfileProvider).value;
-                final hostFlat = profile?.displayFlatNumber ?? '';
-                final societyId = profile?.societyId ?? '';
-                QrShareService.shareQrPass(
-                  qrKey: qrKey,
-                  visitorName: _nameController.text.trim(),
-                  societyId: societyId,
-                  flatNumber: hostFlat,
-                  visitTime: _selectedDate != null
-                      ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
-                      : 'Today',
-                );
-              },
-              icon: const Icon(Icons.share_rounded, size: 18),
-              label: const Text('Share Pass with Visitor'),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            OutlinedButton(
-              onPressed: () {
-                Navigator.pop(ctx);
-                context.go(AppRoutes.visitors);
-              },
-              child: const Text('Done'),
-            ),
-            const SizedBox(height: AppSpacing.md),
-          ],
-        ),
+      builder: (ctx) => VisitorPassBottomSheet(
+        visitorId: visitorId,
+        passCode: passCode,
+        visitorName: _nameController.text,
+        expectedDate: _selectedDate != null
+            ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+            : 'Today',
+        expectedTime:
+            _selectedTime != null ? _selectedTime!.format(context) : 'Anytime',
+        hostFlat: hostFlat,
       ),
     );
   }
@@ -235,153 +138,209 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(title: const Text('Invite Visitor')),
+      appBar: AppBar(
+        title: const Text('Invite Visitor / Pre-Approve'),
+      ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.pagePadding),
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _SectionLabel(text: 'Visitor Details'),
-              const SizedBox(height: AppSpacing.md),
-              _FieldLabel(label: 'Visitor Name'),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _nameController,
-                decoration:
-                    const InputDecoration(hintText: 'Full name of visitor'),
-                validator: (v) =>
-                    (v == null || v.isEmpty) ? 'Name is required' : null,
-              ),
-              const SizedBox(height: AppSpacing.md),
-              _FieldLabel(label: 'Mobile Number (Optional)'),
-              const SizedBox(height: 6),
-              TextFormField(
-                controller: _mobileController,
-                keyboardType: TextInputType.phone,
-                maxLength: 10,
-                decoration: const InputDecoration(
-                    hintText: '10-digit mobile number', counterText: ''),
-              ),
-              const SizedBox(height: AppSpacing.md),
-              _FieldLabel(label: 'Purpose of Visit'),
-              const SizedBox(height: 6),
-              DropdownButtonFormField<String>(
-                value: _selectedPurpose,
-                items: _purposes
-                    .map((p) => DropdownMenuItem(value: p, child: Text(p)))
-                    .toList(),
-                onChanged: (v) => setState(() => _selectedPurpose = v!),
-                decoration: const InputDecoration(hintText: 'Select purpose'),
-              ),
-              const SizedBox(height: AppSpacing.xl),
-              const _SectionLabel(text: 'Expected Visit Time'),
-              const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: _pickDate,
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: Row(children: [
-                          const Icon(Icons.calendar_today_rounded,
-                              size: 18, color: AppColors.primary),
-                          const SizedBox(width: 8),
-                          Text(
-                            _selectedDate == null
-                                ? 'Select Date'
-                                : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
-                            style: TextStyle(
-                              color: _selectedDate == null
-                                  ? AppColors.textSecondary
-                                  : AppColors.textPrimary,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ]),
+              // Guest Details Card
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: BorderSide(color: AppColors.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Visitor Details',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: _pickTime,
-                      child: Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: Row(children: [
-                          const Icon(Icons.access_time_rounded,
-                              size: 18, color: AppColors.primary),
-                          const SizedBox(width: 8),
-                          Text(
-                            _selectedTime == null
-                                ? 'Select Time'
-                                : _selectedTime!.format(context),
-                            style: TextStyle(
-                              color: _selectedTime == null
-                                  ? AppColors.textSecondary
-                                  : AppColors.textPrimary,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ]),
+                    const SizedBox(height: AppSpacing.md),
+
+                    // Name
+                    TextFormField(
+                      controller: _nameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Visitor Name *',
+                        hintText: 'e.g., Rajesh Kumar',
+                        prefixIcon: Icon(Icons.person_outline),
+                      ),
+                      validator: (val) => val == null || val.trim().isEmpty
+                          ? 'Visitor name is required'
+                          : null,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+
+                    // Mobile
+                    TextFormField(
+                      controller: _mobileController,
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(
+                        labelText: 'Mobile Number (Optional)',
+                        hintText: 'e.g., 9876543210',
+                        prefixIcon: Icon(Icons.phone_outlined),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              const SizedBox(height: AppSpacing.xl),
-              ElevatedButton(
-                onPressed: _isLoading ? null : _submit,
-                child: _isLoading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white))
-                    : const Text('Generate Visitor Pass'),
+              const SizedBox(height: AppSpacing.md),
+
+              // Purpose & Category
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: BorderSide(color: AppColors.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Visit Purpose',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: _purposes.map((p) {
+                        final isSelected = _selectedPurpose == p;
+                        return ChoiceChip(
+                          label: Text(p),
+                          selected: isSelected,
+                          onSelected: (_) => setState(() => _selectedPurpose = p),
+                          selectedColor: AppColors.primary,
+                          labelStyle: TextStyle(
+                            color: isSelected ? Colors.white : AppColors.textPrimary,
+                            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                            fontSize: 13,
+                          ),
+                          backgroundColor: AppColors.surface,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            side: BorderSide(
+                              color: isSelected ? AppColors.primary : AppColors.border,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              // Expected Arrival
+              Container(
+                padding: const EdgeInsets.all(AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: BorderSide(color: AppColors.border),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Expected Arrival Date & Time',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _pickDate,
+                            icon: const Icon(Icons.calendar_today, size: 16),
+                            label: Text(
+                              _selectedDate != null
+                                  ? '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}'
+                                  : 'Select Date',
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: _pickTime,
+                            icon: const Icon(Icons.access_time, size: 16),
+                            label: Text(
+                              _selectedTime != null
+                                  ? _selectedTime!.format(context)
+                                  : 'Select Time',
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: AppSpacing.lg),
+
+              // Submit Button
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _submit,
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text(
+                          'Generate Gate Pass',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
+                        ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xl),
             ],
           ),
         ),
       ),
     );
   }
-}
-
-class _SectionLabel extends StatelessWidget {
-  final String text;
-  const _SectionLabel({required this.text});
-
-  @override
-  Widget build(BuildContext context) => Text(text,
-      style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary));
-}
-
-class _FieldLabel extends StatelessWidget {
-  final String label;
-  const _FieldLabel({required this.label});
-
-  @override
-  Widget build(BuildContext context) => Text(label,
-      style: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w500,
-          color: AppColors.textSecondary));
 }
