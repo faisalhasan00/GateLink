@@ -18,10 +18,17 @@ final visitorControllerProvider =
   return VisitorController(repo);
 });
 
-/// Real-time stream of all visitors in current society.
+/// Real-time stream of all visitors for current resident.
 final visitorsProvider = StreamProvider<List<VisitorModel>>((ref) {
   final repo = ref.watch(visitorRepositoryProvider);
-  return repo.watchVisitors();
+  final profile = ref.watch(userProfileProvider).value;
+  if (profile == null) return const Stream.empty();
+
+  return repo.watchVisitorsForResident(
+    residentUid: profile.uid,
+    flatNumber: profile.flatNumber,
+    tower: profile.tower,
+  );
 });
 
 /// Stream of pending gate visitors requiring approval for current resident's flat.

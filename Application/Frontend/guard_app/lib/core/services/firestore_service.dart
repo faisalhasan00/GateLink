@@ -26,7 +26,6 @@ class FirestoreService {
   Stream<QuerySnapshot> visitorsStream() {
     return _db
         .collection('societies/$societyId/visitors')
-        .orderBy('entryTime', descending: true)
         .snapshots();
   }
 

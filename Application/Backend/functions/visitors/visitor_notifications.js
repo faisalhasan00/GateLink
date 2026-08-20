@@ -31,76 +31,124 @@ const notifyResidentOnVisitorArrival = onDocumentCreated(
       visitorType,
     });
 
-    const residentsQuery = await db
-      .collection(`societies/${societyId}/users`)
-      .where("flatNumber", "==", hostFlat)
-      .where("role", "==", "resident")
-      .get();
+    const hostResidentUid = visitor.hostResidentUid;
+    const residentDocs = [];
 
-    if (residentsQuery.empty) {
+    // 1. Direct hostResidentUid lookup
+    if (hostResidentUid) {
+      try {
+        const rootUser = await db.doc(`users/${hostResidentUid}`).get();
+        if (rootUser.exists) residentDocs.push({ id: rootUser.id, ...rootUser.data() });
+      } catch (_) {}
+
+      try {
+        const subUser = await db.doc(`societies/${societyId}/users/${hostResidentUid}`).get();
+        if (subUser.exists && !residentDocs.some(r => r.id === subUser.id)) {
+          residentDocs.push({ id: subUser.id, ...subUser.data() });
+        }
+      } catch (_) {}
+    }
+
+    // 2. Query by flat number fallback
+    if (residentDocs.length === 0 && hostFlat) {
+      const q1 = await db
+        .collection(`societies/${societyId}/users`)
+        .where("flatNumber", "==", hostFlat)
+        .get();
+      q1.docs.forEach(d => {
+        if (!residentDocs.some(r => r.id === d.id)) residentDocs.push({ id: d.id, ...d.data() });
+      });
+
+      const q2 = await db
+        .collection("users")
+        .where("societyId", "==", societyId)
+        .where("flatNumber", "==", hostFlat)
+        .get();
+      q2.docs.forEach(d => {
+        if (!residentDocs.some(r => r.id === d.id)) residentDocs.push({ id: d.id, ...d.data() });
+      });
+    }
+
+    if (residentDocs.length === 0) {
       logger.warn("No resident found for visitor host flat", {
         functionName: "notifyResidentOnVisitorArrival",
         societyId,
         visitorId,
         hostFlat,
+        hostResidentUid,
       });
       return;
     }
 
     const promises = [];
 
-    for (const residentDoc of residentsQuery.docs) {
-      const residentId = residentDoc.id;
-      const resident = residentDoc.data();
+    for (const resident of residentDocs) {
+      const residentId = resident.id;
       const fcmToken = resident.fcmToken;
 
       // 1. Create In-App Notification document
-      const notifRef = db.collection(`societies/${societyId}/users/${residentId}/notifications`).doc();
+      const notifData = {
+        title: "🔔 Visitor at Gate",
+        body: `${visitorName} (${visitorType}) is waiting at the gate for your approval.`,
+        type: "visitor_pending",
+        visitorId: visitorId,
+        hostFlat: hostFlat,
+        createdAt: FieldValue.serverTimestamp(),
+        read: false,
+      };
+
       promises.push(
-        notifRef.set({
-          title: "🔔 Visitor at Gate",
-          body: `${visitorName} (${visitorType}) is waiting at the gate for your approval.`,
-          type: "visitor_pending",
-          visitorId: visitorId,
-          hostFlat: hostFlat,
-          createdAt: FieldValue.serverTimestamp(),
-          read: false,
-        })
+        db.collection(`societies/${societyId}/users/${residentId}/notifications`).add(notifData)
+      );
+      promises.push(
+        db.collection(`users/${residentId}/notifications`).add(notifData)
       );
 
-      // 2. Dispatch FCM Push Notification
+      // 2. Dispatch FCM Push Notification (Zomato-style Heads-Up Alert)
       if (fcmToken) {
         const message = {
           token: fcmToken,
           notification: {
-            title: "🔔 New Visitor Request",
-            body: `${visitorName} (${visitorType}) is waiting for Flat ${hostFlat}`,
+            title: `🚪 Visitor at Gate — Flat ${hostFlat}`,
+            body: `${visitorName} (${visitorType}) is waiting for your entry approval.`,
           },
           data: {
             type: "visitor_pending",
             visitorId: visitorId,
             societyId: societyId,
             hostFlat: hostFlat,
+            click_action: "FLUTTER_NOTIFICATION_CLICK",
           },
           android: {
             priority: "high",
             notification: {
-              channelId: "visitors",
-              sound: "default",
-              priority: "high",
+              channelId: "gate_security_channel",
+              priority: "max",
+              defaultSound: true,
+              defaultVibrateTimings: true,
+              visibility: "public",
             },
           },
         };
+
         promises.push(
-          messaging.send(message).catch((err) =>
-            logger.error("FCM Send Error", {
-              functionName: "notifyResidentOnVisitorArrival",
-              societyId,
-              visitorId,
-              residentUid: residentId,
-              error: err.message,
+          messaging
+            .send(message)
+            .then((res) => {
+              logger.info("FCM push notification sent successfully", {
+                functionName: "notifyResidentOnVisitorArrival",
+                residentId,
+                visitorId,
+                messageId: res,
+              });
             })
-          )
+            .catch((err) => {
+              logger.error("Failed to send FCM push notification", {
+                functionName: "notifyResidentOnVisitorArrival",
+                residentId,
+                error: err.message,
+              });
+            })
         );
       }
     }

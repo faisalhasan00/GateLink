@@ -77,13 +77,17 @@ service cloud.firestore {
         allow read: if isAuthenticated() && (
           isSocietyAdmin(societyId) ||
           isGuard(societyId) ||
-          resource.data.hostFlat == getUserFlat(societyId) ||
-          resource.data.createdBy == request.auth.uid
+          resource.data.hostResidentUid == request.auth.uid ||
+          resource.data.invitedBy == request.auth.uid ||
+          resource.data.createdBy == request.auth.uid ||
+          resource.data.hostFlat == getUserFlat(societyId)
         );
         allow create: if isAuthenticated() && belongsToSociety(societyId);
         allow update: if isAuthenticated() && (
           isSocietyAdmin(societyId) ||
           isGuard(societyId) ||
+          resource.data.hostResidentUid == request.auth.uid ||
+          resource.data.invitedBy == request.auth.uid ||
           (resource.data.hostFlat == getUserFlat(societyId) &&
            !request.resource.data.diff(resource.data).affectedKeys().hasAny(['hostFlat', 'createdBy', 'societyId']))
         );

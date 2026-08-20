@@ -6,6 +6,13 @@ abstract class VisitorRepository {
   /// Stream of strongly typed visitors in the current society.
   Stream<List<VisitorModel>> watchVisitors();
 
+  /// Stream of strongly typed visitors for a specific resident.
+  Stream<List<VisitorModel>> watchVisitorsForResident({
+    required String residentUid,
+    required String flatNumber,
+    String? tower,
+  });
+
   /// Stream of strongly typed pending visitors for a specific flat.
   Stream<List<VisitorModel>> watchPendingVisitorsForFlat(String hostFlat);
 
