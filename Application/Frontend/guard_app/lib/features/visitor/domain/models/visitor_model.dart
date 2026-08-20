@@ -7,6 +7,8 @@ class VisitorModel {
   final String phone;
   final String type; // Guest, Delivery, Cab, Daily Help
   final String hostFlat;
+  final String? hostResidentUid;
+  final String? hostResidentName;
   final String? vehicleNumber;
   final String? vehicleType;
   final String? company;
@@ -26,6 +28,8 @@ class VisitorModel {
     required this.phone,
     required this.type,
     required this.hostFlat,
+    this.hostResidentUid,
+    this.hostResidentName,
     this.vehicleNumber,
     this.vehicleType,
     this.company,
@@ -55,6 +59,8 @@ class VisitorModel {
       phone: map['phone'] as String? ?? '',
       type: map['type'] as String? ?? 'Guest',
       hostFlat: map['hostFlat'] as String? ?? map['flatNumber'] as String? ?? '',
+      hostResidentUid: map['hostResidentUid'] as String? ?? map['residentUid'] as String?,
+      hostResidentName: map['hostResidentName'] as String? ?? map['residentName'] as String?,
       vehicleNumber: map['vehicleNumber'] as String?,
       vehicleType: map['vehicleType'] as String?,
       company: map['company'] as String?,
@@ -76,6 +82,8 @@ class VisitorModel {
       'phone': phone,
       'type': type,
       'hostFlat': hostFlat,
+      if (hostResidentUid != null) 'hostResidentUid': hostResidentUid,
+      if (hostResidentName != null) 'hostResidentName': hostResidentName,
       if (vehicleNumber != null) 'vehicleNumber': vehicleNumber,
       if (vehicleType != null) 'vehicleType': vehicleType,
       if (company != null) 'company': company,
@@ -97,6 +105,8 @@ class VisitorModel {
     String? phone,
     String? type,
     String? hostFlat,
+    String? hostResidentUid,
+    String? hostResidentName,
     String? vehicleNumber,
     String? vehicleType,
     String? company,
@@ -116,6 +126,8 @@ class VisitorModel {
       phone: phone ?? this.phone,
       type: type ?? this.type,
       hostFlat: hostFlat ?? this.hostFlat,
+      hostResidentUid: hostResidentUid ?? this.hostResidentUid,
+      hostResidentName: hostResidentName ?? this.hostResidentName,
       vehicleNumber: vehicleNumber ?? this.vehicleNumber,
       vehicleType: vehicleType ?? this.vehicleType,
       company: company ?? this.company,

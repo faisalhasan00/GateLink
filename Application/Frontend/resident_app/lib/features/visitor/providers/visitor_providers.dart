@@ -29,10 +29,17 @@ final pendingVisitorsForFlatProvider =
     StreamProvider<List<VisitorModel>>((ref) {
   final repo = ref.watch(visitorRepositoryProvider);
   final profile = ref.watch(userProfileProvider).value;
-  final flatNumber = profile?['flatNumber'] as String? ?? '';
-  final tower = profile?['tower'] as String? ?? '';
-  if (flatNumber.isEmpty || tower.isEmpty) return const Stream.empty();
+  if (profile == null) return const Stream.empty();
 
-  final hostFlat = '$tower-$flatNumber';
-  return repo.watchPendingVisitorsForFlat(hostFlat);
+  final flatNumber = profile.flatNumber;
+  final tower = profile.tower;
+  final uid = profile.uid;
+
+  if (flatNumber.isEmpty && uid.isEmpty) return const Stream.empty();
+
+  return repo.watchPendingVisitorsForResident(
+    residentUid: uid,
+    flatNumber: flatNumber,
+    tower: tower,
+  );
 });

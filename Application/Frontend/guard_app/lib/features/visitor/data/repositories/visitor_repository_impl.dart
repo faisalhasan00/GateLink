@@ -70,7 +70,36 @@ class VisitorRepositoryImpl implements VisitorRepository {
       throw ArgumentError('Society ID is required');
     }
     final docData = visitor.toMap();
-    docData['createdAt'] = DateTime.now().toIso8601String();
-    await _firestore.collection('societies/$societyId/visitors').add(docData);
+    final nowStr = DateTime.now().toIso8601String();
+    docData['createdAt'] = nowStr;
+    final docRef = await _firestore.collection('societies/$societyId/visitors').add(docData);
+
+    // Send Realtime Notification to the Host Resident
+    final resUid = visitor.hostResidentUid;
+    if (resUid != null && resUid.isNotEmpty) {
+      final notifData = {
+        'title': '🚪 Visitor at Gate — Flat ${visitor.hostFlat}',
+        'body': '${visitor.name} (${visitor.type}) is waiting for your entry approval at ${visitor.gateName ?? "Main Gate"}.',
+        'type': 'visitor_pending',
+        'visitorId': docRef.id,
+        'visitorName': visitor.name,
+        'visitorType': visitor.type,
+        'hostFlat': visitor.hostFlat,
+        'read': false,
+        'createdAt': nowStr,
+      };
+
+      try {
+        await _firestore
+            .collection('societies/$societyId/users/$resUid/notifications')
+            .add(notifData);
+      } catch (_) {}
+
+      try {
+        await _firestore
+            .collection('users/$resUid/notifications')
+            .add(notifData);
+      } catch (_) {}
+    }
   }
 }

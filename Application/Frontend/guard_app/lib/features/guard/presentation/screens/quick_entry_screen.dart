@@ -192,6 +192,8 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
         phone: _phoneController.text.trim(),
         type: visitorType,
         hostFlat: targetFlat,
+        hostResidentUid: validation.residentUid,
+        hostResidentName: validation.residentName,
         vehicleNumber: _vehicleController.text.trim(),
         vehicleType: _selectedVehicleType,
         company: _companyController.text.trim(),

@@ -9,6 +9,13 @@ abstract class VisitorRepository {
   /// Stream of strongly typed pending visitors for a specific flat.
   Stream<List<VisitorModel>> watchPendingVisitorsForFlat(String hostFlat);
 
+  /// Stream of strongly typed pending visitors for a resident matching UID or flat number.
+  Stream<List<VisitorModel>> watchPendingVisitorsForResident({
+    required String residentUid,
+    required String flatNumber,
+    String? tower,
+  });
+
   /// Validates a flat number to ensure it belongs to a registered resident.
   Future<FlatValidationResult> validateFlat(String hostFlat);
 

@@ -1,3 +1,4 @@
+
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -414,12 +415,19 @@ class FirestoreService {
         .update(updateData);
   }
 
+  /// Stream of all pending visitors in the society.
+  Stream<QuerySnapshot> pendingVisitorsStream() {
+    return _db
+        .collection('societies/$societyId/visitors')
+        .where('status', isEqualTo: 'pending')
+        .snapshots();
+  }
+
   /// Stream of pending visitors for a specific flat (for resident notifications).
   Stream<QuerySnapshot> pendingVisitorsForFlatStream(String flatNumber) {
     return _db
         .collection('societies/$societyId/visitors')
         .where('status', isEqualTo: 'pending')
-        .where('hostFlat', isEqualTo: flatNumber)
         .snapshots();
   }
 

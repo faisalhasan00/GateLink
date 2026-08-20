@@ -19,11 +19,55 @@ class VisitorRepositoryImpl implements VisitorRepository {
 
   @override
   Stream<List<VisitorModel>> watchPendingVisitorsForFlat(String hostFlat) {
-    return _firestoreService
-        .pendingVisitorsForFlatStream(hostFlat)
-        .map((snapshot) {
+    return watchPendingVisitorsForResident(
+      residentUid: '',
+      flatNumber: hostFlat,
+    );
+  }
+
+  @override
+  Stream<List<VisitorModel>> watchPendingVisitorsForResident({
+    required String residentUid,
+    required String flatNumber,
+    String? tower,
+  }) {
+    String normalize(String s) {
+      return s
+          .toLowerCase()
+          .replaceAll('block', '')
+          .replaceAll('tower', '')
+          .replaceAll('flat', '')
+          .replaceAll('unit', '')
+          .replaceAll('apt', '')
+          .replaceAll('apartment', '')
+          .replaceAll(RegExp(r'[^a-z0-9]'), '');
+    }
+
+    final cleanFlat = normalize(flatNumber);
+    final cleanTowerFlat = normalize('${tower ?? ""}$flatNumber');
+
+    return _firestoreService.pendingVisitorsStream().map((snapshot) {
       return snapshot.docs
           .map((doc) => VisitorModel.fromFirestore(doc))
+          .where((v) {
+            // 1. Direct UID match
+            if (residentUid.isNotEmpty &&
+                (v.hostResidentUid == residentUid || v.invitedBy == residentUid)) {
+              return true;
+            }
+
+            // 2. Normalized Flat match
+            final vFlat = normalize(v.hostFlat);
+            if (cleanFlat.isNotEmpty &&
+                (vFlat == cleanFlat ||
+                 vFlat == cleanTowerFlat ||
+                 (cleanFlat.length >= 2 && vFlat.endsWith(cleanFlat)) ||
+                 (vFlat.length >= 2 && cleanFlat.endsWith(vFlat)))) {
+              return true;
+            }
+
+            return false;
+          })
           .toList();
     });
   }

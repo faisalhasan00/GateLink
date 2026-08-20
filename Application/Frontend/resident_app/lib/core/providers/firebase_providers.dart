@@ -43,32 +43,28 @@ final pendingVisitorsForFlatStreamProvider =
 /// Notification watcher — ref.watch this high in the widget tree to start alerts.
 final visitorNotificationWatcherProvider = StreamProvider<int>((ref) async* {
   final profile = ref.watch(userProfileProvider).value;
-  if (profile == null || profile.role != 'resident') return;
+  if (profile == null) return;
 
   final seenIds = <String>{};
   final visitorRepo = ref.watch(visitorRepositoryProvider);
   final flatNumber = profile.flatNumber;
   final tower = profile.tower;
-  if (flatNumber.isEmpty || tower.isEmpty) return;
+  final uid = profile.uid;
 
-  final hostFlat = '$tower-$flatNumber';
+  if (flatNumber.isEmpty && uid.isEmpty) return;
 
-  await for (final visitors
-      in visitorRepo.watchPendingVisitorsForFlat(hostFlat)) {
+  await for (final visitors in visitorRepo.watchPendingVisitorsForResident(
+    residentUid: uid,
+    flatNumber: flatNumber,
+    tower: tower,
+  )) {
     for (final visitor in visitors) {
       if (!seenIds.contains(visitor.id)) {
         seenIds.add(visitor.id);
-        final entryTime = visitor.entryTime;
-        if (entryTime != null) {
-          try {
-            final dt = DateTime.parse(entryTime);
-            if (DateTime.now().difference(dt).inSeconds > 30) continue;
-          } catch (_) {}
-        }
         NotificationService.showVisitorAlert(
           visitorName: visitor.name,
           visitorType: visitor.type,
-          flatNumber: flatNumber,
+          flatNumber: visitor.hostFlat.isNotEmpty ? visitor.hostFlat : flatNumber,
         );
       }
     }
