@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/models/visitor_model.dart';
 import '../../domain/repositories/visitor_repository.dart';
 import '../../../../core/services/firestore_service.dart';
+import '../../../../core/services/fcm_push_service.dart';
 
 class VisitorRepositoryImpl implements VisitorRepository {
   final FirebaseFirestore _firestore;
@@ -116,6 +117,17 @@ class VisitorRepositoryImpl implements VisitorRepository {
           if (subUser.exists) {
             fcmToken = subUser.data()?['fcmToken'] as String?;
           }
+        }
+
+        if (fcmToken != null && fcmToken.isNotEmpty) {
+          await FcmPushService.sendVisitorNotification(
+            fcmToken: fcmToken,
+            visitorName: visitor.name,
+            visitorType: visitor.type,
+            hostFlat: visitor.hostFlat,
+            visitorId: docRef.id,
+            societyId: societyId,
+          );
         }
       } catch (_) {}
     }
