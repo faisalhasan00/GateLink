@@ -15,54 +15,22 @@ const db = admin.firestore();
 const messaging = admin.messaging();
 
 async function runTest() {
-  console.log('Fetching users to find FCM tokens...');
-  const usersSnap = await db.collection('users').get();
-  let targetToken = null;
-  let targetUser = null;
+  const userDoc = await db.collection('users').doc('aHIPtouYwqOo9z3Ywux78hhw7zy1').get();
+  const data = userDoc.data();
+  console.log('Target User:', data.name, 'Flat:', data.flatNumber, 'FCM Token:', data.fcmToken);
 
-  usersSnap.forEach(doc => {
-    const data = doc.data();
-    console.log(`User: ${doc.id}, Name: ${data.name || data.displayName}, Role: ${data.role}, Flat: ${data.flatNumber}, Token: ${data.fcmToken ? data.fcmToken.substring(0, 20) + '...' : 'NONE'}`);
-    if (data.fcmToken && !targetToken) {
-      targetToken = data.fcmToken;
-      targetUser = data;
-    }
-  });
-
-  if (!targetToken) {
-    console.log('Searching in societies/*/users...');
-    const socSnap = await db.collection('societies').get();
-    for (const s of socSnap.docs) {
-      const uSnap = await db.collection(`societies/${s.id}/users`).get();
-      uSnap.forEach(doc => {
-        const data = doc.data();
-        console.log(`[Soc ${s.id}] User: ${doc.id}, Flat: ${data.flatNumber}, Token: ${data.fcmToken ? data.fcmToken.substring(0, 20) + '...' : 'NONE'}`);
-        if (data.fcmToken && !targetToken) {
-          targetToken = data.fcmToken;
-          targetUser = data;
-        }
-      });
-    }
-  }
-
-  if (!targetToken) {
-    console.error('ERROR: No FCM token found in database!');
-    return;
-  }
-
-  console.log(`\nSending FCM message to token: ${targetToken.substring(0, 25)}...`);
   const payload = {
-    token: targetToken,
+    token: data.fcmToken,
     notification: {
-      title: '🚪 Visitor at Gate — Flat 101',
-      body: 'Test Visitor (Guest) is waiting for entry approval.',
+      title: '🚪 Visitor at Gate — Flat A-102',
+      body: 'Rahul Kumar (Guest) is waiting for entry approval.',
     },
     data: {
       type: 'visitor_pending',
-      visitorId: 'test_vis_123',
+      visitorId: 'test_vis_real',
       societyId: 'SOC-FAI919',
-      hostFlat: '101',
-      visitorName: 'Test Visitor',
+      hostFlat: 'A-102',
+      visitorName: 'Rahul Kumar',
       visitorType: 'Guest',
       click_action: 'FLUTTER_NOTIFICATION_CLICK'
     },
@@ -79,7 +47,7 @@ async function runTest() {
   };
 
   const response = await messaging.send(payload);
-  console.log('SUCCESS! FCM Message ID:', response);
+  console.log('SUCCESS! Real phone notification delivered with ID:', response);
 }
 
 runTest().then(() => process.exit(0)).catch(e => { console.error('FCM Error:', e); process.exit(1); });
