@@ -90,7 +90,7 @@ void main() async {
 
   runApp(
     const ProviderScope(
-      child: SocietySphereApp(),
+      child: GateLinkResidentApp(),
     ),
   );
 
@@ -110,8 +110,8 @@ void main() async {
   });
 }
 
-class SocietySphereApp extends ConsumerWidget {
-  const SocietySphereApp({super.key});
+class GateLinkResidentApp extends ConsumerWidget {
+  const GateLinkResidentApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -121,7 +121,7 @@ class SocietySphereApp extends ConsumerWidget {
     ref.watch(visitorNotificationWatcherProvider);
 
     return MaterialApp.router(
-      title: 'HomeHni Residency',
+      title: 'GateLink',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,

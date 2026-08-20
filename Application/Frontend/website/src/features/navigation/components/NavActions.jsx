@@ -11,7 +11,7 @@ export default function NavActions({
     <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
       {/* Phone Call Launcher */}
       <a
-        href="tel:+919999999999"
+        href="tel:+919121863117"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -37,7 +37,7 @@ export default function NavActions({
         >
           <Phone size={13} fill="white" />
         </div>
-        <span>+91 99999 99999</span>
+        <span>+91 91218 63117</span>
       </a>
 
       {/* Outlined Society Login */}

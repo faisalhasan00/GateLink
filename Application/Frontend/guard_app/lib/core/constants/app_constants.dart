@@ -28,7 +28,7 @@ class AppConstants {
   static const String appName = 'GateLink';
   static const String appVersion = '1.0.0';
   static const String supportEmail = 'support@gatelink.in';
-  static const String supportPhone = '+91 9999999999';
+  static const String supportPhone = '+91 9121863117';
 
   // Account Status
   static const String statusPending = 'pending';

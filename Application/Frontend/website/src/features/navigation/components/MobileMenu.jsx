@@ -187,7 +187,7 @@ export default function MobileMenu({
 
       {/* Mobile Phone Launcher */}
       <a
-        href="tel:+919999999999"
+        href="tel:+919121863117"
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -200,7 +200,7 @@ export default function MobileMenu({
         }}
       >
         <Phone size={16} />
-        <span>Call: +91 99999 99999</span>
+        <span>Call: +91 91218 63117</span>
       </a>
 
       {/* Actions */}

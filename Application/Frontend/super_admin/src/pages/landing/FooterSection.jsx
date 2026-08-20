@@ -31,7 +31,7 @@ export default function FooterSection() {
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#CBD5E1', marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Phone size={14} color="#00B589" /> <a href="tel:+919999999999" style={{ color: '#CBD5E1', textDecoration: 'none' }}>+91 99999 99999</a>
+                <Phone size={14} color="#00B589" /> <a href="tel:+919121863117" style={{ color: '#CBD5E1', textDecoration: 'none' }}>+91 91218 63117</a>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <Mail size={14} color="#00B589" /> <a href="mailto:support@gatelink.in" style={{ color: '#CBD5E1', textDecoration: 'none' }}>support@gatelink.in</a>

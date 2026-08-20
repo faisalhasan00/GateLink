@@ -6,21 +6,36 @@ import '../../../../core/theme/app_spacing.dart';
 class SubmitLeadModal extends StatefulWidget {
   final String partnerName;
   final String partnerPhone;
+  final String? partnerEmail;
+  final String? partnerUpi;
 
   const SubmitLeadModal({
     super.key,
     required this.partnerName,
     required this.partnerPhone,
+    this.partnerEmail,
+    this.partnerUpi,
   });
 
-  static void show(BuildContext context, {required String partnerName, required String partnerPhone}) {
+  static void show(
+    BuildContext context, {
+    required String partnerName,
+    required String partnerPhone,
+    String? partnerEmail,
+    String? partnerUpi,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-        child: SubmitLeadModal(partnerName: partnerName, partnerPhone: partnerPhone),
+        child: SubmitLeadModal(
+          partnerName: partnerName,
+          partnerPhone: partnerPhone,
+          partnerEmail: partnerEmail,
+          partnerUpi: partnerUpi,
+        ),
       ),
     );
   }
@@ -35,8 +50,14 @@ class _SubmitLeadModalState extends State<SubmitLeadModal> {
   final _cityController = TextEditingController();
   final _contactPersonController = TextEditingController();
   final _contactPhoneController = TextEditingController();
-  final _approxFlatsController = TextEditingController(text: '150');
-  final _upiController = TextEditingController(text: 'raj@okicici');
+  final _approxFlatsController = TextEditingController();
+  late final TextEditingController _upiController;
+
+  @override
+  void initState() {
+    super.initState();
+    _upiController = TextEditingController(text: widget.partnerUpi ?? '');
+  }
 
   bool _isSubmitting = false;
 
@@ -62,6 +83,7 @@ class _SubmitLeadModalState extends State<SubmitLeadModal> {
         'referenceId': generatedRef,
         'partnerName': widget.partnerName,
         'partnerPhone': widget.partnerPhone,
+        'partnerEmail': widget.partnerEmail ?? '',
         'partnerUpi': _upiController.text.trim(),
         'targetSocietyName': _societyNameController.text.trim(),
         'targetCity': _cityController.text.trim(),

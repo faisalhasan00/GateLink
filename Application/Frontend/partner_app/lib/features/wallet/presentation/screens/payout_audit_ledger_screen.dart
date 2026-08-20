@@ -5,15 +5,18 @@ import '../../../../core/theme/app_spacing.dart';
 
 class PayoutAuditLedgerScreen extends StatelessWidget {
   final String partnerPhone;
+  final String? partnerEmail;
 
   const PayoutAuditLedgerScreen({
     super.key,
     required this.partnerPhone,
+    this.partnerEmail,
   });
 
   @override
   Widget build(BuildContext context) {
     final phoneClean = partnerPhone.replaceAll(RegExp(r'[^0-9]'), '');
+    final emailClean = partnerEmail?.trim().toLowerCase() ?? '';
 
     return Scaffold(
       appBar: AppBar(
@@ -25,7 +28,6 @@ class PayoutAuditLedgerScreen extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('partner_leads')
-            .where('partnerPhone', isEqualTo: phoneClean)
             .snapshots(),
         builder: (context, snapshot) {
           final docs = snapshot.data?.docs ?? [];
@@ -33,7 +35,13 @@ class PayoutAuditLedgerScreen extends StatelessWidget {
 
           for (final doc in docs) {
             final data = doc.data() as Map<String, dynamic>;
-            if (data['payoutStatus'] == 'paid') {
+            final pPhone = (data['partnerPhone'] ?? '').toString().replaceAll(RegExp(r'[^0-9]'), '');
+            final pEmail = (data['partnerEmail'] ?? '').toString().trim().toLowerCase();
+
+            final matchesPhone = phoneClean.isNotEmpty && pPhone.contains(phoneClean);
+            final matchesEmail = emailClean.isNotEmpty && pEmail == emailClean;
+
+            if ((matchesPhone || matchesEmail) && data['payoutStatus'] == 'paid') {
               paidLeads.add(data);
             }
           }

@@ -4,11 +4,11 @@ const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('societysphere_theme') || 'light';
+    return localStorage.getItem('gatelink_theme') || 'light';
   });
 
   useEffect(() => {
-    localStorage.setItem('societysphere_theme', theme);
+    localStorage.setItem('gatelink_theme', theme);
     if (theme === 'light') {
       document.documentElement.classList.add('light-theme');
       document.documentElement.classList.remove('dark-theme');

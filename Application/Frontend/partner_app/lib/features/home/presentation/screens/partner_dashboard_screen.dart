@@ -82,15 +82,29 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance
             .collection('partner_leads')
-            .where('partnerPhone', isEqualTo: partnerPhone.replaceAll(RegExp(r'[^0-9]'), ''))
+            .orderBy('createdAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           List<Map<String, dynamic>> leadsList = [];
 
+          final cleanPhone = partnerPhone.replaceAll(RegExp(r'[^0-9]'), '');
+          final partnerEmail = partnerUser?.email.trim().toLowerCase() ?? '';
+
           if (snapshot.hasData && snapshot.data != null) {
             for (final doc in snapshot.data!.docs) {
               final data = doc.data() as Map<String, dynamic>?;
-              if (data != null) leadsList.add(data);
+              if (data != null) {
+                final leadPhone = (data['partnerPhone'] ?? '').toString().replaceAll(RegExp(r'[^0-9]'), '');
+                final leadEmail = (data['partnerEmail'] ?? '').toString().trim().toLowerCase();
+
+                final matchesPhone = cleanPhone.isNotEmpty && leadPhone.contains(cleanPhone);
+                final matchesEmail = partnerEmail.isNotEmpty && leadEmail == partnerEmail;
+                final matchesName = partnerName.isNotEmpty && (data['partnerName'] ?? '').toString().trim().toLowerCase() == partnerName.trim().toLowerCase();
+
+                if (matchesPhone || matchesEmail || matchesName) {
+                  leadsList.add(data);
+                }
+              }
             }
           }
 
@@ -143,7 +157,13 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                     Expanded(
                       flex: 6,
                       child: ElevatedButton.icon(
-                        onPressed: () => OnboardSocietyModal.show(context, partnerName: partnerName, partnerPhone: partnerPhone),
+                        onPressed: () => OnboardSocietyModal.show(
+                          context,
+                          partnerName: partnerName,
+                          partnerPhone: partnerPhone,
+                          partnerEmail: partnerUser?.email,
+                          partnerUpi: partnerUser?.upiId,
+                        ),
                         icon: const Icon(Icons.bolt_rounded, size: 18),
                         label: const Text('⚡ Onboard Society Directly', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
                         style: ElevatedButton.styleFrom(
@@ -158,7 +178,13 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                     Expanded(
                       flex: 5,
                       child: ElevatedButton.icon(
-                        onPressed: () => SubmitLeadModal.show(context, partnerName: partnerName, partnerPhone: partnerPhone),
+                        onPressed: () => SubmitLeadModal.show(
+                          context,
+                          partnerName: partnerName,
+                          partnerPhone: partnerPhone,
+                          partnerEmail: partnerUser?.email,
+                          partnerUpi: partnerUser?.upiId,
+                        ),
                         icon: const Icon(Icons.add_business_rounded, size: 16),
                         label: const Text('Submit Lead', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                         style: ElevatedButton.styleFrom(
@@ -190,7 +216,12 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                       child: OutlinedButton.icon(
                         onPressed: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => PayoutAuditLedgerScreen(partnerPhone: partnerPhone)),
+                          MaterialPageRoute(
+                            builder: (_) => PayoutAuditLedgerScreen(
+                              partnerPhone: partnerPhone,
+                              partnerEmail: partnerUser?.email,
+                            ),
+                          ),
                         ),
                         icon: const Icon(Icons.receipt_long_rounded, size: 16, color: AppColors.primary),
                         label: const Text('Cashfree Ledger', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),

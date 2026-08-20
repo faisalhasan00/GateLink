@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/partner_auth_provider.dart';
@@ -21,7 +19,6 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
   final _otpController = TextEditingController();
   bool _otpSent = false;
   bool _isLoading = false;
-  bool _isGoogleLoading = false;
 
   @override
   void dispose() {
@@ -97,148 +94,6 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
     }
   }
 
-  Future<void> _handleGoogleSignIn() async {
-    setState(() => _isGoogleLoading = true);
-
-    try {
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        serverClientId: '43273653500-arlkcuk1kal0ph2kr8k8frj2mm0rklb3.apps.googleusercontent.com',
-      );
-
-      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-      if (googleUser == null) {
-        setState(() => _isGoogleLoading = false);
-        return;
-      }
-
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        accessToken: googleAuth.accessToken,
-        idToken: googleAuth.idToken,
-      );
-
-      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
-      final user = userCredential.user;
-
-      if (user != null) {
-        final googleName = user.displayName ?? googleUser.displayName ?? 'Partner User';
-        final googleEmail = user.email ?? googleUser.email;
-
-        await _processGooglePartnerLogin(googleName, googleEmail);
-      }
-    } catch (err) {
-      // PlatformException 10 fallback: Prompt user for Google Email cleanly
-      if (mounted) {
-        _showGoogleEmailFallbackDialog();
-      }
-    } finally {
-      if (mounted) setState(() => _isGoogleLoading = false);
-    }
-  }
-
-  Future<void> _processGooglePartnerLogin(String googleName, String googleEmail) async {
-    final docSnapshot = await FirebaseFirestore.instance.collection('partners').doc(googleEmail).get();
-
-    if (docSnapshot.exists && docSnapshot.data() != null) {
-      final data = docSnapshot.data()!;
-      await ref.read(partnerAuthProvider.notifier).loginOrRegister(
-        name: data['name'] ?? googleName,
-        phone: data['phone'] ?? '',
-        email: googleEmail,
-        category: data['category'] ?? 'Real Estate Broker',
-        upiId: data['upiId'] ?? '',
-        city: data['city'] ?? '',
-      );
-
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const PartnerDashboardScreen()),
-        );
-      }
-    } else {
-      if (mounted) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => PartnerRegisterScreen(
-              initialName: googleName,
-              initialEmail: googleEmail,
-            ),
-          ),
-        );
-      }
-    }
-  }
-
-  void _showGoogleEmailFallbackDialog() {
-    final emailController = TextEditingController();
-    final nameController = TextEditingController();
-
-    showDialog(
-      context: context,
-      builder: (dialogCtx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
-        title: const Row(
-          children: [
-            Icon(Icons.g_mobiledata_rounded, color: Color(0xFF4285F4), size: 32),
-            SizedBox(width: 8),
-            Text('Google Account Sign-In', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Enter your Google account email to sign in or complete registration:',
-              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 14),
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                labelText: 'Full Name',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-              ),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                labelText: 'Google Email Address',
-                hintText: 'name@gmail.com',
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final email = emailController.text.trim();
-              final name = nameController.text.trim();
-              if (email.isNotEmpty) {
-                Navigator.pop(dialogCtx);
-                _processGooglePartnerLogin(name.isEmpty ? 'Google User' : name, email);
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-            ),
-            child: const Text('Continue'),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -275,52 +130,15 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                       'GateLink Partner',
                       style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
                     ),
+                    const SizedBox(height: 4),
                     const Text(
                       'Channel Partner & Broker Referral App',
-                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 36),
-
-              // Google Sign-In Main Button
-              SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: OutlinedButton.icon(
-                  onPressed: _isGoogleLoading ? null : _handleGoogleSignIn,
-                  icon: _isGoogleLoading
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                      : Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                          child: const Icon(Icons.g_mobiledata_rounded, color: Color(0xFF4285F4), size: 28),
-                        ),
-                  label: const Text(
-                    'Continue with Google',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    side: const BorderSide(color: AppColors.border, width: 1.5),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 24),
-
-              Row(
-                children: [
-                  Expanded(child: Container(height: 1, color: AppColors.border)),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 12),
-                    child: Text('OR LOGIN WITH PHONE', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-                  ),
-                  Expanded(child: Container(height: 1, color: AppColors.border)),
-                ],
-              ),
-              const SizedBox(height: 24),
 
               // Phone Login Card Container
               Container(
@@ -341,15 +159,15 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Mobile Number OTP Login',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                      'Partner Login',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 4),
                     const Text(
-                      'Enter your registered mobile number to receive instant verification code',
-                      style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                      'Enter your registered 10-digit mobile number to login',
+                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
 
                     TextFormField(
                       controller: _phoneController,
@@ -362,7 +180,7 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                         prefixIcon: const Icon(Icons.phone_rounded, color: AppColors.primary),
                       ),
                     ),
-                    const SizedBox(height: 14),
+                    const SizedBox(height: 16),
 
                     if (_otpSent) ...[
                       TextFormField(
@@ -376,12 +194,12 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                           prefixIcon: const Icon(Icons.lock_rounded, color: AppColors.secondary),
                         ),
                       ),
-                      const SizedBox(height: 14),
+                      const SizedBox(height: 16),
                     ],
 
                     SizedBox(
                       width: double.infinity,
-                      height: 48,
+                      height: 50,
                       child: ElevatedButton(
                         onPressed: _isLoading
                             ? null
@@ -390,10 +208,14 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                          elevation: 0,
                         ),
                         child: _isLoading
                             ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : Text(_otpSent ? 'Verify & Login' : 'Get Verification Code', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                            : Text(
+                                _otpSent ? 'Verify & Login' : 'Get Verification Code',
+                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                              ),
                       ),
                     ),
                   ],
@@ -406,7 +228,7 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text("Don't have a partner account? ", style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                    const Text("Don't have a partner account? ", style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
                     GestureDetector(
                       onTap: () => Navigator.push(
                         context,
@@ -414,7 +236,7 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
                       ),
                       child: const Text(
                         'Register Now',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.w900, color: AppColors.primary),
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.primary),
                       ),
                     ),
                   ],

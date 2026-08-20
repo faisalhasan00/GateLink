@@ -6,7 +6,7 @@ export default function LiveChatWidget() {
   const location = useLocation();
   const isDashboard = location.pathname.startsWith('/app') || location.pathname.startsWith('/super-admin');
 
-  const whatsappNumber = '919999999999';
+  const whatsappNumber = '919121863117';
   const message = 'Hello GateLink Team, I want to know more about your society management OS and book a live demo.';
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
 

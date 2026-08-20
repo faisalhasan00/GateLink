@@ -131,13 +131,13 @@ export default function Navbar({ onOpenDemo }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             {/* Phone Call Launcher */}
             <a
-              href="tel:+919999999999"
+              href="tel:+919121863117"
               style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', color: isDark ? '#E2E8F0' : '#333333', fontSize: '14px', fontWeight: 700 }}
             >
               <div style={{ width: '26px', height: '26px', borderRadius: '50%', backgroundColor: isDark ? '#334155' : '#4A4A4A', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                 <Phone size={13} fill="white" />
               </div>
-              <span>+91 99999 99999</span>
+              <span>+91 91218 63117</span>
             </a>
 
             {/* Outlined "Society Login" */}

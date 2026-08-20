@@ -91,7 +91,7 @@ export default function ContactSection() {
                 </div>
                 <div>
                   <div style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 600 }}>CALL OR WHATSAPP</div>
-                  <div style={{ fontSize: '16px', fontWeight: 800, color: '#FFFFFF' }}>+91 98765 43210</div>
+                  <div style={{ fontSize: '16px', fontWeight: 800, color: '#FFFFFF' }}>+91 91218 63117</div>
                 </div>
               </div>
 

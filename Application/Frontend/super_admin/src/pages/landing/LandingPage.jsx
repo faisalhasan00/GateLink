@@ -75,11 +75,11 @@ export default function LandingPage() {
               To schedule a free demo,
             </div>
             <div style={{ fontSize: '12px', fontWeight: 600, color: isDark ? '#94A3B8' : '#666666', marginTop: '2px' }}>
-              call us on <a href="tel:+919999999999" style={{ color: '#00B589', textDecoration: 'none', fontWeight: 800 }}>+91 99999 99999</a>
+              call us on <a href="tel:+919121863117" style={{ color: '#00B589', textDecoration: 'none', fontWeight: 800 }}>+91 91218 63117</a>
             </div>
           </div>
           <a
-            href="tel:+919999999999"
+            href="tel:+919121863117"
             aria-label="Call for free demo"
             style={{
               width: '42px',

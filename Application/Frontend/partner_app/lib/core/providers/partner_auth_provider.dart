@@ -40,13 +40,14 @@ class PartnerAuthNotifier extends StateNotifier<PartnerUser?> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final name = prefs.getString('partner_name');
-      final phone = prefs.getString('partner_phone');
-      if (name != null && phone != null) {
+      final phone = prefs.getString('partner_phone') ?? '';
+      final email = prefs.getString('partner_email') ?? '';
+      if (name != null && name.isNotEmpty && (phone.isNotEmpty || email.isNotEmpty)) {
         state = PartnerUser(
           uid: prefs.getString('partner_uid') ?? 'PARTNER-${DateTime.now().millisecondsSinceEpoch}',
           name: name,
           phone: phone,
-          email: prefs.getString('partner_email') ?? '',
+          email: email,
           category: prefs.getString('partner_category') ?? 'Channel Partner',
           upiId: prefs.getString('partner_upi') ?? '',
           city: prefs.getString('partner_city') ?? 'Hyderabad',

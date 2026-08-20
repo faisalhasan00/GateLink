@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -6,19 +7,34 @@ import '../../../../core/theme/app_spacing.dart';
 class OnboardSocietyModal extends StatefulWidget {
   final String partnerName;
   final String partnerPhone;
+  final String? partnerEmail;
+  final String? partnerUpi;
 
   const OnboardSocietyModal({
     super.key,
     required this.partnerName,
     required this.partnerPhone,
+    this.partnerEmail,
+    this.partnerUpi,
   });
 
-  static void show(BuildContext context, {required String partnerName, required String partnerPhone}) {
+  static void show(
+    BuildContext context, {
+    required String partnerName,
+    required String partnerPhone,
+    String? partnerEmail,
+    String? partnerUpi,
+  }) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => OnboardSocietyModal(partnerName: partnerName, partnerPhone: partnerPhone),
+      builder: (_) => OnboardSocietyModal(
+        partnerName: partnerName,
+        partnerPhone: partnerPhone,
+        partnerEmail: partnerEmail,
+        partnerUpi: partnerUpi,
+      ),
     );
   }
 
@@ -114,6 +130,8 @@ class _OnboardSocietyModalState extends State<OnboardSocietyModal> {
         'monthlyPassiveEarned': monthlyPassive,
         'partnerName': widget.partnerName,
         'partnerPhone': widget.partnerPhone,
+        'partnerEmail': widget.partnerEmail ?? '',
+        'partnerUpi': widget.partnerUpi ?? '',
         'paidAt': FieldValue.serverTimestamp(),
         'createdAt': FieldValue.serverTimestamp(),
       });

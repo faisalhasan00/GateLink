@@ -89,7 +89,7 @@ void main() async {
 
   runApp(
     const ProviderScope(
-      child: SocietySphereGuardApp(),
+      child: GateLinkGuardApp(),
     ),
   );
 
@@ -109,15 +109,15 @@ void main() async {
   });
 }
 
-class SocietySphereGuardApp extends ConsumerWidget {
-  const SocietySphereGuardApp({super.key});
+class GateLinkGuardApp extends ConsumerWidget {
+  const GateLinkGuardApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(appRouterProvider);
 
     return MaterialApp.router(
-      title: 'HomeHni Guard',
+      title: 'GateLink Guard',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
