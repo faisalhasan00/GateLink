@@ -447,10 +447,26 @@ export const societyAdminService = {
   async createNotice(societyId, noticeData) {
     if (!societyId) throw new Error('Society ID is required');
     const docRef = doc(collection(db, `societies/${societyId}/notices`));
-    await setDoc(docRef, {
+    const payload = {
       ...noticeData,
       createdAt: new Date().toISOString(),
-    });
+    };
+    await setDoc(docRef, payload);
+
+    // Fire & forget high-priority FCM push broadcast to all residents and guards
+    import('./fcmBroadcastService').then(({ broadcastToSociety }) => {
+      const categoryIcon = noticeData.category === 'Emergency' ? '🚨' : noticeData.category === 'Maintenance' ? '🔧' : '📢';
+      broadcastToSociety(societyId, {
+        title: `${categoryIcon} ${noticeData.title}`,
+        body: noticeData.body || 'New official notice posted by Society Admin.',
+        category: 'notice',
+        data: {
+          noticeId: docRef.id,
+          category: noticeData.category || 'General',
+        },
+      }).catch(err => console.warn('FCM broadcast notice warning:', err));
+    }).catch(err => console.warn('FCM module load warning:', err));
+
     return docRef.id;
   },
 

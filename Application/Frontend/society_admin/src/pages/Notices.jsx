@@ -216,10 +216,25 @@ export default function Notices() {
                   style={{ resize: 'vertical', minHeight: '100px' }}
                 />
               </div>
+              <div style={{
+                background: 'rgba(14, 165, 233, 0.08)',
+                border: '1px solid rgba(14, 165, 233, 0.2)',
+                borderRadius: '8px',
+                padding: '10px 14px',
+                marginBottom: '16px',
+                fontSize: '13px',
+                color: 'var(--primary)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                <span>🔔</span>
+                <span><strong>Instant Mobile Broadcast:</strong> Publishing will automatically trigger high-priority heads-up notifications on all residents' and guards' phones.</span>
+              </div>
               <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
                 <button type="button" className="btn btn-outline" style={{ flex: 1 }} onClick={() => setIsModalOpen(false)} disabled={isSending}>Cancel</button>
                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={isSending}>
-                  {isSending ? 'Sending...' : editingNotice ? 'Update Notice' : 'Publish & Notify All'}
+                  {isSending ? 'Publishing & Broadcasting...' : editingNotice ? 'Update Notice' : '🚀 Publish & Broadcast to All'}
                 </button>
               </div>
             </form>

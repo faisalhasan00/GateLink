@@ -23,11 +23,11 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
     final data = message.data;
     final type = data['type'] as String? ?? '';
+    final title = message.notification?.title ?? data['title'] as String? ?? 'GateLink Notice';
+    final body = message.notification?.body ?? data['body'] as String? ?? 'New update received';
 
-    if (type == 'visitor_pending' || message.notification != null) {
-      final visitorName = data['visitorName'] as String? ??
-          message.notification?.title?.replaceAll('🚪 Visitor at Gate — Flat ', '') ??
-          'Visitor';
+    if (type == 'visitor_pending') {
+      final visitorName = data['visitorName'] as String? ?? 'Visitor';
       final visitorType = data['visitorType'] as String? ?? 'Guest';
       final flatNumber = data['hostFlat'] as String? ?? '';
       final visitorId = data['visitorId'] as String?;
@@ -39,6 +39,25 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         flatNumber: flatNumber,
         visitorId: visitorId,
         societyId: societyId,
+      );
+    } else if (type == 'sos' || type == 'emergency') {
+      final residentName = data['residentName'] as String? ?? 'Resident';
+      final flatNumber = data['flatNumber'] as String? ?? '';
+      final alertType = data['alertType'] as String? ?? 'Emergency';
+      await NotificationService.showSosAlert(
+        residentName: residentName,
+        flatNumber: flatNumber,
+        alertType: alertType,
+      );
+    } else if (type == 'notice' || type == 'announcement' || type == 'offer' || type == 'broadcast' || type == 'bill') {
+      await NotificationService.showNoticeAlert(
+        title: title,
+        body: body,
+      );
+    } else if (message.notification != null) {
+      await NotificationService.showNoticeAlert(
+        title: message.notification!.title ?? 'GateLink Notification',
+        body: message.notification!.body ?? '',
       );
     }
   } catch (e) {
