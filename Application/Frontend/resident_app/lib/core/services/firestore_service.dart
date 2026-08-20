@@ -41,37 +41,110 @@ class FirestoreService {
     }
 
     try {
-      final querySnap = await _db
-          .collection('societies/$societyId/users')
-          .where('flatNumber', isEqualTo: rawInput)
-          .limit(1)
-          .get();
+      final List<Map<String, dynamic>> userDocs = [];
 
-      if (querySnap.docs.isNotEmpty) {
-        final doc = querySnap.docs.first;
-        final data = doc.data();
-        final residentName = data['name'] as String? ?? 'Resident';
+      // 1. Check subcollection societies/$societyId/users
+      try {
+        final subSnap = await _db.collection('societies/$societyId/users').get();
+        for (final doc in subSnap.docs) {
+          final data = Map<String, dynamic>.from(doc.data());
+          data['_id'] = doc.id;
+          userDocs.add(data);
+        }
+      } catch (_) {}
+
+      // 2. Check root /users collection with societyId match
+      try {
+        final rootSnap = await _db
+            .collection('users')
+            .where('societyId', isEqualTo: societyId)
+            .get();
+        for (final doc in rootSnap.docs) {
+          if (!userDocs.any((u) => u['_id'] == doc.id)) {
+            final data = Map<String, dynamic>.from(doc.data());
+            data['_id'] = doc.id;
+            userDocs.add(data);
+          }
+        }
+      } catch (_) {}
+
+      if (userDocs.isEmpty) {
         return FlatValidationResult(
-          isValid: true,
-          residentName: residentName,
-          residentUid: doc.id,
+          isValid: false,
+          error: 'No registered residents found in society',
         );
       }
 
-      final unitSnap = await _db
-          .collection('societies/$societyId/users')
-          .where('unitNumber', isEqualTo: rawInput)
-          .limit(1)
-          .get();
+      String normalize(String s) {
+        return s
+            .toLowerCase()
+            .replaceAll('block', '')
+            .replaceAll('tower', '')
+            .replaceAll('flat', '')
+            .replaceAll('unit', '')
+            .replaceAll('apt', '')
+            .replaceAll('apartment', '')
+            .replaceAll(RegExp(r'[^a-z0-9]'), '');
+      }
 
-      if (unitSnap.docs.isNotEmpty) {
-        final doc = unitSnap.docs.first;
-        final data = doc.data();
-        final residentName = data['name'] as String? ?? 'Resident';
+      final cleanInput = normalize(rawInput);
+
+      Map<String, dynamic>? matchedUser;
+
+      for (final data in userDocs) {
+        final flatNum = (data['flatNumber'] as String? ?? '').trim();
+        final unitNum = (data['unitNumber'] as String? ?? '').trim();
+        final block = (data['block'] as String? ?? data['tower'] as String? ?? '').trim();
+
+        final rawCandidates = [
+          flatNum,
+          unitNum,
+          if (block.isNotEmpty && flatNum.isNotEmpty) '$block-$flatNum',
+          if (block.isNotEmpty && flatNum.isNotEmpty) '$block $flatNum',
+          if (block.isNotEmpty && flatNum.isNotEmpty) '$block$flatNum',
+          if (block.isNotEmpty && unitNum.isNotEmpty) '$block-$unitNum',
+        ];
+
+        // 1. Exact or case-insensitive string match
+        if (rawCandidates.any((c) => c.trim().toLowerCase() == rawInput.toLowerCase())) {
+          matchedUser = data;
+          break;
+        }
+
+        // 2. Normalized alphanumeric match
+        final cleanCandidates = rawCandidates.map(normalize).where((c) => c.isNotEmpty).toList();
+        if (cleanCandidates.any((c) => c == cleanInput)) {
+          matchedUser = data;
+          break;
+        }
+
+        // 3. Suffix or substring match (e.g. "101" matching "A-101" or "A101")
+        if (cleanInput.length >= 2) {
+          final isMatch = cleanCandidates.any((c) =>
+              c.endsWith(cleanInput) ||
+              cleanInput.endsWith(c) ||
+              (c.length >= 3 && cleanInput.contains(c)) ||
+              (cleanInput.length >= 3 && c.contains(cleanInput)));
+          if (isMatch) {
+            matchedUser = data;
+            break;
+          }
+        }
+      }
+
+      if (matchedUser != null) {
+        final residentName = (matchedUser['name'] as String?)?.isNotEmpty == true
+            ? matchedUser['name'] as String
+            : ((matchedUser['fullName'] as String?)?.isNotEmpty == true
+                ? matchedUser['fullName'] as String
+                : ((matchedUser['displayName'] as String?)?.isNotEmpty == true
+                    ? matchedUser['displayName'] as String
+                    : 'Resident'));
+        final residentUid = matchedUser['_id'] as String? ?? '';
         return FlatValidationResult(
           isValid: true,
           residentName: residentName,
-          residentUid: doc.id,
+          residentUid: residentUid,
         );
       }
 
