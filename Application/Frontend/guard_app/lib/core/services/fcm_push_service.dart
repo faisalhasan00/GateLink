@@ -25,7 +25,6 @@ class FcmPushService {
     try {
       _client ??= await clientViaServiceAccount(_credentials, _scopes);
       final token = _client?.credentials.accessToken.data;
-      debugPrint('Google OAuth2 access token obtained successfully');
       return token;
     } catch (e) {
       debugPrint('Error obtaining Google OAuth2 access token: $e');
@@ -83,10 +82,10 @@ class FcmPushService {
               'priority': 'HIGH',
               'notification': {
                 'channel_id': 'gate_security_channel',
-                'priority': 'PRIORITY_MAX',
+                'notification_priority': 'PRIORITY_MAX',
                 'default_sound': true,
                 'default_vibrate_timings': true,
-                'visibility': 'VISIBILITY_PUBLIC',
+                'visibility': 'PUBLIC',
               },
             },
           },
