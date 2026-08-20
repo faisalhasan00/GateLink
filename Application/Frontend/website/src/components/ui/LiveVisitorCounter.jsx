@@ -1,72 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { Eye } from 'lucide-react';
 import { db } from '../../firebase';
-import { doc, setDoc, increment, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, query, where, onSnapshot } from 'firebase/firestore';
 
 export default function LiveVisitorCounter() {
-  // Retrieve previous cached count or initialize dynamic baseline
-  const [totalVisits, setTotalVisits] = useState(() => {
-    const cached = localStorage.getItem('gatelink_cached_visits');
-    return cached ? parseInt(cached, 10) : 1248;
-  });
+  const [totalVisits, setTotalVisits] = useState(null);
 
   useEffect(() => {
-    const statsDocRef = doc(db, 'system_stats', 'website_visits');
-
-    // 1. Increment visitor count per browser session
-    const logVisit = async () => {
+    // 1. Session tracking - each new device or browser session logs +1 to Firestore cloud
+    const logVisitorHit = async () => {
       try {
-        const sessionKey = 'gl_session_hit_logged';
+        const sessionKey = 'gatelink_visitor_logged';
         if (!sessionStorage.getItem(sessionKey)) {
           sessionStorage.setItem(sessionKey, '1');
-          
-          // Update local state and localStorage immediately
-          setTotalVisits((prev) => {
-            const next = (prev || 1248) + 1;
-            localStorage.setItem('gatelink_cached_visits', next.toString());
-            return next;
+          await addDoc(collection(db, 'partner_leads'), {
+            type: 'website_visitor_hit',
+            timestamp: Date.now(),
+            userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'web',
           });
-
-          // Sync atomic increment to Firestore
-          await setDoc(
-            statsDocRef,
-            {
-              total_visits: increment(1),
-              last_visit_at: new Date().toISOString(),
-            },
-            { merge: true }
-          );
         }
       } catch (err) {
-        // Fallback gracefully if firestore rules are deploying
-        console.info('Visitor session tracked locally.');
+        console.warn('Visitor hit logger:', err);
       }
     };
 
-    logVisit();
+    logVisitorHit();
 
-    // 2. Real-time dynamic Firestore listener
-    let unsubscribe;
-    try {
-      unsubscribe = onSnapshot(
-        statsDocRef,
-        (docSnap) => {
-          if (docSnap.exists()) {
-            const data = docSnap.data();
-            if (typeof data.total_visits === 'number' && data.total_visits > 0) {
-              const liveCount = data.total_visits;
-              setTotalVisits(liveCount);
-              localStorage.setItem('gatelink_cached_visits', liveCount.toString());
-            }
-          }
-        },
-        (error) => {
-          // Silent catch for smooth UI rendering
-        }
-      );
-    } catch (err) {
-      // Ignore
-    }
+    // 2. Real-time dynamic Firestore listener across all devices globally
+    const q = query(
+      collection(db, 'partner_leads'),
+      where('type', '==', 'website_visitor_hit')
+    );
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        setTotalVisits(snapshot.size);
+      },
+      (error) => {
+        console.warn('Visitor listener notice:', error);
+      }
+    );
 
     return () => {
       if (unsubscribe) unsubscribe();
@@ -89,12 +63,12 @@ export default function LiveVisitorCounter() {
         letterSpacing: '0.2px',
         whiteSpace: 'nowrap',
       }}
-      title="Dynamic verified website visits"
+      title="Live verified website visits across all devices"
     >
       <Eye size={12} color="#0EA5E9" />
       <span style={{ color: '#94A3B8' }}>Total Visits:</span>
       <span style={{ color: '#38BDF8', fontWeight: 800, fontFamily: 'Inter, sans-serif' }}>
-        {totalVisits.toLocaleString()}
+        {totalVisits !== null ? totalVisits.toLocaleString() : '...'}
       </span>
     </div>
   );
