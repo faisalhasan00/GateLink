@@ -24,8 +24,10 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     final data = message.data;
     final type = data['type'] as String? ?? '';
 
-    if (type == 'visitor_pending') {
-      final visitorName = data['visitorName'] as String? ?? 'Visitor';
+    if (type == 'visitor_pending' || message.notification != null) {
+      final visitorName = data['visitorName'] as String? ??
+          message.notification?.title?.replaceAll('🚪 Visitor at Gate — Flat ', '') ??
+          'Visitor';
       final visitorType = data['visitorType'] as String? ?? 'Guest';
       final flatNumber = data['hostFlat'] as String? ?? '';
       final visitorId = data['visitorId'] as String?;
@@ -47,10 +49,17 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 /// Saves the device FCM token to Firestore so Cloud Functions can reach this device.
 Future<void> saveFcmToken() async {
   final user = FirebaseAuth.instance.currentUser;
-  if (user == null) return;
+  if (user == null) {
+    debugPrint('saveFcmToken: No user logged in');
+    return;
+  }
   try {
     final token = await FirebaseMessaging.instance.getToken();
-    if (token == null) return;
+    if (token == null || token.isEmpty) {
+      debugPrint('saveFcmToken: token is null or empty');
+      return;
+    }
+    debugPrint('saveFcmToken: Fresh token generated => ${token.substring(0, 15)}...');
     final userDoc = await FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
@@ -69,6 +78,7 @@ Future<void> saveFcmToken() async {
         .collection('users')
         .doc(user.uid)
         .set({'fcmToken': token}, SetOptions(merge: true));
+    debugPrint('FCM token saved to users/${user.uid}');
   } catch (e) {
     debugPrint('Error saving FCM token: $e');
   }
@@ -112,6 +122,14 @@ void main() async {
       statusBarIconBrightness: Brightness.dark,
     ),
   );
+
+  // Listen to auth state changes to guarantee fresh FCM token registration
+  FirebaseAuth.instance.authStateChanges().listen((user) async {
+    if (user != null) {
+      debugPrint('Auth changed: User ${user.uid} logged in, syncing FCM token...');
+      await saveFcmToken();
+    }
+  });
 
   runApp(
     const ProviderScope(

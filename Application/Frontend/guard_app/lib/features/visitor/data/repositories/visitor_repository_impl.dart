@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../../domain/models/visitor_model.dart';
 import '../../domain/repositories/visitor_repository.dart';
 import '../../../../core/services/firestore_service.dart';
