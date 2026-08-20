@@ -251,6 +251,11 @@ service cloud.firestore {
       allow write: if isAuthenticated();
     }
 
+    // Public Website Stats / Live Visitor Counter
+    match /system_stats/{statId} {
+      allow read, write: if true;
+    }
+
     // Ad Campaigns Collection (Super Admin Access)
     match /ad_campaigns/{adId} {
       allow read, write: if isAuthenticated();

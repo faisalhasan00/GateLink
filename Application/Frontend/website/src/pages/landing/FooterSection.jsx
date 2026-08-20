@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Phone, Mail, MapPin, Apple, Play } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import GateLinkLogo from '../../components/ui/GateLinkLogo';
+import LiveVisitorCounter from '../../components/ui/LiveVisitorCounter';
 
 export default function FooterSection() {
   const { theme } = useTheme();
@@ -132,10 +133,11 @@ export default function FooterSection() {
           fontSize: '12px',
           color: '#64748B'
         }}>
-          <div>
-            © {new Date().getFullYear()} GateLink. All rights reserved. Built for Modern Housing Societies & Gated Communities.
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
+            <span>© {new Date().getFullYear()} GateLink. All rights reserved.</span>
+            <LiveVisitorCounter />
           </div>
-          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
             <Link to="/privacy" style={{ color: '#64748B', textDecoration: 'none' }}>Privacy Policy</Link>
             <Link to="/terms" style={{ color: '#64748B', textDecoration: 'none' }}>Terms of Service</Link>
             <Link to="/cookies" style={{ color: '#64748B', textDecoration: 'none' }}>Cookie Preferences</Link>
