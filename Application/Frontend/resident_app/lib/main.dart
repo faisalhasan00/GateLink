@@ -41,23 +41,21 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         societyId: societyId,
       );
     } else if (type == 'sos' || type == 'emergency') {
-      final residentName = data['residentName'] as String? ?? 'Resident';
-      final flatNumber = data['flatNumber'] as String? ?? '';
-      final alertType = data['alertType'] as String? ?? 'Emergency';
-      await NotificationService.showSosAlert(
-        residentName: residentName,
-        flatNumber: flatNumber,
-        alertType: alertType,
-      );
-    } else if (type == 'notice' || type == 'announcement' || type == 'offer' || type == 'broadcast' || type == 'bill' || type == 'festival') {
+      if (message.notification == null) {
+        final residentName = data['residentName'] as String? ?? 'Resident';
+        final flatNumber = data['flatNumber'] as String? ?? '';
+        final alertType = data['alertType'] as String? ?? 'Emergency';
+        await NotificationService.showSosAlert(
+          residentName: residentName,
+          flatNumber: flatNumber,
+          alertType: alertType,
+        );
+      }
+    } else if (message.notification == null) {
+      // Only show local notification if Android OS did not automatically display the FCM payload
       await NotificationService.showNoticeAlert(
         title: title,
         body: body,
-      );
-    } else if (message.notification != null) {
-      await NotificationService.showNoticeAlert(
-        title: message.notification!.title ?? 'GateLink Notification',
-        body: message.notification!.body ?? '',
       );
     }
   } catch (e) {
