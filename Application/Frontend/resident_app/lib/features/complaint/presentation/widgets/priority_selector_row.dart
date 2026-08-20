@@ -38,7 +38,7 @@ class PrioritySelectorRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: isSelected ? color.withOpacity(0.15) : AppColors.surface,
                   borderRadius: BorderRadius.circular(10),
-                  border: BorderSide(
+                  border: Border.all(
                     color: isSelected ? color : AppColors.border,
                     width: isSelected ? 2 : 1,
                   ),

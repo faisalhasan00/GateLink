@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/auth_providers.dart';
@@ -154,7 +152,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(16),
-                  border: BorderSide(color: AppColors.border),
+                  border: Border.all(color: AppColors.border),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,7 +202,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(16),
-                  border: BorderSide(color: AppColors.border),
+                  border: Border.all(color: AppColors.border),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -254,7 +252,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(16),
-                  border: BorderSide(color: AppColors.border),
+                  border: Border.all(color: AppColors.border),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

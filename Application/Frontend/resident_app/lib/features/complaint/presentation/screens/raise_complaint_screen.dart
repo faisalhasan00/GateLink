@@ -9,7 +9,6 @@ import '../../../../core/services/storage_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../providers/complaint_providers.dart';
-import '../controllers/complaint_controller.dart';
 import '../widgets/category_selector_grid.dart';
 import '../widgets/priority_selector_row.dart';
 import '../widgets/complaint_image_picker_card.dart';
@@ -173,7 +172,7 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.primary.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(10),
-                  border: BorderSide(color: AppColors.primary.withOpacity(0.2)),
+                  border: Border.all(color: AppColors.primary.withOpacity(0.2)),
                 ),
                 child: Row(
                   children: [

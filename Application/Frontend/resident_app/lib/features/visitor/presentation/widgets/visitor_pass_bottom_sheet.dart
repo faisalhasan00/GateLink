@@ -69,7 +69,7 @@ class VisitorPassBottomSheet extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
-                border: BorderSide(color: AppColors.border),
+                border: Border.all(color: AppColors.border),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withOpacity(0.06),
@@ -146,13 +146,12 @@ class VisitorPassBottomSheet extends StatelessWidget {
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: () async {
-                    await QrShareService.shareVisitorPassImage(
+                    await QrShareService.shareQrPass(
                       qrKey: qrKey,
                       visitorName: visitorName,
-                      passCode: passCode,
-                      date: expectedDate,
-                      time: expectedTime,
-                      flat: hostFlat,
+                      societyId: 'GateLink Community',
+                      flatNumber: hostFlat,
+                      visitTime: '$expectedDate $expectedTime',
                     );
                   },
                   icon: const Icon(Icons.share_rounded, size: 18),

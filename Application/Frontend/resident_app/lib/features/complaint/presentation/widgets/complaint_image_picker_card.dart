@@ -55,15 +55,15 @@ class ComplaintImagePickerCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: BorderSide(color: AppColors.border, style: BorderStyle.solid),
+          border: Border.all(color: AppColors.border),
         ),
         alignment: Alignment.center,
         child: Column(
           children: [
-            Icon(Icons.add_photo_alternate_outlined,
+            const Icon(Icons.add_photo_alternate_outlined,
                 size: 36, color: AppColors.primary),
             const SizedBox(height: 8),
-            Text(
+            const Text(
               'Attach Photo Proof (Optional)',
               style: TextStyle(
                 fontSize: 13,
@@ -72,7 +72,7 @@ class ComplaintImagePickerCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 2),
-            Text(
+            const Text(
               'JPG, PNG up to 5MB',
               style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
             ),
