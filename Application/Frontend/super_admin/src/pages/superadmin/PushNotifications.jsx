@@ -13,7 +13,8 @@ import {
   Zap, 
   Flame,
   Radio,
-  RefreshCw
+  RefreshCw,
+  Heart
 } from 'lucide-react';
 import { broadcastPlatformMessage, subscribeBroadcastHistory } from '../../services/fcmBroadcastService';
 import { superAdminService } from '../../services/superAdminService';
@@ -23,7 +24,7 @@ export default function PushNotifications() {
   const [form, setForm] = useState({
     title: '',
     body: '',
-    category: 'offer',
+    category: 'festival',
     scope: 'all',
     societyId: '',
   });
@@ -33,29 +34,99 @@ export default function PushNotifications() {
   const [lastResult, setLastResult] = useState(null);
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(true);
+  const [presetCategory, setPresetCategory] = useState('all');
 
-  // Quick Preset Templates
+  // Quick Preset Templates including Festive Wishes
   const PRESETS = [
+    // 🪔 Festival Wishes
     {
-      label: '🎁 Special Offer Promo',
-      category: 'offer',
-      title: 'Mega Flash Discount: 25% Off on Groceries',
-      body: 'Get 25% cashback on all LocalMart orders placed this weekend in your resident app!',
+      group: 'festival',
+      label: '🪔 Happy Diwali Wishes',
+      category: 'festival',
+      title: 'Wishing You a Joyous & Prosperous Diwali! ✨',
+      body: 'May the divine festival of lights bring boundless health, happiness, prosperity, and peace to you and your loved ones.',
     },
     {
-      label: '📢 Platform Notice',
+      group: 'festival',
+      label: '🌙 Eid Mubarak Greetings',
+      category: 'festival',
+      title: 'Eid Mubarak to You & Your Family! 🌙',
+      body: 'May this blessed occasion bring immense joy, harmony, and countless blessings to your home and community.',
+    },
+    {
+      group: 'festival',
+      label: '🎄 Merry Christmas & Holidays',
+      category: 'festival',
+      title: 'Merry Christmas & Joyful Holidays! 🎄',
+      body: 'Wishing you a season filled with peace, warmth, happiness, and memorable moments with your loved ones.',
+    },
+    {
+      group: 'festival',
+      label: '🎨 Happy Holi Celebrations',
+      category: 'festival',
+      title: 'Happy & Colorful Holi! 🎨',
+      body: 'May the vibrant colors of Holi paint your life with abundant joy, friendship, good health, and success.',
+    },
+    {
+      group: 'festival',
+      label: '🎆 Happy New Year 2027',
+      category: 'festival',
+      title: 'Happy New Year from GateLink! 🎆',
+      body: 'Wishing you 365 days of prosperity, joy, safety, and triumph in the upcoming new year!',
+    },
+    {
+      group: 'festival',
+      label: '🇮🇳 Independence / Republic Day',
+      category: 'festival',
+      title: 'Happy Independence Day! 🇮🇳',
+      body: 'Celebrating freedom, pride, unity, and strength together as one united community. Jai Hind!',
+    },
+    {
+      group: 'festival',
+      label: '🙏 Ganesh Chaturthi & Navratri',
+      category: 'festival',
+      title: 'Happy Festive Greetings! 🪔',
+      body: 'May the divine blessings bring wisdom, prosperity, and joy into your household this festive season.',
+    },
+
+    // 🎁 Offers & Promos
+    {
+      group: 'offer',
+      label: '🎁 Special 25% Off Promo',
+      category: 'offer',
+      title: 'Mega Flash Discount: 25% Off on Groceries',
+      body: 'Get 25% cashback on all LocalMart orders placed this weekend in your resident mobile app!',
+    },
+    {
+      group: 'offer',
+      label: '🏷️ Free Home Cleaning Trial',
+      category: 'offer',
+      title: 'Exclusive Weekend Partner Offer: Free Home Service',
+      body: 'Book trusted home deep cleaning through GateLink concierge and get ₹500 instant discount.',
+    },
+
+    // 📢 Platform Notices
+    {
+      group: 'notice',
+      label: '📢 Scheduled System Maintenance',
       category: 'notice',
       title: 'Scheduled System Performance Optimization',
       body: 'GateLink services will undergo routine maintenance tonight from 2:00 AM to 3:00 AM IST.',
     },
+
+    // 🚨 Emergency & Security
     {
-      label: '🚨 Urgent Security Alert',
+      group: 'emergency',
+      label: '🚨 High-Alert Gate Security',
       category: 'emergency',
       title: 'Enhanced Gate Verification Active',
       body: 'All gate security passes and visitor pre-approvals are strictly monitored today. Please check in-app alerts.',
     },
+
+    // ⚡ App Updates
     {
-      label: '⚡ New Version Update',
+      group: 'update',
+      label: '⚡ New Version Available',
       category: 'update',
       title: 'New Features Available on GateLink!',
       body: 'Update your mobile app to experience instant biometric logins and ultra-fast visitor approvals.',
@@ -87,6 +158,7 @@ export default function PushNotifications() {
 
   const getCategoryIcon = (cat) => {
     switch (cat) {
+      case 'festival': return '🪔';
       case 'offer': return '🎁';
       case 'emergency': return '🚨';
       case 'update': return '⚡';
@@ -97,6 +169,7 @@ export default function PushNotifications() {
 
   const getCategoryColor = (cat) => {
     switch (cat) {
+      case 'festival': return '#EC4899';
       case 'offer': return '#10B981';
       case 'emergency': return '#EF4444';
       case 'update': return '#3B82F6';
@@ -113,6 +186,10 @@ export default function PushNotifications() {
       body: preset.body,
     }));
   };
+
+  const filteredPresets = presetCategory === 'all' 
+    ? PRESETS 
+    : PRESETS.filter(p => p.group === presetCategory);
 
   const handleSend = async (e) => {
     e.preventDefault();
@@ -172,7 +249,7 @@ export default function PushNotifications() {
             Universal Push Notification Dispatcher
           </h1>
           <p style={{ margin: '6px 0 0 0', opacity: 0.85, fontSize: '14px', maxWidth: '640px' }}>
-            Instantly broadcast high-priority Heads-Up mobile push notifications to all resident and security guard devices across the platform.
+            Send Festival Wishes, Sponsored Offers, Security Alerts, and Official Announcements directly to resident & guard mobile phones with high priority.
           </p>
         </div>
 
@@ -203,18 +280,52 @@ export default function PushNotifications() {
               </div>
               <div>
                 <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800 }}>Compose Notification</h3>
-                <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary, #64748B)' }}>Send targeted or platform-wide mobile alerts</p>
+                <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-secondary, #64748B)' }}>Send festival greetings, offers, or platform announcements</p>
               </div>
             </div>
           </div>
 
-          {/* Quick Presets */}
-          <div style={{ marginBottom: '22px' }}>
-            <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--text-secondary, #64748B)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Sparkles size={13} color="#F59E0B" /> QUICK TEMPLATES
+          {/* Quick Presets Filter Tabs & Chips */}
+          <div style={{ marginBottom: '24px', backgroundColor: 'var(--bg-secondary, #F8FAFC)', padding: '16px', borderRadius: '14px', border: '1px solid var(--border-color, #E2E8F0)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 800, color: 'var(--text-primary, #0F172A)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Sparkles size={14} color="#F59E0B" /> QUICK TEMPLATES & FESTIVAL WISHES
+              </div>
             </div>
+
+            {/* Filter pills */}
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
+              {[
+                { id: 'all', label: 'All Presets' },
+                { id: 'festival', label: '🪔 Festival Wishes' },
+                { id: 'offer', label: '🎁 Offers & Promos' },
+                { id: 'notice', label: '📢 Notices' },
+                { id: 'emergency', label: '🚨 Alerts' },
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setPresetCategory(tab.id)}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                    backgroundColor: presetCategory === tab.id ? '#1E3A8A' : '#E2E8F0',
+                    color: presetCategory === tab.id ? '#FFFFFF' : '#475569',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Preset chips */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              {PRESETS.map((p, i) => (
+              {filteredPresets.map((p, i) => (
                 <button
                   key={i}
                   type="button"
@@ -222,15 +333,19 @@ export default function PushNotifications() {
                   style={{
                     padding: '6px 12px',
                     borderRadius: '8px',
-                    border: '1px solid var(--border-color, #E2E8F0)',
-                    backgroundColor: 'var(--bg-secondary, #F8FAFC)',
+                    border: '1px solid #CBD5E1',
+                    backgroundColor: '#FFFFFF',
                     fontSize: '12px',
                     fontWeight: 600,
                     cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
                     transition: 'all 0.15s ease'
                   }}
                   onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#1E3A8A'; e.currentTarget.style.backgroundColor = '#EFF6FF'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border-color, #E2E8F0)'; e.currentTarget.style.backgroundColor = 'var(--bg-secondary, #F8FAFC)'; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#CBD5E1'; e.currentTarget.style.backgroundColor = '#FFFFFF'; }}
                 >
                   {p.label}
                 </button>
@@ -246,6 +361,7 @@ export default function PushNotifications() {
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: '10px' }}>
                 {[
+                  { id: 'festival', label: '🪔 Festival', desc: 'Greetings' },
                   { id: 'offer', label: '🎁 Offer / Ad', desc: 'Promotional' },
                   { id: 'notice', label: '📢 Notice', desc: 'General Info' },
                   { id: 'emergency', label: '🚨 Urgent', desc: 'High Priority' },
@@ -335,7 +451,7 @@ export default function PushNotifications() {
               </label>
               <input
                 type="text"
-                placeholder="e.g. Special Weekend Deal / Security Notice"
+                placeholder="e.g. Wishing You a Joyous & Prosperous Diwali! ✨"
                 value={form.title}
                 onChange={(e) => setForm(prev => ({ ...prev, title: e.target.value }))}
                 style={{
@@ -364,7 +480,7 @@ export default function PushNotifications() {
               </div>
               <textarea
                 rows={3}
-                placeholder="Write the detailed message that will appear on user lock screens and notification drawers..."
+                placeholder="Write the heartfelt festive greetings or detailed message to appear on all lockscreens..."
                 value={form.body}
                 onChange={(e) => setForm(prev => ({ ...prev, body: e.target.value }))}
                 style={{
@@ -481,7 +597,7 @@ export default function PushNotifications() {
                     <span style={{ fontSize: '11px', fontWeight: 800, color: '#1E3A8A' }}>GateLink</span>
                     <span style={{ fontSize: '10px', color: '#64748B' }}>• now</span>
                   </div>
-                  <span style={{ fontSize: '10px', backgroundColor: '#F1F5F9', padding: '2px 6px', borderRadius: '4px', fontWeight: 700, color: '#475569' }}>
+                  <span style={{ fontSize: '10px', backgroundColor: `${getCategoryColor(form.category)}18`, color: getCategoryColor(form.category), padding: '2px 8px', borderRadius: '4px', fontWeight: 800 }}>
                     {form.category.toUpperCase()}
                   </span>
                 </div>

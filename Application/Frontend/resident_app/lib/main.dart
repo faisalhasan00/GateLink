@@ -49,7 +49,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         flatNumber: flatNumber,
         alertType: alertType,
       );
-    } else if (type == 'notice' || type == 'announcement' || type == 'offer' || type == 'broadcast' || type == 'bill') {
+    } else if (type == 'notice' || type == 'announcement' || type == 'offer' || type == 'broadcast' || type == 'bill' || type == 'festival') {
       await NotificationService.showNoticeAlert(
         title: title,
         body: body,
