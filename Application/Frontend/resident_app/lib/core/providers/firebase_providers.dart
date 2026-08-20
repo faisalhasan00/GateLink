@@ -27,6 +27,44 @@ final firestoreServiceProvider = Provider<FirestoreService>((ref) {
   return FirestoreService(societyId: societyId);
 });
 
+// ── DOMAIN MICRO-SERVICE PROVIDERS ──────────────────────────────────────────
+
+final visitorServiceProvider = Provider<VisitorService>((ref) {
+  return ref.watch(firestoreServiceProvider).visitorService;
+});
+
+final amenityServiceProvider = Provider<AmenityService>((ref) {
+  return ref.watch(firestoreServiceProvider).amenityService;
+});
+
+final complaintServiceProvider = Provider<ComplaintService>((ref) {
+  return ref.watch(firestoreServiceProvider).complaintService;
+});
+
+final billingServiceProvider = Provider<BillingService>((ref) {
+  return ref.watch(firestoreServiceProvider).billingService;
+});
+
+final noticeServiceProvider = Provider<NoticeService>((ref) {
+  return ref.watch(firestoreServiceProvider).noticeService;
+});
+
+final documentServiceProvider = Provider<DocumentService>((ref) {
+  return ref.watch(firestoreServiceProvider).documentService;
+});
+
+final parkingServiceProvider = Provider<ParkingService>((ref) {
+  return ref.watch(firestoreServiceProvider).parkingService;
+});
+
+final adCampaignServiceProvider = Provider<AdCampaignService>((ref) {
+  return ref.watch(firestoreServiceProvider).adCampaignService;
+});
+
+final userNotificationServiceProvider = Provider<UserNotificationService>((ref) {
+  return ref.watch(firestoreServiceProvider).notificationService;
+});
+
 // ── VISITOR PROVIDERS ─────────────────────────────────────────────────────────
 
 /// A real-time stream provider for the live visitor log.

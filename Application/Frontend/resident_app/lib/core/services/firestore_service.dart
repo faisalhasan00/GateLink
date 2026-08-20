@@ -1,162 +1,72 @@
-
-import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class FlatValidationResult {
-  final bool isValid;
-  final String? residentName;
-  final String? residentUid;
-  final String? error;
+import 'visitor_service.dart';
+import 'amenity_service.dart';
+import 'complaint_service.dart';
+import 'billing_service.dart';
+import 'notice_service.dart';
+import 'document_service.dart';
+import 'parking_service.dart';
+import 'ad_campaign_service.dart';
+import 'user_notification_service.dart';
 
-  FlatValidationResult({
-    required this.isValid,
-    this.residentName,
-    this.residentUid,
-    this.error,
-  });
-}
+// Re-export all domain micro-services and models for seamless backward compatibility
+export 'visitor_service.dart';
+export 'amenity_service.dart';
+export 'complaint_service.dart';
+export 'billing_service.dart';
+export 'notice_service.dart';
+export 'document_service.dart';
+export 'parking_service.dart';
+export 'ad_campaign_service.dart';
+export 'user_notification_service.dart';
 
+/// Lightweight Facade / Composition Root.
+/// Composes isolated domain micro-services to preserve full backward compatibility
+/// while enforcing strict Single Responsibility and fault isolation across all features.
 class FirestoreService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String societyId;
+  final FirebaseFirestore _db;
 
-  FirestoreService({required this.societyId});
+  // Domain Micro-Services
+  final VisitorService visitorService;
+  final AmenityService amenityService;
+  final ComplaintService complaintService;
+  final BillingService billingService;
+  final NoticeService noticeService;
+  final DocumentService documentService;
+  final ParkingService parkingService;
+  final AdCampaignService adCampaignService;
+  final UserNotificationService notificationService;
 
-  // ── VISITORS ──────────────────────────────────────────────────────────────
+  FirestoreService({
+    required this.societyId,
+    FirebaseFirestore? db,
+  })  : _db = db ?? FirebaseFirestore.instance,
+        visitorService = VisitorService(societyId: societyId, db: db),
+        amenityService = AmenityService(societyId: societyId, db: db),
+        complaintService = ComplaintService(societyId: societyId, db: db),
+        billingService = BillingService(societyId: societyId, db: db),
+        noticeService = NoticeService(societyId: societyId, db: db),
+        documentService = DocumentService(societyId: societyId, db: db),
+        parkingService = ParkingService(societyId: societyId, db: db),
+        adCampaignService = AdCampaignService(db: db),
+        notificationService = UserNotificationService(societyId: societyId, db: db);
 
-  Stream<QuerySnapshot> visitorsStream() {
-    return _db
-        .collection('societies/$societyId/visitors')
-        .snapshots();
-  }
+  // ── VISITORS DELEGATES ───────────────────────────────────────────────────
 
-  // ── FLAT VALIDATION ───────────────────────────────────────────────────────
+  Stream<QuerySnapshot> visitorsStream() => visitorService.visitorsStream();
 
-  /// Validates that a target flat exists in the society and has an assigned resident with smart flex-matching.
-  Future<FlatValidationResult> validateFlat(String hostFlat) async {
-    final rawInput = hostFlat.trim();
-    if (rawInput.isEmpty) {
-      return FlatValidationResult(
-          isValid: false, error: 'Flat Number is required');
-    }
+  Stream<QuerySnapshot> pendingVisitorsStream() =>
+      visitorService.pendingVisitorsStream();
 
-    try {
-      final List<Map<String, dynamic>> userDocs = [];
+  Stream<QuerySnapshot> pendingVisitorsForFlatStream(String flatNumber) =>
+      visitorService.pendingVisitorsForFlatStream(flatNumber);
 
-      // 1. Check subcollection societies/$societyId/users
-      try {
-        final subSnap = await _db.collection('societies/$societyId/users').get();
-        for (final doc in subSnap.docs) {
-          final data = Map<String, dynamic>.from(doc.data());
-          data['_id'] = doc.id;
-          userDocs.add(data);
-        }
-      } catch (_) {}
+  Stream<QuerySnapshot> residentsStream() => visitorService.residentsStream();
 
-      // 2. Check root /users collection with societyId match
-      try {
-        final rootSnap = await _db
-            .collection('users')
-            .where('societyId', isEqualTo: societyId)
-            .get();
-        for (final doc in rootSnap.docs) {
-          if (!userDocs.any((u) => u['_id'] == doc.id)) {
-            final data = Map<String, dynamic>.from(doc.data());
-            data['_id'] = doc.id;
-            userDocs.add(data);
-          }
-        }
-      } catch (_) {}
-
-      if (userDocs.isEmpty) {
-        return FlatValidationResult(
-          isValid: false,
-          error: 'No registered residents found in society',
-        );
-      }
-
-      String normalize(String s) {
-        return s
-            .toLowerCase()
-            .replaceAll('block', '')
-            .replaceAll('tower', '')
-            .replaceAll('flat', '')
-            .replaceAll('unit', '')
-            .replaceAll('apt', '')
-            .replaceAll('apartment', '')
-            .replaceAll(RegExp(r'[^a-z0-9]'), '');
-      }
-
-      final cleanInput = normalize(rawInput);
-
-      Map<String, dynamic>? matchedUser;
-
-      for (final data in userDocs) {
-        final flatNum = (data['flatNumber'] as String? ?? '').trim();
-        final unitNum = (data['unitNumber'] as String? ?? '').trim();
-        final block = (data['block'] as String? ?? data['tower'] as String? ?? '').trim();
-
-        final rawCandidates = [
-          flatNum,
-          unitNum,
-          if (block.isNotEmpty && flatNum.isNotEmpty) '$block-$flatNum',
-          if (block.isNotEmpty && flatNum.isNotEmpty) '$block $flatNum',
-          if (block.isNotEmpty && flatNum.isNotEmpty) '$block$flatNum',
-          if (block.isNotEmpty && unitNum.isNotEmpty) '$block-$unitNum',
-        ];
-
-        // 1. Exact or case-insensitive string match
-        if (rawCandidates.any((c) => c.trim().toLowerCase() == rawInput.toLowerCase())) {
-          matchedUser = data;
-          break;
-        }
-
-        // 2. Normalized alphanumeric match
-        final cleanCandidates = rawCandidates.map(normalize).where((c) => c.isNotEmpty).toList();
-        if (cleanCandidates.any((c) => c == cleanInput)) {
-          matchedUser = data;
-          break;
-        }
-
-        // 3. Suffix or substring match (e.g. "101" matching "A-101" or "A101")
-        if (cleanInput.length >= 2) {
-          final isMatch = cleanCandidates.any((c) =>
-              c.endsWith(cleanInput) ||
-              cleanInput.endsWith(c) ||
-              (c.length >= 3 && cleanInput.contains(c)) ||
-              (cleanInput.length >= 3 && c.contains(cleanInput)));
-          if (isMatch) {
-            matchedUser = data;
-            break;
-          }
-        }
-      }
-
-      if (matchedUser != null) {
-        final residentName = (matchedUser['name'] as String?)?.isNotEmpty == true
-            ? matchedUser['name'] as String
-            : ((matchedUser['fullName'] as String?)?.isNotEmpty == true
-                ? matchedUser['fullName'] as String
-                : ((matchedUser['displayName'] as String?)?.isNotEmpty == true
-                    ? matchedUser['displayName'] as String
-                    : 'Resident'));
-        final residentUid = matchedUser['_id'] as String? ?? '';
-        return FlatValidationResult(
-          isValid: true,
-          residentName: residentName,
-          residentUid: residentUid,
-        );
-      }
-
-      return FlatValidationResult(
-        isValid: false,
-        error: 'Flat "$rawInput" not assigned to any resident',
-      );
-    } catch (e) {
-      return FlatValidationResult(
-          isValid: false, error: 'Flat validation error: $e');
-    }
-  }
+  Future<FlatValidationResult> validateFlat(String hostFlat) =>
+      visitorService.validateFlat(hostFlat);
 
   Future<String> logVisitorEntry({
     required String name,
@@ -171,462 +81,72 @@ class FirestoreService {
     String? notes,
     String? guardUid,
     String? gateName,
-  }) async {
-    // 1. Strict Flat Validation
-    final validation = await validateFlat(hostFlat);
-    if (!validation.isValid) {
-      throw Exception(validation.error);
-    }
+  }) =>
+      visitorService.logVisitorEntry(
+        name: name,
+        type: type,
+        hostFlat: hostFlat,
+        phone: phone,
+        vehicleNumber: vehicleNumber,
+        vehicleType: vehicleType,
+        company: company,
+        gender: gender,
+        photoUrl: photoUrl,
+        notes: notes,
+        guardUid: guardUid,
+        gateName: gateName,
+      );
 
-    final cleanPhone = (phone ?? '').trim();
+  Future<void> markVisitorExit(String visitorId) =>
+      visitorService.markVisitorExit(visitorId);
 
-    // 2. Duplicate Request Prevention
-    if (cleanPhone.isNotEmpty) {
-      final dupSnapshot = await _db
-          .collection('societies/$societyId/visitors')
-          .where('hostFlat', isEqualTo: hostFlat)
-          .where('phone', isEqualTo: cleanPhone)
-          .where('status', isEqualTo: 'pending')
-          .get();
+  Future<Map<String, dynamic>> validateAndProcessQrScan(String code) =>
+      visitorService.validateAndProcessQrScan(code);
 
-      if (dupSnapshot.docs.isNotEmpty) {
-        throw Exception(
-            'A pending visitor request already exists for this mobile number ($cleanPhone).');
-      }
-    }
-
-    // 3. Write Visitor Record
-    final nowStr = DateTime.now().toIso8601String();
-    final docRef = await _db.collection('societies/$societyId/visitors').add({
-      'name': name,
-      'type': type,
-      'hostFlat': hostFlat,
-      'phone': cleanPhone,
-      'vehicleNumber': vehicleNumber ?? '',
-      'vehicleType': vehicleType ?? '4-Wheeler',
-      'company': company ?? '',
-      'gender': gender ?? 'Not Specified',
-      'photoUrl': photoUrl,
-      'notes': notes ?? '',
-      'entryTime': null,
-      'exitTime': null,
-      'status': 'pending',
-      'societyId': societyId,
-      'createdDate': nowStr,
-      'createdAt': nowStr,
-      'guardUid': guardUid ?? 'guard_gate_1',
-      'gateName': gateName ?? 'Gate 1 — Main Entry',
-      'hostResidentName': validation.residentName,
-      'hostResidentUid': validation.residentUid,
-    });
-
-    // 4. Send Instant In-App Notification to Resident
-    if (validation.residentUid != null && validation.residentUid!.isNotEmpty) {
-      try {
-        await _db
-            .collection(
-                'societies/$societyId/users/${validation.residentUid}/notifications')
-            .add({
-          'title': '🔔 New Visitor Request',
-          'body':
-              '$name ($type) is waiting at ${gateName ?? "Gate 1"} for Flat $hostFlat.',
-          'type': 'visitor_pending',
-          'visitorId': docRef.id,
-          'read': false,
-          'createdAt': nowStr,
-        });
-      } catch (_) {}
-    }
-
-    return docRef.id;
-  }
-
-  Future<void> markVisitorExit(String visitorId) async {
-    final docRef =
-        _db.collection('societies/$societyId/visitors').doc(visitorId);
-    final doc = await docRef.get();
-    final exitNow = DateTime.now();
-    final exitStr = exitNow.toIso8601String();
-
-    int durationMinutes = 0;
-    String durationString = 'Just left';
-
-    if (doc.exists) {
-      final data = doc.data();
-      final entryStr = data?['entryTime'] as String?;
-      if (entryStr != null && entryStr.isNotEmpty) {
-        try {
-          final entryTime = DateTime.parse(entryStr);
-          final diff = exitNow.difference(entryTime);
-          durationMinutes = diff.inMinutes;
-          final hours = durationMinutes ~/ 60;
-          final mins = durationMinutes % 60;
-          if (hours > 0) {
-            durationString =
-                '$hours Hr${hours > 1 ? "s" : ""} $mins Min${mins != 1 ? "s" : ""}';
-          } else {
-            durationString = '$mins Min${mins != 1 ? "s" : ""}';
-          }
-        } catch (_) {}
-      }
-    }
-
-    await docRef.update({
-      'exitTime': exitStr,
-      'status': 'checked_out',
-      'durationMinutes': durationMinutes,
-      'durationString': durationString,
-      'updatedAt': exitStr,
-    });
-  }
-
-  /// Processes QR code or 6-digit numeric Pass Code scan with duplicate prevention, expiration check, and validation
-  Future<Map<String, dynamic>> validateAndProcessQrScan(String code) async {
-    final cleanCode = code.trim();
-
-    // 1. Look up visitor by qrCode, passCode, or docId
-    QuerySnapshot query = await _db
-        .collection('societies/$societyId/visitors')
-        .where('qrCode', isEqualTo: cleanCode)
-        .limit(1)
-        .get();
-
-    DocumentSnapshot? targetDoc;
-    if (query.docs.isNotEmpty) {
-      targetDoc = query.docs.first;
-    } else {
-      // Search by 6-digit numeric passCode
-      final passQuery = await _db
-          .collection('societies/$societyId/visitors')
-          .where('passCode', isEqualTo: cleanCode)
-          .limit(1)
-          .get();
-
-      if (passQuery.docs.isNotEmpty) {
-        targetDoc = passQuery.docs.first;
-      } else {
-        // Fallback to document ID search
-        final doc =
-            await _db.doc('societies/$societyId/visitors/$cleanCode').get();
-        if (doc.exists) targetDoc = doc;
-      }
-    }
-
-    if (targetDoc == null || !targetDoc.exists) {
-      return {'valid': false, 'reason': 'invalid', 'error': 'Invalid QR Code'};
-    }
-
-    final data = targetDoc.data() as Map<String, dynamic>;
-    final status = data['status'] as String? ?? 'pending';
-    final expiresAtStr = data['expiresAt'] as String?;
-
-    // 2. Expiration Check
-    if (expiresAtStr != null && expiresAtStr.isNotEmpty) {
-      try {
-        final exp = DateTime.parse(expiresAtStr);
-        if (DateTime.now().isAfter(exp)) {
-          return {
-            'valid': false,
-            'reason': 'expired',
-            'docId': targetDoc.id,
-            'data': data,
-            'error': 'QR Code Expired'
-          };
-        }
-      } catch (_) {}
-    }
-
-    // 3. Duplicate Prevention Check
-    if (status == 'inside') {
-      return {
-        'valid': false,
-        'reason': 'already_used',
-        'docId': targetDoc.id,
-        'data': data,
-        'error': 'Pass Already Used'
-      };
-    }
-
-    if (status == 'denied' || status == 'rejected') {
-      return {
-        'valid': false,
-        'reason': 'denied',
-        'docId': targetDoc.id,
-        'data': data,
-        'error': 'Visitor Denied Entry'
-      };
-    }
-
-    if (status == 'checked_out' || status == 'left') {
-      return {
-        'valid': false,
-        'reason': 'checked_out',
-        'docId': targetDoc.id,
-        'data': data,
-        'error': 'Visitor Already Checked Out'
-      };
-    }
-
-    return {
-      'valid': true,
-      'reason': 'verified',
-      'docId': targetDoc.id,
-      'data': data,
-    };
-  }
-
-  Future<void> updateVisitorStatus(String visitorId, String status) async {
-    await _db
-        .collection('societies/$societyId/visitors')
-        .doc(visitorId)
-        .update({
-      'status': status,
-      'updatedAt': DateTime.now().toIso8601String(),
-    });
-  }
+  Future<void> updateVisitorStatus(String visitorId, String status) =>
+      visitorService.updateVisitorStatus(visitorId, status);
 
   Future<void> updateVisitorApproval({
     required String visitorId,
-    required String status, // 'approved' or 'rejected'
+    required String status,
     required String residentUid,
     String? rejectionReason,
-  }) async {
-    final nowStr = DateTime.now().toIso8601String();
-    final updateData = <String, dynamic>{
-      'status': status,
-      'updatedAt': nowStr,
-    };
+  }) =>
+      visitorService.updateVisitorApproval(
+        visitorId: visitorId,
+        status: status,
+        residentUid: residentUid,
+        rejectionReason: rejectionReason,
+      );
 
-    if (status == 'approved') {
-      updateData['approvedAt'] = nowStr;
-      updateData['approvedBy'] = residentUid;
-    } else if (status == 'rejected' || status == 'denied') {
-      updateData['rejectedAt'] = nowStr;
-      updateData['rejectedBy'] = residentUid;
-      if (rejectionReason != null) {
-        updateData['rejectionReason'] = rejectionReason;
-      }
-    }
+  Future<Map<String, String>> inviteVisitor({
+    required String name,
+    required String phone,
+    required String purpose,
+    required String hostFlat,
+    required String invitedBy,
+    required String expectedDate,
+    required String expectedTime,
+  }) =>
+      visitorService.inviteVisitor(
+        name: name,
+        phone: phone,
+        purpose: purpose,
+        hostFlat: hostFlat,
+        invitedBy: invitedBy,
+        expectedDate: expectedDate,
+        expectedTime: expectedTime,
+      );
 
-    await _db
-        .collection('societies/$societyId/visitors')
-        .doc(visitorId)
-        .update(updateData);
-  }
+  // ── AMENITIES DELEGATES ──────────────────────────────────────────────────
 
-  /// Stream of all pending visitors in the society.
-  Stream<QuerySnapshot> pendingVisitorsStream() {
-    return _db
-        .collection('societies/$societyId/visitors')
-        .where('status', isEqualTo: 'pending')
-        .snapshots();
-  }
+  Stream<QuerySnapshot> amenitiesStream() => amenityService.amenitiesStream();
 
-  /// Stream of pending visitors for a specific flat (for resident notifications).
-  Stream<QuerySnapshot> pendingVisitorsForFlatStream(String flatNumber) {
-    return _db
-        .collection('societies/$societyId/visitors')
-        .where('status', isEqualTo: 'pending')
-        .snapshots();
-  }
+  Stream<QuerySnapshot> myBookingsStream(String uid) =>
+      amenityService.myBookingsStream(uid);
 
-  // ── RESIDENTS ─────────────────────────────────────────────────────────────
-
-  Stream<QuerySnapshot> residentsStream() {
-    return _db
-        .collection('societies/$societyId/users')
-        .where('role', isEqualTo: 'resident')
-        .snapshots();
-  }
-
-  // ── AD CAMPAIGNS ──────────────────────────────────────────────────────────
-
-  Stream<QuerySnapshot> adCampaignsStream() {
-    return _db
-        .collection('ad_campaigns')
-        .where('status', isEqualTo: 'Active')
-        .snapshots();
-  }
-
-  // ── COMPLAINTS ────────────────────────────────────────────────────────────
-
-  Stream<QuerySnapshot> complaintsStream(String uid) {
-    return _db
-        .collection('societies/$societyId/complaints')
-        .where('raisedBy', isEqualTo: uid)
-        .snapshots();
-  }
-
-  Stream<DocumentSnapshot> complaintDetailStream(String complaintId) {
-    return _db
-        .collection('societies/$societyId/complaints')
-        .doc(complaintId)
-        .snapshots();
-  }
-
-  Future<String> raiseComplaint({
-    required String title,
-    required String description,
-    required String category,
-    required String uid,
-    String? block,
-    String? floor,
-    String? priority,
-    String? photoUrl,
-    String? residentName,
-    String? flatNumber,
-  }) async {
-    final ticketNum =
-        'CMP-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
-    final nowStr = DateTime.now().toIso8601String();
-
-    final docRef = await _db.collection('societies/$societyId/complaints').add({
-      'ticketNumber': ticketNum,
-      'title': title,
-      'description': description,
-      'category': category,
-      'status': 'Open',
-      'raisedBy': uid,
-      'residentUid': uid,
-      'residentName': residentName ?? 'Resident',
-      'flatNumber': flatNumber ?? '',
-      'block': block ?? '',
-      'floor': floor ?? '',
-      'priority': priority ?? 'medium',
-      'photoUrl': photoUrl,
-      'createdAt': nowStr,
-      'updatedAt': nowStr,
-    });
-
-    // Write Live Notification to Society Admin & Super Admin
-    try {
-      final senderName = residentName != null && residentName.isNotEmpty
-          ? residentName
-          : 'Resident';
-      final senderFlat = flatNumber != null && flatNumber.isNotEmpty
-          ? ' (Flat $flatNumber)'
-          : '';
-
-      await _db.collection('societies/$societyId/notifications').add({
-        'title': '🚨 New Complaint: $ticketNum',
-        'message':
-            '$senderName$senderFlat raised a $category complaint: "$title"',
-        'category': category,
-        'type': 'complaint',
-        'ticketNumber': ticketNum,
-        'complaintId': docRef.id,
-        'read': false,
-        'createdAt': nowStr,
-      });
-
-      await _db.collection('notifications').add({
-        'title': '🚨 New Complaint: $ticketNum',
-        'message':
-            '$category complaint raised by $senderName$senderFlat ($title)',
-        'societyId': societyId,
-        'type': 'complaint',
-        'read': false,
-        'createdAt': nowStr,
-      });
-    } catch (notifErr) {
-      print('Error pushing complaint notification to admin: $notifErr');
-    }
-
-    return docRef.id;
-  }
-
-  // ── NOTICES ───────────────────────────────────────────────────────────────
-
-  Stream<QuerySnapshot> noticesStream() {
-    return _db
-        .collection('societies/$societyId/notices')
-        .orderBy('createdAt', descending: true)
-        .snapshots();
-  }
-
-  // ── MAINTENANCE BILLS & PAYMENTS ─────────────────────────────────────────
-
-  Stream<QuerySnapshot> maintenanceBillsStream(String uid) {
-    return _db
-        .collection('societies/$societyId/maintenance_bills')
-        .where('residentUid', isEqualTo: uid)
-        .snapshots();
-  }
-
-  Stream<QuerySnapshot> paymentReceiptsStream(String uid) {
-    return _db
-        .collection('societies/$societyId/payment_receipts')
-        .where('residentUid', isEqualTo: uid)
-        .snapshots();
-  }
-
-  Future<void> payMaintenanceBill({
-    required String billId,
-    required String residentUid,
-    required double amount,
-    required String paymentMethod,
-    required String invoiceNumber,
-    required String billingPeriod,
-  }) async {
-    final nowStr = DateTime.now().toIso8601String();
-    final txnId = 'TXN${DateTime.now().millisecondsSinceEpoch}';
-
-    // 1. Update/Merge Bill Document
-    await _db
-        .collection('societies/$societyId/maintenance_bills')
-        .doc(billId)
-        .set({
-      'status': 'paid',
-      'paidAt': nowStr,
-      'paymentMethod': paymentMethod,
-      'transactionId': txnId,
-    }, SetOptions(merge: true));
-
-    // 2. Create Normalized Payment Receipt Document
-    await _db.collection('societies/$societyId/payment_receipts').add({
-      'billId': billId,
-      'residentUid': residentUid,
-      'amount': amount,
-      'paymentMethod': paymentMethod,
-      'transactionId': txnId,
-      'invoiceNumber': invoiceNumber,
-      'billingPeriod': billingPeriod,
-      'status': 'success',
-      'paidAt': nowStr,
-      'createdAt': nowStr,
-      'societyId': societyId,
-    });
-  }
-
-  // ── AMENITIES ────────────────────────────────────────────────────────────
-
-  Stream<QuerySnapshot> amenitiesStream() {
-    return _db.collection('societies/$societyId/amenities').snapshots();
-  }
-
-  // ── AMENITY BOOKINGS ─────────────────────────────────────────────────────
-
-  Stream<QuerySnapshot> myBookingsStream(String uid) {
-    return _db
-        .collection('societies/$societyId/amenity_bookings')
-        .where('bookedBy', isEqualTo: uid)
-        .snapshots();
-  }
-
-  Future<List<String>> getBookedSlotsForDate(
-      String amenityId, String date) async {
-    final snapshot = await _db
-        .collection('societies/$societyId/amenity_bookings')
-        .where('amenityId', isEqualTo: amenityId)
-        .where('date', isEqualTo: date)
-        .where('status', isEqualTo: 'confirmed')
-        .get();
-
-    return snapshot.docs
-        .map((doc) => doc.data()['timeSlot'] as String?)
-        .whereType<String>()
-        .toList();
-  }
+  Future<List<String>> getBookedSlotsForDate(String amenityId, String date) =>
+      amenityService.getBookedSlotsForDate(amenityId, date);
 
   Future<void> bookAmenity({
     required String amenityId,
@@ -639,301 +159,122 @@ class FirestoreService {
     String? specialNotes,
     String? flatNumber,
     String? phone,
-  }) async {
-    // 1. Fetch Amenity Profile for Capacity & Approval Policy
-    DocumentSnapshot? amenityDoc;
-    try {
-      amenityDoc = await _db
-          .collection('societies/$societyId/amenities')
-          .doc(amenityId)
-          .get();
-    } catch (_) {}
+  }) =>
+      amenityService.bookAmenity(
+        amenityId: amenityId,
+        amenityName: amenityName,
+        uid: uid,
+        userName: userName,
+        date: date,
+        timeSlot: timeSlot,
+        guests: guests,
+        specialNotes: specialNotes,
+        flatNumber: flatNumber,
+        phone: phone,
+      );
 
-    final amenityData = amenityDoc?.data() as Map<String, dynamic>? ?? {};
-    final approvalPolicy = amenityData['approvalPolicy'] as String? ?? 'auto';
-    final maxCapacity = (amenityData['capacity'] as num?)?.toInt() ??
-        (amenityData['maxSlots'] as num?)?.toInt() ??
-        10;
+  Future<void> cancelAmenityBooking(String bookingId, String userUid) =>
+      amenityService.cancelAmenityBooking(bookingId, userUid);
 
-    // 2. Count Active Bookings for this Date & Time Slot
-    final existingSnapshot = await _db
-        .collection('societies/$societyId/amenity_bookings')
-        .where('amenityId', isEqualTo: amenityId)
-        .where('date', isEqualTo: date)
-        .where('timeSlot', isEqualTo: timeSlot)
-        .get();
+  // ── COMPLAINTS DELEGATES ─────────────────────────────────────────────────
 
-    final activeCount = existingSnapshot.docs.where((doc) {
-      final st = (doc.data()['status'] as String? ?? '').toLowerCase();
-      return st == 'approved' || st == 'confirmed' || st == 'pending';
-    }).length;
+  Stream<QuerySnapshot> complaintsStream(String uid) =>
+      complaintService.complaintsStream(uid);
 
-    if (activeCount >= maxCapacity) {
-      throw Exception(
-          'Slot Sold Out! All $maxCapacity available slots for $timeSlot on $date are already booked.');
-    }
+  Stream<DocumentSnapshot> complaintDetailStream(String complaintId) =>
+      complaintService.complaintDetailStream(complaintId);
 
-    // 3. Determine Initial Status (Auto-Approve vs Manual Admin Approval)
-    final initialStatus = (approvalPolicy == 'manual') ? 'pending' : 'approved';
-    final remainingSlots = maxCapacity - activeCount - 1;
-    final nowStr = DateTime.now().toIso8601String();
+  Future<String> raiseComplaint({
+    required String title,
+    required String description,
+    required String category,
+    required String uid,
+    String? block,
+    String? floor,
+    String? priority,
+    String? photoUrl,
+    String? residentName,
+    String? flatNumber,
+  }) =>
+      complaintService.raiseComplaint(
+        title: title,
+        description: description,
+        category: category,
+        uid: uid,
+        block: block,
+        floor: floor,
+        priority: priority,
+        photoUrl: photoUrl,
+        residentName: residentName,
+        flatNumber: flatNumber,
+      );
 
-    // 4. Add Booking Document
-    final docRef =
-        await _db.collection('societies/$societyId/amenity_bookings').add({
-      'amenityId': amenityId,
-      'amenityName': amenityName,
-      'bookedBy': uid,
-      'residentUid': uid,
-      'residentName': userName,
-      'flatNumber': flatNumber ?? '',
-      'phone': phone ?? '',
-      'userName': userName,
-      'uid': uid,
-      'date': date,
-      'bookingDate': date,
-      'timeSlot': timeSlot,
-      'guests': guests,
-      'specialNotes': specialNotes ?? '',
-      'status': initialStatus,
-      'approvalPolicy': approvalPolicy,
-      'slotsRemaining': remainingSlots < 0 ? 0 : remainingSlots,
-      'capacityQuota': maxCapacity,
-      'societyId': societyId,
-      'createdAt': nowStr,
-    });
+  // ── BILLING & PAYMENTS DELEGATES ─────────────────────────────────────────
 
-    // 5. Update live availableSlots on Amenity Document
-    try {
-      final remainingForDoc = remainingSlots < 0 ? 0 : remainingSlots;
-      await _db
-          .collection('societies/$societyId/amenities')
-          .doc(amenityId)
-          .update({
-        'availableSlots': remainingForDoc,
-        'updatedAt': nowStr,
-      });
-    } catch (_) {}
+  Stream<QuerySnapshot> maintenanceBillsStream(String uid) =>
+      billingService.maintenanceBillsStream(uid);
 
-    // 6. Alert Society Admin if Manual Approval Required
-    if (initialStatus == 'pending') {
-      try {
-        await _db.collection('societies/$societyId/notifications').add({
-          'title': '📅 New Amenity Booking Request',
-          'message':
-              '$userName requested a booking for $amenityName on $date ($timeSlot).',
-          'type': 'amenity',
-          'bookingId': docRef.id,
-          'read': false,
-          'createdAt': nowStr,
-        });
-      } catch (err) {
-        print('Notification error: $err');
-      }
-    }
-  }
+  Stream<QuerySnapshot> paymentReceiptsStream(String uid) =>
+      billingService.paymentReceiptsStream(uid);
 
-  Future<void> cancelAmenityBooking(String bookingId, String userUid) async {
-    final docSnap = await _db
-        .collection('societies/$societyId/amenity_bookings')
-        .doc(bookingId)
-        .get();
-    final amenityId = docSnap.data()?['amenityId'] as String?;
+  Future<void> payMaintenanceBill({
+    required String billId,
+    required String residentUid,
+    required double amount,
+    required String paymentMethod,
+    required String invoiceNumber,
+    required String billingPeriod,
+  }) =>
+      billingService.payMaintenanceBill(
+        billId: billId,
+        residentUid: residentUid,
+        amount: amount,
+        paymentMethod: paymentMethod,
+        invoiceNumber: invoiceNumber,
+        billingPeriod: billingPeriod,
+      );
 
-    await _db
-        .collection('societies/$societyId/amenity_bookings')
-        .doc(bookingId)
-        .update({
-      'status': 'cancelled',
-      'cancelledBy': userUid,
-      'cancelledAt': DateTime.now().toIso8601String(),
-    });
+  // ── NOTICES DELEGATES ────────────────────────────────────────────────────
 
-    if (amenityId != null) {
-      try {
-        final amenityDoc = await _db
-            .collection('societies/$societyId/amenities')
-            .doc(amenityId)
-            .get();
-        final currentCap =
-            (amenityDoc.data()?['capacity'] as num?)?.toInt() ?? 10;
-        final currentSlots =
-            (amenityDoc.data()?['availableSlots'] as num?)?.toInt() ??
-                currentCap;
-        await _db
-            .collection('societies/$societyId/amenities')
-            .doc(amenityId)
-            .update({
-          'availableSlots':
-              (currentSlots + 1) > currentCap ? currentCap : (currentSlots + 1),
-        });
-      } catch (_) {}
-    }
-  }
+  Stream<QuerySnapshot> noticesStream() => noticeService.noticesStream();
 
-  // ── PARKING ──────────────────────────────────────────────────────────────
+  // ── DOCUMENTS DELEGATES ──────────────────────────────────────────────────
 
-  Stream<QuerySnapshot> parkingStream(String uid) {
-    return _db
-        .collection('societies/$societyId/parking')
-        .where('residentUid', isEqualTo: uid)
-        .snapshots();
-  }
+  Stream<QuerySnapshot> documentsStream() => documentService.documentsStream();
 
-  // ── DOCUMENTS ────────────────────────────────────────────────────────────
+  Future<void> seedDocumentsIfEmpty() => documentService.seedDocumentsIfEmpty();
 
-  Stream<QuerySnapshot> documentsStream() {
-    return _db.collection('societies/$societyId/documents').snapshots();
-  }
+  // ── PARKING DELEGATES ────────────────────────────────────────────────────
 
-  Future<void> seedDocumentsIfEmpty() async {
-    final snap =
-        await _db.collection('societies/$societyId/documents').limit(1).get();
-    if (snap.docs.isEmpty) {
-      final batch = _db.batch();
-      final docs = [
-        {
-          'title': 'Society By-Laws 2026',
-          'category': 'Rules',
-          'size': '2.4 MB',
-          'url':
-              'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-          'uploadedAt': DateTime.now().toIso8601String(),
-        },
-        {
-          'title': 'Financial Audit Report FY25-26',
-          'category': 'Financial',
-          'size': '4.1 MB',
-          'url':
-              'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-          'uploadedAt': DateTime.now().toIso8601String(),
-        },
-        {
-          'title': 'AGM Minutes - July 2026',
-          'category': 'Compliance',
-          'size': '1.8 MB',
-          'url':
-              'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-          'uploadedAt': DateTime.now().toIso8601String(),
-        },
-        {
-          'title': 'Fire Safety & Evacuation Plan',
-          'category': 'Rules',
-          'size': '3.2 MB',
-          'url':
-              'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
-          'uploadedAt': DateTime.now().toIso8601String(),
-        },
-      ];
+  Stream<QuerySnapshot> parkingStream(String uid) =>
+      parkingService.parkingStream(uid);
 
-      for (final d in docs) {
-        final ref = _db.collection('societies/$societyId/documents').doc();
-        batch.set(ref, d);
-      }
-      await batch.commit();
-    }
-  }
+  // ── AD CAMPAIGNS DELEGATES ───────────────────────────────────────────────
 
-  // ── VISITOR INVITES ──────────────────────────────────────────────────────
+  Stream<QuerySnapshot> adCampaignsStream() =>
+      adCampaignService.adCampaignsStream();
 
-  Future<Map<String, String>> inviteVisitor({
-    required String name,
-    required String phone,
-    required String purpose,
-    required String hostFlat,
-    required String invitedBy,
-    required String expectedDate,
-    required String expectedTime,
-  }) async {
-    // Generate cryptographically secure 6-digit numeric Pass Code with 24-hour expiration
-    final passCode = (100000 + Random.secure().nextInt(900000)).toString();
-    final expiresAt =
-        DateTime.now().add(const Duration(hours: 24)).toIso8601String();
+  // ── USER NOTIFICATIONS DELEGATES ─────────────────────────────────────────
 
-    final docRef = await _db.collection('societies/$societyId/visitors').add({
-      'name': name,
-      'phone': phone,
-      'type': purpose,
-      'hostFlat': hostFlat,
-      'invitedBy': invitedBy,
-      'expectedDate': expectedDate,
-      'expectedTime': expectedTime,
-      'passCode': passCode,
-      'qrCode': passCode,
-      'passCodeExpiresAt': expiresAt,
-      'entryTime': null,
-      'exitTime': null,
-      'status': 'expected',
-      'createdAt': DateTime.now().toIso8601String(),
-    });
+  Stream<QuerySnapshot> notificationsStream(String uid) =>
+      notificationService.notificationsStream(uid);
 
-    return {
-      'visitorId': docRef.id,
-      'passCode': passCode,
-    };
-  }
+  Stream<int> unreadNotificationsCountStream(String uid) =>
+      notificationService.unreadNotificationsCountStream(uid);
 
-  // ── NOTIFICATIONS ────────────────────────────────────────────────────────
+  Future<void> markNotificationAsRead(String notifId, String uid) =>
+      notificationService.markNotificationAsRead(notifId, uid);
 
-  Stream<QuerySnapshot> notificationsStream(String uid) {
-    return _db
-        .collection('societies/$societyId/users/$uid/notifications')
-        .orderBy('createdAt', descending: true)
-        .snapshots();
-  }
-
-  Stream<int> unreadNotificationsCountStream(String uid) {
-    return _db
-        .collection('societies/$societyId/users/$uid/notifications')
-        .where('read', isEqualTo: false)
-        .snapshots()
-        .map((snap) => snap.docs.length);
-  }
-
-  Future<void> markNotificationAsRead(String notifId, String uid) async {
-    await _db
-        .collection('societies/$societyId/users/$uid/notifications')
-        .doc(notifId)
-        .update({'read': true});
-  }
-
-  Future<void> markAllNotificationsAsRead(String uid) async {
-    final unreadSnap = await _db
-        .collection('societies/$societyId/users/$uid/notifications')
-        .where('read', isEqualTo: false)
-        .get();
-
-    final batch = _db.batch();
-    for (final doc in unreadSnap.docs) {
-      batch.update(doc.reference, {'read': true});
-    }
-    await batch.commit();
-  }
+  Future<void> markAllNotificationsAsRead(String uid) =>
+      notificationService.markAllNotificationsAsRead(uid);
 
   Future<void> updateNotificationPreferences(
-      String uid, Map<String, bool> prefs) async {
-    await _db
-        .collection('societies/$societyId/users')
-        .doc(uid)
-        .set({'notificationPreferences': prefs}, SetOptions(merge: true));
-  }
+          String uid, Map<String, bool> prefs) =>
+      notificationService.updateNotificationPreferences(uid, prefs);
 
-  Future<void> deleteNotification(String notifId, String uid) async {
-    await _db
-        .collection('societies/$societyId/users/$uid/notifications')
-        .doc(notifId)
-        .delete();
-  }
+  Future<void> deleteNotification(String notifId, String uid) =>
+      notificationService.deleteNotification(notifId, uid);
 
-  Future<void> clearAllNotifications(String uid) async {
-    final snap = await _db
-        .collection('societies/$societyId/users/$uid/notifications')
-        .get();
-
-    final batch = _db.batch();
-    for (final doc in snap.docs) {
-      batch.delete(doc.reference);
-    }
-    await batch.commit();
-  }
+  Future<void> clearAllNotifications(String uid) =>
+      notificationService.clearAllNotifications(uid);
 }

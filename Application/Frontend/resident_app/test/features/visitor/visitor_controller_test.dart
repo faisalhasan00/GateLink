@@ -18,7 +18,23 @@ class MockVisitorRepository implements VisitorRepository {
   Stream<List<VisitorModel>> watchVisitors() => const Stream.empty();
 
   @override
+  Stream<List<VisitorModel>> watchVisitorsForResident({
+    required String residentUid,
+    required String flatNumber,
+    String? tower,
+  }) =>
+      const Stream.empty();
+
+  @override
   Stream<List<VisitorModel>> watchPendingVisitorsForFlat(String hostFlat) =>
+      const Stream.empty();
+
+  @override
+  Stream<List<VisitorModel>> watchPendingVisitorsForResident({
+    required String residentUid,
+    required String flatNumber,
+    String? tower,
+  }) =>
       const Stream.empty();
 
   @override
