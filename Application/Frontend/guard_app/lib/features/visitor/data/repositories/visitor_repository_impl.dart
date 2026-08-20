@@ -119,8 +119,23 @@ class VisitorRepositoryImpl implements VisitorRepository {
           }
         }
 
+        // Fallback: search by flat number in users collection
+        if (fcmToken == null || fcmToken.isEmpty) {
+          final q = await _firestore
+              .collection('users')
+              .where('societyId', isEqualTo: societyId)
+              .where('flatNumber', isEqualTo: visitor.hostFlat)
+              .limit(1)
+              .get();
+          if (q.docs.isNotEmpty) {
+            fcmToken = q.docs.first.data()['fcmToken'] as String?;
+          }
+        }
+
+        debugPrint('FCM Dispatch: target resident $resUid, flat ${visitor.hostFlat}, token found: ${fcmToken != null && fcmToken.isNotEmpty}');
+
         if (fcmToken != null && fcmToken.isNotEmpty) {
-          await FcmPushService.sendVisitorNotification(
+          final success = await FcmPushService.sendVisitorNotification(
             fcmToken: fcmToken,
             visitorName: visitor.name,
             visitorType: visitor.type,
@@ -128,8 +143,11 @@ class VisitorRepositoryImpl implements VisitorRepository {
             visitorId: docRef.id,
             societyId: societyId,
           );
+          debugPrint('FCM Dispatch result: $success');
         }
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('FCM Token resolution error: $e');
+      }
     }
   }
 }
