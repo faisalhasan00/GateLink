@@ -79,7 +79,10 @@ async function getOAuth2AccessToken() {
 
     const jwt = `${message}.${base64UrlEncodeBytes(new Uint8Array(signature))}`;
 
-    const res = await fetch("https://oauth2.googleapis.com/token", {
+    const isDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const oauthUrl = isDev ? '/api/google-oauth/token' : 'https://oauth2.googleapis.com/token';
+
+    const res = await fetch(oauthUrl, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`
@@ -133,7 +136,12 @@ export async function sendFcmNotification(fcmToken, { title, body, data = {} }) 
   };
 
   try {
-    const res = await fetch(`https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`, {
+    const isDev = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    const fcmUrl = isDev
+      ? `/api/fcm-send/v1/projects/${serviceAccount.project_id}/messages:send`
+      : `https://fcm.googleapis.com/v1/projects/${serviceAccount.project_id}/messages:send`;
+
+    const res = await fetch(fcmUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,

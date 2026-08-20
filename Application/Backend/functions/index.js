@@ -33,6 +33,12 @@ const {
 const { triggerCashfreePayout } = require("./payments/cashfree_payouts");
 const { scheduledMonthlyPartnerPayouts } = require("./payments/scheduled_payouts");
 
+// 4. Notice & Broadcast Notification Triggers
+const {
+  notifyOnNoticeCreated,
+  notifyOnBroadcastCreated,
+} = require("./notices/notice_notifications");
+
 module.exports = {
   // Visitor Management
   notifyResidentOnVisitorArrival,
@@ -43,6 +49,10 @@ module.exports = {
   // Admin & Staff Management
   setSuperAdminRole,
   createStaffUser,
+
+  // Notice & Broadcast Notifications
+  notifyOnNoticeCreated,
+  notifyOnBroadcastCreated,
 
   // Payment Processing & Payouts
   createCashfreeOrder,

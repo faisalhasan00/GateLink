@@ -375,5 +375,19 @@ export const superAdminService = {
       ...actionData,
       timestamp: new Date().toISOString(),
     });
+  },
+
+  // ── BROADCASTS & NOTIFICATIONS ──────────────────────────────────────────
+  async getAllSocieties() {
+    const snap = await getDocs(collection(db, 'societies'));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+
+  async createBroadcast(broadcastData) {
+    const docRef = await addDoc(collection(db, 'broadcasts'), {
+      ...broadcastData,
+      createdAt: new Date().toISOString(),
+    });
+    return docRef.id;
   }
 };

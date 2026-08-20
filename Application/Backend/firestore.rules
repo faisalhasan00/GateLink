@@ -279,6 +279,11 @@ service cloud.firestore {
       allow read, write: if isAuthenticated();
     }
 
+    // Platform Broadcasts Collection
+    match /broadcasts/{broadcastId} {
+      allow read, write: if isAuthenticated();
+    }
+
     // Payments Collection (SEC-P0: Locked to Cloud Functions / Admin SDK writes)
     match /payments/{paymentId} {
       allow read: if isAuthenticated() && (
