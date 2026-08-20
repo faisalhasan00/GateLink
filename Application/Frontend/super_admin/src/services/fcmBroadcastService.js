@@ -1,4 +1,4 @@
-import { collection, getDocs, query, where } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy, addDoc, onSnapshot, doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 
 const serviceAccount = {
@@ -171,24 +171,48 @@ export async function broadcastPlatformMessage({
   const tokens = new Set();
 
   try {
-    let usersQuery;
-    if (scope === 'society' && societyId) {
-      usersQuery = query(collection(db, 'users'), where('societyId', '==', societyId));
-    } else if (scope === 'residents') {
-      usersQuery = query(collection(db, 'users'), where('role', '==', 'resident'));
-    } else if (scope === 'guards') {
-      usersQuery = query(collection(db, 'users'), where('role', '==', 'guard'));
-    } else {
-      usersQuery = query(collection(db, 'users'));
+    // 1. Fetch from root /users collection
+    try {
+      let usersQuery;
+      if (scope === 'society' && societyId) {
+        usersQuery = query(collection(db, 'users'), where('societyId', '==', societyId));
+      } else if (scope === 'residents') {
+        usersQuery = query(collection(db, 'users'), where('role', '==', 'resident'));
+      } else if (scope === 'guards') {
+        usersQuery = query(collection(db, 'users'), where('role', '==', 'guard'));
+      } else {
+        usersQuery = query(collection(db, 'users'));
+      }
+
+      const userDocs = await getDocs(usersQuery);
+      userDocs.forEach(docSnap => {
+        const userData = docSnap.data();
+        if (userData.fcmToken && typeof userData.fcmToken === 'string' && userData.fcmToken.trim().length > 10) {
+          tokens.add(userData.fcmToken.trim());
+        }
+      });
+    } catch (e) {
+      console.warn('Root users query warning:', e.message);
     }
 
-    const userDocs = await getDocs(usersQuery);
-    userDocs.forEach(docSnap => {
-      const userData = docSnap.data();
-      if (userData.fcmToken) {
-        tokens.add(userData.fcmToken);
-      }
-    });
+    // 2. Fetch from targeted society subcollections if applicable
+    if (scope === 'society' && societyId) {
+      try {
+        const socUsers = await getDocs(collection(db, `societies/${societyId}/users`));
+        socUsers.forEach(d => {
+          const t = d.data().fcmToken;
+          if (t && typeof t === 'string' && t.trim().length > 10) tokens.add(t.trim());
+        });
+      } catch (_) {}
+
+      try {
+        const socGuards = await getDocs(collection(db, `societies/${societyId}/guards`));
+        socGuards.forEach(d => {
+          const t = d.data().fcmToken;
+          if (t && typeof t === 'string' && t.trim().length > 10) tokens.add(t.trim());
+        });
+      } catch (_) {}
+    }
 
     const tokenList = Array.from(tokens);
     if (tokenList.length === 0) {
@@ -216,9 +240,38 @@ export async function broadcastPlatformMessage({
       })
     );
 
+    // Save broadcast record to Firestore history
+    try {
+      await addDoc(collection(db, 'broadcasts'), {
+        title,
+        body,
+        category,
+        scope,
+        societyId: societyId || 'All Societies',
+        totalRecipients: tokenList.length,
+        successCount,
+        failCount,
+        status: successCount > 0 ? 'delivered' : 'failed',
+        createdAt: new Date().toISOString(),
+      });
+    } catch (saveErr) {
+      console.warn('Could not save broadcast record:', saveErr.message);
+    }
+
     return { success: successCount, failed: failCount, total: tokenList.length };
   } catch (err) {
     console.error('Error broadcasting platform message:', err);
     return { success: 0, failed: 0, error: err.message };
   }
+}
+
+/**
+ * Subscribes to sent broadcast history in Super Admin.
+ */
+export function subscribeBroadcastHistory(callback, onError) {
+  const q = query(collection(db, 'broadcasts'), orderBy('createdAt', 'desc'));
+  return onSnapshot(q, (snap) => {
+    const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    callback(data);
+  }, onError);
 }

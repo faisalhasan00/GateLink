@@ -6,7 +6,8 @@ import {
   Megaphone, 
   Building2, 
   Contact,
-  Handshake
+  Handshake,
+  Bell
 } from 'lucide-react';
 import EnterpriseHeader from './EnterpriseHeader';
 import EnterpriseSidebar from './EnterpriseSidebar';
@@ -17,6 +18,7 @@ const SUPER_ADMIN_NAV = [
   { name: 'Societies & Licenses', path: '/societies', icon: <Building2 size={20} /> },
   { name: 'CRM & Sales Leads', path: '/crm', icon: <Contact size={20} /> },
   { name: 'Partners & Payouts', path: '/partners', icon: <Handshake size={20} /> },
+  { name: 'Push Notifications', path: '/notifications', icon: <Bell size={20} /> },
   { name: 'Ad & Campaigns', path: '/ads', icon: <Megaphone size={20} /> },
   { name: 'System Settings', path: '/profile', icon: <Settings size={20} /> },
 ];
@@ -27,7 +29,8 @@ const PAGE_TITLES = {
   '/societies': { title: 'Society Onboarding & Licensing', subtitle: 'Onboard new societies and manage subscription tiers' },
   '/crm': { title: 'Sales CRM & Lead Pipeline', subtitle: 'Track society onboarding leads, inquiries, and demo requests' },
   '/partners': { title: 'Partner & Referral Deals CRM', subtitle: 'Manage broker leads, track conversions, and approve monthly recurring UPI payouts' },
-  '/ads': { title: 'Ad Banners & Broadcast Manager', subtitle: 'Manage promotional banners and cross-society announcements' },
+  '/notifications': { title: 'Universal Push Notification Dispatcher', subtitle: 'Send targeted and platform-wide mobile alerts to residents & guards' },
+  '/ads': { title: 'Ad Banners & In-App Promotions', subtitle: 'Manage promotional banners and cross-society announcements' },
   '/profile': { title: 'Super Admin Profile', subtitle: 'System administrator credentials and security settings' },
 };
 

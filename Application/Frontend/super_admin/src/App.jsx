@@ -18,6 +18,7 @@ const AdCampaigns = lazy(() => import('./pages/superadmin/AdCampaigns'))
 const PartnerLeads = lazy(() => import('./pages/superadmin/PartnerLeads'))
 const SuperAdminProfile = lazy(() => import('./pages/superadmin/SuperAdminProfile'))
 const SuperAdminLogin = lazy(() => import('./pages/superadmin/SuperAdminLogin'))
+const PushNotifications = lazy(() => import('./pages/superadmin/PushNotifications'))
 
 function ProtectedSuperRoute({ user, children }) {
   if (user === undefined) return <SkeletonLoader />;
@@ -58,13 +59,15 @@ export default function App() {
               console.warn('Super Admin account status inactive/suspended in database. Logging out...');
               await performCentralizedLogout(auth);
               setUser(null);
-              return;
+            } else {
+              setUser(firebaseUser);
             }
+          } else {
+            setUser(firebaseUser);
           }
-          setUser(firebaseUser);
         },
-        async (err) => {
-          console.warn('Super admin session snapshot notice:', err);
+        (err) => {
+          console.error('Real-time Super Admin presence sync error:', err);
           setUser(firebaseUser);
         }
       );
@@ -95,6 +98,7 @@ export default function App() {
               <Route path="crm" element={<CrmLeads />} />
               <Route path="partners" element={<PartnerLeads />} />
               <Route path="ads" element={<AdCampaigns />} />
+              <Route path="notifications" element={<PushNotifications />} />
               <Route path="profile" element={<SuperAdminProfile />} />
 
               {/* Path Aliases for /super-admin/* routes */}
@@ -103,6 +107,7 @@ export default function App() {
               <Route path="super-admin/crm" element={<CrmLeads />} />
               <Route path="super-admin/partners" element={<PartnerLeads />} />
               <Route path="super-admin/ads" element={<AdCampaigns />} />
+              <Route path="super-admin/notifications" element={<PushNotifications />} />
               <Route path="super-admin/profile" element={<SuperAdminProfile />} />
             </Route>
 
