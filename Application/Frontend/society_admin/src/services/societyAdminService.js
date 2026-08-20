@@ -724,6 +724,94 @@ export const societyAdminService = {
     });
   },
 
+  // ── MAINTENANCE & BILLING ──────────────────────────────────────────────
+  subscribeMaintenanceBills(societyId, callback, onError) {
+    if (!societyId) return () => {};
+    const q = query(
+      collection(db, `societies/${societyId}/maintenance_bills`),
+      orderBy('createdAt', 'desc')
+    );
+    return onSnapshot(q, (snap) => {
+      const bills = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      callback(bills);
+    }, onError);
+  },
+
+  async createMaintenanceBill(societyId, billData) {
+    const docRef = doc(collection(db, `societies/${societyId}/maintenance_bills`));
+    const fullData = {
+      ...billData,
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+    };
+    await setDoc(docRef, fullData);
+
+    // High-priority Push Notification Dispatch to resident(s)
+    import('./fcmBroadcastService').then(async ({ sendFcmNotification, broadcastToSociety }) => {
+      try {
+        const title = `💳 Maintenance Bill: ₹${fullData.amount}`;
+        const body = `Maintenance bill for ${fullData.month || 'this month'} has been generated. Due: ${fullData.dueDate || 'Soon'}.`;
+
+        if (!fullData.residentUid || fullData.residentUid === 'ALL') {
+          await broadcastToSociety(societyId, {
+            title,
+            body,
+            category: 'bill',
+            target: 'residents',
+            data: {
+              type: 'bill',
+              billId: docRef.id,
+              amount: String(fullData.amount)
+            }
+          });
+        } else {
+          // Send directly to the target resident's device
+          let fcmToken = null;
+          try {
+            const uSnap = await getDoc(doc(db, `users/${fullData.residentUid}`));
+            if (uSnap.exists() && uSnap.data().fcmToken) {
+              fcmToken = uSnap.data().fcmToken;
+            }
+          } catch (_) {}
+
+          if (!fcmToken) {
+            try {
+              const suSnap = await getDoc(doc(db, `societies/${societyId}/users/${fullData.residentUid}`));
+              if (suSnap.exists() && suSnap.data().fcmToken) {
+                fcmToken = suSnap.data().fcmToken;
+              }
+            } catch (_) {}
+          }
+
+          if (fcmToken) {
+            await sendFcmNotification(fcmToken, {
+              title,
+              body,
+              data: {
+                type: 'bill',
+                billId: docRef.id,
+                amount: String(fullData.amount)
+              }
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('Bill push notification dispatch error:', err);
+      }
+    });
+
+    return docRef.id;
+  },
+
+  async updateBillStatus(societyId, billId, status, extraData = {}) {
+    const docRef = doc(db, `societies/${societyId}/maintenance_bills/${billId}`);
+    await updateDoc(docRef, {
+      status,
+      ...extraData,
+      updatedAt: new Date().toISOString(),
+    });
+  },
+
   // ── PUBLIC LEADS ───────────────────────────────────────────────────────
   async createLead(leadData) {
     const docRef = doc(collection(db, 'leads'));
