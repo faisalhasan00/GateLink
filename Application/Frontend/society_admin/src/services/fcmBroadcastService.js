@@ -165,41 +165,53 @@ export async function broadcastToSociety(societyId, { title, body, category = 'n
 
   const tokens = new Set();
 
+  // 1. Fetch from global users where societyId matches
   try {
-    // 1. Fetch from global users where societyId matches
     const usersQuery = query(collection(db, 'users'), where('societyId', '==', societyId));
     const userDocs = await getDocs(usersQuery);
     userDocs.forEach(docSnap => {
       const userData = docSnap.data();
-      if (userData.fcmToken) {
+      if (userData.fcmToken && typeof userData.fcmToken === 'string' && userData.fcmToken.trim().length > 10) {
         if (target === 'residents' && userData.role && userData.role !== 'resident') return;
         if (target === 'guards' && userData.role && userData.role !== 'guard') return;
-        tokens.add(userData.fcmToken);
+        tokens.add(userData.fcmToken.trim());
       }
     });
+  } catch (err) {
+    console.warn('Could not query root /users for FCM tokens:', err.message);
+  }
 
-    // 2. Fetch from society subcollection users
+  // 2. Fetch from society subcollection users
+  try {
     const socUsersQuery = query(collection(db, `societies/${societyId}/users`));
     const socUserDocs = await getDocs(socUsersQuery);
     socUserDocs.forEach(docSnap => {
       const userData = docSnap.data();
-      if (userData.fcmToken) {
-        tokens.add(userData.fcmToken);
+      if (userData.fcmToken && typeof userData.fcmToken === 'string' && userData.fcmToken.trim().length > 10) {
+        tokens.add(userData.fcmToken.trim());
       }
     });
+  } catch (err) {
+    console.warn('Could not query subcollection users for FCM tokens:', err.message);
+  }
 
-    // 3. Fetch guards from society guards subcollection if targeted
-    if (target === 'all' || target === 'guards') {
+  // 3. Fetch guards from society guards subcollection if targeted
+  if (target === 'all' || target === 'guards') {
+    try {
       const guardsQuery = query(collection(db, `societies/${societyId}/guards`));
       const guardDocs = await getDocs(guardsQuery);
       guardDocs.forEach(docSnap => {
         const guardData = docSnap.data();
-        if (guardData.fcmToken) {
-          tokens.add(guardData.fcmToken);
+        if (guardData.fcmToken && typeof guardData.fcmToken === 'string' && guardData.fcmToken.trim().length > 10) {
+          tokens.add(guardData.fcmToken.trim());
         }
       });
+    } catch (err) {
+      console.warn('Could not query guards for FCM tokens:', err.message);
     }
+  }
 
+  try {
     const tokenList = Array.from(tokens);
     if (tokenList.length === 0) {
       console.log('No active FCM tokens found in society:', societyId);

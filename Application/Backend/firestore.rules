@@ -72,6 +72,11 @@ service cloud.firestore {
         }
       }
 
+      // Guards Sub-collection under society
+      match /guards/{guardId} {
+        allow read, write: if isAuthenticated();
+      }
+
       // Visitors Sub-collection (SEC-002: Role + Flat Ownership Enforcement)
       match /visitors/{visitorId} {
         allow read: if isAuthenticated() && (
