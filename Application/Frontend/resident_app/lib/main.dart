@@ -15,8 +15,33 @@ import 'core/providers/firebase_providers.dart';
 /// Background FCM handler — must be top-level
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  debugPrint('Background FCM message: ${message.notification?.title}');
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    }
+    await NotificationService.init();
+
+    final data = message.data;
+    final type = data['type'] as String? ?? '';
+
+    if (type == 'visitor_pending') {
+      final visitorName = data['visitorName'] as String? ?? 'Visitor';
+      final visitorType = data['visitorType'] as String? ?? 'Guest';
+      final flatNumber = data['hostFlat'] as String? ?? '';
+      final visitorId = data['visitorId'] as String?;
+      final societyId = data['societyId'] as String?;
+
+      await NotificationService.showVisitorAlert(
+        visitorName: visitorName,
+        visitorType: visitorType,
+        flatNumber: flatNumber,
+        visitorId: visitorId,
+        societyId: societyId,
+      );
+    }
+  } catch (e) {
+    debugPrint('Background FCM error: $e');
+  }
 }
 
 /// Saves the device FCM token to Firestore so Cloud Functions can reach this device.

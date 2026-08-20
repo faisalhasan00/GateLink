@@ -1,10 +1,60 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../../firebase_options.dart';
+
+/// Top-level background notification response handler (for action buttons when app is backgrounded or closed).
+@pragma('vm:entry-point')
+Future<void> notificationBackgroundActionHandler(NotificationResponse response) async {
+  debugPrint('Notification background action received: ${response.actionId} with payload: ${response.payload}');
+
+  if (response.payload == null || response.payload!.isEmpty) return;
+
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    }
+
+    final data = jsonDecode(response.payload!) as Map<String, dynamic>;
+    final societyId = data['societyId'] as String? ?? '';
+    final visitorId = data['visitorId'] as String? ?? '';
+
+    if (societyId.isEmpty || visitorId.isEmpty) return;
+
+    final actionId = response.actionId;
+    final nowIso = DateTime.now().toIso8601String();
+
+    if (actionId == NotificationService.actionApprove) {
+      await FirebaseFirestore.instance
+          .doc('societies/$societyId/visitors/$visitorId')
+          .update({
+        'status': 'approved',
+        'approvedAt': nowIso,
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      debugPrint('Visitor $visitorId approved via background notification action');
+    } else if (actionId == NotificationService.actionReject) {
+      await FirebaseFirestore.instance
+          .doc('societies/$societyId/visitors/$visitorId')
+          .update({
+        'status': 'rejected',
+        'rejectedAt': nowIso,
+        'rejectionReason': 'Denied via quick notification action',
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+      debugPrint('Visitor $visitorId rejected via background notification action');
+    }
+  } catch (e) {
+    debugPrint('Error processing background notification action: $e');
+  }
+}
 
 /// Production-grade Local & Heads-up Notification Engine.
-/// Configures high-importance Android channels with sound and vibration
-/// for instant delivery when app is in foreground, background, or closed.
+/// Configures high-importance Android channels with sound, vibration, and
+/// interactive Action Buttons (Approve & Reject) for instant delivery.
 class NotificationService {
   NotificationService._();
   static final _plugin = FlutterLocalNotificationsPlugin();
@@ -14,6 +64,9 @@ class NotificationService {
   static const String channelEmergencyId = 'emergency_alerts_channel';
   static const String channelUpdatesId = 'society_updates_channel';
 
+  static const String actionApprove = 'action_approve';
+  static const String actionReject = 'action_reject';
+
   static Future<void> init() async {
     if (_initialized) return;
 
@@ -21,7 +74,7 @@ class NotificationService {
     const gateChannel = AndroidNotificationChannel(
       channelGateId,
       'Gate & Visitor Alerts',
-      description: 'Immediate alerts when visitors, delivery, or cabs arrive at the gate.',
+      description: 'Immediate alerts with Approve/Reject buttons when visitors arrive.',
       importance: Importance.max,
       playSound: true,
       enableVibration: true,
@@ -65,38 +118,76 @@ class NotificationService {
 
     await _plugin.initialize(
       initSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) {
-        debugPrint('Notification clicked with payload: ${response.payload}');
+      onDidReceiveNotificationResponse: (NotificationResponse response) async {
+        debugPrint('Notification foreground action: ${response.actionId} with payload: ${response.payload}');
+        if (response.actionId != null && response.actionId!.isNotEmpty) {
+          await notificationBackgroundActionHandler(response);
+        }
       },
+      onDidReceiveBackgroundNotificationResponse: notificationBackgroundActionHandler,
     );
 
     _initialized = true;
-    debugPrint('NotificationService initialized successfully with high-priority channels');
+    debugPrint('NotificationService initialized successfully with action buttons');
   }
 
-  /// Trigger a heads-up gate arrival notification (e.g. Zomato / Delivery / Guest waiting)
+  /// Trigger a heads-up gate arrival notification with 2 action buttons: Approve and Reject
   static Future<void> showVisitorAlert({
     required String visitorName,
     required String visitorType,
     required String flatNumber,
+    String? visitorId,
+    String? societyId,
   }) async {
+    await init();
+
+    final payloadData = jsonEncode({
+      'visitorId': visitorId ?? '',
+      'societyId': societyId ?? '',
+      'visitorName': visitorName,
+      'flatNumber': flatNumber,
+    });
+
+    final notifId = visitorId != null && visitorId.isNotEmpty
+        ? visitorId.hashCode.remainder(100000)
+        : DateTime.now().millisecondsSinceEpoch.remainder(100000);
+
     await _plugin.show(
-      DateTime.now().millisecondsSinceEpoch.remainder(100000),
-      '🚪 Visitor at Main Gate — Flat $flatNumber',
+      notifId,
+      '🚪 Visitor at Gate — Flat $flatNumber',
       '$visitorName ($visitorType) is waiting for your entry approval.',
-      const NotificationDetails(
+      NotificationDetails(
         android: AndroidNotificationDetails(
           channelGateId,
           'Gate & Visitor Alerts',
-          channelDescription: 'Visitor arrival alerts with action triggers',
+          channelDescription: 'Visitor arrival alerts with Approve/Reject buttons',
           importance: Importance.max,
-          priority: Priority.high,
+          priority: Priority.max,
           playSound: true,
           enableVibration: true,
           icon: '@mipmap/ic_launcher',
-          styleInformation: BigTextStyleInformation(''),
+          styleInformation: BigTextStyleInformation(
+            '$visitorName ($visitorType) is at the security gate for Flat $flatNumber. Please approve or deny entry.',
+            contentTitle: '🚪 Visitor Approval — Flat $flatNumber',
+            summaryText: 'Gate Request',
+          ),
+          actions: const <AndroidNotificationAction>[
+            AndroidNotificationAction(
+              actionApprove,
+              'Approve ✅',
+              showsUserInterface: false,
+              cancelNotification: true,
+            ),
+            AndroidNotificationAction(
+              actionReject,
+              'Reject ❌',
+              showsUserInterface: false,
+              cancelNotification: true,
+            ),
+          ],
         ),
       ),
+      payload: payloadData,
     );
   }
 
@@ -106,6 +197,7 @@ class NotificationService {
     required String flatNumber,
     required String alertType,
   }) async {
+    await init();
     await _plugin.show(
       DateTime.now().millisecondsSinceEpoch.remainder(100000),
       '🚨 EMERGENCY SOS ALERT: Flat $flatNumber',
@@ -131,6 +223,7 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
+    await init();
     await _plugin.show(
       DateTime.now().millisecondsSinceEpoch.remainder(100000),
       '📢 $title',
@@ -155,6 +248,7 @@ class NotificationService {
     required String title,
     required String body,
   }) async {
+    await init();
     await _plugin.show(
       DateTime.now().millisecondsSinceEpoch.remainder(100000),
       '💳 $title',

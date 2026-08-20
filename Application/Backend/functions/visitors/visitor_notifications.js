@@ -117,6 +117,8 @@ const notifyResidentOnVisitorArrival = onDocumentCreated(
             visitorId: visitorId,
             societyId: societyId,
             hostFlat: hostFlat,
+            visitorName: visitorName,
+            visitorType: visitorType,
             click_action: "FLUTTER_NOTIFICATION_CLICK",
           },
           android: {

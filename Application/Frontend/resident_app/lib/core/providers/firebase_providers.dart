@@ -65,6 +65,8 @@ final visitorNotificationWatcherProvider = StreamProvider<int>((ref) async* {
           visitorName: visitor.name,
           visitorType: visitor.type,
           flatNumber: visitor.hostFlat.isNotEmpty ? visitor.hostFlat : flatNumber,
+          visitorId: visitor.id,
+          societyId: profile.societyId,
         );
       }
     }
