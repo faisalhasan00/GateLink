@@ -175,13 +175,13 @@ class NotificationService {
             AndroidNotificationAction(
               actionApprove,
               'Approve ✅',
-              showsUserInterface: false,
+              showsUserInterface: true,
               cancelNotification: true,
             ),
             AndroidNotificationAction(
               actionReject,
               'Reject ❌',
-              showsUserInterface: false,
+              showsUserInterface: true,
               cancelNotification: true,
             ),
           ],

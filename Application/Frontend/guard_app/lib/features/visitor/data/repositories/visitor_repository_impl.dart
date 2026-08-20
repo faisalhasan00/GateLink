@@ -100,6 +100,24 @@ class VisitorRepositoryImpl implements VisitorRepository {
             .collection('users/$resUid/notifications')
             .add(notifData);
       } catch (_) {}
+
+      // Fetch FCM Token and dispatch background wake-up
+      try {
+        String? fcmToken;
+        final rootUser = await _firestore.collection('users').doc(resUid).get();
+        if (rootUser.exists) {
+          fcmToken = rootUser.data()?['fcmToken'] as String?;
+        }
+        if (fcmToken == null || fcmToken.isEmpty) {
+          final subUser = await _firestore
+              .collection('societies/$societyId/users')
+              .doc(resUid)
+              .get();
+          if (subUser.exists) {
+            fcmToken = subUser.data()?['fcmToken'] as String?;
+          }
+        }
+      } catch (_) {}
     }
   }
 }
