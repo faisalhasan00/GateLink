@@ -56,7 +56,7 @@ export default function Legal() {
         <div style={{ display: 'flex', gap: '32px', flexWrap: 'wrap', fontSize: '13px' }}>
           <div>
             <strong>Technical Support Email:</strong>
-            <div style={{ color: 'var(--primary)', fontWeight: 600 }}>support@gatelink.in</div>
+            <div style={{ color: 'var(--primary)', fontWeight: 600 }}>gatelink.in@gmail.com</div>
           </div>
           <div>
             <strong>Helpline Hotline:</strong>

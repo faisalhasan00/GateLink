@@ -5,10 +5,7 @@ Section A: Data Collection & Security
 Question on Console	Answer to Select
 Does your app collect or share any of the required user data types?	Yes
 Is all of the user data collected by your app encrypted in transit?	Yes (All connections use HTTPS/TLS & Firebase Security Rules)
-Do you provide a way for users to request that their data be deleted?	Yes (Users can email 
-
-privacy@gatelink.in
- or contact their Society Admin)
+Do you provide a way for users to request that their data be deleted?	Yes (Users can email gatelink.in@gmail.com or contact their Society Admin)
 Section B: Specific Data Types Collected
 1. Personal Info
 Name:

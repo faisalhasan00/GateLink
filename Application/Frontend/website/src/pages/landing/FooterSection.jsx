@@ -34,7 +34,7 @@ export default function FooterSection() {
                 <Phone size={14} color="#0EA5E9" /> <a href="tel:+919121863117" style={{ color: '#CBD5E1', textDecoration: 'none' }}>+91 91218 63117</a>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Mail size={14} color="#0EA5E9" /> <a href="mailto:support@gatelink.in" style={{ color: '#CBD5E1', textDecoration: 'none' }}>support@gatelink.in</a>
+                <Mail size={14} color="#0EA5E9" /> <a href="mailto:gatelink.in@gmail.com" style={{ color: '#CBD5E1', textDecoration: 'none' }}>gatelink.in@gmail.com</a>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <MapPin size={14} color="#0EA5E9" /> HITEC City, Hyderabad, Telangana
