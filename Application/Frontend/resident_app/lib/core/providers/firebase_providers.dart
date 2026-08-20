@@ -27,10 +27,16 @@ final firestoreServiceProvider = Provider<FirestoreService>((ref) {
   return FirestoreService(societyId: societyId);
 });
 
-// ── DOMAIN MICRO-SERVICE PROVIDERS ──────────────────────────────────────────
-
 final visitorServiceProvider = Provider<VisitorService>((ref) {
   return ref.watch(firestoreServiceProvider).visitorService;
+});
+
+final flatValidationServiceProvider = Provider<FlatValidationService>((ref) {
+  return ref.watch(firestoreServiceProvider).visitorService.flatValidationService;
+});
+
+final visitorPassServiceProvider = Provider<VisitorPassService>((ref) {
+  return ref.watch(firestoreServiceProvider).visitorService.passService;
 });
 
 final amenityServiceProvider = Provider<AmenityService>((ref) {
