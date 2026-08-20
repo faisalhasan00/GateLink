@@ -53,7 +53,12 @@ class AppRoutes {
   static const String maintenanceHistory = '/guard/dashboard';
   static const String myBookings = '/guard/dashboard';
   static const String parking = '/guard/vehicles';
+  static const String vehicles = '/guard/vehicles';
+  static const String passcode = '/guard/scan';
+  static const String scan = '/guard/scan';
+  static const String quickEntry = '/guard/quick-entry';
   static const String documents = '/guard/dashboard';
+  static const String residents = '/guard/dashboard';
   static const String editProfile = '/guard/profile';
   static const String changePassword = '/guard/profile';
   static const String raiseComplaint = '/guard/dashboard';

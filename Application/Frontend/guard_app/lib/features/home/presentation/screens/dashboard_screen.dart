@@ -59,7 +59,11 @@ class DashboardScreen extends ConsumerWidget {
     final timeStr = DateFormat('hh:mm:ss a').format(now);
     final dateStr = DateFormat('EEEE, d MMM').format(now);
     final profile = ref.watch(userProfileProvider).value;
-    final guardName = profile?.name ?? 'Security Guard';
+    final guardName = (profile?['name'] as String?)?.isNotEmpty == true
+        ? profile!['name'] as String
+        : ((profile?['displayName'] as String?)?.isNotEmpty == true
+            ? profile!['displayName'] as String
+            : 'Security Guard');
 
     return Scaffold(
       backgroundColor: AppColors.background,
