@@ -212,19 +212,27 @@ export async function createTeamMember({ name, email, password, role, permission
       updatedAt: nowIso,
     };
 
-    await setDoc(doc(db, 'super_admin_team', newUid), staffData);
+    // 2. Save Staff Record in Firestore super_admin_team collection
+    try {
+      await setDoc(doc(db, 'super_admin_team', newUid), staffData);
+    } catch (teamErr) {
+      console.warn('super_admin_team write notice:', teamErr.message);
+    }
 
-    // Also mirror in /users collection for universal platform discovery
+    // 3. Mirror in /users collection for universal platform discovery & RBAC authentication
     await setDoc(doc(db, 'users', newUid), {
       _id: newUid,
       uid: newUid,
       name: name.trim(),
       email: cleanEmail,
+      phone: phone.trim(),
       role: 'super_admin',
       userType: 'employee',
       status: 'active',
       permissions: permissions || {},
+      createdBy: MASTER_SUPER_ADMIN_EMAIL,
       createdAt: nowIso,
+      updatedAt: nowIso,
     }, { merge: true });
 
     return staffData;
