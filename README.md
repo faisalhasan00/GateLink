@@ -6,7 +6,7 @@ GateLink is an enterprise-grade Society, Apartment, and Gated Community Manageme
 
 ## 1. Monorepo Structure & Applications
 
-GateLink is organized as a decoupled, industry-standard monorepo:
+GateLink is organized as a decoupled, industry-standard monorepo following `.agents/AGENTS.md` rules:
 
 ```
 SocietySphere / GateLink
@@ -19,6 +19,7 @@ SocietySphere / GateLink
 │   └── Frontend/
 │       ├── resident_app/          # Flutter mobile app for residents & flat owners
 │       ├── guard_app/             # Flutter mobile app for security guards & gatekeepers
+│       ├── partner_app/           # Flutter mobile app for GateLink partners & referral agents
 │       ├── website/               # React + Vite SaaS marketing website (gatelink.in)
 │       ├── society_admin/         # React + Vite society management dashboard (app.gatelink.in)
 │       └── super_admin/           # React + Vite platform administration portal (admin.gatelink.in)
@@ -30,7 +31,24 @@ SocietySphere / GateLink
 
 ---
 
-## 2. Quick Start Guide for New Developers
+## 2. Platform Core Systems
+
+### A. Role-Based Access Control (RBAC) & Team Management
+- **Master Admin Protection**: Permanent, immutable Master Super Admin (`mohammedfaisalhasan@gmail.com`) with full system access.
+- **Granular Permissions**: 14 distinct permission modules with real-time UI masking and sidebar control for staff members.
+- **Secondary App Provisioning**: Uses secondary Firebase App instances to create staff accounts without terminating active admin sessions.
+
+### B. Universal Push Notification Dispatcher (FCM)
+- High-priority Google FCM push notification engine supporting Festival Wishes, Sponsored Offers, Security Alerts, and Official Announcements.
+- Live mobile lockscreen preview simulator and real-time broadcast telemetry log history.
+
+### C. Clean Feature Architecture & Domain Services
+- **No Monolithic Files**: Strictly decoupled into `<300 line` single-responsibility components and hooks under `src/features/<feature-name>/`.
+- **Domain Services**: `society_admin` data services structured under `src/services/domain/` (`residentService`, `maintenanceService`, `complaintService`, `facilityService`).
+
+---
+
+## 3. Quick Start Guide for New Developers
 
 ### Prerequisites
 - **Node.js**: v18+ or v20+
@@ -65,23 +83,30 @@ npm run dev
 
 ### Running the Mobile Applications
 
-#### 1. Resident Mobile App
+#### 1. Resident Mobile App (`resident_app`)
 ```bash
 cd Application/Frontend/resident_app
 flutter pub get
 flutter run -t lib/main.dart
 ```
 
-#### 2. Security Guard Mobile App
+#### 2. Security Guard Mobile App (`guard_app`)
 ```bash
 cd Application/Frontend/guard_app
 flutter pub get
 flutter run -t lib/main.dart
 ```
 
+#### 3. Partner & Referral Mobile App (`partner_app`)
+```bash
+cd Application/Frontend/partner_app
+flutter pub get
+flutter run -t lib/main.dart
+```
+
 ---
 
-## 3. Architecture & Development Guidelines
+## 4. Architecture & Development Guidelines
 
 Every developer must adhere to the rules in [`.agents/AGENTS.md`](file:///.agents/AGENTS.md).
 
@@ -91,7 +116,7 @@ $$\text{Component (JSX/Widget)} \longrightarrow \text{Custom Hook (State/Lifecyc
 
 ### B. Shared UI Components vs Feature Modules
 - **`components/ui/`**: Generic, non-business primitives (`Button`, `Input`, `Badge`, `Card`, `StateViews`).
-- **`features/<feature_name>/`**: Domain-specific components, hooks, services, types, and utilities (e.g. `features/navigation/`, `features/residents/`, `features/visitors/`).
+- **`features/<feature_name>/`**: Domain-specific components, hooks, services, types, and utilities (e.g. `features/team/`, `features/notifications/`, `features/residents/`).
 
 ### C. Multi-Tenant Security & Isolation
 - **Rule**: Every data-driven Firestore read/write must be scoped with the active `societyId`.
@@ -99,7 +124,7 @@ $$\text{Component (JSX/Widget)} \longrightarrow \text{Custom Hook (State/Lifecyc
 
 ---
 
-## 4. Design System Tokens (`gatelink_tokens.css`)
+## 5. Design System Tokens (`gatelink_tokens.css`)
 
 GateLink uses a strict, brand-coherent token system:
 
@@ -116,7 +141,7 @@ GateLink uses a strict, brand-coherent token system:
 
 ---
 
-## 5. Verification & Quality Assurance
+## 6. Verification & Quality Assurance
 
 Before opening a pull request or submitting code:
 
@@ -129,12 +154,5 @@ cd Application/Frontend/super_admin && npm run build
 # Verify Flutter mobile apps
 cd Application/Frontend/resident_app && flutter analyze
 cd Application/Frontend/guard_app && flutter analyze
+cd Application/Frontend/partner_app && flutter analyze
 ```
-
----
-
-## 6. How to Write Code Comments
-- **Explain the WHY, not the WHAT**:
-  - ❌ `// Fetch residents`
-  - ✅ `// Scoped by societyId to enforce multi-tenant isolation.`
-  - ✅ `// Uses 12px radius and GateLink Navy token to maintain design system consistency.`
