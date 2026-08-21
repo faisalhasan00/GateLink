@@ -1,6 +1,7 @@
 import React from 'react';
 import { QrCode, CheckCircle, XCircle, Trash2 } from 'lucide-react';
 import { calculateSocietyMonthlyFee } from '../../../utils/pricingEngine';
+import { useSuperAdminAuth } from '../../../context/SuperAdminAuthContext';
 
 export default function SocietyListTable({
   societies,
@@ -10,6 +11,8 @@ export default function SocietyListTable({
   onUpdatePlan,
   onDeleteSociety
 }) {
+  const { hasPermission } = useSuperAdminAuth();
+  const canDelete = hasPermission('delete_society');
   return (
     <div className="card">
       <div className="table-container">
@@ -76,21 +79,26 @@ export default function SocietyListTable({
                       >
                         View
                       </button>
-                      <button
-                        className="btn btn-outline"
-                        style={{ padding: '4px 8px', fontSize: '12px', color: soc.status === 'Active' ? 'var(--warning)' : 'var(--secondary)' }}
-                        onClick={() => onToggleStatus(soc.id, soc.status)}
-                      >
-                        {soc.status === 'Active' ? <XCircle size={14} /> : <CheckCircle size={14} />}
-                      </button>
-                      <button
-                        className="btn-icon"
-                        style={{ color: 'var(--danger)' }}
-                        onClick={() => onDeleteSociety(soc.id, soc.name)}
-                        title="Permanently Delete Society"
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      {canDelete && (
+                        <>
+                          <button
+                            className="btn btn-outline"
+                            style={{ padding: '4px 8px', fontSize: '12px', color: soc.status === 'Active' ? 'var(--warning)' : 'var(--secondary)' }}
+                            onClick={() => onToggleStatus(soc.id, soc.status)}
+                            title={canDelete ? "Toggle Active Status" : "Restricted: Requires Delete/Suspend Permission"}
+                          >
+                            {soc.status === 'Active' ? <XCircle size={14} /> : <CheckCircle size={14} />}
+                          </button>
+                          <button
+                            className="btn-icon"
+                            style={{ color: 'var(--danger)' }}
+                            onClick={() => onDeleteSociety(soc.id, soc.name)}
+                            title="Permanently Delete Society"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>

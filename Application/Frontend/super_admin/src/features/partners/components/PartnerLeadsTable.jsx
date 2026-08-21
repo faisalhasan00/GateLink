@@ -1,5 +1,6 @@
 import React from 'react';
 import { Gift, Phone, CheckCircle2, DollarSign, Trash2 } from 'lucide-react';
+import { useSuperAdminAuth } from '../../../context/SuperAdminAuthContext';
 
 export default function PartnerLeadsTable({
   loading,
@@ -8,6 +9,8 @@ export default function PartnerLeadsTable({
   onOpenPayoutModal,
   onDeleteLead,
 }) {
+  const { hasPermission } = useSuperAdminAuth();
+  const canApprovePayout = hasPermission('approve_payout');
   if (loading) {
     return (
       <div style={{ padding: '60px', textAlign: 'center', color: 'var(--text-secondary)' }}>
@@ -144,22 +147,25 @@ export default function PartnerLeadsTable({
                   </div>
                 ) : lead.status === 'won' ? (
                   <button
-                    onClick={() => onOpenPayoutModal(lead)}
+                    onClick={() => canApprovePayout && onOpenPayoutModal(lead)}
+                    disabled={!canApprovePayout}
+                    title={canApprovePayout ? "Click to disburse UPI payout" : "Restricted: Requires Payout Approval Permission"}
                     style={{
                       padding: '6px 12px',
                       borderRadius: '6px',
-                      backgroundColor: '#1E3A8A',
+                      backgroundColor: canApprovePayout ? '#1E3A8A' : '#94A3B8',
                       color: '#FFFFFF',
                       border: 'none',
                       fontSize: '12px',
                       fontWeight: 700,
-                      cursor: 'pointer',
+                      cursor: canApprovePayout ? 'pointer' : 'not-allowed',
+                      opacity: canApprovePayout ? 1 : 0.6,
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '4px'
                     }}
                   >
-                    <DollarSign size={13} /> Pay Partner
+                    <DollarSign size={13} /> {canApprovePayout ? 'Pay Partner' : 'Payout Restricted'}
                   </button>
                 ) : (
                   <span style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>On Close</span>

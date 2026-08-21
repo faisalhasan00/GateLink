@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../../firebase';
 import { useNavigate, Link } from 'react-router-dom';
 import { setSuperAdminSession, performCentralizedLogout } from '../../services/sessionManager';
 import GateLinkLogo from '../../components/ui/GateLinkLogo';
 import SeoHead from '../../components/seo/SeoHead';
-import { Lock, Mail, ArrowRight, AlertCircle, ShieldAlert } from 'lucide-react';
+import { Lock, Mail, ArrowRight, AlertCircle, ShieldAlert, CheckCircle2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 const SUPER_ADMIN_EMAIL = 'mohammedfaisalhasan@gmail.com';
@@ -22,8 +22,31 @@ export default function SuperAdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [resetSuccess, setResetSuccess] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleForgotPassword = async () => {
+    const targetEmail = (email.trim() || SUPER_ADMIN_EMAIL).toLowerCase();
+    setError('');
+    setResetSuccess('');
+    setResetLoading(true);
+
+    try {
+      await sendPasswordResetEmail(auth, targetEmail);
+      setResetSuccess(`Password reset link sent to ${targetEmail}. Please check your inbox / spam folder.`);
+    } catch (err) {
+      console.error('Password reset error:', err);
+      let msg = err.message || 'Failed to send password reset email.';
+      if (err.code === 'auth/user-not-found') {
+        msg = 'No account found with this email.';
+      }
+      setError(msg);
+    } finally {
+      setResetLoading(false);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -32,15 +55,8 @@ export default function SuperAdminLogin() {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // 1. Enforce Super Admin email restriction
-    if (cleanEmail !== SUPER_ADMIN_EMAIL.toLowerCase()) {
-      setError('Access Denied: Unrecognized Super Admin email address.');
-      setLoading(false);
-      return;
-    }
-
     try {
-      // 2. Authoritative Firebase Auth Sign In
+      // 1. Authoritative Firebase Auth Sign In
       const res = await signInWithEmailAndPassword(auth, cleanEmail, password);
       const uid = res.user?.uid;
 
@@ -48,13 +64,38 @@ export default function SuperAdminLogin() {
         throw new Error('Authentication failed: Invalid credentials.');
       }
 
-      // 3. Authoritative Database Account Verification
-      const userDocSnap = await getDoc(doc(db, 'users', uid));
-      if (userDocSnap.exists()) {
-        const userData = userDocSnap.data() || {};
-        if (userData.status === 'deleted' || userData.status === 'suspended') {
+      const isMaster = cleanEmail === SUPER_ADMIN_EMAIL.toLowerCase();
+
+      if (!isMaster) {
+        // 2. Staff Account Authoritative Database Verification
+        const staffDocSnap = await getDoc(doc(db, 'super_admin_team', uid));
+        let isStaffAuthorized = false;
+
+        if (staffDocSnap.exists()) {
+          const staffData = staffDocSnap.data() || {};
+          if (staffData.status === 'Suspended' || staffData.status === 'inactive' || staffData.status === 'deleted') {
+            await performCentralizedLogout(auth);
+            throw new Error('Account Suspended: Your staff access has been disabled by the Administrator.');
+          }
+          isStaffAuthorized = true;
+        } else {
+          // Fallback check in users collection
+          const userDocSnap = await getDoc(doc(db, 'users', uid));
+          if (userDocSnap.exists()) {
+            const userData = userDocSnap.data() || {};
+            if (userData.status === 'deleted' || userData.status === 'suspended') {
+              await performCentralizedLogout(auth);
+              throw new Error('Account Suspended: Your account is no longer active.');
+            }
+            if (userData.role === 'super_admin' || userData.role === 'employee' || userData.role === 'staff') {
+              isStaffAuthorized = true;
+            }
+          }
+        }
+
+        if (!isStaffAuthorized) {
           await performCentralizedLogout(auth);
-          throw new Error('Account not found or account is no longer active.');
+          throw new Error('Access Denied: You do not have permission to access the Super Admin Portal.');
         }
       }
 
@@ -121,6 +162,25 @@ export default function SuperAdminLogin() {
           </div>
         )}
 
+        {resetSuccess && (
+          <div style={{
+            background: 'rgba(34, 197, 94, 0.1)',
+            border: '1px solid rgba(34, 197, 94, 0.3)',
+            borderRadius: '6px',
+            padding: '12px 14px',
+            marginBottom: '20px',
+            color: '#16A34A',
+            fontSize: '13px',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px'
+          }}>
+            <CheckCircle2 size={18} color="#16A34A" style={{ flexShrink: 0 }} />
+            <span>{resetSuccess}</span>
+          </div>
+        )}
+
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
           <div>
             <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#CBD5E1' : '#334155', marginBottom: '6px' }}>
@@ -150,9 +210,28 @@ export default function SuperAdminLogin() {
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '13px', fontWeight: 700, color: isDark ? '#CBD5E1' : '#334155', marginBottom: '6px' }}>
-              Password *
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <label style={{ fontSize: '13px', fontWeight: 700, color: isDark ? '#CBD5E1' : '#334155' }}>
+                Password *
+              </label>
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={resetLoading}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  color: '#DC2626',
+                  cursor: resetLoading ? 'not-allowed' : 'pointer',
+                  textDecoration: 'underline'
+                }}
+              >
+                {resetLoading ? 'Sending link...' : 'Forgot / Reset Password?'}
+              </button>
+            </div>
             <div style={{ position: 'relative' }}>
               <input
                 required

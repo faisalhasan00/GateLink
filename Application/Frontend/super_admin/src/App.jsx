@@ -1,12 +1,9 @@
-import React, { useState, useEffect, lazy, Suspense } from 'react'
+import React, { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import { onAuthStateChanged } from 'firebase/auth'
-import { doc, onSnapshot } from 'firebase/firestore'
-import { auth, db } from './firebase'
-
 import { ThemeProvider } from './context/ThemeContext'
+import { SuperAdminAuthProvider, useSuperAdminAuth } from './context/SuperAdminAuthContext'
 import SkeletonLoader from './components/ui/SkeletonLoader'
-import { getSuperAdminSession, performCentralizedLogout, clearSuperAdminSession } from './services/sessionManager'
+import { ShieldAlert } from 'lucide-react'
 import './index.css'
 
 // Lazy Loaded Super Admin Pages & Layouts
@@ -19,103 +16,158 @@ const PartnerLeads = lazy(() => import('./pages/superadmin/PartnerLeads'))
 const SuperAdminProfile = lazy(() => import('./pages/superadmin/SuperAdminProfile'))
 const SuperAdminLogin = lazy(() => import('./pages/superadmin/SuperAdminLogin'))
 const PushNotifications = lazy(() => import('./pages/superadmin/PushNotifications'))
+const TeamManagement = lazy(() => import('./pages/superadmin/TeamManagement'))
 
-function ProtectedSuperRoute({ user, children }) {
-  if (user === undefined) return <SkeletonLoader />;
+function ProtectedSuperRoute({ children }) {
+  const { user, loading } = useSuperAdminAuth();
 
-  // Authoritative Check: Must have a validated Firebase User. Stale localStorage is blocked.
+  if (loading || user === undefined) return <SkeletonLoader />;
+
   if (!user || !user.email) {
     return <Navigate to="/login" replace />;
   }
   return children;
 }
 
-export default function App() {
-  const [user, setUser] = useState(undefined); // undefined = loading
+function PermissionGuard({ permission, children }) {
+  const { hasPermission, isMasterAdmin } = useSuperAdminAuth();
 
-  useEffect(() => {
-    let unsubscribeSnapshot = null;
-
-    const unsubscribeAuth = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (unsubscribeSnapshot) {
-        unsubscribeSnapshot();
-        unsubscribeSnapshot = null;
-      }
-
-      if (!firebaseUser) {
-        clearSuperAdminSession();
-        setUser(null);
-        return;
-      }
-
-      // Real-Time Authoritative Account Presence Listener for Super Admin
-      const userDocRef = doc(db, 'users', firebaseUser.uid);
-      unsubscribeSnapshot = onSnapshot(
-        userDocRef,
-        async (docSnap) => {
-          if (docSnap.exists()) {
-            const data = docSnap.data() || {};
-            if (data.status === 'deleted' || data.status === 'suspended' || data.status === 'inactive') {
-              console.warn('Super Admin account status inactive/suspended in database. Logging out...');
-              await performCentralizedLogout(auth);
-              setUser(null);
-            } else {
-              setUser(firebaseUser);
-            }
-          } else {
-            setUser(firebaseUser);
-          }
-        },
-        (err) => {
-          console.error('Real-time Super Admin presence sync error:', err);
-          setUser(firebaseUser);
-        }
-      );
-    });
-
-    return () => {
-      if (unsubscribeSnapshot) unsubscribeSnapshot();
-      unsubscribeAuth();
-    };
-  }, []);
+  if (isMasterAdmin || hasPermission(permission)) {
+    return children;
+  }
 
   return (
+    <div style={{
+      maxWidth: '600px',
+      margin: '60px auto',
+      textAlign: 'center',
+      padding: '40px',
+      backgroundColor: 'var(--surface-color)',
+      borderRadius: '16px',
+      border: '1px solid var(--border-color)',
+      boxShadow: '0 10px 30px rgba(0,0,0,0.05)'
+    }}>
+      <div style={{
+        width: '56px',
+        height: '56px',
+        borderRadius: '50%',
+        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+        color: '#EF4444',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: '0 auto 16px'
+      }}>
+        <ShieldAlert size={32} />
+      </div>
+      <h2 style={{ fontSize: '20px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>
+        Access Restricted
+      </h2>
+      <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.5, marginBottom: '20px' }}>
+        Your staff account does not have permission to view or manage this module. Please contact the Master Super Administrator to request access.
+      </p>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
     <ThemeProvider>
-      <BrowserRouter>
-        <Suspense fallback={<SkeletonLoader />}>
-          <Routes>
-            {/* Public Login Route */}
-            <Route path="/login" element={<SuperAdminLogin />} />
+      <SuperAdminAuthProvider>
+        <BrowserRouter>
+          <Suspense fallback={<SkeletonLoader />}>
+            <Routes>
+              {/* Public Login Route */}
+              <Route path="/login" element={<SuperAdminLogin />} />
 
-            {/* Protected Super Admin Dashboard Routes */}
-            <Route path="/" element={
-              <ProtectedSuperRoute user={user}>
-                <SuperAdminLayout />
-              </ProtectedSuperRoute>
-            }>
-              <Route index element={<SuperAdminDashboard />} />
-              <Route path="societies" element={<SocietyManagement />} />
-              <Route path="crm" element={<CrmLeads />} />
-              <Route path="partners" element={<PartnerLeads />} />
-              <Route path="ads" element={<AdCampaigns />} />
-              <Route path="notifications" element={<PushNotifications />} />
-              <Route path="profile" element={<SuperAdminProfile />} />
+              {/* Protected Super Admin Dashboard Routes */}
+              <Route path="/" element={
+                <ProtectedSuperRoute>
+                  <SuperAdminLayout />
+                </ProtectedSuperRoute>
+              }>
+                <Route index element={
+                  <PermissionGuard permission="overview">
+                    <SuperAdminDashboard />
+                  </PermissionGuard>
+                } />
+                <Route path="societies" element={
+                  <PermissionGuard permission="societies">
+                    <SocietyManagement />
+                  </PermissionGuard>
+                } />
+                <Route path="crm" element={
+                  <PermissionGuard permission="crm">
+                    <CrmLeads />
+                  </PermissionGuard>
+                } />
+                <Route path="partners" element={
+                  <PermissionGuard permission="partners">
+                    <PartnerLeads />
+                  </PermissionGuard>
+                } />
+                <Route path="ads" element={
+                  <PermissionGuard permission="ads">
+                    <AdCampaigns />
+                  </PermissionGuard>
+                } />
+                <Route path="notifications" element={
+                  <PermissionGuard permission="notifications">
+                    <PushNotifications />
+                  </PermissionGuard>
+                } />
+                <Route path="team" element={
+                  <PermissionGuard permission="team">
+                    <TeamManagement />
+                  </PermissionGuard>
+                } />
+                <Route path="profile" element={<SuperAdminProfile />} />
 
-              {/* Path Aliases for /super-admin/* routes */}
-              <Route path="super-admin" element={<SuperAdminDashboard />} />
-              <Route path="super-admin/societies" element={<SocietyManagement />} />
-              <Route path="super-admin/crm" element={<CrmLeads />} />
-              <Route path="super-admin/partners" element={<PartnerLeads />} />
-              <Route path="super-admin/ads" element={<AdCampaigns />} />
-              <Route path="super-admin/notifications" element={<PushNotifications />} />
-              <Route path="super-admin/profile" element={<SuperAdminProfile />} />
-            </Route>
+                {/* Path Aliases for /super-admin/* routes */}
+                <Route path="super-admin" element={
+                  <PermissionGuard permission="overview">
+                    <SuperAdminDashboard />
+                  </PermissionGuard>
+                } />
+                <Route path="super-admin/societies" element={
+                  <PermissionGuard permission="societies">
+                    <SocietyManagement />
+                  </PermissionGuard>
+                } />
+                <Route path="super-admin/crm" element={
+                  <PermissionGuard permission="crm">
+                    <CrmLeads />
+                  </PermissionGuard>
+                } />
+                <Route path="super-admin/partners" element={
+                  <PermissionGuard permission="partners">
+                    <PartnerLeads />
+                  </PermissionGuard>
+                } />
+                <Route path="super-admin/ads" element={
+                  <PermissionGuard permission="ads">
+                    <AdCampaigns />
+                  </PermissionGuard>
+                } />
+                <Route path="super-admin/notifications" element={
+                  <PermissionGuard permission="notifications">
+                    <PushNotifications />
+                  </PermissionGuard>
+                } />
+                <Route path="super-admin/team" element={
+                  <PermissionGuard permission="team">
+                    <TeamManagement />
+                  </PermissionGuard>
+                } />
+                <Route path="super-admin/profile" element={<SuperAdminProfile />} />
+              </Route>
 
-            {/* Fallback */}
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </SuperAdminAuthProvider>
     </ThemeProvider>
   );
 }
