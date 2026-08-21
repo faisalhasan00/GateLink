@@ -5,7 +5,7 @@ import {
   Settings, 
   Megaphone, 
   Building2, 
-  Contact, 
+  Contact,
   Handshake, 
   Bell,
   Users
@@ -49,7 +49,6 @@ export default function EnterpriseLayout({ isSuperAdmin = true }) {
     subtitle: 'Enterprise Management System'
   };
 
-  // Filter navigation items based on current user's role/permissions
   const navItems = SUPER_ADMIN_NAV.filter(item => !item.permissionKey || hasPermission(item.permissionKey));
   const brandTitle = 'GateLink';
 

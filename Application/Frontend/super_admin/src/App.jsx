@@ -21,7 +21,7 @@ const TeamManagement = lazy(() => import('./pages/superadmin/TeamManagement'))
 function ProtectedSuperRoute({ children }) {
   const { user, loading } = useSuperAdminAuth();
 
-  if (loading || user === undefined) return <SkeletonLoader />;
+  if (loading) return <SkeletonLoader />;
 
   if (!user || !user.email) {
     return <Navigate to="/login" replace />;

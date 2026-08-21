@@ -284,6 +284,11 @@ service cloud.firestore {
       allow read, write: if isAuthenticated();
     }
 
+    // Super Admin Team & Staff RBAC Collection
+    match /super_admin_team/{memberId} {
+      allow read, write: if isAuthenticated();
+    }
+
     // Platform Broadcasts Collection
     match /broadcasts/{broadcastId} {
       allow read, write: if isAuthenticated();

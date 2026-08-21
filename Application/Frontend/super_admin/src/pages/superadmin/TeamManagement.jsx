@@ -2,24 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { 
   Users, 
   UserPlus, 
-  Shield, 
   ShieldCheck, 
   ShieldAlert, 
   Key, 
-  Check, 
   X, 
   Search, 
-  Filter, 
   Edit3, 
   Trash2, 
-  Lock, 
-  Unlock, 
   AlertTriangle, 
-  CheckCircle2, 
-  Mail, 
-  Phone, 
-  Sparkles,
-  Info
+  CheckCircle2 
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 import { useSuperAdminAuth, MASTER_SUPER_ADMIN_EMAIL } from '../../context/SuperAdminAuthContext';
@@ -37,7 +28,7 @@ import SeoHead from '../../components/seo/SeoHead';
 export default function TeamManagement() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const { isMasterAdmin, user } = useSuperAdminAuth();
+  const { isMasterAdmin } = useSuperAdminAuth();
 
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);

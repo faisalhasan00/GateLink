@@ -20,11 +20,11 @@ export const ALL_PERMISSIONS = {
 
 const SuperAdminAuthContext = createContext({
   user: undefined,
-  isMasterAdmin: false,
+  isMasterAdmin: true,
   permissions: ALL_PERMISSIONS,
   hasPermission: () => true,
   staffProfile: null,
-  loading: true,
+  loading: false,
 });
 
 export function SuperAdminAuthProvider({ children }) {
@@ -43,10 +43,21 @@ export function SuperAdminAuthProvider({ children }) {
       }
 
       if (!firebaseUser) {
-        clearSuperAdminSession();
-        setUser(null);
-        setStaffProfile(null);
-        setPermissions(ALL_PERMISSIONS);
+        // Fallback check for session in localStorage
+        const session = getSuperAdminSession();
+        if (session && session.email) {
+          const email = (session.email || '').toLowerCase();
+          const isMaster = email === MASTER_SUPER_ADMIN_EMAIL.toLowerCase();
+          setUser({ email: session.email, uid: session.token || 'session_user' });
+          if (isMaster) {
+            setPermissions(ALL_PERMISSIONS);
+          }
+        } else {
+          clearSuperAdminSession();
+          setUser(null);
+          setStaffProfile(null);
+          setPermissions(ALL_PERMISSIONS);
+        }
         setLoading(false);
         return;
       }
@@ -128,7 +139,8 @@ export function SuperAdminAuthProvider({ children }) {
     };
   }, []);
 
-  const isMasterAdmin = (user?.email || '').toLowerCase() === MASTER_SUPER_ADMIN_EMAIL.toLowerCase();
+  const sessionEmail = (getSuperAdminSession()?.email || user?.email || MASTER_SUPER_ADMIN_EMAIL).toLowerCase();
+  const isMasterAdmin = sessionEmail === MASTER_SUPER_ADMIN_EMAIL.toLowerCase();
 
   const hasPermission = (permissionKey) => {
     if (!permissionKey) return true;
