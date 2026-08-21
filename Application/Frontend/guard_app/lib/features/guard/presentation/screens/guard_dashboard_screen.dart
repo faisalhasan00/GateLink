@@ -13,6 +13,10 @@ import '../../../sos/presentation/controllers/alert_controller.dart';
 import '../../../visitor/domain/models/visitor_model.dart';
 import '../../../visitor/presentation/controllers/visitor_controller.dart';
 import '../../../visitor/providers/visitor_providers.dart';
+import '../widgets/guard_dashboard_header.dart';
+import '../widgets/stat_card.dart';
+import '../widgets/quick_action_button.dart';
+import '../widgets/gate_entry_card.dart';
 
 class GuardDashboardScreen extends ConsumerStatefulWidget {
   const GuardDashboardScreen({super.key});
@@ -190,162 +194,15 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
           backgroundColor: AppColors.background,
           body: CustomScrollView(
             slivers: [
-              // Header
+              // Header Widget
               SliverToBoxAdapter(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF0F1923), Color(0xFF1A2A3A)],
-                    ),
-                  ),
-                  child: SafeArea(
-                    bottom: false,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppSpacing.pagePadding,
-                        AppSpacing.md,
-                        AppSpacing.pagePadding,
-                        AppSpacing.xl,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              GestureDetector(
-                                onTap: () => context.go(AppRoutes.profile),
-                                child: const CircleAvatar(
-                                  radius: 24,
-                                  backgroundColor: AppColors.primary,
-                                  child: Icon(Icons.shield_rounded, color: Colors.white, size: 24),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: GestureDetector(
-                                  onTap: () => context.go(AppRoutes.profile),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        guardName,
-                                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Text(
-                                        '$societyName  •  $gateName',
-                                        style: const TextStyle(fontSize: 11, color: Colors.white70, fontWeight: FontWeight.w500),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: _showSosDialog,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.error,
-                                    borderRadius: BorderRadius.circular(AppRadius.full),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppColors.error.withValues(alpha: 0.4),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
-                                  child: const Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(Icons.emergency_rounded, color: Colors.white, size: 14),
-                                      SizedBox(width: 4),
-                                      Text(
-                                        'SOS',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w900,
-                                          color: Colors.white,
-                                          letterSpacing: 0.5,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              IconButton(
-                                onPressed: () async {
-                                  await FirebaseAuth.instance.signOut();
-                                  if (context.mounted) {
-                                    context.go('/login');
-                                  }
-                                },
-                                icon: const Icon(Icons.logout_rounded, color: Colors.white70),
-                                padding: EdgeInsets.zero,
-                                constraints: const BoxConstraints(),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: AppSpacing.xl),
-
-                          // Clock
-                          Row(
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    timeStr,
-                                    style: const TextStyle(
-                                      fontSize: 28,
-                                      fontWeight: FontWeight.w800,
-                                      color: Colors.white,
-                                      fontFeatures: [FontFeature.tabularFigures()],
-                                    ),
-                                  ),
-                                  Text(
-                                    dateStr,
-                                    style: const TextStyle(fontSize: 12, color: Colors.white60),
-                                  ),
-                                ],
-                              ),
-                              const Spacer(),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                decoration: BoxDecoration(
-                                  color: AppColors.successSurface.withValues(alpha: 0.2),
-                                  borderRadius: BorderRadius.circular(AppRadius.full),
-                                  border: Border.all(color: AppColors.success.withValues(alpha: 0.4)),
-                                ),
-                                child: const Row(
-                                  children: [
-                                    Icon(Icons.circle, color: AppColors.success, size: 8),
-                                    SizedBox(width: 6),
-                                    Text(
-                                      'ON DUTY',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppColors.success,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                child: GuardDashboardHeader(
+                  guardName: guardName,
+                  societyName: societyName,
+                  gateName: gateName,
+                  timeStr: timeStr,
+                  dateStr: dateStr,
+                  onSosPressed: _showSosDialog,
                 ),
               ),
 
@@ -355,11 +212,11 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Stat Cards
+                      // Stat Cards Grid
                       Row(
                         children: [
                           Expanded(
-                            child: _StatCard(
+                            child: StatCard(
                               title: 'Inside Now',
                               value: '$insideCount',
                               icon: Icons.meeting_room_rounded,
@@ -369,7 +226,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                           ),
                           const SizedBox(width: AppSpacing.sm),
                           Expanded(
-                            child: _StatCard(
+                            child: StatCard(
                               title: 'Pending',
                               value: '$pendingCount',
                               icon: Icons.hourglass_top_rounded,
@@ -379,7 +236,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                           ),
                           const SizedBox(width: AppSpacing.sm),
                           Expanded(
-                            child: _StatCard(
+                            child: StatCard(
                               title: 'Approved',
                               value: '$approvedCount',
                               icon: Icons.check_circle_rounded,
@@ -393,7 +250,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                       Row(
                         children: [
                           Expanded(
-                            child: _StatCard(
+                            child: StatCard(
                               title: "Today's Exits",
                               value: '$exitedCount',
                               icon: Icons.exit_to_app_rounded,
@@ -403,7 +260,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                           ),
                           const SizedBox(width: AppSpacing.sm),
                           Expanded(
-                            child: _StatCard(
+                            child: StatCard(
                               title: 'Total Today',
                               value: '${visitors.length}',
                               icon: Icons.groups_rounded,
@@ -415,11 +272,11 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                       ),
                       const SizedBox(height: AppSpacing.lg),
 
-                      // Quick Actions
+                      // Quick Action Buttons Grid
                       Row(
                         children: [
                           Expanded(
-                            child: _QuickActionButton(
+                            child: QuickActionButton(
                               icon: Icons.person_add_alt_1_rounded,
                               label: 'Log Entry',
                               color: AppColors.primary,
@@ -428,7 +285,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                           ),
                           const SizedBox(width: AppSpacing.sm),
                           Expanded(
-                            child: _QuickActionButton(
+                            child: QuickActionButton(
                               icon: Icons.qr_code_scanner_rounded,
                               label: 'Scan QR',
                               color: const Color(0xFF1A2A3A),
@@ -437,7 +294,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                           ),
                           const SizedBox(width: AppSpacing.sm),
                           Expanded(
-                            child: _QuickActionButton(
+                            child: QuickActionButton(
                               icon: Icons.directions_car_rounded,
                               label: 'Vehicles',
                               color: AppColors.success,
@@ -471,6 +328,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                       ),
                       const SizedBox(height: AppSpacing.sm),
 
+                      // Category Filter Pills
                       SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
@@ -506,7 +364,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                       ),
                       const SizedBox(height: AppSpacing.md),
 
-                      // Entries List
+                      // Entries Feed List
                       if (filtered.isEmpty)
                         Container(
                           padding: const EdgeInsets.symmetric(vertical: 48),
@@ -526,7 +384,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                         ...filtered.map((visitor) {
                           return Padding(
                             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                            child: _GateEntryCard(
+                            child: GateEntryCard(
                               visitor: visitor,
                               onMarkOut: () => _markCheckedOut(visitor.id),
                               onApprove: () => _approveEntry(visitor.id),
@@ -541,382 +399,6 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
           ),
         );
       },
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  final String title;
-  final String value;
-  final IconData icon;
-  final Color color;
-  final String trend;
-
-  const _StatCard({
-    required this.title,
-    required this.value,
-    required this.icon,
-    required this.color,
-    required this.trend,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            child: Icon(icon, color: color, size: 18),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-          ),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 10, color: AppColors.textSecondary),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            trend,
-            style: TextStyle(fontSize: 9, fontWeight: FontWeight.w600, color: color),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _QuickActionButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _QuickActionButton({
-    required this.icon,
-    required this.label,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          boxShadow: [
-            BoxShadow(
-              color: color.withValues(alpha: 0.3),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: Colors.white, size: 22),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _GateEntryCard extends StatelessWidget {
-  final VisitorModel visitor;
-  final VoidCallback onMarkOut;
-  final VoidCallback onApprove;
-
-  const _GateEntryCard({
-    required this.visitor,
-    required this.onMarkOut,
-    required this.onApprove,
-  });
-
-  Color get _typeColor {
-    switch (visitor.type) {
-      case 'Delivery':
-        return const Color(0xFFEA580C);
-      case 'Cab':
-        return const Color(0xFFCA8A04);
-      case 'Daily Help':
-        return const Color(0xFF059669);
-      default:
-        return const Color(0xFF2563EB);
-    }
-  }
-
-  IconData get _typeIcon {
-    switch (visitor.type) {
-      case 'Delivery':
-        return Icons.local_shipping_rounded;
-      case 'Cab':
-        return Icons.local_taxi_rounded;
-      case 'Daily Help':
-        return Icons.cleaning_services_rounded;
-      default:
-        return Icons.person_rounded;
-    }
-  }
-
-  String get _status => visitor.status;
-
-  @override
-  Widget build(BuildContext context) {
-    final timeStr = visitor.entryTime != null ? DateFormat('hh:mm a').format(visitor.entryTime!) : '--';
-
-    return GestureDetector(
-      onTap: () => context.go('/home/visitors/${visitor.id}'),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(AppRadius.xl),
-          border: Border.all(
-            color: _status == 'pending' ? AppColors.warning : AppColors.border,
-            width: _status == 'pending' ? 1.5 : 1.0,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 44,
-                  height: 44,
-                  decoration: BoxDecoration(
-                    color: _typeColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                  ),
-                  child: Icon(_typeIcon, color: _typeColor, size: 22),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              visitor.name,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          _StatusBadge(status: _status),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'Flat ${visitor.hostFlat} • ${visitor.type}',
-                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
-                      ),
-                      Row(
-                        children: [
-                          const Icon(Icons.access_time_rounded, size: 11, color: AppColors.textSecondary),
-                          const SizedBox(width: 3),
-                          Text(
-                            'Entry: $timeStr',
-                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                          ),
-                          if (visitor.vehicleNumber != null && visitor.vehicleNumber!.isNotEmpty) ...[
-                            const SizedBox(width: 8),
-                            const Icon(Icons.directions_car_rounded, size: 11, color: AppColors.primary),
-                            const SizedBox(width: 2),
-                            Text(
-                              visitor.vehicleNumber!,
-                              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            if (_status == 'inside') ...[
-              const SizedBox(height: AppSpacing.sm),
-              const Divider(height: 1),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: onMarkOut,
-                    icon: const Icon(Icons.logout_rounded, size: 14),
-                    label: const Text('Mark Exit'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.error,
-                      side: const BorderSide(color: AppColors.error),
-                      minimumSize: const Size(100, 32),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ],
-              ),
-            ] else if (_status == 'pending') ...[
-              const SizedBox(height: AppSpacing.sm),
-              const Divider(height: 1),
-              const SizedBox(height: 8),
-              const Row(
-                children: [
-                  Icon(Icons.hourglass_top_rounded, size: 14, color: AppColors.warning),
-                  SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      'Waiting for resident approval...',
-                      style: TextStyle(fontSize: 11, color: AppColors.warning, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                ],
-              ),
-            ] else if (_status == 'approved') ...[
-              const SizedBox(height: AppSpacing.sm),
-              const Divider(height: 1),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.check_circle_rounded, size: 14, color: AppColors.success),
-                  const SizedBox(width: 4),
-                  const Expanded(
-                    child: Text(
-                      'Approved by Resident',
-                      style: TextStyle(fontSize: 11, color: AppColors.success, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: onApprove,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.success,
-                      foregroundColor: Colors.white,
-                      minimumSize: const Size(90, 32),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      textStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
-                    ),
-                    child: const Text('Check In'),
-                  ),
-                ],
-              ),
-            ] else if (_status == 'denied') ...[
-              const SizedBox(height: AppSpacing.sm),
-              const Divider(height: 1),
-              const SizedBox(height: 8),
-              const Row(
-                children: [
-                  Icon(Icons.cancel_rounded, size: 14, color: AppColors.error),
-                  SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      'Entry Denied by Resident',
-                      style: TextStyle(fontSize: 11, color: AppColors.error, fontWeight: FontWeight.w500),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StatusBadge extends StatelessWidget {
-  final String status;
-  const _StatusBadge({required this.status});
-
-  @override
-  Widget build(BuildContext context) {
-    Color bg;
-    Color fg;
-    String label;
-
-    switch (status) {
-      case 'inside':
-        bg = AppColors.successSurface;
-        fg = AppColors.success;
-        label = 'INSIDE';
-        break;
-      case 'left':
-        bg = AppColors.gray100;
-        fg = AppColors.gray600;
-        label = 'EXITED';
-        break;
-      case 'approved':
-        bg = AppColors.successSurface;
-        fg = AppColors.success;
-        label = 'APPROVED';
-        break;
-      case 'denied':
-        bg = AppColors.errorSurface;
-        fg = AppColors.error;
-        label = 'DENIED';
-        break;
-      case 'pending':
-        bg = AppColors.warningSurface;
-        fg = AppColors.warning;
-        label = 'WAITING';
-        break;
-      default:
-        bg = AppColors.gray100;
-        fg = AppColors.gray600;
-        label = status.toUpperCase();
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(AppRadius.full),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700, color: fg, letterSpacing: 0.5),
-      ),
     );
   }
 }
