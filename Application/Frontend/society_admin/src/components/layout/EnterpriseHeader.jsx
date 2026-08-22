@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, Sun, Moon } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { auth } from '../../firebase';
 import SearchBar from './SearchBar';
 import SubscriptionBadge from './SubscriptionBadge';
 import NotificationMenu from './NotificationMenu';
 import ProfileDropdown from './ProfileDropdown';
 import Breadcrumb from './Breadcrumb';
-import { useTheme } from '../../context/ThemeContext';
 import { onAuthStateChanged } from 'firebase/auth';
 import { getSocietyAdminSession, getSuperAdminSession } from '../../services/sessionManager';
 import { societyAdminService } from '../../services/societyAdminService';
@@ -62,8 +61,6 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
     };
   }, [isSuperAdmin]);
 
-  const { theme, toggleTheme } = useTheme();
-
   return (
     <header 
       className="enterprise-header"
@@ -73,7 +70,7 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
         backgroundColor: 'var(--surface-color)',
         borderBottom: '1px solid var(--border-color)',
         display: 'flex',
-        justify: 'space-between',
+        justifyContent: 'space-between',
         alignItems: 'center',
         boxShadow: '0 8px 24px rgba(0,0,0,0.04)',
         position: 'sticky',
@@ -109,27 +106,6 @@ export default function EnterpriseHeader({ title, subtitle, toggleSidebar, isSup
         <div style={{ marginRight: '4px' }}>
           <SubscriptionBadge plan={isSuperAdmin ? 'SUPER ADMIN' : societyInfo.plan} />
         </div>
-
-        <button
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
-          title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} Mode`}
-          style={{
-            background: 'var(--bg-color)',
-            border: '1px solid var(--border-color)',
-            borderRadius: '10px',
-            padding: '8px',
-            cursor: 'pointer',
-            color: 'var(--text-primary)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transition: 'all 0.2s ease',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
-          }}
-        >
-          {theme === 'dark' ? <Sun size={18} color="#F59E0B" /> : <Moon size={18} color="#4F46E5" />}
-        </button>
 
         <NotificationMenu />
 

@@ -1,26 +1,17 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem('societysphere_theme') || 'dark';
-  });
+  const theme = 'light';
 
   useEffect(() => {
-    localStorage.setItem('societysphere_theme', theme);
-    if (theme === 'light') {
-      document.documentElement.classList.add('light-theme');
-      document.documentElement.classList.remove('dark-theme');
-    } else {
-      document.documentElement.classList.add('dark-theme');
-      document.documentElement.classList.remove('light-theme');
-    }
-  }, [theme]);
+    localStorage.setItem('gatelink_theme', 'light');
+    document.documentElement.classList.add('light-theme');
+    document.documentElement.classList.remove('dark-theme');
+  }, []);
 
-  const toggleTheme = () => {
-    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
-  };
+  const toggleTheme = () => {};
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
@@ -32,3 +23,4 @@ export function ThemeProvider({ children }) {
 export function useTheme() {
   return useContext(ThemeContext);
 }
+
