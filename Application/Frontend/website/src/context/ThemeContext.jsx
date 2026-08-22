@@ -1,17 +1,26 @@
-import React, { createContext, useContext, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
-  const theme = 'light';
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('gatelink_theme') || 'light';
+  });
 
   useEffect(() => {
-    localStorage.setItem('gatelink_theme', 'light');
-    document.documentElement.classList.add('light-theme');
-    document.documentElement.classList.remove('dark-theme');
-  }, []);
+    localStorage.setItem('gatelink_theme', theme);
+    if (theme === 'light') {
+      document.documentElement.classList.add('light-theme');
+      document.documentElement.classList.remove('dark-theme');
+    } else {
+      document.documentElement.classList.add('dark-theme');
+      document.documentElement.classList.remove('light-theme');
+    }
+  }, [theme]);
 
-  const toggleTheme = () => {};
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
@@ -23,4 +32,3 @@ export function ThemeProvider({ children }) {
 export function useTheme() {
   return useContext(ThemeContext);
 }
-
