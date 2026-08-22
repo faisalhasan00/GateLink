@@ -20,7 +20,7 @@ export default function HeroVisualMockup({ isDark, isMobileScreen }) {
             height: 'auto',
             display: 'block',
             borderRadius: '16px',
-            boxShadow: isDark ? '0 20px 50px rgba(0,0,0,0.5)' : '0 20px 50px rgba(0,0,0,0.08)'
+            boxShadow: 'none'
           }}
         />
       </div>

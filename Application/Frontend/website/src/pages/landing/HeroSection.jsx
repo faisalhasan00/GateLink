@@ -24,9 +24,9 @@ export default function HeroSection({ onOpenDemo }) {
       style={{
         paddingTop: '80px',
         paddingBottom: '60px',
-        background: isDark ? '#0F172A' : '#FFFFFF',
+        background: '#FFFFFF',
         position: 'relative',
-        borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB'
+        borderBottom: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E2E8F0'
       }}
     >
       <div
