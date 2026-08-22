@@ -84,7 +84,7 @@ export default function TermsPage() {
             </p>
 
             <div style={{ marginTop: '36px', paddingTop: '24px', borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB', fontSize: '13px', color: isDark ? '#94A3B8' : '#666666' }}>
-              For legal inquiries or enterprise agreement terms, contact legal@gatelink.in
+              For legal and corporate inquiries, contact <a href="mailto:admin@gatelink.in" style={{ color: '#0EA5E9', textDecoration: 'none', fontWeight: 700 }}>admin@gatelink.in</a>. For subscription and invoicing queries, contact <a href="mailto:billing@gatelink.in" style={{ color: '#0EA5E9', textDecoration: 'none', fontWeight: 700 }}>billing@gatelink.in</a>.
             </div>
           </div>
 

@@ -78,7 +78,7 @@ export default function PrivacyPolicyPage() {
               <Eye size={18} color="#0EA5E9" /> 3. Data Protection Rights & Erasure
             </h3>
             <p>
-              Under DPDP regulations, flat owners and residents retain full control over their personal profile records. You may request profile data correction, access export logs, or submit erasure requests upon moving out of the housing society by contacting your RWA admin or emailing our Data Officer at <a href="mailto:gatelink.in@gmail.com" style={{ color: '#0EA5E9', textDecoration: 'none', fontWeight: 700 }}>gatelink.in@gmail.com</a>.
+              Under DPDP regulations, flat owners and residents retain full control over their personal profile records. You may request profile data correction, access export logs, or submit erasure requests upon moving out of the housing society by contacting your RWA admin or emailing our Data Officer at <a href="mailto:support@gatelink.in" style={{ color: '#0EA5E9', textDecoration: 'none', fontWeight: 700 }}>support@gatelink.in</a>.
             </p>
 
             <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginTop: '32px', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -90,7 +90,7 @@ export default function PrivacyPolicyPage() {
 
             <div style={{ marginTop: '36px', paddingTop: '24px', borderTop: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #E5E7EB', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: isDark ? '#94A3B8' : '#666666' }}>
               <CheckCircle2 size={16} color="#0EA5E9" />
-              <span>For questions regarding our privacy practices, contact Data Protection Officer at gatelink.in@gmail.com</span>
+              <span>For questions regarding our privacy practices, contact Data Protection Officer at support@gatelink.in</span>
             </div>
           </div>
 
