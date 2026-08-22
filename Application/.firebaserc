@@ -1,6 +1,8 @@
 {
   "projects": {
-    "default": "societysphere-b2538"
+    "default": "societysphere-b2538",
+    "production": "societysphere-b2538",
+    "staging": "gatelink-staging"
   },
   "targets": {
     "societysphere-b2538": {
@@ -16,6 +18,22 @@
         ],
         "api": [
           "gatelink-api"
+        ]
+      }
+    },
+    "gatelink-staging": {
+      "hosting": {
+        "website": [
+          "gatelink-website-staging"
+        ],
+        "society_admin": [
+          "gatelink-app-staging"
+        ],
+        "super_admin": [
+          "gatelink-admin-staging"
+        ],
+        "api": [
+          "gatelink-api-staging"
         ]
       }
     }

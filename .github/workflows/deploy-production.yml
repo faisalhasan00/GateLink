@@ -42,7 +42,7 @@ jobs:
               - '.github/workflows/**'
 
   deploy-website:
-    name: Build & Deploy Website (gatelink-website)
+    name: Build & Deploy Website
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.website == 'true' }}
     runs-on: ubuntu-latest
@@ -62,23 +62,39 @@ jobs:
           cd Application/Frontend/website
           npm install
 
-      - name: Build Website Production Bundle
+      - name: Build Website Bundle (Production vs Staging)
         run: |
           cd Application/Frontend/website
-          npm run build
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            npm run build -- --mode production
+          else
+            npm run build -- --mode staging
+          fi
 
-      - name: Deploy to Firebase Hosting (gatelink-website)
+      - name: Deploy to Firebase Hosting Production (societysphere-b2538)
+        if: ${{ github.ref == 'refs/heads/main' }}
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOCIETYSPHERE_B2538 }}'
           target: website
-          channelId: ${{ github.ref == 'refs/heads/main' && 'live' || 'staging' }}
+          channelId: live
           projectId: societysphere-b2538
           entryPoint: Application
 
+      - name: Deploy to Firebase Hosting Staging (gatelink-staging)
+        if: ${{ github.ref == 'refs/heads/develop' }}
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GATELINK_STAGING }}'
+          target: website
+          channelId: live
+          projectId: gatelink-staging
+          entryPoint: Application
+
   deploy-society-admin:
-    name: Build & Deploy Society Admin (gatelink-app)
+    name: Build & Deploy Society Admin
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.society_admin == 'true' }}
     runs-on: ubuntu-latest
@@ -98,23 +114,39 @@ jobs:
           cd Application/Frontend/society_admin
           npm install
 
-      - name: Build Society Admin Production Bundle
+      - name: Build Society Admin Bundle (Production vs Staging)
         run: |
           cd Application/Frontend/society_admin
-          npm run build
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            npm run build -- --mode production
+          else
+            npm run build -- --mode staging
+          fi
 
-      - name: Deploy to Firebase Hosting (gatelink-app)
+      - name: Deploy to Firebase Hosting Production (societysphere-b2538)
+        if: ${{ github.ref == 'refs/heads/main' }}
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOCIETYSPHERE_B2538 }}'
           target: society_admin
-          channelId: ${{ github.ref == 'refs/heads/main' && 'live' || 'staging' }}
+          channelId: live
           projectId: societysphere-b2538
           entryPoint: Application
 
+      - name: Deploy to Firebase Hosting Staging (gatelink-staging)
+        if: ${{ github.ref == 'refs/heads/develop' }}
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GATELINK_STAGING }}'
+          target: society_admin
+          channelId: live
+          projectId: gatelink-staging
+          entryPoint: Application
+
   deploy-super-admin:
-    name: Build & Deploy Super Admin (gatelink-admin)
+    name: Build & Deploy Super Admin
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.super_admin == 'true' }}
     runs-on: ubuntu-latest
@@ -134,23 +166,39 @@ jobs:
           cd Application/Frontend/super_admin
           npm install
 
-      - name: Build Super Admin Production Bundle
+      - name: Build Super Admin Bundle (Production vs Staging)
         run: |
           cd Application/Frontend/super_admin
-          npm run build
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then
+            npm run build -- --mode production
+          else
+            npm run build -- --mode staging
+          fi
 
-      - name: Deploy to Firebase Hosting (gatelink-admin)
+      - name: Deploy to Firebase Hosting Production (societysphere-b2538)
+        if: ${{ github.ref == 'refs/heads/main' }}
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOCIETYSPHERE_B2538 }}'
           target: super_admin
-          channelId: ${{ github.ref == 'refs/heads/main' && 'live' || 'staging' }}
+          channelId: live
           projectId: societysphere-b2538
           entryPoint: Application
 
+      - name: Deploy to Firebase Hosting Staging (gatelink-staging)
+        if: ${{ github.ref == 'refs/heads/develop' }}
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GATELINK_STAGING }}'
+          target: super_admin
+          channelId: live
+          projectId: gatelink-staging
+          entryPoint: Application
+
   deploy-api:
-    name: Deploy API Gateway (gatelink-api)
+    name: Deploy API Gateway
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.api == 'true' }}
     runs-on: ubuntu-latest
@@ -158,12 +206,24 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Deploy to Firebase Hosting (gatelink-api)
+      - name: Deploy to Firebase Hosting Production (societysphere-b2538)
+        if: ${{ github.ref == 'refs/heads/main' }}
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOCIETYSPHERE_B2538 }}'
           target: api
-          channelId: ${{ github.ref == 'refs/heads/main' && 'live' || 'staging' }}
+          channelId: live
           projectId: societysphere-b2538
+          entryPoint: Application
+
+      - name: Deploy to Firebase Hosting Staging (gatelink-staging)
+        if: ${{ github.ref == 'refs/heads/develop' }}
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GATELINK_STAGING }}'
+          target: api
+          channelId: live
+          projectId: gatelink-staging
           entryPoint: Application
