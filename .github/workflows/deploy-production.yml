@@ -27,18 +27,22 @@ jobs:
             website:
               - 'Application/Frontend/website/**'
               - 'Application/firebase.json'
+              - 'Application/.firebaserc'
               - '.github/workflows/**'
             society_admin:
               - 'Application/Frontend/society_admin/**'
               - 'Application/firebase.json'
+              - 'Application/.firebaserc'
               - '.github/workflows/**'
             super_admin:
               - 'Application/Frontend/super_admin/**'
               - 'Application/firebase.json'
+              - 'Application/.firebaserc'
               - '.github/workflows/**'
             api:
               - 'Application/Backend/**'
               - 'Application/firebase.json'
+              - 'Application/.firebaserc'
               - '.github/workflows/**'
 
   deploy-website:
