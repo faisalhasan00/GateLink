@@ -15,13 +15,24 @@ export function useNavbar(onOpenDemo) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const societyAdminUrl =
-    import.meta.env.VITE_SOCIETY_ADMIN_URL ||
-    (typeof window !== 'undefined' &&
-    (window.location.hostname === 'localhost' ||
-      window.location.hostname === '127.0.0.1')
-      ? 'http://localhost:5174/login'
-      : 'https://society-admin-liard.vercel.app/login');
+  const getSocietyAdminLoginUrl = () => {
+    if (import.meta.env.VITE_SOCIETY_ADMIN_URL) {
+      const base = import.meta.env.VITE_SOCIETY_ADMIN_URL;
+      return base.endsWith('/login') ? base : `${base}/login`;
+    }
+    if (typeof window !== 'undefined') {
+      const host = window.location.hostname;
+      if (host === 'localhost' || host === '127.0.0.1') {
+        return 'http://localhost:5174/login';
+      }
+      if (host.includes('web.app') || host.includes('firebaseapp.com')) {
+        return 'https://gatelink-app-staging.web.app/login';
+      }
+    }
+    return 'https://app.gatelink.in/login';
+  };
+
+  const societyAdminUrl = getSocietyAdminLoginUrl();
 
   useEffect(() => {
     const handleScroll = () => {

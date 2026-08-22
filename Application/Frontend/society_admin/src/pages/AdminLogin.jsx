@@ -13,10 +13,17 @@ export default function AdminLogin() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  const websiteUrl = import.meta.env.VITE_WEBSITE_URL || 
-    (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
-      ? 'http://localhost:5173'
-      : 'https://society-sphere-two.vercel.app');
+  const getWebsiteUrl = () => {
+    if (import.meta.env.VITE_WEBSITE_URL) return import.meta.env.VITE_WEBSITE_URL;
+    if (typeof window !== 'undefined') {
+      const host = window.location.hostname;
+      if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:5173';
+      if (host.includes('web.app') || host.includes('firebaseapp.com')) return 'https://gatelink-website-staging.web.app';
+    }
+    return 'https://gatelink.in';
+  };
+
+  const websiteUrl = getWebsiteUrl();
   const websiteContactUrl = `${websiteUrl}/contact`;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
