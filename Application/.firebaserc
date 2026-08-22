@@ -24,16 +24,16 @@
     "gatelink-staging": {
       "hosting": {
         "website": [
-          "gatelink-website-staging"
+          "gatelink-staging"
         ],
         "society_admin": [
-          "gatelink-app-staging"
+          "gatelink-staging"
         ],
         "super_admin": [
-          "gatelink-admin-staging"
+          "gatelink-staging"
         ],
         "api": [
-          "gatelink-api-staging"
+          "gatelink-staging"
         ]
       }
     }
