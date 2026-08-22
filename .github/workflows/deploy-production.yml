@@ -14,6 +14,7 @@ jobs:
       website: ${{ steps.filter.outputs.website }}
       society_admin: ${{ steps.filter.outputs.society_admin }}
       super_admin: ${{ steps.filter.outputs.super_admin }}
+      api: ${{ steps.filter.outputs.api }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -33,6 +34,10 @@ jobs:
               - '.github/workflows/**'
             super_admin:
               - 'Application/Frontend/super_admin/**'
+              - 'Application/firebase.json'
+              - '.github/workflows/**'
+            api:
+              - 'Application/Backend/**'
               - 'Application/firebase.json'
               - '.github/workflows/**'
 
@@ -140,6 +145,25 @@ jobs:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOCIETYSPHERE_B2538 }}'
           target: super_admin
+          channelId: ${{ github.ref == 'refs/heads/main' && 'live' || 'staging' }}
+          projectId: societysphere-b2538
+          entryPoint: Application
+
+  deploy-api:
+    name: Deploy API Gateway (gatelink-api)
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.api == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Firebase Hosting (gatelink-api)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOCIETYSPHERE_B2538 }}'
+          target: api
           channelId: ${{ github.ref == 'refs/heads/main' && 'live' || 'staging' }}
           projectId: societysphere-b2538
           entryPoint: Application
