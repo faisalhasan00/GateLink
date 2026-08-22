@@ -61,6 +61,21 @@ android {
             signingConfig = signingConfigs.getByName("release")
         }
     }
+
+    flavorDimensions += "environment"
+    productFlavors {
+        create("production") {
+            dimension = "environment"
+            applicationId = "in.gatelink.guard"
+            resValue("string", "app_name", "Gatekeeper")
+        }
+        create("staging") {
+            dimension = "environment"
+            applicationId = "in.gatelink.guard.staging"
+            applicationIdSuffix = ".staging"
+            resValue("string", "app_name", "Gatekeeper Staging")
+        }
+    }
 }
 
 kotlin {
