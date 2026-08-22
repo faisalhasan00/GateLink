@@ -151,9 +151,9 @@ export default function HeroQuickEnrollForm({ isDark, isMobileScreen, onOpenDemo
           type="submit"
           disabled={submitting}
           style={{
-            padding: '12px 18px',
+            padding: '12px 22px',
             borderRadius: '12px',
-            background: 'linear-gradient(135deg, #1E3A8A 0%, #0EA5E9 100%)',
+            background: '#1E3A8A',
             color: '#FFFFFF',
             border: 'none',
             fontWeight: 800,
@@ -163,8 +163,11 @@ export default function HeroQuickEnrollForm({ isDark, isMobileScreen, onOpenDemo
             alignItems: 'center',
             justifyContent: 'center',
             gap: '8px',
-            boxShadow: '0 4px 14px rgba(14, 165, 233, 0.3)'
+            boxShadow: '0 4px 14px rgba(30, 58, 138, 0.35)',
+            transition: 'all 0.2s ease-in-out'
           }}
+          onMouseEnter={(e) => e.currentTarget.style.background = '#172554'}
+          onMouseLeave={(e) => e.currentTarget.style.background = '#1E3A8A'}
         >
           <span>{submitting ? 'Submitting...' : 'Enrol Your Society'}</span>
           <ArrowRight size={16} />
