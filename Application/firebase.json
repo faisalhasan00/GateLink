@@ -1,10 +1,10 @@
 {
   "firestore": {
-    "rules": "firestore.rules"
+    "rules": "Backend/firestore.rules"
   },
   "functions": [
     {
-      "source": "functions",
+      "source": "Backend/functions",
       "codebase": "default",
       "ignore": [
         "node_modules",
@@ -19,7 +19,7 @@
   "hosting": [
     {
       "target": "website",
-      "public": "../Frontend/website/dist",
+      "public": "Frontend/website/dist",
       "ignore": [
         "firebase.json",
         "**/.*",
@@ -34,7 +34,7 @@
     },
     {
       "target": "society_admin",
-      "public": "../Frontend/society_admin/dist",
+      "public": "Frontend/society_admin/dist",
       "ignore": [
         "firebase.json",
         "**/.*",
@@ -49,7 +49,7 @@
     },
     {
       "target": "super_admin",
-      "public": "../Frontend/super_admin/dist",
+      "public": "Frontend/super_admin/dist",
       "ignore": [
         "firebase.json",
         "**/.*",
@@ -62,14 +62,5 @@
         }
       ]
     }
-  ],
-  "emulators": {
-    "firestore": {
-      "port": 8080
-    },
-    "ui": {
-      "enabled": false
-    }
-  }
+  ]
 }
-
