@@ -1,0 +1,20 @@
+{
+  "projects": {
+    "default": "societysphere-b2538"
+  },
+  "targets": {
+    "societysphere-b2538": {
+      "hosting": {
+        "website": [
+          "gatelink-website"
+        ],
+        "society_admin": [
+          "gatelink-app"
+        ],
+        "super_admin": [
+          "gatelink-admin"
+        ]
+      }
+    }
+  }
+}
