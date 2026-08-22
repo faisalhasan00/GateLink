@@ -61,6 +61,56 @@
           "destination": "/index.html"
         }
       ]
+    },
+    {
+      "target": "api",
+      "public": "Backend/api_public",
+      "ignore": [
+        "firebase.json",
+        "**/.*"
+      ],
+      "rewrites": [
+        {
+          "source": "/createCashfreeOrder",
+          "function": "createCashfreeOrder"
+        },
+        {
+          "source": "/verifyCashfreePaymentStatus",
+          "function": "verifyCashfreePaymentStatus"
+        },
+        {
+          "source": "/cashfreeWebhook",
+          "function": "cashfreeWebhook"
+        },
+        {
+          "source": "/approveOfflinePayment",
+          "function": "approveOfflinePayment"
+        },
+        {
+          "source": "/rejectOfflinePayment",
+          "function": "rejectOfflinePayment"
+        },
+        {
+          "source": "/api/createCashfreeOrder",
+          "function": "createCashfreeOrder"
+        },
+        {
+          "source": "/api/verifyCashfreePaymentStatus",
+          "function": "verifyCashfreePaymentStatus"
+        },
+        {
+          "source": "/api/cashfreeWebhook",
+          "function": "cashfreeWebhook"
+        },
+        {
+          "source": "/api/approveOfflinePayment",
+          "function": "approveOfflinePayment"
+        },
+        {
+          "source": "/api/rejectOfflinePayment",
+          "function": "rejectOfflinePayment"
+        }
+      ]
     }
   ]
 }

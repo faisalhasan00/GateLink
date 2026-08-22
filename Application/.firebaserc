@@ -13,6 +13,9 @@
         ],
         "super_admin": [
           "gatelink-admin"
+        ],
+        "api": [
+          "gatelink-api"
         ]
       }
     }
