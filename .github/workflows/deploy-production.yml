@@ -1,0 +1,145 @@
+name: GateLink Production & Staging Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  detect-changes:
+    name: Detect Changed Applications
+    runs-on: ubuntu-latest
+    outputs:
+      website: ${{ steps.filter.outputs.website }}
+      society_admin: ${{ steps.filter.outputs.society_admin }}
+      super_admin: ${{ steps.filter.outputs.super_admin }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check Changed Paths
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            website:
+              - 'Application/Frontend/website/**'
+              - 'Application/firebase.json'
+              - '.github/workflows/**'
+            society_admin:
+              - 'Application/Frontend/society_admin/**'
+              - 'Application/firebase.json'
+              - '.github/workflows/**'
+            super_admin:
+              - 'Application/Frontend/super_admin/**'
+              - 'Application/firebase.json'
+              - '.github/workflows/**'
+
+  deploy-website:
+    name: Build & Deploy Website (gatelink-website)
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.website == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'Application/Frontend/website/package-lock.json'
+
+      - name: Install Dependencies
+        run: |
+          cd Application/Frontend/website
+          npm install
+
+      - name: Build Website Production Bundle
+        run: |
+          cd Application/Frontend/website
+          npm run build
+
+      - name: Deploy to Firebase Hosting (gatelink-website)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOCIETYSPHERE_B2538 }}'
+          target: website
+          channelId: ${{ github.ref == 'refs/heads/main' && 'live' || 'staging' }}
+          projectId: societysphere-b2538
+          entryPoint: Application
+
+  deploy-society-admin:
+    name: Build & Deploy Society Admin (gatelink-app)
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.society_admin == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'Application/Frontend/society_admin/package-lock.json'
+
+      - name: Install Dependencies
+        run: |
+          cd Application/Frontend/society_admin
+          npm install
+
+      - name: Build Society Admin Production Bundle
+        run: |
+          cd Application/Frontend/society_admin
+          npm run build
+
+      - name: Deploy to Firebase Hosting (gatelink-app)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOCIETYSPHERE_B2538 }}'
+          target: society_admin
+          channelId: ${{ github.ref == 'refs/heads/main' && 'live' || 'staging' }}
+          projectId: societysphere-b2538
+          entryPoint: Application
+
+  deploy-super-admin:
+    name: Build & Deploy Super Admin (gatelink-admin)
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.super_admin == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'Application/Frontend/super_admin/package-lock.json'
+
+      - name: Install Dependencies
+        run: |
+          cd Application/Frontend/super_admin
+          npm install
+
+      - name: Build Super Admin Production Bundle
+        run: |
+          cd Application/Frontend/super_admin
+          npm run build
+
+      - name: Deploy to Firebase Hosting (gatelink-admin)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: '${{ secrets.GITHUB_TOKEN }}'
+          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOCIETYSPHERE_B2538 }}'
+          target: super_admin
+          channelId: ${{ github.ref == 'refs/heads/main' && 'live' || 'staging' }}
+          projectId: societysphere-b2538
+          entryPoint: Application
