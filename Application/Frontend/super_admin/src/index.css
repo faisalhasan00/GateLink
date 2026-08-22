@@ -52,6 +52,27 @@
   --lp-accent-purple: #7C3AED;
 }
 
+/* Dark Mode Overrides */
+html.dark-theme {
+  --lp-bg-dark: #0F172A;
+  --lp-surface-dark: #1E293B;
+  --lp-card-dark: #1E293B;
+  --lp-border-dark: rgba(255, 255, 255, 0.12);
+  --lp-text-heading: #FFFFFF;
+  --lp-text-body: #94A3B8;
+  --bg-color: #0F172A;
+  --surface-color: #1E293B;
+  --border-color: rgba(255, 255, 255, 0.12);
+  --text-primary: #FFFFFF;
+  --text-secondary: #94A3B8;
+  --primary-light: rgba(37, 99, 235, 0.15);
+  --secondary-light: rgba(5, 150, 105, 0.15);
+  --warning-light: rgba(217, 119, 6, 0.15);
+  --danger-light: rgba(220, 38, 38, 0.15);
+  --header-bg: #1E293B;
+  --search-bg: #0F172A;
+}
+
 * {
   margin: 0;
   padding: 0;
