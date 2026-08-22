@@ -23,6 +23,9 @@ const DocsPage = lazy(() => import('./pages/landing/DocsPage'))
 const PrivacyPolicyPage = lazy(() => import('./pages/landing/PrivacyPolicyPage'))
 const TermsPage = lazy(() => import('./pages/landing/TermsPage'))
 const CookiePolicyPage = lazy(() => import('./pages/landing/CookiePolicyPage'))
+const RefundPolicyPage = lazy(() => import('./pages/landing/RefundPolicyPage'))
+const DataProcessingPage = lazy(() => import('./pages/landing/DataProcessingPage'))
+const GrievancePolicyPage = lazy(() => import('./pages/landing/GrievancePolicyPage'))
 const PartnersPage = lazy(() => import('./pages/landing/PartnersPage'))
 const GateSelfEntryPage = lazy(() => import('./pages/gate/GateSelfEntryPage'))
 
@@ -49,7 +52,7 @@ export default function App() {
             <Route path="/refer" element={<PartnersPage />} />
             <Route path="/gate" element={<GateSelfEntryPage />} />
 
-            {/* SEO Knowledge Base & Legal Pages */}
+            {/* SEO Knowledge Base & Legal Trust Pages */}
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/help" element={<HelpCenterPage />} />
@@ -57,6 +60,12 @@ export default function App() {
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/cookies" element={<CookiePolicyPage />} />
+            <Route path="/refund-policy" element={<RefundPolicyPage />} />
+            <Route path="/refunds" element={<RefundPolicyPage />} />
+            <Route path="/data-processing" element={<DataProcessingPage />} />
+            <Route path="/dpa" element={<DataProcessingPage />} />
+            <Route path="/grievance" element={<GrievancePolicyPage />} />
+            <Route path="/grievance-redressal" element={<GrievancePolicyPage />} />
           </Routes>
         </Suspense>
 

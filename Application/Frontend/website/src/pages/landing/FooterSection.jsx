@@ -91,15 +91,15 @@ export default function FooterSection() {
             </ul>
           </div>
 
-          {/* Col 4: Knowledge Hub */}
+          {/* Col 4: Knowledge Hub & Legal Trust */}
           <div>
-            <h4 style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 800, marginBottom: '14px', letterSpacing: '0.5px' }}>RESOURCES</h4>
+            <h4 style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 800, marginBottom: '14px', letterSpacing: '0.5px' }}>LEGAL & TRUST</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '13px' }}>
-              <li><Link to="/blog" style={{ color: '#94A3B8', textDecoration: 'none' }}>Society Insights Blog</Link></li>
-              <li><Link to="/faq" style={{ color: '#94A3B8', textDecoration: 'none' }}>Help & FAQ</Link></li>
-              <li><Link to="/docs" style={{ color: '#94A3B8', textDecoration: 'none' }}>API & Audit Docs</Link></li>
-              <li><Link to="/privacy" style={{ color: '#94A3B8', textDecoration: 'none' }}>Privacy Policy</Link></li>
-              <li><Link to="/terms" style={{ color: '#94A3B8', textDecoration: 'none' }}>Terms of Service</Link></li>
+              <li><Link to="/privacy" style={{ color: '#94A3B8', textDecoration: 'none' }}>Privacy Policy (DPDP)</Link></li>
+              <li><Link to="/terms" style={{ color: '#94A3B8', textDecoration: 'none' }}>Terms & Conditions</Link></li>
+              <li><Link to="/refund-policy" style={{ color: '#94A3B8', textDecoration: 'none' }}>Refund & Cancellation</Link></li>
+              <li><Link to="/data-processing" style={{ color: '#94A3B8', textDecoration: 'none' }}>Data Processing Terms</Link></li>
+              <li><Link to="/grievance" style={{ color: '#94A3B8', textDecoration: 'none' }}>Grievance Officer</Link></li>
             </ul>
           </div>
 
@@ -134,13 +134,15 @@ export default function FooterSection() {
           color: '#64748B'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-            <span>© {new Date().getFullYear()} GateLink. All rights reserved.</span>
+            <span>© {new Date().getFullYear()} GateLink Technologies Private Limited. All rights reserved.</span>
             <LiveVisitorCounter />
           </div>
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
             <Link to="/privacy" style={{ color: '#64748B', textDecoration: 'none' }}>Privacy Policy</Link>
-            <Link to="/terms" style={{ color: '#64748B', textDecoration: 'none' }}>Terms of Service</Link>
-            <Link to="/cookies" style={{ color: '#64748B', textDecoration: 'none' }}>Cookie Preferences</Link>
+            <Link to="/terms" style={{ color: '#64748B', textDecoration: 'none' }}>Terms</Link>
+            <Link to="/refund-policy" style={{ color: '#64748B', textDecoration: 'none' }}>Refunds</Link>
+            <Link to="/data-processing" style={{ color: '#64748B', textDecoration: 'none' }}>DPA</Link>
+            <Link to="/grievance" style={{ color: '#64748B', textDecoration: 'none' }}>Grievance Officer</Link>
           </div>
         </div>
 
