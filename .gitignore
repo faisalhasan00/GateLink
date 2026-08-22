@@ -1,7 +1,7 @@
 # Dependencies & Environment
 node_modules/
-.env
-.env.local
+.env*
+!.env.staging.template
 build/
 dist/
 .firebase/
