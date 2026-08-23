@@ -288,3 +288,30 @@ jobs:
           channelId: live
           projectId: gatelink-staging
           entryPoint: Application
+
+  deploy-firestore-rules:
+    name: Deploy Firestore Security Rules
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.api == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy Rules to Production (societysphere-b2538)
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only firestore:rules --project societysphere-b2538
+        env:
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOCIETYSPHERE_B2538 }}
+          PROJECT_PATH: Application
+
+      - name: Deploy Rules to Staging (gatelink-staging)
+        if: ${{ github.ref == 'refs/heads/develop' }}
+        uses: w9jds/firebase-action@master
+        with:
+          args: deploy --only firestore:rules --project gatelink-staging
+        env:
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GATELINK_STAGING }}
+          PROJECT_PATH: Application
