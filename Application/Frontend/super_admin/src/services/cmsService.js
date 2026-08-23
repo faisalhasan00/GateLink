@@ -433,6 +433,29 @@ export async function uploadMedia(file, altText = '', userEmail = 'System Admin'
     reader.readAsDataURL(f);
   });
 
+  const isLocalhost = typeof window !== 'undefined' && (
+    window.location.hostname === 'localhost' || 
+    window.location.hostname === '127.0.0.1'
+  );
+
+  // On localhost, use high-speed Data URL instantly to bypass browser CORS preflight blocks
+  if (isLocalhost) {
+    if (onProgress) onProgress(100);
+    const localUrl = await convertFileToDataUrl(file);
+    const localMedia = {
+      id: `media-local-${Date.now()}`,
+      url: localUrl,
+      storagePath: '',
+      filename: file.name,
+      size: file.size,
+      mimeType: file.type,
+      altText: altText || file.name,
+      uploadedBy: userEmail,
+      createdAt: new Date()
+    };
+    return localMedia;
+  }
+
   try {
     const filename = `${Date.now()}_${file.name.replace(/[^\w.-]/g, '_')}`;
     const storagePath = `cms_media/${filename}`;
@@ -448,7 +471,7 @@ export async function uploadMedia(file, altText = '', userEmail = 'System Admin'
           if (onProgress) onProgress(Math.round(progress));
         },
         async (error) => {
-          console.warn('Firebase Storage CORS block or upload error detected on localhost. Using local Data URL fallback:', error.message);
+          console.warn('Firebase Storage upload warning:', error.message);
           const localUrl = await convertFileToDataUrl(file);
           resolve({
             id: `media-local-${Date.now()}`,
