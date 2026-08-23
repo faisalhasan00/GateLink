@@ -104,18 +104,22 @@ export default function AdminLogin() {
 
       navigate('/');
     } catch (err) {
-      let msg = err.message || 'Authentication failed.';
-      if (err.code === 'auth/operation-not-allowed') {
+      const errStr = `${err.code || ''} ${err.message || ''}`.toLowerCase();
+      let msg = 'Invalid email or password. Please verify your credentials.';
+      if (errStr.includes('operation-not-allowed')) {
         msg = 'Email/Password sign-in is disabled in Firebase Console.';
       } else if (
-        err.code === 'auth/invalid-credential' || 
-        err.code === 'auth/wrong-password' || 
-        err.code === 'auth/user-not-found' ||
-        err.code === 'auth/invalid-email'
+        errStr.includes('invalid-credential') || 
+        errStr.includes('wrong-password') || 
+        errStr.includes('user-not-found') ||
+        errStr.includes('invalid-email')
       ) {
-        msg = 'Invalid email or password. Please verify your credentials.';
-      } else {
-        msg = msg.replace('Firebase: ', '').replace(/\(.*\)\.?/, '').trim();
+        msg = 'Invalid email or password. Please check your password or use "Forgot / Reset Password?".';
+      } else if (err.message) {
+        const cleaned = err.message.replace(/^Firebase:\s*/i, '').trim();
+        if (cleaned && cleaned !== 'Error') {
+          msg = cleaned;
+        }
       }
       setError(msg);
     } finally {
