@@ -72,7 +72,7 @@ jobs:
           cd Application/Frontend/website
           npm run build
         env:
-          VITE_FIREBASE_API_KEY: "AIzaSyAEqP0hDR5zhpflZ7zTgwk5RxSulpyEwtA"
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY_PROD || 'AIzaSyAEqP0hDR5zhpflZ7zTgwk5RxSulpyEwtA' }}
           VITE_FIREBASE_AUTH_DOMAIN: "societysphere-b2538.firebaseapp.com"
           VITE_FIREBASE_PROJECT_ID: "societysphere-b2538"
           VITE_FIREBASE_STORAGE_BUCKET: "societysphere-b2538.firebasestorage.app"
@@ -86,7 +86,7 @@ jobs:
           cd Application/Frontend/website
           npm run build:staging
         env:
-          VITE_FIREBASE_API_KEY: "AIzaSyCkIVqNPPGVR-HY8wsU-Ik8F79ZkFEocbc"
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY_STAGING || 'AIzaSyCkIVqNPPGVR-HY8wsU-Ik8F79ZkFEocbc' }}
           VITE_FIREBASE_AUTH_DOMAIN: "gatelink-staging.firebaseapp.com"
           VITE_FIREBASE_PROJECT_ID: "gatelink-staging"
           VITE_FIREBASE_STORAGE_BUCKET: "gatelink-staging.firebasestorage.app"
@@ -143,7 +143,7 @@ jobs:
           cd Application/Frontend/society_admin
           npm run build
         env:
-          VITE_FIREBASE_API_KEY: "AIzaSyAEqP0hDR5zhpflZ7zTgwk5RxSulpyEwtA"
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY_PROD || 'AIzaSyAEqP0hDR5zhpflZ7zTgwk5RxSulpyEwtA' }}
           VITE_FIREBASE_AUTH_DOMAIN: "societysphere-b2538.firebaseapp.com"
           VITE_FIREBASE_PROJECT_ID: "societysphere-b2538"
           VITE_FIREBASE_STORAGE_BUCKET: "societysphere-b2538.firebasestorage.app"
@@ -157,7 +157,7 @@ jobs:
           cd Application/Frontend/society_admin
           npm run build:staging
         env:
-          VITE_FIREBASE_API_KEY: "AIzaSyCkIVqNPPGVR-HY8wsU-Ik8F79ZkFEocbc"
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY_STAGING || 'AIzaSyCkIVqNPPGVR-HY8wsU-Ik8F79ZkFEocbc' }}
           VITE_FIREBASE_AUTH_DOMAIN: "gatelink-staging.firebaseapp.com"
           VITE_FIREBASE_PROJECT_ID: "gatelink-staging"
           VITE_FIREBASE_STORAGE_BUCKET: "gatelink-staging.firebasestorage.app"
@@ -214,7 +214,7 @@ jobs:
           cd Application/Frontend/super_admin
           npm run build
         env:
-          VITE_FIREBASE_API_KEY: "AIzaSyAEqP0hDR5zhpflZ7zTgwk5RxSulpyEwtA"
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY_PROD || 'AIzaSyAEqP0hDR5zhpflZ7zTgwk5RxSulpyEwtA' }}
           VITE_FIREBASE_AUTH_DOMAIN: "societysphere-b2538.firebaseapp.com"
           VITE_FIREBASE_PROJECT_ID: "societysphere-b2538"
           VITE_FIREBASE_STORAGE_BUCKET: "societysphere-b2538.firebasestorage.app"
@@ -228,7 +228,7 @@ jobs:
           cd Application/Frontend/super_admin
           npm run build:staging
         env:
-          VITE_FIREBASE_API_KEY: "AIzaSyCkIVqNPPGVR-HY8wsU-Ik8F79ZkFEocbc"
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY_STAGING || 'AIzaSyCkIVqNPPGVR-HY8wsU-Ik8F79ZkFEocbc' }}
           VITE_FIREBASE_AUTH_DOMAIN: "gatelink-staging.firebaseapp.com"
           VITE_FIREBASE_PROJECT_ID: "gatelink-staging"
           VITE_FIREBASE_STORAGE_BUCKET: "gatelink-staging.firebasestorage.app"
