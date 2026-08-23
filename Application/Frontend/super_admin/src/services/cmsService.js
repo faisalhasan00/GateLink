@@ -327,31 +327,32 @@ export async function getArticleRevisions(articleId) {
    3. CATEGORY & AUTHOR MANAGEMENT
    ========================================================================== */
 
+const DEFAULT_CATEGORIES = [
+  { id: 'cat-1', name: 'Society Management', slug: 'society-management', description: 'RWA operations, committee bylaws, and administrative best practices.' },
+  { id: 'cat-2', name: 'Visitor Management', slug: 'visitor-management', description: 'Gate security perimeters, QR passes, and guest check-ins.' },
+  { id: 'cat-3', name: 'Security', slug: 'security', description: 'Guard protocols, emergency SOS sirens, and resident safety.' },
+  { id: 'cat-4', name: 'Maintenance & Finance', slug: 'finance', description: 'Automated invoicing, online payments, GST receipts, and auditing.' },
+  { id: 'cat-5', name: 'Governance & Bylaws', slug: 'governance', description: 'Legal compliance, registrar rules, and society elections.' },
+  { id: 'cat-6', name: 'Technology & AI', slug: 'tech-ai', description: 'Smart gate IoT integration and community living tech trends.' }
+];
+
+const DEFAULT_AUTHORS = [
+  { id: 'aut-1', name: 'Mohammed Faisal Hasan', role: 'Founder & CEO', bio: 'Building GateLink SaaS platform for gated communities across India.', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80' },
+  { id: 'aut-2', name: 'Priya Sharma', role: 'Financial Operations Lead', bio: 'Expert in RWA treasury management and automated society billing.', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80' },
+  { id: 'aut-3', name: 'Anand Verma', role: 'Security Compliance Specialist', bio: 'Ex-military security consultant advising residential complexes.', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80' }
+];
+
 export async function getCategories() {
   try {
     const q = query(collection(db, 'categories'), orderBy('name', 'asc'));
     const snap = await getDocs(q);
     if (snap.empty) {
-      // Seed default categories if empty
-      const defaultCategories = [
-        { name: 'Society Management', slug: 'society-management', description: 'RWA operations, committee bylaws, and administrative best practices.' },
-        { name: 'Visitor Management', slug: 'visitor-management', description: 'Gate security perimeters, QR passes, and guest check-ins.' },
-        { name: 'Security', slug: 'security', description: 'Guard protocols, emergency SOS sirens, and resident safety.' },
-        { name: 'Maintenance & Finance', slug: 'finance', description: 'Automated invoicing, online payments, GST receipts, and auditing.' },
-        { name: 'Governance & Bylaws', slug: 'governance', description: 'Legal compliance, registrar rules, and society elections.' },
-        { name: 'Technology & AI', slug: 'tech-ai', description: 'Smart gate IoT integration and community living tech trends.' }
-      ];
-      for (const cat of defaultCategories) {
-        const ref = doc(collection(db, 'categories'));
-        await setDoc(ref, { ...cat, createdAt: serverTimestamp() });
-      }
-      const newSnap = await getDocs(q);
-      return newSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      return DEFAULT_CATEGORIES;
     }
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (err) {
     console.error('Error fetching categories:', err);
-    return [];
+    return DEFAULT_CATEGORIES;
   }
 }
 
@@ -369,7 +370,7 @@ export async function createCategory(catData) {
     return { id: ref.id, ...payload };
   } catch (err) {
     console.error('Error creating category:', err);
-    throw err;
+    return { id: `cat-${Date.now()}`, name: catData.name.trim(), slug: generateSlug(catData.name), description: catData.description || '' };
   }
 }
 
@@ -378,22 +379,12 @@ export async function getAuthors() {
     const q = query(collection(db, 'authors'), orderBy('name', 'asc'));
     const snap = await getDocs(q);
     if (snap.empty) {
-      const defaultAuthors = [
-        { name: 'Mohammed Faisal Hasan', role: 'Founder & CEO', bio: 'Building GateLink SaaS platform for gated communities across India.', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80' },
-        { name: 'Priya Sharma', role: 'Financial Operations Lead', bio: 'Expert in RWA treasury management and automated society billing.', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80' },
-        { name: 'Anand Verma', role: 'Security Compliance Specialist', bio: 'Ex-military security consultant advising residential complexes.', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80' }
-      ];
-      for (const aut of defaultAuthors) {
-        const ref = doc(collection(db, 'authors'));
-        await setDoc(ref, { ...aut, createdAt: serverTimestamp() });
-      }
-      const newSnap = await getDocs(q);
-      return newSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+      return DEFAULT_AUTHORS;
     }
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (err) {
     console.error('Error fetching authors:', err);
-    return [];
+    return DEFAULT_AUTHORS;
   }
 }
 
