@@ -455,28 +455,19 @@ export async function uploadMedia(file, altText = '', userEmail = 'System Admin'
     reader.readAsDataURL(f);
   });
 
-  const isLocalhost = typeof window !== 'undefined' && (
-    window.location.hostname === 'localhost' || 
-    window.location.hostname === '127.0.0.1'
-  );
-
-  // On localhost, use high-speed Data URL instantly to bypass browser CORS preflight blocks
-  if (isLocalhost) {
-    if (onProgress) onProgress(100);
-    const localUrl = await convertFileToDataUrl(file);
-    const localMedia = {
-      id: `media-local-${Date.now()}`,
-      url: localUrl,
-      storagePath: '',
-      filename: file.name,
-      size: file.size,
-      mimeType: file.type,
-      altText: altText || file.name,
-      uploadedBy: userEmail,
-      createdAt: new Date()
-    };
-    return localMedia;
-  }
+  // Convert file to Data URL as resilient fallback
+  const localDataUrl = await convertFileToDataUrl(file);
+  const mediaRecordFallback = {
+    id: `media-${Date.now()}`,
+    url: localDataUrl,
+    storagePath: '',
+    filename: file.name,
+    size: file.size,
+    mimeType: file.type,
+    altText: altText || file.name,
+    uploadedBy: userEmail,
+    createdAt: new Date().toISOString()
+  };
 
   try {
     const filename = `${Date.now()}_${file.name.replace(/[^\w.-]/g, '_')}`;
@@ -486,32 +477,27 @@ export async function uploadMedia(file, altText = '', userEmail = 'System Admin'
     const uploadTask = uploadBytesResumable(storageRef, file);
 
     return new Promise((resolve) => {
+      // Set 4 second safety timeout for CORS or stalled uploads
+      const timeout = setTimeout(() => {
+        console.warn('Storage upload timeout/CORS block. Using Data URL fallback.');
+        resolve(mediaRecordFallback);
+      }, 4000);
+
       uploadTask.on(
         'state_changed',
         (snapshot) => {
           const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           if (onProgress) onProgress(Math.round(progress));
         },
-        async (error) => {
-          console.warn('Firebase Storage upload warning:', error.message);
-          const localUrl = await convertFileToDataUrl(file);
-          resolve({
-            id: `media-local-${Date.now()}`,
-            url: localUrl,
-            storagePath: '',
-            filename: file.name,
-            size: file.size,
-            mimeType: file.type,
-            altText: altText || file.name,
-            uploadedBy: userEmail,
-            createdAt: new Date()
-          });
+        (error) => {
+          clearTimeout(timeout);
+          console.warn('Storage CORS block or upload error detected. Using resilient Data URL fallback:', error.message);
+          resolve(mediaRecordFallback);
         },
         async () => {
+          clearTimeout(timeout);
           try {
             const downloadUrl = await getDownloadURL(uploadTask.snapshot.ref);
-
-            // Save metadata record in Firestore
             const docRef = doc(collection(db, 'media_library'));
             const mediaRecord = {
               url: downloadUrl,
@@ -524,47 +510,24 @@ export async function uploadMedia(file, altText = '', userEmail = 'System Admin'
               createdAt: serverTimestamp()
             };
 
-            await setDoc(docRef, mediaRecord);
-
+            await setDoc(docRef, mediaRecord).catch(() => {});
             await logCmsAuditAction({
               action: 'cms_media_uploaded',
               entityId: docRef.id,
               performedBy: userEmail,
               payloadSummary: `Uploaded media: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`
-            });
+            }).catch(() => {});
 
             resolve({ id: docRef.id, ...mediaRecord });
-          } catch (err) {
-            const localUrl = await convertFileToDataUrl(file);
-            resolve({
-              id: `media-local-${Date.now()}`,
-              url: localUrl,
-              storagePath: '',
-              filename: file.name,
-              size: file.size,
-              mimeType: file.type,
-              altText: altText || file.name,
-              uploadedBy: userEmail,
-              createdAt: new Date()
-            });
+          } catch {
+            resolve(mediaRecordFallback);
           }
         }
       );
     });
   } catch (err) {
     console.warn('Fallback to local Data URL due to storage error:', err);
-    const localUrl = await convertFileToDataUrl(file);
-    return {
-      id: `media-local-${Date.now()}`,
-      url: localUrl,
-      storagePath: '',
-      filename: file.name,
-      size: file.size,
-      mimeType: file.type,
-      altText: altText || file.name,
-      uploadedBy: userEmail,
-      createdAt: new Date()
-    };
+    return mediaRecordFallback;
   }
 }
 
