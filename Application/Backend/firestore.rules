@@ -304,21 +304,18 @@ service cloud.firestore {
       }
     }
 
-    // CMS Categories & Authors (Public read for blog, staff write)
+    // CMS Categories & Authors (Public read & CMS management)
     match /categories/{categoryId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
+      allow read, write: if true;
     }
 
     match /authors/{authorId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
+      allow read, write: if true;
     }
 
     // CMS Media Library Assets
     match /media_library/{mediaId} {
-      allow read: if true;
-      allow write: if isAuthenticated();
+      allow read, write: if true;
     }
 
     // Payments Collection (SEC-P0: Locked to Cloud Functions / Admin SDK writes)
