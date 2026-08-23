@@ -84,9 +84,9 @@ jobs:
         if: ${{ github.ref == 'refs/heads/develop' }}
         run: |
           cd Application/Frontend/website
-          npm run build
+          npm run build:staging
         env:
-          VITE_FIREBASE_API_KEY: "AIzaSyCkIvVqNPPGVR-HY8wsU-Ik8F79ZkFEocbc"
+          VITE_FIREBASE_API_KEY: "AIzaSyCkIVqNPPGVR-HY8wsU-Ik8F79ZkFEocbc"
           VITE_FIREBASE_AUTH_DOMAIN: "gatelink-staging.firebaseapp.com"
           VITE_FIREBASE_PROJECT_ID: "gatelink-staging"
           VITE_FIREBASE_STORAGE_BUCKET: "gatelink-staging.firebasestorage.app"
@@ -155,9 +155,9 @@ jobs:
         if: ${{ github.ref == 'refs/heads/develop' }}
         run: |
           cd Application/Frontend/society_admin
-          npm run build
+          npm run build:staging
         env:
-          VITE_FIREBASE_API_KEY: "AIzaSyCkIvVqNPPGVR-HY8wsU-Ik8F79ZkFEocbc"
+          VITE_FIREBASE_API_KEY: "AIzaSyCkIVqNPPGVR-HY8wsU-Ik8F79ZkFEocbc"
           VITE_FIREBASE_AUTH_DOMAIN: "gatelink-staging.firebaseapp.com"
           VITE_FIREBASE_PROJECT_ID: "gatelink-staging"
           VITE_FIREBASE_STORAGE_BUCKET: "gatelink-staging.firebasestorage.app"
@@ -226,9 +226,9 @@ jobs:
         if: ${{ github.ref == 'refs/heads/develop' }}
         run: |
           cd Application/Frontend/super_admin
-          npm run build
+          npm run build:staging
         env:
-          VITE_FIREBASE_API_KEY: "AIzaSyCkIvVqNPPGVR-HY8wsU-Ik8F79ZkFEocbc"
+          VITE_FIREBASE_API_KEY: "AIzaSyCkIVqNPPGVR-HY8wsU-Ik8F79ZkFEocbc"
           VITE_FIREBASE_AUTH_DOMAIN: "gatelink-staging.firebaseapp.com"
           VITE_FIREBASE_PROJECT_ID: "gatelink-staging"
           VITE_FIREBASE_STORAGE_BUCKET: "gatelink-staging.firebasestorage.app"
