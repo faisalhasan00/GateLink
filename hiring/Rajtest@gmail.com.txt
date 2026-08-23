@@ -1,0 +1,26 @@
+Rajtest@gmail.com
+Raj786f@
+
+testing@gmail.com
+Raj786f@
+
+Guards@gmail.com
+Guard123
+
+How the screen looks inside the Resident Mobile App?
+How you manage and approve payouts in the Super Admin Dashboard?
+Or ready to start building the first screen?
+
+git checkout main
+git merge develop
+git push origin main 
+git checkout develop
+
+# 1. Add changes and commit on develop
+git add .
+git commit -m "feat(partner_app): 100% fully dynamic Firestore integration with live onboarding & metrics"
+
+# 2. Push to origin develop
+git push origin develop
+
+xkh2588622
