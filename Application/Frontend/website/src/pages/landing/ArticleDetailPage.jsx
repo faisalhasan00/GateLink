@@ -48,7 +48,6 @@ export default function ArticleDetailPage() {
       const q = query(
         collection(db, 'articles'),
         where('slug', '==', slug),
-        where('status', '==', 'Published'),
         limit(1)
       );
       const snap = await getDocs(q);
@@ -60,6 +59,14 @@ export default function ArticleDetailPage() {
       }
 
       const docData = { id: snap.docs[0].id, ...snap.docs[0].data() };
+      
+      // Enforce public read status check
+      if (docData.status !== 'Published') {
+        setNotFound(true);
+        setLoading(false);
+        return;
+      }
+
       setArticle(docData);
 
       // Fetch related articles in same category
