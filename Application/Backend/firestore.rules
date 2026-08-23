@@ -8,7 +8,10 @@ service cloud.firestore {
     }
 
     function isSuperAdmin() {
-      return isAuthenticated();
+      return isAuthenticated() && (
+        request.auth.token.get('role', '') == 'super_admin' ||
+        (hasUserDoc() && getUserData().get('role', '') == 'super_admin')
+      );
     }
 
     // Direct root user lookup mapping
@@ -21,15 +24,38 @@ service cloud.firestore {
     }
 
     function belongsToSociety(societyId) {
-      return isAuthenticated();
+      return isAuthenticated() && (
+        (hasUserDoc() && getUserData().get('societyId', '') == societyId) ||
+        exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid))
+      );
+    }
+
+    function isActiveResident(societyId) {
+      return isAuthenticated() &&
+        hasUserDoc() &&
+        getUserData().get('societyId', '') == societyId &&
+        getUserData().get('role', '') == 'resident' &&
+        (getUserData().get('status', '') in ['active', 'approved']);
     }
 
     function isSocietyAdmin(societyId) {
-      return isAuthenticated();
+      return isAuthenticated() && (
+        (belongsToSociety(societyId) && (
+          (hasUserDoc() && getUserData().get('role', '') in ['admin', 'society_admin']) ||
+          (exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)) &&
+           get(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)).data.get('role', '') in ['admin', 'society_admin'])
+        )) ||
+        isSuperAdmin()
+      );
     }
 
     function isGuard(societyId) {
-      return isAuthenticated();
+      return isAuthenticated() && belongsToSociety(societyId) && (
+        (hasUserDoc() && getUserData().get('role', '') in ['guard', 'security']) ||
+        (exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)).data.get('role', '') in ['guard', 'security']) ||
+        exists(/databases/$(database)/documents/societies/$(societyId)/guards/$(request.auth.uid))
+      );
     }
 
     function getUserFlat(societyId) {
@@ -40,28 +66,104 @@ service cloud.firestore {
 
     // Global Direct User Membership Mapping (/users/{uid})
     match /users/{userId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isSuperAdmin() ||
+        (resource.data.get('societyId', '') != '' && isSocietyAdmin(resource.data.get('societyId', '')))
+      );
+
+      allow create: if isAuthenticated() && (
+        isSuperAdmin() ||
+        (
+          request.auth.uid == userId &&
+          request.resource.data.get('role', 'resident') != 'super_admin'
+        ) ||
+        (
+          request.resource.data.get('societyId', '') != '' &&
+          isSocietyAdmin(request.resource.data.get('societyId', '')) &&
+          request.resource.data.get('role', 'resident') != 'super_admin'
+        )
+      );
+
+      allow update: if isAuthenticated() && (
+        isSuperAdmin() ||
+        (
+          request.auth.uid == userId &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'societyId', 'status'])
+        ) ||
+        (
+          resource.data.get('societyId', '') != '' &&
+          isSocietyAdmin(resource.data.get('societyId', '')) &&
+          !request.resource.data.diff(resource.data).affectedKeys().hasAny(['societyId']) &&
+          request.resource.data.get('role', resource.data.get('role', '')) != 'super_admin' &&
+          (request.auth.uid != userId || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
+        )
+      );
+
+      allow delete: if isAuthenticated() && (
+        isSuperAdmin() ||
+        (
+          resource.data.get('societyId', '') != '' &&
+          isSocietyAdmin(resource.data.get('societyId', '')) &&
+          request.auth.uid != userId
+        )
+      );
     }
 
     // Root Societies Collection (Tenant Isolation - SEC-001)
     match /societies/{societyId} {
       allow read: if true; // Public read allowed for society directory search during signup
-      allow write: if isAuthenticated();
+      allow write: if isSocietyAdmin(societyId) || isSuperAdmin();
 
-      // Metadata Sub-collection (Address, Structure, Occupancy, Committee)
+      // Metadata Sub-collection (Address, Structure, Occupancy, Bank Details)
       match /metadata/{docId} {
-        allow read, write: if isAuthenticated();
+        allow read: if isAuthenticated() && (belongsToSociety(societyId) || isSuperAdmin());
+        allow create, update, delete: if isSocietyAdmin(societyId) || isSuperAdmin();
       }
 
       // Users Sub-collection under society
       match /users/{userId} {
-        allow read: if isAuthenticated() && (belongsToSociety(societyId) || isSuperAdmin());
-        allow create: if isAuthenticated(); // Self-registration creates pending document
-        allow update: if isSocietyAdmin(societyId) || (
-          request.auth.uid == userId &&
-          (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'societyId', 'status']))
+        allow read: if isAuthenticated() && (
+          request.auth.uid == userId ||
+          belongsToSociety(societyId) ||
+          isSocietyAdmin(societyId) ||
+          isSuperAdmin()
         );
-        allow delete: if isSocietyAdmin(societyId);
+
+        allow create: if isAuthenticated() && (
+          isSuperAdmin() ||
+          (
+            isSocietyAdmin(societyId) &&
+            request.resource.data.get('role', 'resident') != 'super_admin'
+          ) ||
+          (
+            request.auth.uid == userId &&
+            request.resource.data.get('societyId', societyId) == societyId &&
+            !(request.resource.data.get('role', 'resident') in ['super_admin', 'society_admin', 'admin'])
+          )
+        );
+
+        allow update: if isAuthenticated() && (
+          isSuperAdmin() ||
+          (
+            request.auth.uid == userId &&
+            !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'societyId', 'status'])
+          ) ||
+          (
+            isSocietyAdmin(societyId) &&
+            !request.resource.data.diff(resource.data).affectedKeys().hasAny(['societyId']) &&
+            request.resource.data.get('role', resource.data.get('role', '')) != 'super_admin' &&
+            (request.auth.uid != userId || !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']))
+          )
+        );
+
+        allow delete: if isAuthenticated() && (
+          isSuperAdmin() ||
+          (
+            isSocietyAdmin(societyId) &&
+            request.auth.uid != userId
+          )
+        );
 
         match /notifications/{notifId} {
           allow read, write: if isAuthenticated() && (request.auth.uid == userId || isSocietyAdmin(societyId) || isSuperAdmin());
@@ -74,7 +176,8 @@ service cloud.firestore {
 
       // Guards Sub-collection under society
       match /guards/{guardId} {
-        allow read, write: if isAuthenticated();
+        allow read: if isAuthenticated() && (belongsToSociety(societyId) || isSuperAdmin());
+        allow create, update, delete: if isSocietyAdmin(societyId) || isSuperAdmin();
       }
 
       // Visitors Sub-collection (SEC-002: Role + Flat Ownership Enforcement)
@@ -82,64 +185,124 @@ service cloud.firestore {
         allow read: if isAuthenticated() && (
           isSocietyAdmin(societyId) ||
           isGuard(societyId) ||
-          resource.data.hostResidentUid == request.auth.uid ||
-          resource.data.invitedBy == request.auth.uid ||
-          resource.data.createdBy == request.auth.uid ||
-          resource.data.hostFlat == getUserFlat(societyId)
+          isSuperAdmin() ||
+          (
+            isActiveResident(societyId) && (
+              resource.data.get('hostResidentUid', '') == request.auth.uid ||
+              resource.data.get('invitedBy', '') == request.auth.uid ||
+              resource.data.get('createdBy', '') == request.auth.uid ||
+              resource.data.get('hostFlat', '') == getUserFlat(societyId)
+            )
+          )
         );
-        allow create: if isAuthenticated() && belongsToSociety(societyId);
+        allow create: if isAuthenticated() && (
+          isSocietyAdmin(societyId) ||
+          isGuard(societyId) ||
+          isSuperAdmin() ||
+          (
+            isActiveResident(societyId) &&
+            request.resource.data.get('invitedBy', '') == request.auth.uid &&
+            request.resource.data.get('hostFlat', '') == getUserFlat(societyId) &&
+            request.resource.data.get('societyId', societyId) == societyId
+          )
+        );
         allow update: if isAuthenticated() && (
           isSocietyAdmin(societyId) ||
           isGuard(societyId) ||
-          resource.data.hostResidentUid == request.auth.uid ||
-          resource.data.invitedBy == request.auth.uid ||
-          (resource.data.hostFlat == getUserFlat(societyId) &&
-           !request.resource.data.diff(resource.data).affectedKeys().hasAny(['hostFlat', 'createdBy', 'societyId']))
+          isSuperAdmin() ||
+          (
+            isActiveResident(societyId) && (
+              resource.data.get('hostResidentUid', '') == request.auth.uid ||
+              resource.data.get('invitedBy', '') == request.auth.uid ||
+              (
+                resource.data.get('hostFlat', '') == getUserFlat(societyId) &&
+                !request.resource.data.diff(resource.data).affectedKeys().hasAny(['hostFlat', 'createdBy', 'societyId'])
+              )
+            )
+          )
         );
-        allow delete: if isSocietyAdmin(societyId);
+        allow delete: if isSocietyAdmin(societyId) || isSuperAdmin();
       }
 
       // Complaints Sub-collection (SEC-002: Resident Ownership Enforcement)
       match /complaints/{complaintId} {
         allow read: if isAuthenticated() && (
           isSocietyAdmin(societyId) ||
-          resource.data.raisedBy == request.auth.uid
+          isSuperAdmin() ||
+          (isActiveResident(societyId) && resource.data.get('raisedBy', '') == request.auth.uid)
         );
-        allow create: if isAuthenticated() && belongsToSociety(societyId);
+        allow create: if isAuthenticated() && (
+          isSocietyAdmin(societyId) ||
+          isSuperAdmin() ||
+          (
+            isActiveResident(societyId) &&
+            request.resource.data.get('societyId', societyId) == societyId &&
+            request.resource.data.get('raisedBy', request.auth.uid) == request.auth.uid &&
+            request.resource.data.get('residentUid', request.auth.uid) == request.auth.uid &&
+            request.resource.data.get('flatNumber', getUserFlat(societyId)) == getUserFlat(societyId)
+          )
+        );
         allow update: if isAuthenticated() && (
           isSocietyAdmin(societyId) ||
-          (resource.data.raisedBy == request.auth.uid &&
-           !request.resource.data.diff(resource.data).affectedKeys().hasAny(['raisedBy', 'societyId']))
+          isSuperAdmin() ||
+          (
+            isActiveResident(societyId) &&
+            resource.data.get('raisedBy', '') == request.auth.uid &&
+            !request.resource.data.diff(resource.data).affectedKeys().hasAny(['raisedBy', 'societyId'])
+          )
         );
-        allow delete: if isSocietyAdmin(societyId) || resource.data.raisedBy == request.auth.uid;
+        allow delete: if isSocietyAdmin(societyId) || isSuperAdmin() ||
+          (isActiveResident(societyId) && resource.data.get('raisedBy', '') == request.auth.uid);
       }
 
       // Maintenance Bills Sub-collection
       match /maintenance_bills/{billId} {
-        allow read: if isAuthenticated() && belongsToSociety(societyId);
-        allow update: if isSocietyAdmin(societyId) || (
-          isAuthenticated() && belongsToSociety(societyId) &&
-          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'paymentMethod', 'referenceNumber', 'residentName', 'flatNumber', 'invoiceNumber', 'transactionId', 'paidAt', 'updatedAt']) &&
-          (request.resource.data.status == 'pending_verification' || request.resource.data.status == 'paid')
+        allow read: if isAuthenticated() && (
+          isSocietyAdmin(societyId) ||
+          isSuperAdmin() ||
+          (
+            isActiveResident(societyId) &&
+            resource.data.get('residentUid', '') == request.auth.uid
+          )
         );
-        allow create, delete: if isSocietyAdmin(societyId);
+        allow update: if isSocietyAdmin(societyId) || isSuperAdmin() || (
+          isActiveResident(societyId) &&
+          resource.data.get('residentUid', '') == request.auth.uid &&
+          request.resource.data.get('residentUid', request.auth.uid) == request.auth.uid &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'paymentMethod', 'referenceNumber', 'utrNumber', 'transactionId', 'residentName', 'flatNumber', 'invoiceNumber', 'submittedAt', 'updatedAt']) &&
+          request.resource.data.status == 'pending_verification'
+        );
+        allow create, delete: if isSocietyAdmin(societyId) || isSuperAdmin();
       }
 
       match /maintenance/{billId} {
-        allow read: if isAuthenticated() && belongsToSociety(societyId);
-        allow write: if isSocietyAdmin(societyId);
+        allow read: if isAuthenticated() && (
+          isSocietyAdmin(societyId) ||
+          isSuperAdmin() ||
+          (
+            isActiveResident(societyId) &&
+            resource.data.get('residentUid', '') == request.auth.uid
+          )
+        );
+        allow write: if isSocietyAdmin(societyId) || isSuperAdmin();
       }
 
       // Amenity Bookings Sub-collection (BUG-001)
       match /amenity_bookings/{bookingId} {
-        allow read: if isAuthenticated() && belongsToSociety(societyId);
-        allow create: if isAuthenticated() && belongsToSociety(societyId);
-        allow update, delete: if isSocietyAdmin(societyId) || (resource.data.uid == request.auth.uid);
+        allow read: if isAuthenticated() && (belongsToSociety(societyId) || isSuperAdmin());
+        allow create: if isAuthenticated() && (
+          isSocietyAdmin(societyId) ||
+          isSuperAdmin() ||
+          (isActiveResident(societyId) && request.resource.data.get('uid', request.auth.uid) == request.auth.uid)
+        );
+        allow update, delete: if isSocietyAdmin(societyId) || isSuperAdmin() || (
+          isActiveResident(societyId) && resource.data.get('uid', '') == request.auth.uid
+        );
       }
 
       match /amenities/{amenityId} {
-        allow read: if isAuthenticated() && belongsToSociety(societyId);
-        allow write: if isSocietyAdmin(societyId);
+        allow read: if isAuthenticated() && (belongsToSociety(societyId) || isSuperAdmin());
+        allow write: if isSocietyAdmin(societyId) || isSuperAdmin();
       }
 
       // Audit Logs Sub-collection (BUG-001: Immutable Audit Trail)
@@ -232,90 +395,111 @@ service cloud.firestore {
       }
     }
 
-    // Website Inbound Leads (Public Creation with Strict Field Validation - SEC-004)
+    // Website Inbound Leads (Public Creation with Strict Admin Access)
     match /leads/{leadId} {
       allow create: if true;
-      allow read, update, delete: if isAuthenticated();
+      allow read, update, delete: if isSuperAdmin();
     }
 
-    // Partner & Referral Leads (Public Lead Submission & Status Lookup by Phone/Ref)
+    // Partner & Referral Leads (Public Lead Submission & Controlled Status Lookup)
     match /partner_leads/{leadId} {
       allow create: if true;
       allow read: if true;
-      allow update, delete: if isAuthenticated();
+      allow update, delete: if isSuperAdmin();
     }
 
     // Partner Accounts & Commission Payouts
     match /partner_accounts/{accountId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isAuthenticated() && (
+        isSuperAdmin() ||
+        resource.data.get('partnerUid', '') == request.auth.uid ||
+        request.auth.uid == accountId
+      );
+      allow write: if isSuperAdmin();
     }
 
     match /partner_payouts/{payoutId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isAuthenticated() && (
+        isSuperAdmin() ||
+        resource.data.get('partnerUid', '') == request.auth.uid
+      );
+      allow write: if isSuperAdmin();
     }
 
     // System Configuration (Global Partner Commission Rates & App Settings)
     match /system_config/{configId} {
       allow read: if true;
-      allow write: if isAuthenticated();
+      allow write: if isSuperAdmin();
     }
 
     // Public Website Stats / Live Visitor Counter
     match /system_stats/{statId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isSuperAdmin();
     }
 
     // Ad Campaigns Collection (Super Admin Access)
     match /ad_campaigns/{adId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isAuthenticated() && isSuperAdmin();
+      allow write: if isSuperAdmin();
     }
 
     // Root System Notifications (Super Admin & Platform Alerts)
     match /notifications/{notifId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
     }
 
     // Root Audit Logs & Telemetry
     match /audit_logs/{logId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isSuperAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
     }
 
     match /system_audit_logs/{logId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isSuperAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
     }
 
     // Super Admin Team & Staff RBAC Collection
     match /super_admin_team/{memberId} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if isSuperAdmin();
     }
 
     // Platform Broadcasts Collection
     match /broadcasts/{broadcastId} {
-      allow read, write: if isAuthenticated();
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
     }
 
     // CMS Articles & Revisions (Public read for blog, slug checking & SERP indexing)
     match /articles/{articleId} {
       allow read: if true;
-      allow create, update, delete: if isAuthenticated() || true;
+      allow create, update, delete: if isSuperAdmin();
 
       match /revisions/{revisionId} {
-        allow read, write: if true;
+        allow read: if true;
+        allow write: if isSuperAdmin();
       }
     }
 
-    // CMS Categories & Authors (Public read & CMS management)
+    // CMS Categories & Authors (Public read & Super Admin CMS management)
     match /categories/{categoryId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isSuperAdmin();
     }
 
     match /authors/{authorId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isSuperAdmin();
     }
 
     // CMS Media Library Assets
     match /media_library/{mediaId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if isSuperAdmin();
     }
 
     // Payments Collection (SEC-P0: Locked to Cloud Functions / Admin SDK writes)

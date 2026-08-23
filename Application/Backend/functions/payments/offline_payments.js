@@ -1,24 +1,27 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const { db, FieldValue } = require("../config/firebase");
-const { verifyActiveUser } = require("../config/auth_middleware");
+const { verifySocietyAdmin } = require("../config/auth_middleware");
 
 /**
- * 3. Approve Offline UTR Payment (Society Admin)
+ * 3. Approve Offline UTR Payment (Society Admin / Super Admin)
+ * SEC-P0: Hardened with authoritative tenant binding and active admin verification.
  */
 const approveOfflinePayment = onRequest({ cors: true }, async (req, res) => {
   try {
-    const authResult = await verifyActiveUser(req, ["admin", "society_admin", "super_admin"]);
-    if (!authResult.authenticated) {
-      return res.status(authResult.statusCode || 401).json({ error: authResult.error });
-    }
-    const authUser = authResult.authUser;
-
     const { societyId, maintenanceBillId } = req.body || {};
     if (!societyId || !maintenanceBillId) {
       return res.status(400).json({ error: "Missing parameters: societyId, maintenanceBillId" });
     }
 
+    // 1. Authoritative Backend Authentication & Tenant-bound Admin Verification
+    const authResult = await verifySocietyAdmin(req, societyId);
+    if (!authResult.authenticated) {
+      return res.status(authResult.statusCode || 401).json({ error: authResult.error });
+    }
+    const authUser = authResult.authUser;
+
+    // 2. Fetch and validate target maintenance bill
     const billRef = db.doc(`societies/${societyId}/maintenance_bills/${maintenanceBillId}`);
     const billDoc = await billRef.get();
 
@@ -51,21 +54,24 @@ const approveOfflinePayment = onRequest({ cors: true }, async (req, res) => {
 });
 
 /**
- * 4. Reject Offline UTR Payment (Society Admin)
+ * 4. Reject Offline UTR Payment (Society Admin / Super Admin)
+ * SEC-P0: Hardened with authoritative tenant binding and active admin verification.
  */
 const rejectOfflinePayment = onRequest({ cors: true }, async (req, res) => {
   try {
-    const authResult = await verifyActiveUser(req, ["admin", "society_admin", "super_admin"]);
-    if (!authResult.authenticated) {
-      return res.status(authResult.statusCode || 401).json({ error: authResult.error });
-    }
-    const authUser = authResult.authUser;
-
     const { societyId, maintenanceBillId, rejectionReason } = req.body || {};
     if (!societyId || !maintenanceBillId) {
       return res.status(400).json({ error: "Missing parameters: societyId, maintenanceBillId" });
     }
 
+    // 1. Authoritative Backend Authentication & Tenant-bound Admin Verification
+    const authResult = await verifySocietyAdmin(req, societyId);
+    if (!authResult.authenticated) {
+      return res.status(authResult.statusCode || 401).json({ error: authResult.error });
+    }
+    const authUser = authResult.authUser;
+
+    // 2. Fetch and validate target maintenance bill
     const billRef = db.doc(`societies/${societyId}/maintenance_bills/${maintenanceBillId}`);
     const billDoc = await billRef.get();
 

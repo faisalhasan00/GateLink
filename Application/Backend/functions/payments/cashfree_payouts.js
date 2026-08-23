@@ -1,17 +1,17 @@
 const { onCall, HttpsError } = require("firebase-functions/v2/https");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { CashfreePayoutProvider } = require("../cashfree_payout_service");
+const { verifyActiveCallableUser } = require("../config/auth_middleware");
 
 /**
  * Super Admin Callable Cloud Function to trigger 1-Click Instant Cashfree UPI Payout
+ * SEC-P0: Restricted exclusively to authenticated, active Super Admins.
  */
 exports.triggerCashfreePayout = onCall(
   { region: "asia-south1", cors: true },
   async (request) => {
-    // 1. Verify Authentication
-    if (!request.auth) {
-      throw new HttpsError("unauthenticated", "Authentication required.");
-    }
+    // 1. Authoritative Backend Authentication & Super Admin Verification
+    await verifyActiveCallableUser(request, ["super_admin"]);
 
     const { leadId, amount, upiId, notes } = request.data || {};
 
@@ -28,7 +28,7 @@ exports.triggerCashfreePayout = onCall(
     }
 
     const leadData = leadDoc.data();
-    finalUpi = upiId || leadData.partnerUpi;
+    const finalUpi = upiId || leadData.partnerUpi;
 
     if (!finalUpi) {
       throw new HttpsError(

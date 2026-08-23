@@ -148,7 +148,7 @@ class AuthService {
       'societyId': societyId,
       'societyName': societyName,
       'societyCode': cleanCode,
-      'status': 'active', // Active resident profile
+      'status': 'pending_approval', // Pending RWA verification
       'documentProofUrl': documentProofUrl ?? '',
       'documentType':
           documentType ?? 'Rent Agreement / Electricity Bill / Address Proof',
