@@ -1,0 +1,17 @@
+[
+  {
+    "origin": [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:5175",
+      "https://gatelink.in",
+      "https://app.gatelink.in",
+      "https://admin.gatelink.in",
+      "https://societysphere-b2538.web.app",
+      "https://societysphere-b2538.firebaseapp.com"
+    ],
+    "method": ["GET", "PUT", "POST", "DELETE", "HEAD"],
+    "responseHeader": ["Content-Type", "Authorization", "x-goog-resumable"],
+    "maxAgeSeconds": 3600
+  }
+]
