@@ -29,6 +29,13 @@ const GrievancePolicyPage = lazy(() => import('./pages/landing/GrievancePolicyPa
 const PartnersPage = lazy(() => import('./pages/landing/PartnersPage'))
 const GateSelfEntryPage = lazy(() => import('./pages/gate/GateSelfEntryPage'))
 
+// Dedicated Product SEO Landing Pages
+const SocietyManagementLanding = lazy(() => import('./pages/landing/SocietyManagementLanding'))
+const VisitorManagementLanding = lazy(() => import('./pages/landing/VisitorManagementLanding'))
+const MaintenanceManagementLanding = lazy(() => import('./pages/landing/MaintenanceManagementLanding'))
+const SecurityManagementLanding = lazy(() => import('./pages/landing/SecurityManagementLanding'))
+const NotFoundPage = lazy(() => import('./pages/landing/NotFoundPage'))
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -52,6 +59,12 @@ export default function App() {
             <Route path="/refer" element={<PartnersPage />} />
             <Route path="/gate" element={<GateSelfEntryPage />} />
 
+            {/* Dedicated High-Value Feature SEO Landing Pages */}
+            <Route path="/society-management-software" element={<SocietyManagementLanding />} />
+            <Route path="/visitor-management" element={<VisitorManagementLanding />} />
+            <Route path="/maintenance-management" element={<MaintenanceManagementLanding />} />
+            <Route path="/security-management" element={<SecurityManagementLanding />} />
+
             {/* SEO Knowledge Base & Legal Trust Pages */}
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/faq" element={<FaqPage />} />
@@ -66,6 +79,9 @@ export default function App() {
             <Route path="/dpa" element={<DataProcessingPage />} />
             <Route path="/grievance" element={<GrievancePolicyPage />} />
             <Route path="/grievance-redressal" element={<GrievancePolicyPage />} />
+
+            {/* 404 Catch-All Route */}
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
 

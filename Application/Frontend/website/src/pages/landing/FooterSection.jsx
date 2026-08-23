@@ -71,10 +71,10 @@ export default function FooterSection() {
           <div>
             <h4 style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 800, marginBottom: '14px', letterSpacing: '0.5px' }}>PLATFORM</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '13px' }}>
-              <li><Link to="/features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Visitor Pass</Link></li>
-              <li><Link to="/features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Guard Gatekeeper</Link></li>
-              <li><Link to="/features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Pay Maintenance Bill Online</Link></li>
-              <li><Link to="/features" style={{ color: '#94A3B8', textDecoration: 'none' }}>Emergency SOS</Link></li>
+              <li><Link to="/society-management-software" style={{ color: '#94A3B8', textDecoration: 'none' }}>Society Management OS</Link></li>
+              <li><Link to="/visitor-management" style={{ color: '#94A3B8', textDecoration: 'none' }}>Visitor Entry System</Link></li>
+              <li><Link to="/maintenance-management" style={{ color: '#94A3B8', textDecoration: 'none' }}>Maintenance Billing</Link></li>
+              <li><Link to="/security-management" style={{ color: '#94A3B8', textDecoration: 'none' }}>Gate Guard & SOS System</Link></li>
             </ul>
           </div>
 
