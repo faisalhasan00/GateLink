@@ -11,6 +11,7 @@ import FooterSection from './FooterSection';
 import DemoModal from './DemoModal';
 import { Phone } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import SeoHead from '../../components/seo/SeoHead';
 
 export default function LandingPage() {
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
@@ -34,6 +35,12 @@ export default function LandingPage() {
 
   return (
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#FFFFFF', minHeight: '100vh', fontFamily: "'Plus Jakarta Sans', sans-serif", paddingBottom: isMobile ? '70px' : '0' }}>
+      <SeoHead
+        title="GateLink – Smart Society Management Software for Gated Communities"
+        description="GateLink is India's leading gated community management software. Streamline RWA administration, society maintenance billing, visitor entry, and gate security."
+        canonicalUrl="https://gatelink.in/"
+      />
+
       {/* Sticky Enterprise Navbar */}
       <Navbar onOpenDemo={handleOpenDemo} />
 

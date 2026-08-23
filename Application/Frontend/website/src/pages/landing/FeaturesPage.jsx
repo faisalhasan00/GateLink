@@ -28,8 +28,8 @@ export default function FeaturesPage() {
   return (
     <div style={{ background: isDark ? '#020617' : '#F8FAFC', minHeight: '100vh', color: isDark ? '#F8FAFC' : '#0F172A' }}>
       <SeoHead
-        title="GateLink Features — Comprehensive Gated Community Operations Platform"
-        description="Explore the complete suite of GateLink modules: Smart Visitor Management, Automated Maintenance Billing, Guard Gatekeeper App, Complaint Ticketing, and Community ERP."
+        title="GateLink Features – All-in-One Society Management Platform"
+        description="Explore all GateLink society management app features including visitor security pass, maintenance billing collections, guard gatekeeper app, and resident directory."
         canonicalUrl="https://gatelink.in/features"
       />
 
@@ -50,13 +50,14 @@ export default function FeaturesPage() {
               fontSize: '12px',
               fontWeight: 800,
               color: '#0EA5E9',
-              marginBottom: '16px'
+              marginBottom: '16px',
+              textTransform: 'uppercase'
             }}
           >
-            MODULAR ENTERPRISE ARCHITECTURE
+            Capabilities Suite
           </div>
-          <h1 style={{ fontSize: '38px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', marginBottom: '16px', letterSpacing: '-0.5px' }}>
-            Comprehensive Society Management Capabilities
+          <h1 style={{ fontSize: '38px', fontWeight: 900, fontFamily: 'Manrope, sans-serif', marginBottom: '12px' }}>
+            Society Management App Features & Platform Capabilities
           </h1>
           <p style={{ fontSize: '16px', color: isDark ? '#94A3B8' : '#64748B', maxWidth: '680px', margin: '0 auto', lineHeight: 1.6 }}>
             Every tool and workflow needed to operate a modern gated community — from security gate automation to financial ledger audits.

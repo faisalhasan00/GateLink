@@ -69,7 +69,7 @@ export default function HeroSection({ onOpenDemo }) {
               marginBottom: '16px'
             }}
           >
-            Visitor, Society and Accounting Management System
+            Smart Society Management Software for Gated Communities
           </h1>
 
           {/* Subtitle */}

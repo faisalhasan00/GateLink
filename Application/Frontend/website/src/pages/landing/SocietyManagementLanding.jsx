@@ -45,7 +45,7 @@ export default function SocietyManagementLanding() {
           </div>
 
           <h1 style={{ fontSize: '42px', fontWeight: 900, fontFamily: 'Manrope, sans-serif', color: isDark ? '#FFFFFF' : '#0F172A', lineHeight: 1.18, marginBottom: '20px', maxWidth: '900px', margin: '0 auto 20px auto' }}>
-            Smart Society Management Software for Modern Gated Communities
+            Smart Society Management Software for Housing Societies & RWAs
           </h1>
 
           <p style={{ fontSize: '17px', color: isDark ? '#94A3B8' : '#475569', maxWidth: '780px', margin: '0 auto 32px auto', lineHeight: 1.65 }}>

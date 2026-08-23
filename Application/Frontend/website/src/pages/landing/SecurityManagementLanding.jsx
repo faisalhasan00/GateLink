@@ -29,7 +29,7 @@ export default function SecurityManagementLanding() {
   return (
     <div style={{ background: isDark ? '#020617' : '#F8FAFC', color: isDark ? '#F8FAFC' : '#0F172A', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <SeoHead 
-        title="Apartment Security & Gate Guard App | GateLink" 
+        title="Apartment Security Management & Guard App | GateLink" 
         description="GateLink Guard App empowers security guards with instant visitor verification, blacklisted entry alerts, emergency SOS panic buttons, and main gate access control."
         canonicalUrl="https://gatelink.in/security-management"
         schemaData={schemaData}
@@ -44,7 +44,7 @@ export default function SecurityManagementLanding() {
           </div>
 
           <h1 style={{ fontSize: '42px', fontWeight: 900, fontFamily: 'Manrope, sans-serif', color: isDark ? '#FFFFFF' : '#0F172A', lineHeight: 1.18, marginBottom: '20px', maxWidth: '900px', margin: '0 auto 20px auto' }}>
-            Next-Gen Gate Security & Guard Automation System
+            Apartment Security Management & Gate Guard Automation System
           </h1>
 
           <p style={{ fontSize: '17px', color: isDark ? '#94A3B8' : '#475569', maxWidth: '780px', margin: '0 auto 32px auto', lineHeight: 1.65 }}>
@@ -91,6 +91,19 @@ export default function SecurityManagementLanding() {
               </p>
             </div>
           </div>
+
+          {/* Internal Cross-Linking Section */}
+          <section style={{ background: isDark ? '#0F172A' : '#EFF6FF', padding: '32px', borderRadius: '16px', border: isDark ? '1px solid rgba(255,255,255,0.08)' : '1px solid #DBEAFE' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: 800, color: isDark ? '#FFFFFF' : '#0F172A', marginBottom: '12px' }}>Related GateLink Solutions</h3>
+            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+              <Link to="/visitor-management" style={{ color: '#EF4444', fontWeight: 700, textDecoration: 'none' }}>
+                → Visitor Management System
+              </Link>
+              <Link to="/society-management-software" style={{ color: '#EF4444', fontWeight: 700, textDecoration: 'none' }}>
+                → Society Management Software OS
+              </Link>
+            </div>
+          </section>
 
         </div>
       </main>

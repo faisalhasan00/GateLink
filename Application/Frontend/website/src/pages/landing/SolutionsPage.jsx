@@ -19,8 +19,8 @@ export default function SolutionsPage() {
   return (
     <div style={{ background: isDark ? '#020617' : '#F8FAFC', minHeight: '100vh', color: isDark ? '#F8FAFC' : '#0F172A' }}>
       <SeoHead
-        title="GateLink Solutions — Tailored for Residents, Security Guards, Committees & Partners"
-        description="Explore how GateLink empowers flat owners, security gatekeepers, RWA committees, facility managers, and growth partners with purpose-built automation tools."
+        title="GateLink Solutions for Residents, Guards & RWAs"
+        description="Explore GateLink society management solutions designed for residents, security guards, RWA committee members, and facility managers."
         canonicalUrl="https://gatelink.in/solutions"
       />
 
@@ -49,8 +49,8 @@ export default function SolutionsPage() {
           >
             TAILORED COMMUNITY SOLUTIONS
           </div>
-          <h1 style={{ fontSize: '38px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#0F172A', marginBottom: '16px', letterSpacing: '-0.5px' }}>
-            Built Specifically for Every Stakeholder in Your Society
+          <h1 style={{ fontSize: '38px', fontWeight: 900, fontFamily: 'Manrope, sans-serif', color: isDark ? '#FFFFFF' : '#0F172A', marginBottom: '16px', letterSpacing: '-0.5px' }}>
+            Society Management Solutions for Residents, Guards & RWAs
           </h1>
           <p style={{ fontSize: '16px', color: isDark ? '#94A3B8' : '#64748B', maxWidth: '680px', margin: '0 auto', lineHeight: 1.6 }}>
             Select your role below to discover how GateLink eliminates friction, prevents unauthorized intrusions, and modernizes your gated community.
