@@ -298,20 +298,26 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
       - name: Deploy Rules to Production (societysphere-b2538)
         if: ${{ github.ref == 'refs/heads/main' }}
-        uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only firestore:rules --project societysphere-b2538
-        env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOCIETYSPHERE_B2538 }}
-          PROJECT_PATH: Application
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_SOCIETYSPHERE_B2538 }}' > $HOME/gcp-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json
+          cd Application
+          npx firebase-tools deploy --only firestore:rules --project societysphere-b2538
 
       - name: Deploy Rules to Staging (gatelink-staging)
         if: ${{ github.ref == 'refs/heads/develop' }}
-        uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only firestore:rules --project gatelink-staging
-        env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GATELINK_STAGING }}
-          PROJECT_PATH: Application
+        run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT_GATELINK_STAGING }}' > $HOME/gcp-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/gcp-key.json
+          cd Application
+          npx firebase-tools deploy --only firestore:rules --project gatelink-staging
