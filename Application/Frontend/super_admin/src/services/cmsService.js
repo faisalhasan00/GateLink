@@ -261,7 +261,7 @@ export async function updateArticle(articleId, updateData, userEmail = 'System A
 
   try {
     const docRef = doc(db, 'articles', articleId);
-    await updateDoc(docRef, { ...payload, updatedAt: serverTimestamp() });
+    await setDoc(docRef, { ...payload, updatedAt: serverTimestamp() }, { merge: true });
     await saveRevision(articleId, payload, userEmail, revisionNote).catch(() => {});
     await logCmsAuditAction({
       action: 'cms_article_updated',
