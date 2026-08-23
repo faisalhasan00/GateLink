@@ -49,7 +49,7 @@ export default function FeaturesSection() {
           }}>
             <div>
               <div style={{ width: '100%', height: '180px', marginBottom: '20px', borderRadius: '4px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #F1F5F9' }}>
-                <img src="/assets/resident_app_mockup.png" alt="Visitor Security" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src="/assets/resident_app_mockup.png" alt="GateLink Resident Mobile App Lock Screen 1-Tap Visitor Approvals Interface" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '10px' }}>
                 1-Tap Lock Screen Approvals
@@ -73,7 +73,7 @@ export default function FeaturesSection() {
           }}>
             <div>
               <div style={{ width: '100%', height: '180px', marginBottom: '20px', borderRadius: '4px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #F1F5F9' }}>
-                <img src="/assets/guard_app_mockup.png" alt="Gatekeeper App" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src="/assets/guard_app_mockup.png" alt="GateLink Security Guard Gatekeeper Mobile Interface" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '10px' }}>
                 5-Second Fast Gate Verification
@@ -97,7 +97,7 @@ export default function FeaturesSection() {
           }}>
             <div>
               <div style={{ width: '100%', height: '180px', marginBottom: '20px', borderRadius: '4px', overflow: 'hidden', border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #F1F5F9' }}>
-                <img src="/assets/admin_dashboard_mockup.png" alt="Pay Maintenance Bill Online" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src="/assets/admin_dashboard_mockup.png" alt="GateLink Society Administration Dashboard & Maintenance Billing System" loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', marginBottom: '10px' }}>
                 Pay Maintenance Bill Online
