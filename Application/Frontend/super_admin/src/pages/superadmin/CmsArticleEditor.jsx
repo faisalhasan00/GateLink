@@ -100,7 +100,6 @@ export default function CmsArticleEditor() {
   const editor = useEditor({
     extensions: [
       StarterKit,
-      LinkExtension.configure({ openOnClick: false }),
       ImageExtension.configure({ inline: true }),
     ],
     content: '<p>Write your SaaS article content here...</p>',

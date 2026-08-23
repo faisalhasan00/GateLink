@@ -351,7 +351,7 @@ export async function getCategories() {
     }
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (err) {
-    console.error('Error fetching categories:', err);
+    console.warn('Using default categories fallback:', err.message || err);
     return DEFAULT_CATEGORIES;
   }
 }
@@ -369,7 +369,7 @@ export async function createCategory(catData) {
     await setDoc(ref, payload);
     return { id: ref.id, ...payload };
   } catch (err) {
-    console.error('Error creating category:', err);
+    console.warn('Using local category creation fallback:', err.message || err);
     return { id: `cat-${Date.now()}`, name: catData.name.trim(), slug: generateSlug(catData.name), description: catData.description || '' };
   }
 }
@@ -383,7 +383,7 @@ export async function getAuthors() {
     }
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   } catch (err) {
-    console.error('Error fetching authors:', err);
+    console.warn('Using default authors fallback:', err.message || err);
     return DEFAULT_AUTHORS;
   }
 }
