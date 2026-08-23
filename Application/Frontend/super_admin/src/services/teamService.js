@@ -71,6 +71,49 @@ export const PERMISSION_MODULES = [
     category: 'Administration',
     isDangerous: true
   },
+  {
+    key: 'content.view',
+    label: 'CMS View Articles',
+    description: 'View the CMS dashboard, article directory, and draft content.',
+    category: 'Content & CMS'
+  },
+  {
+    key: 'content.create',
+    label: 'CMS Create Drafts',
+    description: 'Write and draft new SaaS blog articles and SEO content.',
+    category: 'Content & CMS'
+  },
+  {
+    key: 'content.edit',
+    label: 'CMS Edit Articles',
+    description: 'Modify draft and existing article body and SEO metadata.',
+    category: 'Content & CMS'
+  },
+  {
+    key: 'content.publish',
+    label: 'CMS Publish / Unpublish',
+    description: 'Publish articles to the live public website or archive existing posts.',
+    category: 'Content & CMS'
+  },
+  {
+    key: 'content.categories',
+    label: 'CMS Categories & Authors',
+    description: 'Create and manage article categories and staff author profiles.',
+    category: 'Content & CMS'
+  },
+  {
+    key: 'content.media',
+    label: 'CMS Media Library',
+    description: 'Upload and manage images and media assets in Firebase Storage.',
+    category: 'Content & CMS'
+  },
+  {
+    key: 'content.delete',
+    label: 'CMS Delete Content',
+    description: 'Permanently delete articles or media files from the database.',
+    category: 'Content & CMS',
+    isDangerous: true
+  },
 ];
 
 export const ROLE_PRESETS = {

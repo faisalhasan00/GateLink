@@ -17,6 +17,7 @@ const SolutionsPage = lazy(() => import('./pages/landing/SolutionsPage'))
 const LeadGenerationPage = lazy(() => import('./pages/landing/LeadGenerationPage'))
 const DownloadAppPage = lazy(() => import('./pages/landing/DownloadAppPage'))
 const BlogPage = lazy(() => import('./pages/landing/BlogPage'))
+const ArticleDetailPage = lazy(() => import('./pages/landing/ArticleDetailPage'))
 const FaqPage = lazy(() => import('./pages/landing/FaqPage'))
 const HelpCenterPage = lazy(() => import('./pages/landing/HelpCenterPage'))
 const DocsPage = lazy(() => import('./pages/landing/DocsPage'))
@@ -67,6 +68,7 @@ export default function App() {
 
             {/* SEO Knowledge Base & Legal Trust Pages */}
             <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<ArticleDetailPage />} />
             <Route path="/faq" element={<FaqPage />} />
             <Route path="/help" element={<HelpCenterPage />} />
             <Route path="/docs" element={<DocsPage />} />

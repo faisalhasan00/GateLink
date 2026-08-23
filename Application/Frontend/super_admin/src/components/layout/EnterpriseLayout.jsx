@@ -8,7 +8,8 @@ import {
   Contact,
   Handshake, 
   Bell,
-  Users
+  Users,
+  FileText
 } from 'lucide-react';
 import EnterpriseHeader from './EnterpriseHeader';
 import EnterpriseSidebar from './EnterpriseSidebar';
@@ -22,6 +23,7 @@ const SUPER_ADMIN_NAV = [
   { name: 'Partners & Payouts', path: '/partners', permissionKey: 'partners', icon: <Handshake size={20} /> },
   { name: 'Push Notifications', path: '/notifications', permissionKey: 'notifications', icon: <Bell size={20} /> },
   { name: 'Ad & Campaigns', path: '/ads', permissionKey: 'ads', icon: <Megaphone size={20} /> },
+  { name: 'Content & CMS', path: '/cms', permissionKey: 'content.view', icon: <FileText size={20} /> },
   { name: 'Team & Staff', path: '/team', permissionKey: 'team', icon: <Users size={20} /> },
   { name: 'System Settings', path: '/profile', permissionKey: 'overview', icon: <Settings size={20} /> },
 ];
@@ -34,6 +36,9 @@ const PAGE_TITLES = {
   '/partners': { title: 'Partner & Referral Deals CRM', subtitle: 'Manage broker leads, track conversions, and approve monthly recurring UPI payouts' },
   '/notifications': { title: 'Universal Push Notification Dispatcher', subtitle: 'Send targeted and platform-wide mobile alerts to residents & guards' },
   '/ads': { title: 'Ad Banners & In-App Promotions', subtitle: 'Manage promotional banners and cross-society announcements' },
+  '/cms': { title: 'CMS & Article Management', subtitle: 'Publish and manage SaaS blog posts, articles, and SEO content' },
+  '/cms/categories': { title: 'Content Categories & Authors', subtitle: 'Manage article categories and staff author profiles' },
+  '/cms/media': { title: 'Media Library Assets', subtitle: 'Upload and manage images for SaaS blog posts and campaigns' },
   '/team': { title: 'Team & Staff Management', subtitle: 'Manage employee accounts and granular role permissions' },
   '/profile': { title: 'Super Admin Profile', subtitle: 'System administrator credentials and security settings' },
 };

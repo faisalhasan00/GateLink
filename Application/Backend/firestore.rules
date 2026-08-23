@@ -294,6 +294,33 @@ service cloud.firestore {
       allow read, write: if isAuthenticated();
     }
 
+    // CMS Articles & Revisions (Public read ONLY if status == Published)
+    match /articles/{articleId} {
+      allow read: if resource.data.status == 'Published' || isAuthenticated();
+      allow create, update, delete: if isAuthenticated();
+
+      match /revisions/{revisionId} {
+        allow read, write: if isAuthenticated();
+      }
+    }
+
+    // CMS Categories & Authors (Public read for blog, staff write)
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    match /authors/{authorId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // CMS Media Library Assets
+    match /media_library/{mediaId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
     // Payments Collection (SEC-P0: Locked to Cloud Functions / Admin SDK writes)
     match /payments/{paymentId} {
       allow read: if isAuthenticated() && (

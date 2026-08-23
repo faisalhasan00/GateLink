@@ -17,6 +17,10 @@ const SuperAdminProfile = lazy(() => import('./pages/superadmin/SuperAdminProfil
 const SuperAdminLogin = lazy(() => import('./pages/superadmin/SuperAdminLogin'))
 const PushNotifications = lazy(() => import('./pages/superadmin/PushNotifications'))
 const TeamManagement = lazy(() => import('./pages/superadmin/TeamManagement'))
+const CmsArticles = lazy(() => import('./pages/superadmin/CmsArticles'))
+const CmsArticleEditor = lazy(() => import('./pages/superadmin/CmsArticleEditor'))
+const CmsCategories = lazy(() => import('./pages/superadmin/CmsCategories'))
+const CmsMedia = lazy(() => import('./pages/superadmin/CmsMedia'))
 
 function ProtectedSuperRoute({ children }) {
   const { user, loading } = useSuperAdminAuth();
@@ -121,6 +125,34 @@ export default function App() {
                     <TeamManagement />
                   </PermissionGuard>
                 } />
+
+                {/* CMS & Content Management Routes */}
+                <Route path="cms" element={
+                  <PermissionGuard permission="content.view">
+                    <CmsArticles />
+                  </PermissionGuard>
+                } />
+                <Route path="cms/editor" element={
+                  <PermissionGuard permission="content.view">
+                    <CmsArticleEditor />
+                  </PermissionGuard>
+                } />
+                <Route path="cms/editor/:articleId" element={
+                  <PermissionGuard permission="content.view">
+                    <CmsArticleEditor />
+                  </PermissionGuard>
+                } />
+                <Route path="cms/categories" element={
+                  <PermissionGuard permission="content.categories">
+                    <CmsCategories />
+                  </PermissionGuard>
+                } />
+                <Route path="cms/media" element={
+                  <PermissionGuard permission="content.media">
+                    <CmsMedia />
+                  </PermissionGuard>
+                } />
+
                 <Route path="profile" element={<SuperAdminProfile />} />
 
                 {/* Path Aliases for /super-admin/* routes */}
@@ -157,6 +189,31 @@ export default function App() {
                 <Route path="super-admin/team" element={
                   <PermissionGuard permission="team">
                     <TeamManagement />
+                  </PermissionGuard>
+                } />
+                <Route path="super-admin/cms" element={
+                  <PermissionGuard permission="content.view">
+                    <CmsArticles />
+                  </PermissionGuard>
+                } />
+                <Route path="super-admin/cms/editor" element={
+                  <PermissionGuard permission="content.view">
+                    <CmsArticleEditor />
+                  </PermissionGuard>
+                } />
+                <Route path="super-admin/cms/editor/:articleId" element={
+                  <PermissionGuard permission="content.view">
+                    <CmsArticleEditor />
+                  </PermissionGuard>
+                } />
+                <Route path="super-admin/cms/categories" element={
+                  <PermissionGuard permission="content.categories">
+                    <CmsCategories />
+                  </PermissionGuard>
+                } />
+                <Route path="super-admin/cms/media" element={
+                  <PermissionGuard permission="content.media">
+                    <CmsMedia />
                   </PermissionGuard>
                 } />
                 <Route path="super-admin/profile" element={<SuperAdminProfile />} />

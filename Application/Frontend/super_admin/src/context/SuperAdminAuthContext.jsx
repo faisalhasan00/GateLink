@@ -16,6 +16,13 @@ export const ALL_PERMISSIONS = {
   notifications: true,
   ads: true,
   team: true,
+  'content.view': true,
+  'content.create': true,
+  'content.edit': true,
+  'content.delete': true,
+  'content.publish': true,
+  'content.categories': true,
+  'content.media': true,
 };
 
 const SuperAdminAuthContext = createContext({
