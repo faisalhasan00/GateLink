@@ -26,10 +26,35 @@
         "**/node_modules/**"
       ],
       "rewrites": [
-        {
-          "source": "**",
-          "destination": "/index.html"
-        }
+        { "source": "/", "destination": "/index.html" },
+        { "source": "/landing", "destination": "/index.html" },
+        { "source": "/about", "destination": "/index.html" },
+        { "source": "/features", "destination": "/index.html" },
+        { "source": "/solutions", "destination": "/index.html" },
+        { "source": "/contact", "destination": "/index.html" },
+        { "source": "/book-demo", "destination": "/index.html" },
+        { "source": "/download", "destination": "/index.html" },
+        { "source": "/partners", "destination": "/index.html" },
+        { "source": "/refer", "destination": "/index.html" },
+        { "source": "/gate", "destination": "/index.html" },
+        { "source": "/society-management-software", "destination": "/index.html" },
+        { "source": "/visitor-management", "destination": "/index.html" },
+        { "source": "/maintenance-management", "destination": "/index.html" },
+        { "source": "/security-management", "destination": "/index.html" },
+        { "source": "/blog", "destination": "/index.html" },
+        { "source": "/faq", "destination": "/index.html" },
+        { "source": "/help", "destination": "/index.html" },
+        { "source": "/docs", "destination": "/index.html" },
+        { "source": "/privacy", "destination": "/index.html" },
+        { "source": "/terms", "destination": "/index.html" },
+        { "source": "/cookies", "destination": "/index.html" },
+        { "source": "/refund-policy", "destination": "/index.html" },
+        { "source": "/refunds", "destination": "/index.html" },
+        { "source": "/data-processing", "destination": "/index.html" },
+        { "source": "/dpa", "destination": "/index.html" },
+        { "source": "/grievance", "destination": "/index.html" },
+        { "source": "/grievance-redressal", "destination": "/index.html" },
+        { "source": "!**/*.*", "destination": "/index.html" }
       ]
     },
     {
