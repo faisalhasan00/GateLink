@@ -40,7 +40,11 @@ if (typeof window !== 'undefined') {
   }
 }
 
+import { getFunctions, httpsCallable } from 'firebase/functions';
+
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
+export const functions = getFunctions(app, "us-central1");
+export { httpsCallable };
 

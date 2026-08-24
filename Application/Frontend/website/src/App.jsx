@@ -22,6 +22,7 @@ const FaqPage = lazy(() => import('./pages/landing/FaqPage'))
 const HelpCenterPage = lazy(() => import('./pages/landing/HelpCenterPage'))
 const DocsPage = lazy(() => import('./pages/landing/DocsPage'))
 const PrivacyPolicyPage = lazy(() => import('./pages/landing/PrivacyPolicyPage'))
+const AccountDeletionPage = lazy(() => import('./pages/landing/AccountDeletionPage'))
 const TermsPage = lazy(() => import('./pages/landing/TermsPage'))
 const CookiePolicyPage = lazy(() => import('./pages/landing/CookiePolicyPage'))
 const RefundPolicyPage = lazy(() => import('./pages/landing/RefundPolicyPage'))
@@ -75,6 +76,8 @@ export default function App() {
             <Route path="/help" element={<HelpCenterPage />} />
             <Route path="/docs" element={<DocsPage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
+            <Route path="/delete-account" element={<AccountDeletionPage />} />
+            <Route path="/account-deletion" element={<AccountDeletionPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/cookies" element={<CookiePolicyPage />} />
             <Route path="/refund-policy" element={<RefundPolicyPage />} />

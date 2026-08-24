@@ -43,6 +43,13 @@ const {
 // 5. Automated Backup Schedules
 const { scheduledFirestoreBackup } = require("./backup/scheduled_backup");
 
+// 6. Account Deletion & Privacy Workflows
+const {
+  requestAccountDeletion,
+  cancelAccountDeletion,
+  processScheduledAccountDeletion,
+} = require("./admin/account_deletion");
+
 module.exports = {
   // Visitor Management
   notifyResidentOnVisitorArrival,
@@ -53,6 +60,11 @@ module.exports = {
   // Admin & Staff Management
   setSuperAdminRole,
   createStaffUser,
+
+  // Account Deletion & Self-Service Privacy Workflows
+  requestAccountDeletion,
+  cancelAccountDeletion,
+  processScheduledAccountDeletion,
 
   // Notice & Broadcast Notifications
   notifyOnNoticeCreated,
