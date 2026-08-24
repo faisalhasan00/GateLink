@@ -52,7 +52,7 @@ class RecentNoticesList extends ConsumerWidget {
                         width: 40,
                         height: 40,
                         decoration: BoxDecoration(
-                          color: AppColors.notice.withOpacity(0.1),
+                          color: AppColors.notice.withValues(alpha: 0.1),
                           borderRadius: BorderRadius.circular(AppRadius.md),
                         ),
                         child: const Icon(Icons.campaign_rounded,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -13,6 +14,135 @@ import '../widgets/notification_preferences_dialog.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
+
+  void _showPrivacyPolicyModal(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
+      ),
+      builder: (ctx) => Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.shield_outlined, color: AppColors.primary),
+                SizedBox(width: 8),
+                Text(
+                  'Privacy & Data Protection',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            const Text(
+              'GateLink is ISO 27001 certified and complies with India\'s Digital Personal Data Protection (DPDP) Act 2023.',
+              style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: const Icon(Icons.privacy_tip_outlined, color: AppColors.primary),
+              title: const Text('Read Privacy Policy', style: TextStyle(fontWeight: FontWeight.w600)),
+              subtitle: const Text('https://gatelink.in/privacy'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final Uri uri = Uri.parse('https://gatelink.in/privacy');
+                try { await launchUrl(uri, mode: LaunchMode.externalApplication); } catch (_) {}
+              },
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.description_outlined, color: AppColors.primary),
+              title: const Text('Read Terms of Service', style: TextStyle(fontWeight: FontWeight.w600)),
+              subtitle: const Text('https://gatelink.in/terms'),
+              onTap: () async {
+                Navigator.pop(ctx);
+                final Uri uri = Uri.parse('https://gatelink.in/terms');
+                try { await launchUrl(uri, mode: LaunchMode.externalApplication); } catch (_) {}
+              },
+            ),
+            const SizedBox(height: 12),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showAccountDeletionDialog(BuildContext context, WidgetRef ref) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+        ),
+        title: const Row(
+          children: [
+            Icon(Icons.delete_forever_rounded, color: AppColors.error),
+            SizedBox(width: 8),
+            Text(
+              'Request Account Deletion',
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),
+            ),
+          ],
+        ),
+        content: const SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Under India\'s DPDP Act 2023, you have the right to request deletion of your personal resident account data.',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+              ),
+              SizedBox(height: 10),
+              Text(
+                '• Financial & tax audit records (maintenance payment receipts, GST invoices) are retained for legal audit compliance.\n• Active flat access will be revoked upon RWA admin approval.',
+                style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
+              ),
+              SizedBox(height: 12),
+              Text(
+                'To complete account erasure, submit a request to our Data Protection Officer at support@gatelink.in or contact your RWA Admin.',
+                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.primary),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+          ),
+          ElevatedButton.icon(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              final Uri uri = Uri.parse('mailto:support@gatelink.in?subject=Account%20Deletion%20Request%20-%20GateLink');
+              try { await launchUrl(uri, mode: LaunchMode.externalApplication); } catch (_) {}
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Deletion request directed to Data Protection Officer (support@gatelink.in).'),
+                    backgroundColor: AppColors.primary,
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.email_outlined, size: 18),
+            label: const Text('Contact DPO'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.md),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
     showDialog(
@@ -139,14 +269,9 @@ class ProfileScreen extends ConsumerWidget {
                     onSocietySupport: () =>
                         SocietySupportSheet.show(context,
                             societyName: societyName),
-                    onTermsAndPrivacy: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              'GateLink Security & Data Protection v2.4.0 (ISO/IEC 27001 Certified)'),
-                        ),
-                      );
-                    },
+                    onTermsAndPrivacy: () => _showPrivacyPolicyModal(context),
+                    onRequestAccountDeletion: () =>
+                        _showAccountDeletionDialog(context, ref),
                     onLogout: () => _showLogoutDialog(context, ref),
                   ),
                   const SizedBox(height: AppSpacing.xxl),

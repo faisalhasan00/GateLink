@@ -29,6 +29,7 @@ export default function Navbar({ onOpenDemo }) {
 
   const aboutItems = [
     { label: 'About Us', to: '/about' },
+    { label: 'Security Center', to: '/security' },
     { label: 'Blog', to: '/blog' },
     { label: 'Privacy Policy', to: '/privacy' },
   ];

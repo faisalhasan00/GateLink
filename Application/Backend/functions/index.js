@@ -40,6 +40,9 @@ const {
   sendAdminFcmBroadcast,
 } = require("./notices/notice_notifications");
 
+// 5. Automated Backup Schedules
+const { scheduledFirestoreBackup } = require("./backup/scheduled_backup");
+
 module.exports = {
   // Visitor Management
   notifyResidentOnVisitorArrival,
@@ -65,4 +68,7 @@ module.exports = {
   reconcilePendingPayments,
   triggerCashfreePayout,
   scheduledMonthlyPartnerPayouts,
+
+  // Automated System Backups
+  scheduledFirestoreBackup,
 };

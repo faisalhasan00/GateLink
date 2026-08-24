@@ -2,6 +2,9 @@
   "firestore": {
     "rules": "Backend/firestore.rules"
   },
+  "storage": {
+    "rules": "Backend/storage.rules"
+  },
   "functions": [
     {
       "source": "Backend/functions",

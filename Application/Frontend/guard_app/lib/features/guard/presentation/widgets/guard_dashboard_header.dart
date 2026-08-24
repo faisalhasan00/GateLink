@@ -87,7 +87,7 @@ class GuardDashboardHeader extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.error.withOpacity(0.4),
+                            color: AppColors.error.withValues(alpha: 0.4),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           )

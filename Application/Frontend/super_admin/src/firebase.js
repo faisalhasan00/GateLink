@@ -3,6 +3,7 @@ import { getFirestore } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getStorage } from 'firebase/storage';
 import { getFunctions } from 'firebase/functions';
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 
 const getValidEnv = (val, fallback) => {
   if (!val || typeof val !== 'string') return fallback;
@@ -25,8 +26,24 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
+// Initialize Firebase App Check safely if reCAPTCHA Enterprise site key is provided
+if (typeof window !== 'undefined') {
+  const recaptchaKey = import.meta.env.VITE_RECAPTCHA_ENTERPRISE_KEY || import.meta.env.VITE_RECAPTCHA_SITE_KEY;
+  if (recaptchaKey && recaptchaKey.length > 10 && !recaptchaKey.includes('PLACEHOLDER')) {
+    try {
+      initializeAppCheck(app, {
+        provider: new ReCaptchaEnterpriseProvider(recaptchaKey),
+        isTokenAutoRefreshEnabled: true,
+      });
+    } catch (e) {
+      console.warn('App Check initialization note:', e.message);
+    }
+  }
+}
+
 export { firebaseConfig };
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
 export const functions = getFunctions(app, 'asia-south1');
+

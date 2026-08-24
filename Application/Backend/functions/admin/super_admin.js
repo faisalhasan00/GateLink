@@ -10,57 +10,59 @@ const ALLOWED_STAFF_ROLES = ["guard", "security", "staff", "manager"];
  * Safe Admin SDK endpoint to assign { role: 'super_admin' } custom claims.
  * Client-side self-assignment is strictly blocked.
  */
-const setSuperAdminRole = onCall(async (request) => {
-  await verifyActiveCallableUser(request);
+const setSuperAdminRole = onCall(
+  { enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
+  async (request) => {
+    await verifyActiveCallableUser(request);
 
-  // Security check: Only existing super_admin or bootstrap master key allowed
-  const callerClaims = request.auth.token || {};
-  const isExistingSuperAdmin = callerClaims.role === "super_admin";
-  const isBootstrapKeyMatch =
-    request.data.bootstrapKey && request.data.bootstrapKey === process.env.SUPER_ADMIN_BOOTSTRAP_KEY;
+    // Security check: Only existing super_admin or bootstrap master key allowed
+    const callerClaims = request.auth.token || {};
+    const isExistingSuperAdmin = callerClaims.role === "super_admin";
+    const isBootstrapKeyMatch =
+      request.data.bootstrapKey && request.data.bootstrapKey === process.env.SUPER_ADMIN_BOOTSTRAP_KEY;
 
-  if (!isExistingSuperAdmin && !isBootstrapKeyMatch) {
-    logger.error("Unauthorized attempt to assign super_admin role", {
+    if (!isExistingSuperAdmin && !isBootstrapKeyMatch) {
+      logger.error("Unauthorized attempt to assign super_admin role", {
+        functionName: "setSuperAdminRole",
+        callerUid: request.auth.uid,
+      });
+      throw new HttpsError("permission-denied", "Unauthorized to assign super_admin role.");
+    }
+
+    const { targetUid } = request.data || {};
+    if (!targetUid) {
+      throw new HttpsError("invalid-argument", "targetUid is required.");
+    }
+
+    await auth.setCustomUserClaims(targetUid, { role: "super_admin" });
+
+    await db
+      .doc(`users/${targetUid}`)
+      .set({ role: "super_admin", updatedAt: FieldValue.serverTimestamp() }, { merge: true });
+
+    logger.info("Successfully assigned super_admin claim", {
       functionName: "setSuperAdminRole",
       callerUid: request.auth.uid,
+      targetUid,
     });
-    throw new HttpsError("permission-denied", "Unauthorized to assign super_admin role.");
+
+    return { success: true, message: `Successfully assigned super_admin claim to user ${targetUid}` };
   }
-
-  const { targetUid } = request.data || {};
-  if (!targetUid) {
-    throw new HttpsError("invalid-argument", "targetUid is required.");
-  }
-
-  await auth.setCustomUserClaims(targetUid, { role: "super_admin" });
-
-  await db
-    .doc(`users/${targetUid}`)
-    .set({ role: "super_admin", updatedAt: FieldValue.serverTimestamp() }, { merge: true });
-
-  logger.info("Successfully assigned super_admin claim", {
-    functionName: "setSuperAdminRole",
-    callerUid: request.auth.uid,
-    targetUid,
-  });
-
-  return { success: true, message: `Successfully assigned super_admin claim to user ${targetUid}` };
-});
+);
 
 /**
- * SEC-P0: Safe Server-Side Staff / Guard User Provisioning
+ * SEC-P0 & P1: Safe Server-Side Staff / Guard User Provisioning
  * Requires Society Admin (for own society) or Super Admin (platform-wide).
  * Restricted to staff roles: 'guard', 'security', 'staff', 'manager'.
  */
-const createStaffUser = onCall(async (request) => {
-  const { email, password, name, role, societyId, phone, department } = request.data || {};
+const createStaffUser = onCall(
+  { enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
+  async (request) => {
+    const { email, password, name, role, societyId, phone, department } = request.data || {};
 
-  if (!societyId || !email || !password) {
-    throw new HttpsError("invalid-argument", "societyId, email, and password are required.");
-  }
-
-  // 1. Authoritative Caller Verification (Society Admin for own society or Super Admin globally)
-  await verifySocietyAdmin(request, societyId);
+    if (!societyId || !email || !password) {
+      throw new HttpsError("invalid-argument", "societyId, email, and password are required.");
+    }
 
   // 2. Creatable Role Whitelist Validation
   const requestedRole = (role || "guard").toLowerCase().trim();

@@ -1,9 +1,11 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
 
-class RegisterAccountStep extends StatelessWidget {
+class RegisterAccountStep extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController nameController;
   final TextEditingController emailController;
@@ -24,9 +26,24 @@ class RegisterAccountStep extends StatelessWidget {
   });
 
   @override
+  State<RegisterAccountStep> createState() => _RegisterAccountStepState();
+}
+
+class _RegisterAccountStepState extends State<RegisterAccountStep> {
+  bool _agreedToPrivacyPolicy = false;
+  String? _consentError;
+
+  Future<void> _launchUrl(String urlStr) async {
+    final Uri uri = Uri.parse(urlStr);
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {}
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Form(
-      key: formKey,
+      key: widget.formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -49,7 +66,7 @@ class RegisterAccountStep extends StatelessWidget {
           AppTextField(
             label: 'Full Name',
             isRequired: true,
-            controller: nameController,
+            controller: widget.nameController,
             hintText: 'e.g. Faisal Hasan',
             prefixIcon: Icons.person_outline_rounded,
             validator: (v) =>
@@ -61,7 +78,7 @@ class RegisterAccountStep extends StatelessWidget {
           AppTextField(
             label: 'Email Address',
             isRequired: true,
-            controller: emailController,
+            controller: widget.emailController,
             hintText: 'name@example.com',
             keyboardType: TextInputType.emailAddress,
             prefixIcon: Icons.email_outlined,
@@ -79,7 +96,7 @@ class RegisterAccountStep extends StatelessWidget {
           AppTextField(
             label: 'Mobile Number',
             isRequired: true,
-            controller: phoneController,
+            controller: widget.phoneController,
             hintText: '+91 98765 43210',
             keyboardType: TextInputType.phone,
             prefixIcon: Icons.phone_outlined,
@@ -92,7 +109,7 @@ class RegisterAccountStep extends StatelessWidget {
           AppTextField(
             label: 'Password',
             isRequired: true,
-            controller: passwordController,
+            controller: widget.passwordController,
             isPassword: true,
             hintText: '••••••••',
             prefixIcon: Icons.lock_outline_rounded,
@@ -109,17 +126,71 @@ class RegisterAccountStep extends StatelessWidget {
           AppTextField(
             label: 'Confirm Password',
             isRequired: true,
-            controller: confirmPasswordController,
+            controller: widget.confirmPasswordController,
             isPassword: true,
             hintText: '••••••••',
             prefixIcon: Icons.lock_outline_rounded,
             validator: (v) {
-              if (v != passwordController.text) {
+              if (v != widget.passwordController.text) {
                 return 'Passwords do not match';
               }
               return null;
             },
           ),
+          const SizedBox(height: AppSpacing.lg),
+
+          // DPDP Consent Checkbox (Initially Unchecked false)
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: Checkbox(
+                  value: _agreedToPrivacyPolicy,
+                  activeColor: AppColors.primary,
+                  onChanged: (val) {
+                    setState(() {
+                      _agreedToPrivacyPolicy = val ?? false;
+                      if (_agreedToPrivacyPolicy) _consentError = null;
+                    });
+                  },
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: RichText(
+                  text: TextSpan(
+                    style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
+                    children: [
+                      const TextSpan(text: 'I agree to the GateLink '),
+                      TextSpan(
+                        text: 'Privacy Policy',
+                        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => _launchUrl('https://gatelink.in/privacy'),
+                      ),
+                      const TextSpan(text: ' and '),
+                      TextSpan(
+                        text: 'Terms of Service',
+                        style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () => _launchUrl('https://gatelink.in/terms'),
+                      ),
+                      const TextSpan(text: ' under DPDP Act 2023.'),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          if (_consentError != null) ...[
+            const SizedBox(height: 6),
+            Text(
+              _consentError!,
+              style: const TextStyle(color: AppColors.error, fontSize: 12, fontWeight: FontWeight.w500),
+            ),
+          ],
           const SizedBox(height: AppSpacing.xxl),
 
           // Reusable AppButton
@@ -127,8 +198,14 @@ class RegisterAccountStep extends StatelessWidget {
             text: 'Next: Select Location & Society ➔',
             size: AppButtonSize.lg,
             onPressed: () {
-              if (formKey.currentState!.validate()) {
-                onNext();
+              if (!_agreedToPrivacyPolicy) {
+                setState(() {
+                  _consentError = 'You must agree to the Privacy Policy and Terms of Service to proceed.';
+                });
+                return;
+              }
+              if (widget.formKey.currentState!.validate()) {
+                widget.onNext();
               }
             },
           ),
@@ -137,3 +214,4 @@ class RegisterAccountStep extends StatelessWidget {
     );
   }
 }
+

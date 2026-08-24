@@ -1,7 +1,7 @@
 const serviceAccount = {
   "type": "service_account",
   "project_id": "societysphere-b2538",
-  "private_key_id": "27cf2c457830f74dffcb36a7c987a84575867896",
+  "private_key_id": process.env.FIREBASE_PRIVATE_KEY_ID || "",
   "private_key": process.env.FIREBASE_PRIVATE_KEY || "",
   "client_email": "firebase-adminsdk-fbsvc@societysphere-b2538.iam.gserviceaccount.com"
 };

@@ -35,6 +35,7 @@ const SocietyManagementLanding = lazy(() => import('./pages/landing/SocietyManag
 const VisitorManagementLanding = lazy(() => import('./pages/landing/VisitorManagementLanding'))
 const MaintenanceManagementLanding = lazy(() => import('./pages/landing/MaintenanceManagementLanding'))
 const SecurityManagementLanding = lazy(() => import('./pages/landing/SecurityManagementLanding'))
+const SecurityCenterPage = lazy(() => import('./pages/landing/SecurityCenterPage'))
 const NotFoundPage = lazy(() => import('./pages/landing/NotFoundPage'))
 
 export default function App() {
@@ -51,6 +52,7 @@ export default function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/landing" element={<LandingPage />} />
             <Route path="/about" element={<AboutUsPage />} />
+            <Route path="/security" element={<SecurityCenterPage />} />
             <Route path="/features" element={<FeaturesPage />} />
             <Route path="/solutions" element={<SolutionsPage />} />
             <Route path="/contact" element={<LeadGenerationPage />} />

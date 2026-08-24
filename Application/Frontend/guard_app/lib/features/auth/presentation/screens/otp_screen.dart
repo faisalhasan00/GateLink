@@ -162,7 +162,7 @@ class _OtpScreenState extends State<OtpScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.warningSurface,
                   borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.warning.withOpacity(0.3)),
+                  border: Border.all(color: AppColors.warning.withValues(alpha: 0.3)),
                 ),
                 child: Row(
                   children: [

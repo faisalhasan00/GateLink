@@ -20,13 +20,10 @@ export function useNavbar(onOpenDemo) {
       const base = import.meta.env.VITE_SOCIETY_ADMIN_URL;
       return base.endsWith('/login') ? base : `${base}/login`;
     }
-    if (typeof window !== 'undefined') {
+    if (import.meta.env.DEV && typeof window !== 'undefined') {
       const host = window.location.hostname;
       if (host === 'localhost' || host === '127.0.0.1') {
         return 'http://localhost:5174/login';
-      }
-      if (host.includes('web.app') || host.includes('firebaseapp.com')) {
-        return 'https://gatelink-app-staging.web.app/login';
       }
     }
     return 'https://app.gatelink.in/login';

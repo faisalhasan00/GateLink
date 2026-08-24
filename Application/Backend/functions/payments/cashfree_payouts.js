@@ -8,7 +8,7 @@ const { verifyActiveCallableUser } = require("../config/auth_middleware");
  * SEC-P0: Restricted exclusively to authenticated, active Super Admins.
  */
 exports.triggerCashfreePayout = onCall(
-  { region: "asia-south1", cors: true },
+  { region: "asia-south1", cors: true, enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
   async (request) => {
     // 1. Authoritative Backend Authentication & Super Admin Verification
     await verifyActiveCallableUser(request, ["super_admin"]);

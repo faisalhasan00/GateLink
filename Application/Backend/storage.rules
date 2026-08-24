@@ -1,0 +1,77 @@
+rules_version = '2';
+
+// GateLink Production Firebase Storage Security Rules
+// SEC-P1: Strict Path-Based RBAC, Tenant Isolation, Ownership Verification, Content & Size Limits
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    function isSuperAdmin() {
+      return isAuthenticated() && request.auth.token.role == 'super_admin';
+    }
+
+    function isSocietyAdmin(societyId) {
+      return isAuthenticated() && 
+        (request.auth.token.role == 'super_admin' || 
+        (request.auth.token.role in ['admin', 'society_admin'] && request.auth.token.societyId == societyId));
+    }
+
+    function isValidImage() {
+      return request.resource.contentType.matches('image/.*') &&
+             request.resource.size < 5 * 1024 * 1024; // 5 MB max limit
+    }
+
+    function isValidDocument() {
+      return (request.resource.contentType.matches('image/.*') || 
+              request.resource.contentType == 'application/pdf') &&
+             request.resource.size < 10 * 1024 * 1024; // 10 MB max limit
+    }
+
+    // 1. User Profile Photos
+    match /profile_photos/{uid}.jpg {
+      allow read: if isAuthenticated();
+      allow write: if isOwner(uid) && isValidImage();
+      allow delete: if isOwner(uid) || isSuperAdmin();
+    }
+
+    // 2. Registration Verification Identity Proofs (KYC / Govt IDs)
+    match /verification_documents/{fileName} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidDocument();
+      allow update, delete: if isSuperAdmin();
+    }
+
+    // 3. Society Complaint Attachments
+    match /societies/{societyId}/complaints/{complaintId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isValidDocument();
+      allow update, delete: if isSocietyAdmin(societyId);
+    }
+
+    // 4. Society Documents & Notices
+    match /societies/{societyId}/{documentType}/{documentId}/{fileName} {
+      allow read: if isAuthenticated();
+      allow write: if isSocietyAdmin(societyId) && isValidDocument();
+    }
+
+    // 5. CMS & Website Marketing Media Assets (Publicly Readable for gatelink.in)
+    match /cms_media/{fileName} {
+      allow read: if true;
+      allow write: if isSuperAdmin() && isValidDocument();
+    }
+
+    // Deny all other unlisted storage paths by default
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

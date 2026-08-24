@@ -125,7 +125,7 @@ class AppTheme {
         space: 0,
       ),
       scaffoldBackgroundColor: AppColors.background,
-      splashColor: AppColors.primary.withOpacity(0.05),
+      splashColor: AppColors.primary.withValues(alpha: 0.05),
       highlightColor: Colors.transparent,
     );
   }

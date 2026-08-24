@@ -95,6 +95,7 @@ export default function FooterSection() {
           <div>
             <h4 style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 800, marginBottom: '14px', letterSpacing: '0.5px' }}>LEGAL & TRUST</h4>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '9px', fontSize: '13px' }}>
+              <li><Link to="/security" style={{ color: '#38BDF8', fontWeight: 700, textDecoration: 'none' }}>Security Center</Link></li>
               <li><Link to="/privacy" style={{ color: '#94A3B8', textDecoration: 'none' }}>Privacy Policy (DPDP)</Link></li>
               <li><Link to="/terms" style={{ color: '#94A3B8', textDecoration: 'none' }}>Terms & Conditions</Link></li>
               <li><Link to="/refund-policy" style={{ color: '#94A3B8', textDecoration: 'none' }}>Refund & Cancellation</Link></li>

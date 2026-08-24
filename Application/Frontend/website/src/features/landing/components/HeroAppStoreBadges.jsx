@@ -4,10 +4,9 @@ import { Apple, Play, Globe } from 'lucide-react';
 export default function HeroAppStoreBadges({ isDark }) {
   const getSocietyAdminUrl = () => {
     if (import.meta.env.VITE_SOCIETY_ADMIN_URL) return import.meta.env.VITE_SOCIETY_ADMIN_URL;
-    if (typeof window !== 'undefined') {
+    if (import.meta.env.DEV && typeof window !== 'undefined') {
       const host = window.location.hostname;
       if (host === 'localhost' || host === '127.0.0.1') return 'http://localhost:5174';
-      if (host.includes('web.app') || host.includes('firebaseapp.com')) return 'https://gatelink-app-staging.web.app';
     }
     return 'https://app.gatelink.in';
   };

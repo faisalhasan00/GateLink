@@ -62,7 +62,7 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
     final userProfile = ref.read(userProfileProvider).value;
     final firestore = ref.read(firestoreServiceProvider);
 
-    if (user == null || firestore == null) {
+    if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error: Not authenticated or service unavailable.')));
       return;
@@ -344,7 +344,7 @@ class _PriorityChip extends StatelessWidget {
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       decoration: BoxDecoration(
-        color: selected ? color.withOpacity(0.12) : Colors.white,
+        color: selected ? color.withValues(alpha: 0.12) : Colors.white,
         borderRadius: BorderRadius.circular(AppRadius.lg),
         border: Border.all(color: selected ? color : AppColors.border, width: selected ? 1.5 : 1),
       ),

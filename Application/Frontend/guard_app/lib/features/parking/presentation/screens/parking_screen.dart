@@ -103,7 +103,7 @@ class _VehicleCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: status == 'Active' ? AppColors.success.withOpacity(0.1) : AppColors.textSecondary.withOpacity(0.1),
+                    color: status == 'Active' ? AppColors.success.withValues(alpha: 0.1) : AppColors.textSecondary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(AppRadius.full),
                   ),
                   child: Text(status, style: TextStyle(

@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -20,6 +22,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _isRegisterMode = false;
+  bool _agreedToPrivacyPolicy = false;
+  String? _consentError;
 
   // Register fields
   final _nameController = TextEditingController();
@@ -80,18 +84,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  Future<void> _handleGoogleSignIn() async {
-    setState(() => _isLoading = true);
-    try {
-      final result = await ref.read(authServiceProvider).signInWithGoogle();
-      if (result != null && mounted) context.go('/home');
-    } catch (e) {
-      _showError('Google Sign-In failed. Please try again.');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -139,6 +131,66 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 _buildField('Email Address', _emailController, hint: 'you@example.com', keyboardType: TextInputType.emailAddress),
                 const SizedBox(height: AppSpacing.md),
                 _buildPasswordField(),
+                const SizedBox(height: AppSpacing.md),
+
+                // DPDP Privacy Consent Checkbox (Initially Unchecked false)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: Checkbox(
+                        value: _agreedToPrivacyPolicy,
+                        activeColor: AppColors.primary,
+                        onChanged: (val) {
+                          setState(() {
+                            _agreedToPrivacyPolicy = val ?? false;
+                            if (_agreedToPrivacyPolicy) _consentError = null;
+                          });
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(
+                          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
+                          children: [
+                            const TextSpan(text: 'I agree to the GateLink '),
+                            TextSpan(
+                              text: 'Privacy Policy',
+                              style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () async {
+                                  final Uri uri = Uri.parse('https://gatelink.in/privacy');
+                                  try { await launchUrl(uri, mode: LaunchMode.externalApplication); } catch (_) {}
+                                },
+                            ),
+                            const TextSpan(text: ' and '),
+                            TextSpan(
+                              text: 'Terms of Service',
+                              style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () async {
+                                  final Uri uri = Uri.parse('https://gatelink.in/terms');
+                                  try { await launchUrl(uri, mode: LaunchMode.externalApplication); } catch (_) {}
+                                },
+                            ),
+                            const TextSpan(text: ' under DPDP Act 2023.'),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (_consentError != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    _consentError!,
+                    style: const TextStyle(color: AppColors.error, fontSize: 12, fontWeight: FontWeight.w500),
+                  ),
+                ],
                 const SizedBox(height: AppSpacing.xl),
 
                 // Main Action Button
@@ -146,7 +198,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton(
-                    onPressed: _isLoading ? null : (_isRegisterMode ? _handleRegister : _handleEmailLogin),
+                    onPressed: _isLoading
+                        ? null
+                        : () {
+                            if (!_agreedToPrivacyPolicy) {
+                              setState(() {
+                                _consentError = 'You must agree to the Privacy Policy and Terms of Service to proceed.';
+                              });
+                              return;
+                            }
+                            if (_isRegisterMode) {
+                              _handleRegister();
+                            } else {
+                              _handleEmailLogin();
+                            }
+                          },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),

@@ -9,6 +9,7 @@ class ProfileActionsMenu extends StatelessWidget {
   final VoidCallback onReferral;
   final VoidCallback onSocietySupport;
   final VoidCallback onTermsAndPrivacy;
+  final VoidCallback onRequestAccountDeletion;
   final VoidCallback onLogout;
 
   const ProfileActionsMenu({
@@ -19,6 +20,7 @@ class ProfileActionsMenu extends StatelessWidget {
     required this.onReferral,
     required this.onSocietySupport,
     required this.onTermsAndPrivacy,
+    required this.onRequestAccountDeletion,
     required this.onLogout,
   });
 
@@ -70,8 +72,16 @@ class ProfileActionsMenu extends StatelessWidget {
           _MenuItem(
             icon: Icons.privacy_tip_outlined,
             title: 'Privacy Policy & Terms',
-            subtitle: 'GateLink data protection standards',
+            subtitle: 'GateLink DPDP data protection standards',
             onTap: onTermsAndPrivacy,
+          ),
+          const Divider(height: 1),
+          _MenuItem(
+            icon: Icons.delete_forever_rounded,
+            title: 'Request Account Deletion',
+            subtitle: 'DPDP Act 2023 personal data erasure request',
+            isDestructive: true,
+            onTap: onRequestAccountDeletion,
           ),
           const Divider(height: 1),
           _MenuItem(

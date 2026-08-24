@@ -11,11 +11,13 @@ const ALLOWED_SCANNER_ROLES = ["guard", "security", "admin", "society_admin", "s
  * Generates a cryptographically secure 6-digit numeric passcode and 24-hour expiration timestamp.
  * Restricted strictly to active/approved residents for their own registered flat within their own society.
  */
-const generateVisitorPasscode = onCall(async (request) => {
-  const { societyId, name, phone, purpose, hostFlat, expectedDate, expectedTime } = request.data || {};
-  if (!societyId || !name) {
-    throw new HttpsError("invalid-argument", "societyId and name are required.");
-  }
+const generateVisitorPasscode = onCall(
+  { enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
+  async (request) => {
+    const { societyId, name, phone, purpose, hostFlat, expectedDate, expectedTime } = request.data || {};
+    if (!societyId || !name) {
+      throw new HttpsError("invalid-argument", "societyId and name are required.");
+    }
 
   // 1. Authoritative Active Resident Verification (enforces resident role, active status, and societyId match)
   const caller = await verifyActiveResident(request, societyId);
@@ -92,8 +94,10 @@ const generateVisitorPasscode = onCall(async (request) => {
  * Enforces role check (guard, security, admin, society_admin, super_admin) and tenant isolation.
  * Prevents passcode replay attacks and concurrent scan race conditions using Firestore Transaction.
  */
-const validateVisitorPasscode = onCall(async (request) => {
-  const { societyId, passCode } = request.data || {};
+const validateVisitorPasscode = onCall(
+  { enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
+  async (request) => {
+    const { societyId, passCode } = request.data || {};
   if (!societyId || !passCode) {
     throw new HttpsError("invalid-argument", "societyId and passCode are required.");
   }

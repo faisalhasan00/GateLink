@@ -3,11 +3,20 @@ const logger = require("firebase-functions/logger");
 const { db, FieldValue } = require("../config/firebase");
 const { verifySocietyAdmin } = require("../config/auth_middleware");
 
+const allowedOrigins = [
+  "https://gatelink.in",
+  "https://app.gatelink.in",
+  "https://admin.gatelink.in",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:5173",
+];
+
 /**
  * 3. Approve Offline UTR Payment (Society Admin / Super Admin)
- * SEC-P0: Hardened with authoritative tenant binding and active admin verification.
+ * SEC-P0 & P1: Hardened with authoritative tenant binding, active admin verification, and origin CORS restriction.
  */
-const approveOfflinePayment = onRequest({ cors: true }, async (req, res) => {
+const approveOfflinePayment = onRequest({ cors: allowedOrigins }, async (req, res) => {
   try {
     const { societyId, maintenanceBillId } = req.body || {};
     if (!societyId || !maintenanceBillId) {
@@ -55,9 +64,9 @@ const approveOfflinePayment = onRequest({ cors: true }, async (req, res) => {
 
 /**
  * 4. Reject Offline UTR Payment (Society Admin / Super Admin)
- * SEC-P0: Hardened with authoritative tenant binding and active admin verification.
+ * SEC-P0 & P1: Hardened with authoritative tenant binding, active admin verification, and origin CORS restriction.
  */
-const rejectOfflinePayment = onRequest({ cors: true }, async (req, res) => {
+const rejectOfflinePayment = onRequest({ cors: allowedOrigins }, async (req, res) => {
   try {
     const { societyId, maintenanceBillId, rejectionReason } = req.body || {};
     if (!societyId || !maintenanceBillId) {

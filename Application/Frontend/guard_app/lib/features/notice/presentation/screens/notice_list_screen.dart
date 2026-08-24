@@ -64,7 +64,7 @@ class NoticeListScreen extends ConsumerWidget {
                         width: 44,
                         height: 44,
                         decoration: BoxDecoration(
-                          color: AppColors.notice.withOpacity(0.12),
+                          color: AppColors.notice.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(AppRadius.md),
                         ),
                         child: const Icon(Icons.campaign_rounded, color: AppColors.notice, size: 22),

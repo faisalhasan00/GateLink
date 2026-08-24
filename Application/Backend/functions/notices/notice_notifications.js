@@ -215,7 +215,9 @@ const notifyOnBroadcastCreated = onDocumentCreated(
  * Authorized for Society Admin (for own society) and Super Admin (platform-wide or society).
  * Replaces client-side service account JWT signing.
  */
-const sendAdminFcmBroadcast = onCall(async (request) => {
+const sendAdminFcmBroadcast = onCall(
+  { enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
+  async (request) => {
   const { title, body, category, scope, societyId, data } = request.data || {};
 
   if (!title || !body) {

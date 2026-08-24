@@ -76,7 +76,7 @@ class _VisitorCard extends ConsumerWidget {
         children: [
           CircleAvatar(
             radius: 22,
-            backgroundColor: AppColors.visitor.withOpacity(0.1),
+            backgroundColor: AppColors.visitor.withValues(alpha: 0.1),
             child: Text(
               visitor.initials,
               style: const TextStyle(
@@ -161,7 +161,7 @@ class _ApproveButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(AppRadius.sm),
         ),
         child: Text(label,

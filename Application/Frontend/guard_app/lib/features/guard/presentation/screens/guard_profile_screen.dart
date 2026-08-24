@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -152,6 +153,22 @@ class GuardProfileScreen extends ConsumerWidget {
                 },
                 icon: const Icon(Icons.lock_reset_rounded),
                 label: const Text('Change Guard Account Password', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton.icon(
+                onPressed: () async {
+                  final Uri uri = Uri.parse('https://gatelink.in/privacy');
+                  try { await launchUrl(uri, mode: LaunchMode.externalApplication); } catch (_) {}
+                },
+                icon: const Icon(Icons.shield_outlined, color: AppColors.primary),
+                label: const Text('Privacy Policy & DPDP Standards', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
                 style: OutlinedButton.styleFrom(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
                 ),
