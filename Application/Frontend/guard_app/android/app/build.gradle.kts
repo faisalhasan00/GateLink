@@ -38,11 +38,13 @@ android {
             val storeFileProp = keystoreProperties.getProperty("storeFile")
             val storePasswordProp = keystoreProperties.getProperty("storePassword")
 
-            if (storeFileProp != null) {
+            if (storeFileProp != null && file(storeFileProp).exists()) {
                 keyAlias = keyAliasProp
                 keyPassword = keyPasswordProp
                 storeFile = file(storeFileProp)
                 storePassword = storePasswordProp
+            } else {
+                signingConfig = signingConfigs.getByName("debug")
             }
         }
     }

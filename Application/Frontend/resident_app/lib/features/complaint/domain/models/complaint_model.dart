@@ -49,7 +49,7 @@ class ComplaintModel {
       title: map['title'] as String? ?? 'Complaint',
       category: map['category'] as String? ?? 'General',
       description: map['description'] as String? ?? '',
-      status: map['status'] as String? ?? 'Open',
+      status: (map['status'] as String? ?? 'open').toLowerCase(),
       raisedBy: map['raisedBy'] as String? ?? map['uid'] as String? ?? '',
       residentUid: map['residentUid'] as String? ?? map['uid'] as String? ?? '',
       residentName: map['residentName'] as String? ?? 'Resident',
@@ -91,10 +91,15 @@ class ComplaintModel {
     };
   }
 
-  bool get isResolved => status.toLowerCase() == 'resolved';
-  bool get isInProgress =>
-      status.toLowerCase() == 'in progress' ||
-      status.toLowerCase() == 'assigned';
+  bool get isResolved {
+    final s = status.toLowerCase();
+    return s == 'resolved' || s == 'closed' || s == 'completed';
+  }
+
+  bool get isInProgress {
+    final s = status.toLowerCase();
+    return s == 'in_progress' || s == 'in progress' || s == 'assigned';
+  }
 
   ComplaintModel copyWith({
     String? id,

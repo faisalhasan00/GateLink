@@ -76,6 +76,15 @@ export default function Complaints() {
     }
   };
 
+  const normalizeStatus = (status) => {
+    const s = (status || '').toLowerCase().trim();
+    if (s === 'in progress' || s === 'in_progress') return 'in_progress';
+    if (s === 'resolved' || s === 'completed' || s === 'closed') return 'resolved';
+    if (s === 'rejected') return 'rejected';
+    if (s === 'assigned') return 'assigned';
+    return 'open';
+  };
+
   const filteredComplaints = complaints.filter(c => {
     const queryStr = searchQuery.toLowerCase();
     const idMatches = (c.id || '').toLowerCase().includes(queryStr);
@@ -84,18 +93,18 @@ export default function Complaints() {
     const categoryMatches = (c.category || '').toLowerCase().includes(queryStr);
     const titleMatches = (c.title || c.description || '').toLowerCase().includes(queryStr);
     const matchesSearch = idMatches || residentMatches || flatMatches || categoryMatches || titleMatches;
-    const matchesStatus = statusFilter === 'All' || c.status === statusFilter;
+    const matchesStatus = statusFilter === 'All' || normalizeStatus(c.status) === normalizeStatus(statusFilter);
     const matchesPriority = priorityFilter === 'All' || (c.priority || 'Medium') === priorityFilter;
     const matchesCategory = categoryFilter === 'All' || c.category === categoryFilter;
     return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
   });
 
   const totalCount = complaints.length;
-  const openCount = complaints.filter(c => !c.status || c.status === 'Open' || c.status === 'Pending').length;
-  const assignedCount = complaints.filter(c => c.status === 'Assigned' || c.assignedStaffName).length;
-  const inProgressCount = complaints.filter(c => c.status === 'In Progress' || c.status === 'in_progress').length;
-  const resolvedCount = complaints.filter(c => c.status === 'Completed' || c.status === 'Resolved' || c.status === 'Closed').length;
-  const highPriorityCount = complaints.filter(c => c.priority === 'High' || c.priority === 'Critical').length;
+  const openCount = complaints.filter(c => normalizeStatus(c.status) === 'open').length;
+  const assignedCount = complaints.filter(c => normalizeStatus(c.status) === 'assigned' || c.assignedStaffName).length;
+  const inProgressCount = complaints.filter(c => normalizeStatus(c.status) === 'in_progress').length;
+  const resolvedCount = complaints.filter(c => normalizeStatus(c.status) === 'resolved').length;
+  const highPriorityCount = complaints.filter(c => (c.priority || '').toLowerCase() === 'high' || (c.priority || '').toLowerCase() === 'critical').length;
 
   if (loading) return <div style={{ padding: '32px', textAlign: 'center' }}>Loading complaint register...</div>;
 
@@ -174,10 +183,11 @@ export default function Complaints() {
           />
           <select className="form-select" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} style={{ padding: '8px 12px', borderRadius: '8px', fontSize: '13px' }}>
             <option value="All">Status: All</option>
-            <option value="Open">Open</option>
-            <option value="Assigned">Assigned</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
+            <option value="open">Open</option>
+            <option value="assigned">Assigned</option>
+            <option value="in_progress">In Progress</option>
+            <option value="resolved">Resolved</option>
+            <option value="rejected">Rejected</option>
           </select>
         </div>
       </div>
@@ -214,12 +224,13 @@ export default function Complaints() {
                       <select
                         className="form-select"
                         style={{ padding: '4px 8px', fontSize: '11px' }}
-                        value={c.status || 'Open'}
+                        value={normalizeStatus(c.status)}
                         onChange={(e) => handleUpdateStatus(c.id, e.target.value)}
                       >
-                        <option value="Open">Open</option>
-                        <option value="In Progress">In Progress</option>
-                        <option value="Completed">Completed</option>
+                        <option value="open">Open</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="rejected">Rejected</option>
                       </select>
                     </td>
                     <td>

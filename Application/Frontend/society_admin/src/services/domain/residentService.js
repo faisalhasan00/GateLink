@@ -6,14 +6,10 @@ import {
   deleteDoc, 
   onSnapshot, 
   query, 
-  where, 
-  writeBatch 
+  where 
 } from 'firebase/firestore';
-import { initializeApp, deleteApp } from 'firebase/app';
-import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { httpsCallable } from 'firebase/functions';
-import { db, functions, firebaseConfig } from '../../firebase';
-import { generateUUID } from '../../utils/security';
+import { db, functions } from '../../firebase';
 
 export const residentService = {
   subscribeResidents(societyId, callback, onError) {
@@ -146,63 +142,20 @@ export const residentService = {
     const password = (staffData.password || '').trim() || 'SecGuard@2026';
     const name = staffData.name || 'Security Guard';
 
-    try {
-      const createStaffCallable = httpsCallable(functions, 'createStaffUser');
-      const res = await createStaffCallable({
-        societyId,
-        email,
-        password,
-        name,
-        phone: staffData.phone || '',
-        department: staffData.department || 'Security & Gate',
-        role: 'guard',
-      });
-      if (res?.data?.success && res.data.uid) {
-        return res.data.uid;
-      }
-    } catch (cfErr) {
-      console.warn("Cloud function provisioning fallback to client:", cfErr?.message || cfErr);
-    }
-
-    let staffUid = null;
-    let provisionApp = null;
-    if (email && password) {
-      try {
-        const appName = `StaffProvisioner-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
-        provisionApp = initializeApp(firebaseConfig, appName);
-        const provisionAuth = getAuth(provisionApp);
-        const userCredential = await createUserWithEmailAndPassword(provisionAuth, email, password);
-        staffUid = userCredential.user?.uid;
-      } catch (authErr) {
-        console.warn("Staff Auth user provisioning info:", authErr?.message || authErr);
-      } finally {
-        if (provisionApp) {
-          try {
-            await deleteApp(provisionApp);
-          } catch (e) {}
-        }
-      }
-    }
-
-    const docId = staffUid || generateUUID();
-    const payload = {
-      uid: docId,
-      name: name,
-      email: email,
+    const createStaffCallable = httpsCallable(functions, 'createStaffUser');
+    const res = await createStaffCallable({
+      societyId,
+      email,
+      password,
+      name,
       phone: staffData.phone || '',
       department: staffData.department || 'Security & Gate',
       role: 'guard',
-      status: staffData.status || 'Active',
-      societyId: societyId,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
+    });
 
-    const batch = writeBatch(db);
-    batch.set(doc(db, `societies/${societyId}/users`, docId), payload, { merge: true });
-    batch.set(doc(db, 'users', docId), payload, { merge: true });
-    await batch.commit();
-
-    return docId;
+    if (res?.data?.success && res.data.uid) {
+      return res.data.uid;
+    }
+    throw new Error(res?.data?.message || 'Failed to provision staff member.');
   }
 };

@@ -37,6 +37,7 @@ const { scheduledMonthlyPartnerPayouts } = require("./payments/scheduled_payouts
 const {
   notifyOnNoticeCreated,
   notifyOnBroadcastCreated,
+  sendAdminFcmBroadcast,
 } = require("./notices/notice_notifications");
 
 module.exports = {
@@ -53,6 +54,7 @@ module.exports = {
   // Notice & Broadcast Notifications
   notifyOnNoticeCreated,
   notifyOnBroadcastCreated,
+  sendAdminFcmBroadcast,
 
   // Payment Processing & Payouts
   createCashfreeOrder,

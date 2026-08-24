@@ -66,7 +66,7 @@ class ComplaintRepositoryImpl implements ComplaintRepository {
       'title': title.trim(),
       'description': description.trim(),
       'category': category,
-      'status': 'Open',
+      'status': 'open',
       'raisedBy': residentUid,
       'residentUid': residentUid,
       'residentName': residentName,

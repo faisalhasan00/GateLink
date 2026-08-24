@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_cashfree_pg_sdk/utils/cfenums.dart';
@@ -282,26 +281,6 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
 
       if (mounted) {
         if (verifiedOrder?.status == 'SUCCESS') {
-          final targetBillId = _effectiveBillId ?? widget.billId;
-          if (targetBillId != null && targetBillId.isNotEmpty) {
-            final nowStr = DateTime.now().toIso8601String();
-            final txnId = _activeOrderId ?? 'CF-PAID-SUCCESS';
-            try {
-              await FirebaseFirestore.instance
-                  .doc('societies/$activeSocId/maintenance_bills/$targetBillId')
-                  .set({
-                'status': 'paid',
-                'paymentMethod': 'Cashfree Online',
-                'transactionId': txnId,
-                'paidAt': nowStr,
-                'updatedAt': nowStr,
-              }, SetOptions(merge: true));
-            } catch (fsErr) {
-              debugPrint(
-                  '[PaymentFlow] Error updating bill status in Firestore: $fsErr');
-            }
-          }
-
           PaymentSuccessBottomSheet.show(
             context,
             amount: verifiedOrder?.amount ?? _effectiveAmount ?? 1.0,

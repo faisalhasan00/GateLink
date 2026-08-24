@@ -53,7 +53,7 @@ class VisitorPassService {
 
     final data = targetDoc.data() as Map<String, dynamic>;
     final status = data['status'] as String? ?? 'pending';
-    final expiresAtStr = data['expiresAt'] as String?;
+    final expiresAtStr = (data['passCodeExpiresAt'] ?? data['expiresAt']) as String?;
 
     // 2. Expiration Check
     if (expiresAtStr != null && expiresAtStr.isNotEmpty) {
