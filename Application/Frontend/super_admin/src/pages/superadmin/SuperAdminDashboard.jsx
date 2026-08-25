@@ -31,7 +31,7 @@ export default function SuperAdminDashboard() {
         </div>
 
         <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-          <Link to="/societies" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
+          <Link to="/societies?openWizard=true" state={{ openWizard: true }} className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
             <Building2 size={16} /> + Onboard New Society
           </Link>
         </div>

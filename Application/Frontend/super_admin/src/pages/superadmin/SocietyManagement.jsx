@@ -7,7 +7,10 @@ import SocietyListTable from '../../features/societies/components/SocietyListTab
 import CreatedCredentialsModal from '../../features/societies/components/CreatedCredentialsModal';
 import SocietyDetailModal from '../../features/societies/components/SocietyDetailModal';
 
+import { useLocation } from 'react-router-dom';
+
 export default function SocietyManagement() {
+  const location = useLocation();
   const {
     societies,
     loading,
@@ -26,6 +29,12 @@ export default function SocietyManagement() {
     handleWizardSuccess,
     handleCopyCredentials
   } = useSocieties();
+
+  React.useEffect(() => {
+    if (location.state?.openWizard || location.search.includes('openWizard=true')) {
+      setShowWizard(true);
+    }
+  }, [location, setShowWizard]);
 
   if (loading) return <div style={{ padding: '20px' }}>Loading societies...</div>;
 
@@ -55,6 +64,8 @@ export default function SocietyManagement() {
       {/* Onboarding Wizard Modal */}
       {showWizard && (
         <SocietyOnboardingWizard
+          isOpen={showWizard}
+          existingSocieties={societies}
           onClose={() => setShowWizard(false)}
           onSuccess={handleWizardSuccess}
         />
