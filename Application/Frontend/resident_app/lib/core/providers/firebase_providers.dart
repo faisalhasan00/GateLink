@@ -74,15 +74,10 @@ final userNotificationServiceProvider = Provider<UserNotificationService>((ref) 
 // ── VISITOR PROVIDERS ─────────────────────────────────────────────────────────
 
 /// A real-time stream provider for the live visitor log.
-final visitorsStreamProvider = StreamProvider<List<VisitorModel>>((ref) {
-  return ref.watch(visitorsProvider.stream);
-});
+final visitorsStreamProvider = visitorsProvider;
 
 /// Stream of pending visitors for the currently logged-in resident's flat.
-final pendingVisitorsForFlatStreamProvider =
-    StreamProvider<List<VisitorModel>>((ref) {
-  return ref.watch(pendingVisitorsForFlatProvider.stream);
-});
+final pendingVisitorsForFlatStreamProvider = pendingVisitorsForFlatProvider;
 
 /// Notification watcher — ref.watch this high in the widget tree to start alerts.
 final visitorNotificationWatcherProvider = StreamProvider<int>((ref) async* {

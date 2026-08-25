@@ -4,7 +4,6 @@ import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../complaint/providers/complaint_providers.dart';
 import '../../../maintenance/presentation/screens/pay_maintenance_screen.dart';
 
 class DynamicMaintenanceBanner extends ConsumerWidget {
@@ -23,6 +22,9 @@ class DynamicMaintenanceBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final billsAsync = ref.watch(maintenanceBillsStreamProvider);
+    final complaintsAsync = ref.watch(myComplaintsStreamProvider);
+    final visitorsAsync = ref.watch(visitorsStreamProvider);
+    final profile = ref.watch(userProfileProvider).value;
 
     return billsAsync.when(
       data: (bills) {
@@ -30,9 +32,6 @@ class DynamicMaintenanceBanner extends ConsumerWidget {
 
         // ── STATE 1: ALL DUES PAID (MATCHING EXACT CARD DESIGN) ───────────────
         if (pendingBills.isEmpty) {
-          final complaintsAsync = ref.watch(myComplaintsStreamProvider);
-          final visitorsAsync = ref.watch(visitorsStreamProvider);
-          final profile = ref.watch(userProfileProvider).value;
 
           final openComplaintsCount = (complaintsAsync.value ?? [])
               .where((c) =>

@@ -22,7 +22,7 @@ final visitorControllerProvider =
 final visitorsProvider = StreamProvider<List<VisitorModel>>((ref) {
   final repo = ref.watch(visitorRepositoryProvider);
   final profile = ref.watch(userProfileProvider).value;
-  if (profile == null) return const Stream.empty();
+  if (profile == null) return Stream.value(<VisitorModel>[]);
 
   return repo.watchVisitorsForResident(
     residentUid: profile.uid,
@@ -36,13 +36,13 @@ final pendingVisitorsForFlatProvider =
     StreamProvider<List<VisitorModel>>((ref) {
   final repo = ref.watch(visitorRepositoryProvider);
   final profile = ref.watch(userProfileProvider).value;
-  if (profile == null) return const Stream.empty();
+  if (profile == null) return Stream.value(<VisitorModel>[]);
 
   final flatNumber = profile.flatNumber;
   final tower = profile.tower;
   final uid = profile.uid;
 
-  if (flatNumber.isEmpty && uid.isEmpty) return const Stream.empty();
+  if (flatNumber.isEmpty && uid.isEmpty) return Stream.value(<VisitorModel>[]);
 
   return repo.watchPendingVisitorsForResident(
     residentUid: uid,
