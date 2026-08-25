@@ -19,6 +19,7 @@ import {
   onSnapshot, 
   query, 
   orderBy,
+  where,
   writeBatch
 } from 'firebase/firestore';
 import { initializeApp, deleteApp } from 'firebase/app';
@@ -31,7 +32,15 @@ export const superAdminService = {
   subscribeSocieties(callback, onError) {
     const q = query(collection(db, 'societies'), orderBy('createdAt', 'desc'));
     return onSnapshot(q, (snap) => {
-      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const data = snap.docs.map(d => {
+        const docData = d.data();
+        return {
+          ...docData,
+          id: d.id, // Primary Firestore document key
+          docId: d.id,
+          uuid: docData.id || d.id
+        };
+      });
       callback(data);
     }, onError);
   },
@@ -234,18 +243,72 @@ export const superAdminService = {
 
   async updateSocietyStatus(societyId, status) {
     if (!societyId) throw new Error('Society ID is required');
-    await updateDoc(doc(db, 'societies', societyId), {
-      status,
-      updatedAt: new Date().toISOString(),
-    });
+
+    // 1. Direct document key match
+    const docRef = doc(db, 'societies', societyId);
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      await updateDoc(docRef, {
+        status,
+        updatedAt: new Date().toISOString(),
+      });
+      return;
+    }
+
+    // 2. Fallback query by internal `id` == societyId
+    const q1 = query(collection(db, 'societies'), where('id', '==', societyId));
+    const snap1 = await getDocs(q1);
+    if (!snap1.empty) {
+      await updateDoc(snap1.docs[0].ref, {
+        status,
+        updatedAt: new Date().toISOString(),
+      });
+      return;
+    }
+
+    // 3. Fallback query by `societyId` == societyId
+    const q2 = query(collection(db, 'societies'), where('societyId', '==', societyId));
+    const snap2 = await getDocs(q2);
+    if (!snap2.empty) {
+      await updateDoc(snap2.docs[0].ref, {
+        status,
+        updatedAt: new Date().toISOString(),
+      });
+      return;
+    }
+
+    throw new Error(`Society document "${societyId}" not found in database.`);
   },
 
   async updateSocietyFeatures(societyId, featureToggles) {
     if (!societyId) throw new Error('Society ID is required');
-    await updateDoc(doc(db, 'societies', societyId), {
+    const payload = {
       features: featureToggles,
       updatedAt: new Date().toISOString(),
-    });
+    };
+
+    const docRef = doc(db, 'societies', societyId);
+    const snap = await getDoc(docRef);
+    if (snap.exists()) {
+      await updateDoc(docRef, payload);
+      return;
+    }
+
+    const q1 = query(collection(db, 'societies'), where('id', '==', societyId));
+    const snap1 = await getDocs(q1);
+    if (!snap1.empty) {
+      await updateDoc(snap1.docs[0].ref, payload);
+      return;
+    }
+
+    const q2 = query(collection(db, 'societies'), where('societyId', '==', societyId));
+    const snap2 = await getDocs(q2);
+    if (!snap2.empty) {
+      await updateDoc(snap2.docs[0].ref, payload);
+      return;
+    }
+
+    throw new Error(`Society document "${societyId}" not found in database.`);
   },
 
   // ── CRM INBOUND LEADS ──────────────────────────────────────────────────
