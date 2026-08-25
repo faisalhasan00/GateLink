@@ -107,6 +107,31 @@ Future<void> saveFcmToken() async {
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Replace default Flutter plain grey ErrorWidget in release mode with a clean fallback card
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.info_outline_rounded, color: Color(0xFF64748B), size: 28),
+          const SizedBox(height: 6),
+          Text(
+            kDebugMode ? details.exceptionAsString() : 'Content temporarily unavailable',
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
+          ),
+        ],
+      ),
+    );
+  };
+
   // Initialize Firebase safely
   try {
     await Firebase.initializeApp(

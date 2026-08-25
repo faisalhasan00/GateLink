@@ -11,6 +11,7 @@ class BillingService {
   }) : _db = db ?? FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> maintenanceBillsStream(String uid) {
+    if (societyId.isEmpty || uid.isEmpty) return const Stream.empty();
     return _db
         .collection('societies/$societyId/maintenance_bills')
         .where('residentUid', isEqualTo: uid)
@@ -18,6 +19,7 @@ class BillingService {
   }
 
   Stream<QuerySnapshot> paymentReceiptsStream(String uid) {
+    if (societyId.isEmpty || uid.isEmpty) return const Stream.empty();
     return _db
         .collection('societies/$societyId/payment_receipts')
         .where('residentUid', isEqualTo: uid)

@@ -19,7 +19,7 @@ class EntryTypeSelector extends StatelessWidget {
       {'type': EntryType.guest, 'label': 'Guest', 'icon': Icons.person_rounded},
       {'type': EntryType.delivery, 'label': 'Delivery', 'icon': Icons.local_shipping_rounded},
       {'type': EntryType.cab, 'label': 'Cab / Taxi', 'icon': Icons.local_taxi_rounded},
-      {'type': EntryType.service, 'label': 'Daily Help', 'icon': Icons.cleaning_services_rounded},
+      {'type': EntryType.dailyHelp, 'label': 'Daily Help', 'icon': Icons.cleaning_services_rounded},
     ];
 
     return Row(

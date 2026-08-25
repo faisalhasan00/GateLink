@@ -11,6 +11,7 @@ class DocumentService {
   }) : _db = db ?? FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> documentsStream() {
+    if (societyId.isEmpty) return const Stream.empty();
     return _db.collection('societies/$societyId/documents').snapshots();
   }
 

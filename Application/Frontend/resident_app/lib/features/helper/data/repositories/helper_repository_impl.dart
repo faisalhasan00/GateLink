@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/helper_log_model.dart';
-import '../models/helper_model.dart';
+import '../../domain/models/helper_log_model.dart';
+import '../../domain/models/helper_model.dart';
 import '../../domain/repositories/helper_repository.dart';
 
 class HelperRepositoryImpl implements HelperRepository {

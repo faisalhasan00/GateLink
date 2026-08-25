@@ -27,10 +27,12 @@ class VisitorService {
   // ── STREAMS ───────────────────────────────────────────────────────────────
 
   Stream<QuerySnapshot> visitorsStream() {
+    if (societyId.isEmpty) return const Stream.empty();
     return _db.collection('societies/$societyId/visitors').snapshots();
   }
 
   Stream<QuerySnapshot> pendingVisitorsStream() {
+    if (societyId.isEmpty) return const Stream.empty();
     return _db
         .collection('societies/$societyId/visitors')
         .where('status', isEqualTo: 'pending')
@@ -38,6 +40,7 @@ class VisitorService {
   }
 
   Stream<QuerySnapshot> pendingVisitorsForFlatStream(String flatNumber) {
+    if (societyId.isEmpty) return const Stream.empty();
     return _db
         .collection('societies/$societyId/visitors')
         .where('status', isEqualTo: 'pending')
@@ -45,6 +48,7 @@ class VisitorService {
   }
 
   Stream<QuerySnapshot> residentsStream() {
+    if (societyId.isEmpty) return const Stream.empty();
     return _db
         .collection('societies/$societyId/users')
         .where('role', isEqualTo: 'resident')

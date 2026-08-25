@@ -11,6 +11,7 @@ class ComplaintService {
   }) : _db = db ?? FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> complaintsStream(String uid) {
+    if (societyId.isEmpty || uid.isEmpty) return const Stream.empty();
     return _db
         .collection('societies/$societyId/complaints')
         .where('raisedBy', isEqualTo: uid)
@@ -18,6 +19,7 @@ class ComplaintService {
   }
 
   Stream<DocumentSnapshot> complaintDetailStream(String complaintId) {
+    if (societyId.isEmpty || complaintId.isEmpty) return const Stream.empty();
     return _db
         .collection('societies/$societyId/complaints')
         .doc(complaintId)

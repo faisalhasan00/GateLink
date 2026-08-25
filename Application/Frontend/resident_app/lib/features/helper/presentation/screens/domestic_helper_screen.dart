@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../domain/models/helper_log_model.dart';
-import '../domain/models/helper_model.dart';
-import '../providers/helper_providers.dart';
+import '../../domain/models/helper_log_model.dart';
+import '../../domain/models/helper_model.dart';
+import '../../providers/helper_providers.dart';
 import 'register_helper_screen.dart';
 
 class DomesticHelperScreen extends ConsumerWidget {

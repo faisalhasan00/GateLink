@@ -16,8 +16,17 @@ if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(FileInputStream(keystorePropertiesFile))
 }
 
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+
+val flutterVersionCode = localProperties.getProperty("flutter.versionCode")?.toInt() ?: 3
+val flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "1.0.2"
+
 android {
-    namespace = "in.gatelink.resident"
+    namespace = "in.gatelink.app"
     compileSdk = 36
     ndkVersion = "28.2.13676358"
 
@@ -44,17 +53,17 @@ android {
                 storeFile = file(storeFileProp)
                 storePassword = storePasswordProp
             } else {
-                signingConfig = signingConfigs.getByName("debug")
+                initWith(getByName("debug"))
             }
         }
     }
 
     defaultConfig {
-        applicationId = "in.gatelink.resident"
+        applicationId = "in.gatelink.app"
         minSdk = flutter.minSdkVersion
         targetSdk = 35
-        versionCode = flutter.versionCode
-        versionName = flutter.versionName
+        versionCode = flutterVersionCode
+        versionName = flutterVersionName
         resValue("string", "app_name", "GateLink")
     }
 
@@ -68,12 +77,12 @@ android {
     productFlavors {
         create("production") {
             dimension = "environment"
-            applicationId = "in.gatelink.resident"
+            applicationId = "in.gatelink.app"
             resValue("string", "app_name", "GateLink")
         }
         create("staging") {
             dimension = "environment"
-            applicationId = "in.gatelink.resident.staging"
+            applicationId = "in.gatelink.app.staging"
             applicationIdSuffix = ".staging"
             resValue("string", "app_name", "GateLink Staging")
         }

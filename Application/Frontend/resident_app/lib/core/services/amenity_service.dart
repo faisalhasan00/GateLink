@@ -11,10 +11,12 @@ class AmenityService {
   }) : _db = db ?? FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> amenitiesStream() {
+    if (societyId.isEmpty) return const Stream.empty();
     return _db.collection('societies/$societyId/amenities').snapshots();
   }
 
   Stream<QuerySnapshot> myBookingsStream(String uid) {
+    if (societyId.isEmpty || uid.isEmpty) return const Stream.empty();
     return _db
         .collection('societies/$societyId/amenity_bookings')
         .where('bookedBy', isEqualTo: uid)

@@ -11,6 +11,7 @@ class ParkingService {
   }) : _db = db ?? FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> parkingStream(String uid) {
+    if (societyId.isEmpty || uid.isEmpty) return const Stream.empty();
     return _db
         .collection('societies/$societyId/parking')
         .where('residentUid', isEqualTo: uid)

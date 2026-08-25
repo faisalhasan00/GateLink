@@ -11,6 +11,7 @@ class NoticeService {
   }) : _db = db ?? FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> noticesStream() {
+    if (societyId.isEmpty) return const Stream.empty();
     return _db
         .collection('societies/$societyId/notices')
         .orderBy('createdAt', descending: true)

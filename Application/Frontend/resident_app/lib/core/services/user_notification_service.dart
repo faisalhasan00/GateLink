@@ -11,6 +11,7 @@ class UserNotificationService {
   }) : _db = db ?? FirebaseFirestore.instance;
 
   Stream<QuerySnapshot> notificationsStream(String uid) {
+    if (societyId.isEmpty || uid.isEmpty) return const Stream.empty();
     return _db
         .collection('societies/$societyId/users/$uid/notifications')
         .orderBy('createdAt', descending: true)
@@ -18,6 +19,7 @@ class UserNotificationService {
   }
 
   Stream<int> unreadNotificationsCountStream(String uid) {
+    if (societyId.isEmpty || uid.isEmpty) return Stream.value(0);
     return _db
         .collection('societies/$societyId/users/$uid/notifications')
         .where('read', isEqualTo: false)

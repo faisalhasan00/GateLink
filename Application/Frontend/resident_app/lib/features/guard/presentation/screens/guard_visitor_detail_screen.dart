@@ -163,10 +163,10 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                         _DetailRow(label: 'Entry Timestamp', value: entryTime),
                       if (exitTime != null)
                         _DetailRow(label: 'Exit Timestamp', value: exitTime),
-                      if (data['durationString'] != null)
+                      if (visitor.durationString != null)
                         _DetailRow(
                             label: 'Visit Duration',
-                            value: data['durationString'] as String),
+                            value: visitor.durationString!),
                     ],
                   ),
                 ),
@@ -220,7 +220,7 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                           title: 'Resident Approved Request',
                           subtitle: 'Approved by $residentName',
                           timestamp:
-                              data['approvedAt'] as String? ?? 'Approved',
+                              visitor.approvedAt ?? 'Approved',
                           icon: Icons.check_circle_rounded,
                           color: AppColors.success,
                         )
@@ -228,7 +228,7 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                         _TimelineStep(
                           title: 'Resident Denied Entry',
                           subtitle: 'Entry request rejected by $residentName',
-                          timestamp: data['rejectedAt'] as String? ?? 'Denied',
+                          timestamp: visitor.rejectedAt ?? 'Denied',
                           icon: Icons.cancel_rounded,
                           color: AppColors.error,
                         ),
@@ -244,7 +244,7 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                         _TimelineStep(
                           title: 'Visitor Checked Out',
                           subtitle:
-                              'Visit Duration: ${data["durationString"] ?? "Checked Out"}',
+                              'Visit Duration: ${visitor.durationString ?? "Checked Out"}',
                           timestamp: exitTime as String,
                           icon: Icons.exit_to_app_rounded,
                           color: AppColors.textSecondary,
@@ -264,7 +264,7 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                           onPressed: () async {
                             final svc = ref.read(firestoreServiceProvider);
                             if (svc != null) {
-                              await svc.markVisitorExit(doc.id);
+                              await svc.markVisitorExit(visitor.id);
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
@@ -289,7 +289,7 @@ class GuardVisitorDetailScreen extends ConsumerWidget {
                           onPressed: () async {
                             final svc = ref.read(firestoreServiceProvider);
                             if (svc != null) {
-                              await svc.updateVisitorStatus(doc.id, 'inside');
+                              await svc.updateVisitorStatus(visitor.id, 'inside');
                               if (context.mounted) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(

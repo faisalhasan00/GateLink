@@ -306,7 +306,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
                       Expanded(
                         child: Text(
                           _flatValidationResult!.isValid
-                              ? 'Verified Resident: ${_flatValidationResult!.residentName} (${_flatValidationResult!.occupancyStatus})'
+                              ? 'Verified Resident: ${_flatValidationResult!.residentName}'
                               : _flatValidationResult!.error ?? 'Flat not found in society database',
                           style: TextStyle(
                             fontSize: 12,

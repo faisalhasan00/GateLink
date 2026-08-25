@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../providers/helper_providers.dart';
+import '../../providers/helper_providers.dart';
 
 class RegisterHelperScreen extends ConsumerStatefulWidget {
   const RegisterHelperScreen({super.key});
