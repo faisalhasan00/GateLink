@@ -83,7 +83,6 @@ android {
         create("staging") {
             dimension = "environment"
             applicationId = "in.gatelink.app.staging"
-            applicationIdSuffix = ".staging"
             resValue("string", "app_name", "GateLink Staging")
         }
     }
