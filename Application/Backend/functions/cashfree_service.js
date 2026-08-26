@@ -18,8 +18,12 @@ class CashfreePaymentProvider {
   }
 
   _verifyCredentials() {
-    const clientId = process.env.CASHFREE_CLIENT_ID || this.clientId;
-    const clientSecret = process.env.CASHFREE_CLIENT_SECRET || this.clientSecret;
+    let clientId = String(process.env.CASHFREE_CLIENT_ID || this.clientId || "").trim();
+    let clientSecret = String(process.env.CASHFREE_CLIENT_SECRET || this.clientSecret || "").trim();
+
+    // Strip BOM (\uFEFF) and non-ASCII / non-printable characters from secret keys
+    clientId = clientId.replace(/[^\x20-\x7E]/g, "").trim();
+    clientSecret = clientSecret.replace(/[^\x20-\x7E]/g, "").trim();
 
     if (!clientId || !clientSecret) {
       throw new Error(

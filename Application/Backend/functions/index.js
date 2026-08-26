@@ -2,6 +2,10 @@
  * SocietySphere Cloud Functions Entrypoint
  * Clean Monorepo Modular Architecture
  */
+const dns = require("dns");
+try {
+  dns.setDefaultResultOrder("ipv4first");
+} catch (_) {}
 
 // 1. Visitor Triggers & Callables
 const {
