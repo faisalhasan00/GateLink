@@ -1,3 +1,8 @@
+const dns = require("dns");
+try {
+  dns.setDefaultResultOrder("ipv4first");
+} catch (_) {}
+
 const { initializeApp } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getAuth } = require("firebase-admin/auth");

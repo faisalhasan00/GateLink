@@ -68,9 +68,19 @@ class PaymentRepositoryImpl implements PaymentRepository {
           currency: 'INR',
           status: 'PENDING',
         );
+      } else {
+        Map<String, dynamic>? errBody;
+        try {
+          errBody = jsonDecode(response.body) as Map<String, dynamic>?;
+        } catch (_) {}
+        final msg = errBody?['error'] ?? errBody?['message'] ?? response.body;
+        throw Exception('Backend Payment Error (${response.statusCode}): $msg');
       }
     } catch (e) {
-      // Cloud Function endpoint unreachable or returned non-200 in dev/sandbox
+      if (e.toString().contains('Backend Payment Error')) {
+        rethrow;
+      }
+      debugPrint('[PaymentRepo] Cloud Function call error: $e');
     }
 
     // Cashfree Sandbox Direct Gateway Fallback: dynamically fetch exact bill amount from Firestore

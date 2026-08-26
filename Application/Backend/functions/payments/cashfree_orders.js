@@ -50,10 +50,11 @@ const createCashfreeOrder = onRequest(
         return res.status(404).json({ error: "Maintenance bill not found." });
       }
 
-      const billData = billDoc.data();
-      const customerName = userData.name || billData.residentName || "Resident Owner";
-      const customerPhone = userData.phone || "9876543210";
-      const customerEmail = userData.email || "resident@societysphere.com";
+      const billData = billDoc.data() || {};
+      const officialAmount = Number(billData.amount ?? billData.totalAmount ?? billData.dueAmount ?? 4500);
+      const customerName = authUser.name || authUser.displayName || billData.residentName || "Resident Owner";
+      const customerPhone = authUser.phone || authUser.phoneNumber || "9876543210";
+      const customerEmail = authUser.email || "resident@societysphere.com";
 
       const orderId = `CF_${societyId}_${maintenanceBillId}_${Date.now()}`;
 
