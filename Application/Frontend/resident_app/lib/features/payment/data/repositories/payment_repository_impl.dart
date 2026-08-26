@@ -96,20 +96,16 @@ class PaymentRepositoryImpl implements PaymentRepository {
     final envClientId = const String.fromEnvironment('CASHFREE_CLIENT_ID');
     final envSecret = const String.fromEnvironment('CASHFREE_CLIENT_SECRET');
 
-    final sandboxClientId = envClientId.isNotEmpty
-        ? envClientId
-        : utf8.decode(base64.decode('VEVTVDEwNzA3ODAwNThmZDU4ODEzNTM0MGMyY2FkNjUwMDg3MDcwMQ=='));
-    final sandboxSecret = envSecret.isNotEmpty
-        ? envSecret
-        : utf8.decode(base64.decode('Y2Zza19tYV90ZXN0XzcxMmQwNGE5NWVjZTg5NTkzZDI1NmZhZTliMDA4YTgwXzdhZGEwYzVm'));
+    final prodClientId = envClientId;
+    final prodSecret = envSecret;
 
     final cfResponse = await _client.post(
-      Uri.parse('https://sandbox.cashfree.com/pg/orders'),
+      Uri.parse('https://api.cashfree.com/pg/orders'),
       headers: {
         'Content-Type': 'application/json',
         'x-api-version': '2023-08-01',
-        'x-client-id': sandboxClientId,
-        'x-client-secret': sandboxSecret,
+        'x-client-id': prodClientId,
+        'x-client-secret': prodSecret,
       },
       body: jsonEncode({
         'order_id': orderId,
@@ -203,24 +199,20 @@ class PaymentRepositoryImpl implements PaymentRepository {
       // Fallback: Query Sandbox API directly if Cloud Functions are unreachable in dev
     }
 
-    // Direct Cashfree Sandbox S2S Fallback
+    // Direct Cashfree Production S2S Fallback
     try {
       final envClientId = const String.fromEnvironment('CASHFREE_CLIENT_ID');
       final envSecret = const String.fromEnvironment('CASHFREE_CLIENT_SECRET');
 
-      final sandboxClientId = envClientId.isNotEmpty
-          ? envClientId
-          : utf8.decode(base64.decode('VEVTVDEwNzA3ODAwNThmZDU4ODEzNTM0MGMyY2FkNjUwMDg3MDcwMQ=='));
-      final sandboxSecret = envSecret.isNotEmpty
-          ? envSecret
-          : utf8.decode(base64.decode('Y2Zza19tYV90ZXN0XzcxMmQwNGE5NWVjZTg5NTkzZDI1NmZhZTliMDA4YTgwXzdhZGEwYzVm'));
+      final prodClientId = envClientId;
+      final prodSecret = envSecret;
 
       final cfVerifyResp = await _client.get(
-        Uri.parse('https://sandbox.cashfree.com/pg/orders/$orderId/payments'),
+        Uri.parse('https://api.cashfree.com/pg/orders/$orderId/payments'),
         headers: {
           'x-api-version': '2023-08-01',
-          'x-client-id': sandboxClientId,
-          'x-client-secret': sandboxSecret,
+          'x-client-id': prodClientId,
+          'x-client-secret': prodSecret,
         },
       );
 

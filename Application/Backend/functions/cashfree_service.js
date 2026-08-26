@@ -7,14 +7,14 @@ const crypto = require("crypto");
  */
 class CashfreePaymentProvider {
   constructor() {
-    this.env = process.env.CASHFREE_ENV || "sandbox";
+    this.env = process.env.CASHFREE_ENV || "production";
     this.clientId = process.env.CASHFREE_CLIENT_ID || "";
     this.clientSecret = process.env.CASHFREE_CLIENT_SECRET || "";
     this.apiVersion = "2023-08-01";
     this.baseUrl =
-      this.env === "production"
-        ? "https://api.cashfree.com/pg"
-        : "https://sandbox.cashfree.com/pg";
+      this.env === "sandbox"
+        ? "https://sandbox.cashfree.com/pg"
+        : "https://api.cashfree.com/pg";
   }
 
   _verifyCredentials() {
@@ -23,7 +23,7 @@ class CashfreePaymentProvider {
 
     if (!clientId || !clientSecret) {
       throw new Error(
-        "Cashfree Configuration Error: CASHFREE_CLIENT_ID or CASHFREE_CLIENT_SECRET environment variable is missing. Hardcoded credentials are strictly prohibited."
+        "Cashfree Configuration Error: CASHFREE_CLIENT_ID or CASHFREE_CLIENT_SECRET environment variable is missing."
       );
     }
     return { clientId, clientSecret };

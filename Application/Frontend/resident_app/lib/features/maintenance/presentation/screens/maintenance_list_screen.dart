@@ -8,6 +8,7 @@ import '../../domain/models/maintenance_bill_model.dart';
 import '../../domain/models/payment_status.dart';
 import '../../providers/maintenance_providers.dart';
 import 'pay_maintenance_screen.dart';
+import '../widgets/payment_success_bottom_sheet.dart';
 
 class MaintenanceListScreen extends ConsumerStatefulWidget {
   const MaintenanceListScreen({super.key});
@@ -296,6 +297,34 @@ class _BillCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(AppRadius.md)),
                   ),
                   child: Text('Pay Now  •  ₹${bill.amount.toStringAsFixed(0)}'),
+                ),
+              ),
+            ] else ...[
+              const SizedBox(height: AppSpacing.md),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    final txnRef = (bill.utrNumber != null && bill.utrNumber!.isNotEmpty)
+                        ? bill.utrNumber!
+                        : (bill.transactionId ?? 'CF-PAY-OK');
+                    PaymentSuccessBottomSheet.show(
+                      context,
+                      amount: bill.amount,
+                      transactionId: txnRef,
+                      invoiceNumber: bill.invoiceNumber,
+                    );
+                  },
+                  icon: const Icon(Icons.receipt_long_rounded, size: 18),
+                  label: const Text('View Tax Invoice & Receipt'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    side: const BorderSide(color: AppColors.primary),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                  ),
                 ),
               ),
             ],

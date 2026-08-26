@@ -193,7 +193,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       await CashfreeNativeService().startCheckout(
         orderId: order.orderId,
         paymentSessionId: order.cashfreePaymentSessionId!,
-        environment: CFEnvironment.SANDBOX,
+        environment: CFEnvironment.PRODUCTION,
         onSuccess: (orderId) {
           debugPrint('[PaymentFlow] Native SDK reported success for order: $orderId');
           if (mounted) {
