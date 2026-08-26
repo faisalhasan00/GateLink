@@ -16,7 +16,7 @@ class ReferralHeroHeader extends StatelessWidget {
       'Hello! I am using GateLink Gatekeeper OS for gated community security & automated maintenance billing.\n\n'
       'Onboard your society to GateLink:\n'
       '🔗 https://gatelink.in/partners?ref=$refCode\n\n'
-      'Refer your society and earn instant ₹500 + 2% Lifetime Monthly Recurring cash payouts!'
+      'Refer your society and earn up to ₹500 (Min ₹150) instant cash + 2% Lifetime Monthly Recurring cash payouts!'
     );
     final whatsappUrl = Uri.parse('https://wa.me/?text=$message');
 
@@ -83,7 +83,7 @@ class ReferralHeroHeader extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           const Text(
-            'Earn Instant ₹500 Cash &\n2% Lifetime Monthly Income',
+            'Earn Up to ₹500 Cash &\n2% Lifetime Monthly Income',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w900,
@@ -93,7 +93,7 @@ class ReferralHeroHeader extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Introduce a housing society. Track your lead status in real time and get instant Cashfree UPI payouts with verified UTR numbers!',
+            'Introduce a housing society. Earn Min ₹150 up to ₹500 based on business generated! Track status in real time with verified Cashfree UPI payouts.',
             style: TextStyle(
               fontSize: 12,
               color: Colors.white70,

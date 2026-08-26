@@ -200,7 +200,7 @@ class _SubmitLeadBottomSheetState extends State<SubmitLeadBottomSheet> {
               TextFormField(
                 controller: _upiController,
                 decoration: InputDecoration(
-                  labelText: 'Your Payout UPI ID (for instant ₹500 + 2%)',
+                  labelText: 'Your Payout UPI ID (for instant ₹150 to ₹500 + 2%)',
                   hintText: 'e.g. yourname@upi or raj@okicici',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                   prefixIcon: const Icon(Icons.account_balance_wallet_rounded, color: AppColors.secondary),

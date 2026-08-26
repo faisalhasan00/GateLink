@@ -20,6 +20,8 @@ export function usePartnerAdmin() {
     promoterSubPartnerOverridePercent: 0.5,
     baseRatePerFlat: 25,
     minFlatsThreshold: 40,
+    minInstantPayout: 150,
+    maxInstantPayout: 500,
   });
   const [savingConfig, setSavingConfig] = useState(false);
 
@@ -103,24 +105,33 @@ export function usePartnerAdmin() {
     setSelectedLeadForPayout(lead);
 
     let flats = 100;
-    if (lead.approxFlats === '40-100') flats = 70;
+    if (typeof lead.approxFlats === 'number') flats = lead.approxFlats;
+    else if (lead.approxFlats === '40-100') flats = 70;
     else if (lead.approxFlats === '100-250') flats = 175;
     else if (lead.approxFlats === '250-500') flats = 375;
     else if (lead.approxFlats === '500+') flats = 600;
+    else if (parseInt(lead.approxFlats)) flats = parseInt(lead.approxFlats);
 
-    const tier = lead.assignedTier || 'growth';
+    const tier = lead.assignedTier || 'referral';
     const month1Rate =
       tier === 'referral'
-        ? commissionRates.tier1Month1Percent
+        ? (commissionRates.tier1Month1Percent ?? 5)
         : tier === 'onboarding'
-        ? commissionRates.tier2Month1Percent
-        : commissionRates.tier3Month1Percent;
+        ? (commissionRates.tier2Month1Percent ?? 10)
+        : (commissionRates.tier3Month1Percent ?? 10);
 
-    const calculatedBonus = Math.round(flats * (commissionRates.baseRatePerFlat || 25) * (month1Rate / 100));
+    const businessVal = lead.dealValue || lead.monthlyBillingAmount || Math.round(flats * (commissionRates.baseRatePerFlat || 25));
+    const calculatedRawBonus = Math.round(businessVal * (month1Rate / 100));
 
-    setPayoutAmount(String(calculatedBonus || 500));
+    const minPayout = commissionRates.minInstantPayout ?? 150;
+    const maxPayout = commissionRates.maxInstantPayout ?? 500;
+
+    // Strict clamping: Min ₹150, Max ₹500
+    const finalPayout = Math.min(maxPayout, Math.max(minPayout, calculatedRawBonus || minPayout));
+
+    setPayoutAmount(String(finalPayout));
     setUtrNumber('');
-    setPayoutNotes(`Month 1 (${month1Rate}%) Commission for ${lead.targetSocietyName}`);
+    setPayoutNotes(`Month 1 (${month1Rate}%) Revenue Bonus for ${lead.targetSocietyName}`);
   };
 
   const handleInstantCashfreePayout = async () => {

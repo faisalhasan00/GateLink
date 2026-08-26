@@ -83,10 +83,11 @@ export function useMaintenance() {
     try {
       const totalAmount = calculateTotal(formData);
       const resObj = residents.find((r) => r.id === selectedResidentUid || r.uid === selectedResidentUid);
-      const billNo = `INV-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      const invoiceNo = `INV/2026-27/${Math.floor(1000 + Math.random() * 9000)}`;
 
       await societyAdminService.createMaintenanceBill(societyId, {
-        billNumber: billNo,
+        billNumber: invoiceNo,
+        invoiceNumber: invoiceNo,
         title: formData.title,
         month: formData.month,
         dueDate: formData.dueDate,
@@ -213,6 +214,7 @@ export function useMaintenance() {
     paidBills,
     pendingBills,
     overdueBills,
-    pendingVerifications
+    pendingVerifications,
+    session
   };
 }

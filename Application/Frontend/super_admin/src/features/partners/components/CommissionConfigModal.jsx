@@ -147,6 +147,35 @@ export default function CommissionConfigModal({
             </div>
           </div>
 
+          {/* Instant Payout Bounds */}
+          <div style={{ padding: '12px 14px', borderRadius: '10px', backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0' }}>
+            <div style={{ fontSize: '13px', fontWeight: 800, color: '#059669', marginBottom: '8px' }}>
+              Instant Payout Bounds (Revenue Bonus)
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#047857', marginBottom: '3px' }}>Min Instant Payout (₹)</label>
+                <input
+                  type="number"
+                  required
+                  value={commissionRates.minInstantPayout ?? 150}
+                  onChange={(e) => setCommissionRates({ ...commissionRates, minInstantPayout: Number(e.target.value) })}
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid #6EE7B7', fontSize: '13px', fontWeight: 700, color: '#065F46' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: 700, color: '#047857', marginBottom: '3px' }}>Max Payout Cap (₹)</label>
+                <input
+                  type="number"
+                  required
+                  value={commissionRates.maxInstantPayout ?? 500}
+                  onChange={(e) => setCommissionRates({ ...commissionRates, maxInstantPayout: Number(e.target.value) })}
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', borderRadius: '6px', border: '1px solid #6EE7B7', fontSize: '13px', fontWeight: 700, color: '#065F46' }}
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Base Platform Rates */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>

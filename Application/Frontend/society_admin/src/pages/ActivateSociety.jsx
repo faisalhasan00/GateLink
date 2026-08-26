@@ -120,7 +120,7 @@ export default function ActivateSociety() {
         createdAt: serverTimestamp(),
       });
 
-      // 3. Update Society Status to Active
+      // 3. Update Society Status to Active & record Referral Code
       await setDoc(
         doc(db, 'societies', societyId),
         {
@@ -130,6 +130,7 @@ export default function ActivateSociety() {
           adminUid: uid,
           adminEmail: cleanEmail,
           status: 'active',
+          referredByCode: refFromUrl || provisionedSociety.referredByCode || '',
           activatedAt: serverTimestamp(),
         },
         { merge: true }
@@ -139,6 +140,7 @@ export default function ActivateSociety() {
       if (provisionedSociety.partnerLeadId) {
         await updateDoc(doc(db, 'partner_leads', provisionedSociety.partnerLeadId), {
           status: 'won',
+          referredByCode: refFromUrl || '',
           activatedAt: serverTimestamp(),
         });
       }

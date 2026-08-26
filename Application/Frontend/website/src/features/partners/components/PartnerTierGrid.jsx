@@ -21,8 +21,8 @@ export default function PartnerTierGrid({ onSelectTier, rates = {} }) {
       subtitle: 'For residents & casual friends who introduce a society committee',
       badgeColor: '#059669',
       badgeBg: '#ECFDF5',
-      m1Rate: `${t1M1}%`,
-      m1Desc: 'One-time bonus on Month 1',
+      m1Rate: `Up to ₹500`,
+      m1Desc: 'Min ₹150 up to ₹500 based on business value',
       recurring: `${t1Rec}%`,
       duration: '12 Months (1 Year)',
       features: [

@@ -49,7 +49,8 @@ export default function Maintenance() {
     paidBills,
     pendingBills,
     overdueBills,
-    pendingVerifications
+    pendingVerifications,
+    session
   } = useMaintenance();
 
   if (loading) {
@@ -161,6 +162,7 @@ export default function Maintenance() {
       {/* Invoice Breakdown Audit Modal */}
       <InvoiceDetailModal
         invoice={selectedInvoice}
+        societyInfo={{ name: session?.societyName }}
         onClose={() => setSelectedInvoice(null)}
       />
     </div>

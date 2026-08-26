@@ -75,7 +75,9 @@ class PartnerLeadPipelineCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
                 child: Text(
-                  payoutStatus == 'paid' ? '✓ ₹500 Disbursed' : '⏳ Processing Activation',
+                  payoutStatus == 'paid'
+                      ? '✓ ₹${data['payoutTotal'] ?? 500} Disbursed'
+                      : '⏳ Processing Activation',
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,

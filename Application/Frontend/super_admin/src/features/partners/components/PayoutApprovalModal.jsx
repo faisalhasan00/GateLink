@@ -108,11 +108,23 @@ export default function PayoutApprovalModal({
           </div>
 
           <div>
-            <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, color: '#334155', marginBottom: '4px' }}>Payout Amount (₹) *</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>Payout Amount (₹) *</label>
+              <span style={{ fontSize: '11px', color: '#059669', fontWeight: 700 }}>Min ₹150 • Max ₹500 Cap</span>
+            </div>
             <input
               type="number"
+              min="150"
+              max="500"
               value={payoutAmount}
-              onChange={(e) => setPayoutAmount(e.target.value)}
+              onChange={(e) => {
+                const val = Number(e.target.value);
+                if (val > 500) {
+                  setPayoutAmount('500');
+                } else {
+                  setPayoutAmount(e.target.value);
+                }
+              }}
               placeholder="500"
               required
               style={{ width: '100%', boxSizing: 'border-box', padding: '10px 12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '14px', fontWeight: 700 }}

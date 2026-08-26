@@ -18,7 +18,10 @@ export default function PartnerEarningsCalculator({ selectedTier, rates = {} }) 
     ? (rates.tier1MonthlyPercent ?? 2) 
     : (selectedTier === 'onboarding' ? (rates.tier2MonthlyPercent ?? 2) : (rates.tier3MonthlyPercent ?? 2));
 
-  const m1Bonus = Math.round(monthlySaaSRevenue * (m1Pct / 100));
+  const rawM1 = Math.round(monthlySaaSRevenue * (m1Pct / 100));
+  const m1Bonus = selectedTier === 'referral' 
+    ? Math.min(500, Math.max(150, rawM1)) 
+    : rawM1;
   const recurringMonthly = Math.round(monthlySaaSRevenue * (recPct / 100));
   const annualTotal = m1Bonus + (recurringMonthly * 11);
 

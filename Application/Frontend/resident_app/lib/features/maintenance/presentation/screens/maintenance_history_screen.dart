@@ -101,39 +101,156 @@ class MaintenanceHistoryScreen extends ConsumerWidget {
                           onTap: () {
                             showDialog(
                               context: context,
-                              builder: (_) => AlertDialog(
-                                title: const Text('Digital Receipt'),
-                                content: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Invoice #: ${receipt.invoiceNumber}',
-                                        style: const TextStyle(
-                                            fontWeight: FontWeight.bold)),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                        'Billing Period: ${receipt.billingPeriod}'),
-                                    Text(
-                                        'Amount Paid: ₹${receipt.amount.toStringAsFixed(0)}'),
-                                    Text(
-                                        'Payment Method: ${receipt.paymentMethod}'),
-                                    Text(
-                                        'Transaction ID: ${receipt.transactionId}'),
-                                    Text('Timestamp: ${receipt.formattedDate}'),
-                                    const Divider(height: 16),
-                                    const Text(
-                                        'Authorized by SocietySphere System',
-                                        style: TextStyle(
-                                            fontSize: 11,
-                                            color: AppColors.textSecondary,
-                                            fontStyle: FontStyle.italic)),
-                                  ],
+                              builder: (_) => Dialog(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(AppRadius.xl),
                                 ),
-                                actions: [
-                                  TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('Close')),
-                                ],
+                                child: Padding(
+                                  padding: const EdgeInsets.all(AppSpacing.lg),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      // Header Branding
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          const Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                'GateLink Society OS',
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w900,
+                                                  color: AppColors.primary,
+                                                ),
+                                              ),
+                                              Text(
+                                                'OFFICIAL TAX RECEIPT',
+                                                style: TextStyle(
+                                                  fontSize: 10,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Color(0xFF0284C7),
+                                                  letterSpacing: 0.5,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFECFDF5),
+                                              borderRadius: BorderRadius.circular(AppRadius.sm),
+                                              border: Border.all(color: const Color(0xFFA7F3D0)),
+                                            ),
+                                            child: const Text(
+                                              '✓ PAID & SETTLED',
+                                              style: TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w900,
+                                                color: Color(0xFF059669),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const Divider(height: 20),
+
+                                      // Invoice & Resident Metadata
+                                      Text(
+                                        'Invoice #: ${receipt.invoiceNumber}',
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w800,
+                                          color: AppColors.textPrimary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'Billing Period: ${receipt.billingPeriod}',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      const Text(
+                                        'SAC Code: 999598 (Services by RWAs)',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.textSecondary,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+
+                                      // Amount Breakdown Box
+                                      Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade50,
+                                          borderRadius: BorderRadius.circular(AppRadius.md),
+                                          border: Border.all(color: Colors.grey.shade200),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                const Text('Total Amount Paid:', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                                                Text(
+                                                  '₹${receipt.amount.toStringAsFixed(0)}',
+                                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.primary),
+                                                ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                const Text('Payment Method:', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                                Text(receipt.paymentMethod, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                const Text('Transaction UTR:', style: TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                                Text(receipt.transactionId, style: const TextStyle(fontSize: 11, fontFamily: 'monospace', fontWeight: FontWeight.bold)),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(height: 12),
+
+                                      const Text(
+                                        'Computer-generated Tax Receipt issued via GateLink Society OS (gatelink.in). No physical signature required.',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: AppColors.textSecondary,
+                                          fontStyle: FontStyle.italic,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 16),
+
+                                      SizedBox(
+                                        width: double.infinity,
+                                        child: ElevatedButton(
+                                          onPressed: () => Navigator.pop(context),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: AppColors.primary,
+                                            foregroundColor: Colors.white,
+                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                                          ),
+                                          child: const Text('Close Receipt', style: TextStyle(fontWeight: FontWeight.bold)),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
                               ),
                             );
                           },

@@ -61,27 +61,35 @@ class PaymentSuccessBottomSheet extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '₹${amount.toStringAsFixed(0)} verified via Cashfree Online Gateway',
+            '₹${amount.toStringAsFixed(0)} verified via Cashfree Gateway',
             style:
                 const TextStyle(color: AppColors.textSecondary, fontSize: 13),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 4),
-          Text(
-            'Cashfree Ref: $transactionId',
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: AppColors.primary,
+          const SizedBox(height: 6),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: const Color(0xFFE0F2FE),
+              borderRadius: BorderRadius.circular(AppRadius.sm),
+            ),
+            child: Text(
+              'TAX RECEIPT #: $invoiceNumber  •  SAC: 999598',
+              style: const TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w900,
+                color: Color(0xFF0284C7),
+              ),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 6),
           Text(
-            'Invoice: $invoiceNumber',
+            'Cashfree Ref / UTR: $transactionId',
             style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: AppColors.textPrimary,
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: AppColors.primary,
+              fontFamily: 'monospace',
             ),
           ),
           const SizedBox(height: AppSpacing.xl),
