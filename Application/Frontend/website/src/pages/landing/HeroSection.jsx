@@ -81,7 +81,7 @@ export default function HeroSection({ onOpenDemo }) {
               marginBottom: '16px'
             }}
           >
-            A world-class technology to make your daily life more convenient and safe.
+            The intelligent operating system for modern gated communities.
           </p>
 
           {/* Quick Enrollment Form Component */}

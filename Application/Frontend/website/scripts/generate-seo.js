@@ -13,7 +13,7 @@ const SEO_ROUTES = [
   {
     path: '',
     title: 'GateLink – Smart Society Management Software for Gated Communities',
-    description: 'GateLink is India’s intelligent society management operating system. Automate visitor entry, resident management, maintenance billing, gate security, parking, and complaints.',
+    description: 'GateLink is the intelligent operating system for modern gated communities. Automate visitor entry, resident management, maintenance billing, gate security, parking, and complaints.',
     canonicalUrl: 'https://gatelink.in/',
     ogImage: 'https://gatelink.in/logo.png',
     schemaData: {

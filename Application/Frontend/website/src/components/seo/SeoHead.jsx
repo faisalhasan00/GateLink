@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 
 export default function SeoHead({
   title = 'GateLink – Smart Society Management Software for Gated Communities',
-  description = 'GateLink is India’s intelligent society management operating system. Automate visitor entry, resident profiles, maintenance billing, gate security, and community communication.',
+  description = 'GateLink is the intelligent operating system for modern gated communities. Automate visitor entry, resident profiles, maintenance billing, gate security, and community communication.',
   canonicalUrl = 'https://gatelink.in',
   ogImage = 'https://gatelink.in/logo.png',
   robots = 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',

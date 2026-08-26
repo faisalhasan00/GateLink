@@ -28,7 +28,7 @@ export default function FooterSection() {
               <GateLinkLogo isDark={true} size="medium" />
             </Link>
             <p style={{ fontSize: '13px', lineHeight: 1.65, color: '#94A3B8', marginBottom: '18px', maxWidth: '320px' }}>
-              India’s intelligent society management operating system. Empowering gated communities, residents, and gate security staff with real-time digital automation.
+              The intelligent operating system for modern gated communities. Empowering RWAs, residents, and gate security staff with real-time digital automation.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', color: '#CBD5E1', marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
