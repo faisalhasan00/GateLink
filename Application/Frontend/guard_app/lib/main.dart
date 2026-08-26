@@ -74,14 +74,28 @@ void main() async {
       debugPrint('Firebase App Check init note: $appCheckErr');
     }
 
-    // Pass uncaught Flutter framework errors to Crashlytics
-    FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
+    // Pass uncaught Flutter framework errors to Crashlytics (with non-fatal font guard)
+    FlutterError.onError = (FlutterErrorDetails details) {
+      if (details.exceptionAsString().contains('GoogleFonts') ||
+          details.exceptionAsString().contains('Failed to load font') ||
+          details.exceptionAsString().contains('was not found in the application assets')) {
+        debugPrint('Non-fatal font load exception handled: ${details.exception}');
+        return;
+      }
+      FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+    };
 
     // Enable Crashlytics collection in release mode only
     await FirebaseCrashlytics.instance.setCrashlyticsCollectionEnabled(!kDebugMode);
 
-    // Pass uncaught async errors to Crashlytics
+    // Pass uncaught async errors to Crashlytics (with non-fatal font guard)
     PlatformDispatcher.instance.onError = (error, stack) {
+      if (error.toString().contains('GoogleFonts') ||
+          error.toString().contains('Failed to load font') ||
+          error.toString().contains('was not found in the application assets')) {
+        debugPrint('Non-fatal async font exception handled: $error');
+        return true;
+      }
       FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
       return true;
     };
