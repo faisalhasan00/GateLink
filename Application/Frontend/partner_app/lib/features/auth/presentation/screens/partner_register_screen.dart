@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/partner_auth_provider.dart';
+import '../../../../core/widgets/partner_logo.dart';
 import '../../../home/presentation/screens/partner_dashboard_screen.dart';
 
 class PartnerRegisterScreen extends ConsumerStatefulWidget {
@@ -22,13 +23,16 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
   final _cityController = TextEditingController();
 
   String _selectedCategory = 'Real Estate Broker';
+  bool _acceptedTerms = true;
   bool _isLoading = false;
 
   final List<String> _categories = [
     'Real Estate Broker',
     'Channel Partner Agency',
     'Society Management Consultant',
-    'Resident / RWA Member',
+    'Resident / RWA Board Member',
+    'Security Vendor',
+    'Individual Affiliate Partner',
   ];
 
   @override
@@ -43,16 +47,23 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
 
   Future<void> _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
+    if (!_acceptedTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please accept the Partner Terms & Code of Conduct')),
+      );
+      return;
+    }
     setState(() => _isLoading = true);
 
     try {
       final name = _nameController.text.trim();
-      final phone = _phoneController.text.trim();
+      final phone = _phoneController.text.trim().replaceAll(RegExp(r'[^0-9]'), '');
       final email = _emailController.text.trim();
       final upi = _upiController.text.trim();
       final city = _cityController.text.trim();
+      final regLogId = 'REG-LOG-${DateTime.now().millisecondsSinceEpoch}';
 
-      // Save to Firestore 'partners' collection
+      // 1. Save to Firestore 'partners' collection
       await FirebaseFirestore.instance.collection('partners').doc(phone).set({
         'name': name,
         'phone': phone,
@@ -61,10 +72,24 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
         'upiId': upi,
         'city': city,
         'status': 'active',
+        'registrationLogId': regLogId,
         'createdAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      // 2. Save structured Partner Registration Audit Log
+      await FirebaseFirestore.instance.collection('partner_registration_logs').doc(phone).set({
+        'logReference': regLogId,
+        'partnerPhone': phone,
+        'partnerName': name,
+        'partnerEmail': email,
+        'category': _selectedCategory,
+        'upiId': upi,
+        'city': city,
+        'status': 'verified_active',
+        'registeredAt': FieldValue.serverTimestamp(),
       });
 
-      // Save locally
+      // 3. Save locally
       await ref.read(partnerAuthProvider.notifier).loginOrRegister(
         name: name,
         phone: phone,
@@ -75,6 +100,12 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
       );
 
       if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('✓ Registration Logged & Partner Account Created Successfully!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const PartnerDashboardScreen()),
@@ -96,7 +127,11 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Partner Registration', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const PartnerLogo(
+          size: PartnerLogoSize.small,
+          showTagline: false,
+          isDark: true,
+        ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -108,7 +143,7 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Card
+              // Header Card with Logo
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppSpacing.lg),
@@ -119,6 +154,13 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
                     end: Alignment.bottomRight,
                   ),
                   borderRadius: BorderRadius.circular(AppRadius.lg),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.2),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,15 +176,16 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
                         style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.white),
                       ),
                     ),
+                    const SizedBox(height: 12),
+                    const PartnerLogo(
+                      size: PartnerLogoSize.medium,
+                      showTagline: true,
+                      isDark: true,
+                    ),
                     const SizedBox(height: 10),
                     const Text(
-                      'Join GateLink Partner Program',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
                       'Earn instant ₹500 bonus per onboarded society + 2% lifetime monthly recurring revenue.',
-                      style: TextStyle(fontSize: 12, color: Colors.white70),
+                      style: TextStyle(fontSize: 12, color: Colors.white70, height: 1.4),
                     ),
                   ],
                 ),
@@ -150,7 +193,7 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
               const SizedBox(height: 20),
 
               const Text(
-                'Personal & Business Details',
+                'Personal & Business Registration',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 14),
@@ -177,7 +220,9 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                   prefixIcon: const Icon(Icons.phone_rounded, color: AppColors.primary),
                 ),
-                validator: (val) => val == null || val.trim().length < 10 ? 'Enter valid mobile number' : null,
+                validator: (val) => val == null || val.trim().replaceAll(RegExp(r'[^0-9]'), '').length < 10
+                    ? 'Enter valid 10-digit mobile number'
+                    : null,
               ),
               const SizedBox(height: 14),
 
@@ -190,7 +235,7 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                   prefixIcon: const Icon(Icons.email_rounded, color: AppColors.primary),
                 ),
-                validator: (val) => val == null || !val.contains('@') ? 'Enter valid email' : null,
+                validator: (val) => val == null || !val.contains('@') ? 'Enter valid email address' : null,
               ),
               const SizedBox(height: 14),
 
@@ -214,7 +259,9 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                   prefixIcon: const Icon(Icons.account_balance_wallet_rounded, color: AppColors.secondary),
                 ),
-                validator: (val) => val == null || val.trim().isEmpty ? 'Enter UPI ID' : null,
+                validator: (val) => val == null || val.trim().isEmpty || !val.contains('@')
+                    ? 'Enter valid UPI ID (e.g. name@bank)'
+                    : null,
               ),
               const SizedBox(height: 14),
 
@@ -228,7 +275,20 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
                 ),
                 validator: (val) => val == null || val.trim().isEmpty ? 'Enter operating city' : null,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 14),
+
+              // Consent Checkbox
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                value: _acceptedTerms,
+                onChanged: (val) => setState(() => _acceptedTerms = val ?? true),
+                controlAffinity: ListTileControlAffinity.leading,
+                title: const Text(
+                  'I agree to GateLink Partner Terms & Code of Conduct for automated Cashfree disbursals.',
+                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                ),
+              ),
+              const SizedBox(height: 16),
 
               SizedBox(
                 width: double.infinity,
@@ -242,7 +302,7 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
                   ),
                   child: _isLoading
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Text('Complete Registration & Enter Dashboard', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                      : const Text('Complete Registration & Create Audit Log', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -252,3 +312,4 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
     );
   }
 }
+

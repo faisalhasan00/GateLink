@@ -7,6 +7,8 @@ import '../../../../core/providers/partner_auth_provider.dart';
 import '../../../home/presentation/screens/partner_dashboard_screen.dart';
 import 'partner_register_screen.dart';
 
+import '../../../../core/widgets/partner_logo.dart';
+
 class PartnerLoginScreen extends ConsumerStatefulWidget {
   const PartnerLoginScreen({super.key});
 
@@ -104,36 +106,31 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: 30),
 
               // Logo & Brand Header
               Center(
                 child: Column(
                   children: [
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                       decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(24),
+                        border: Border.all(color: AppColors.border),
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                            blurRadius: 16,
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            blurRadius: 20,
                             offset: const Offset(0, 8),
                           ),
                         ],
                       ),
-                      child: const Icon(Icons.handshake_rounded, color: Colors.white, size: 40),
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'GateLink Partner',
-                      style: TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Channel Partner & Broker Referral App',
-                      style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      child: const PartnerLogo(
+                        size: PartnerLogoSize.large,
+                        showTagline: true,
+                        isDark: false,
+                      ),
                     ),
                   ],
                 ),

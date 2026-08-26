@@ -13,6 +13,9 @@ import '../../../toolkit/presentation/screens/marketing_toolkit_screen.dart';
 import '../../../profile/presentation/widgets/edit_partner_category_modal.dart';
 import '../../../onboarding/presentation/widgets/onboard_society_modal.dart';
 
+import '../../../../core/widgets/partner_logo.dart';
+import '../../../auth/presentation/screens/registration_audit_log_screen.dart';
+
 class PartnerDashboardScreen extends ConsumerStatefulWidget {
   const PartnerDashboardScreen({super.key});
 
@@ -32,30 +35,23 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
 
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Icon(Icons.handshake_rounded, color: Colors.white, size: 20),
-            ),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('GateLink Partner', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 17)),
-                Text(partnerName, style: const TextStyle(fontSize: 10, color: Colors.white70)),
-              ],
-            ),
-          ],
+        title: const PartnerLogo(
+          size: PartnerLogoSize.small,
+          showTagline: false,
+          isDark: true,
         ),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         elevation: 0,
         actions: [
+          IconButton(
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const RegistrationAuditLogScreen()),
+            ),
+            icon: const Icon(Icons.verified_user_rounded),
+            tooltip: 'Registration & Audit Log',
+          ),
           IconButton(
             onPressed: () => Navigator.push(
               context,
@@ -203,15 +199,30 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () => EditPartnerCategoryModal.show(context),
-                        icon: const Icon(Icons.manage_accounts_rounded, size: 16, color: AppColors.primary),
-                        label: const Text('Category Settings', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                        icon: const Icon(Icons.manage_accounts_rounded, size: 14, color: AppColors.primary),
+                        label: const Text('Category', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                         ),
                       ),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const RegistrationAuditLogScreen()),
+                        ),
+                        icon: const Icon(Icons.verified_user_rounded, size: 14, color: AppColors.primary),
+                        label: const Text('Audit Log', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
+                        style: OutlinedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
                     Expanded(
                       child: OutlinedButton.icon(
                         onPressed: () => Navigator.push(
@@ -223,10 +234,10 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                             ),
                           ),
                         ),
-                        icon: const Icon(Icons.receipt_long_rounded, size: 16, color: AppColors.primary),
-                        label: const Text('Cashfree Ledger', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                        icon: const Icon(Icons.receipt_long_rounded, size: 14, color: AppColors.primary),
+                        label: const Text('Ledger', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
                         style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                         ),
                       ),

@@ -139,7 +139,7 @@ class PartnerLeadStepperCard extends StatelessWidget {
                           style: TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF065F46)),
                         ),
                         Text(
-                          'UTR #: ${utrNumber.isNotEmpty ? utrNumber : "CF" + DateTime.now().millisecondsSinceEpoch.toString().substring(4)}',
+                          'UTR #: ${utrNumber.isNotEmpty ? utrNumber : "CF${DateTime.now().millisecondsSinceEpoch.toString().substring(4)}"}',
                           style: const TextStyle(fontSize: 10, fontFamily: 'monospace', fontWeight: FontWeight.bold, color: Color(0xFF047857)),
                         ),
                       ],

@@ -5,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
+import '../../../../core/widgets/partner_logo.dart';
+
 class MarketingToolkitScreen extends StatelessWidget {
   final String refCode;
   final String partnerName;
@@ -152,7 +154,12 @@ class MarketingToolkitScreen extends StatelessWidget {
                 ),
                 child: Column(
                   children: [
-                    // Brand Badge
+                    const PartnerLogo(
+                      size: PartnerLogoSize.medium,
+                      showTagline: false,
+                      isDark: false,
+                    ),
+                    const SizedBox(height: 10),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                       decoration: BoxDecoration(
@@ -160,7 +167,7 @@ class MarketingToolkitScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(AppRadius.pill),
                       ),
                       child: const Text(
-                        'GATELINK OFFICIAL PARTNER',
+                        'OFFICIAL CHANNEL PARTNER',
                         style: TextStyle(fontSize: 10, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.5),
                       ),
                     ),
