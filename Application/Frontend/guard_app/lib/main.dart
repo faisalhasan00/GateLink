@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'firebase_options.dart';
 import 'core/router/app_router.dart';
@@ -53,6 +54,9 @@ Future<void> saveFcmToken() async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Prevent GoogleFonts from throwing uncaught HTTP exceptions when offline/slow connection
+  GoogleFonts.config.allowRuntimeFetching = false;
 
   // Initialize Firebase safely
   try {
