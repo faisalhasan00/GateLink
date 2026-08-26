@@ -35,7 +35,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _handleEmailLogin() async {
-    if (!_formKey.currentState!.validate()) return;
+    final formState = _formKey.currentState;
+    if (formState == null || !formState.validate()) return;
+
     setState(() => _isLoading = true);
     try {
       await ref.read(authServiceProvider).signInWithEmail(
@@ -45,6 +47,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       if (mounted) context.go('/home');
     } on FirebaseAuthException catch (e) {
       _showError(e.message ?? 'Login failed. Please try again.');
+    } on FirebaseException catch (e) {
+      if (e.code == 'unavailable') {
+        _showError('Network error: Unable to connect to server. Please check your internet connection.');
+      } else {
+        _showError(e.message ?? 'Authentication error. Please try again.');
+      }
+    } catch (e) {
+      _showError('An unexpected error occurred. Please try again.');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
