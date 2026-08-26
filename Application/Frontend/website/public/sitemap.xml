@@ -3,136 +3,110 @@
   <!-- Primary Homepage -->
   <url>
     <loc>https://gatelink.in/</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   
   <!-- Dedicated Product Capability SEO Pages -->
   <url>
     <loc>https://gatelink.in/society-management-software</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.95</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/visitor-management</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/maintenance-management</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/security-management</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.90</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
 
-  <!-- Core Platform Pages -->
+  <!-- Core Platform & Security Pages -->
+  <url>
+    <loc>https://gatelink.in/security</loc>
+    <lastmod>2026-08-26</lastmod>
+  </url>
   <url>
     <loc>https://gatelink.in/about</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/features</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/solutions</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/contact</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/partners</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/download</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.80</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
 
-  <!-- Knowledge Hub & SEO Blog -->
+  <!-- Knowledge Hub & Published Blog Articles -->
   <url>
     <loc>https://gatelink.in/blog</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.80</priority>
+    <lastmod>2026-08-26</lastmod>
+  </url>
+  <url>
+    <loc>https://gatelink.in/blog/top-5-security-measures-every-indian-housing-society-must-implement-in-2026</loc>
+    <lastmod>2026-07-24</lastmod>
+  </url>
+  <url>
+    <loc>https://gatelink.in/blog/how-automated-maintenance-invoicing-online-gateway-boosts-collection-to-98</loc>
+    <lastmod>2026-07-18</lastmod>
+  </url>
+  <url>
+    <loc>https://gatelink.in/blog/the-ultimate-guide-to-rwa-bylaw-compliance-digital-audit-vaults</loc>
+    <lastmod>2026-07-12</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/faq</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.70</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/help</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.70</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/docs</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.70</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
 
   <!-- Legal & Trust Governance Pages -->
   <url>
     <loc>https://gatelink.in/privacy</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.60</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/terms</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.60</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/refund-policy</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.60</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/data-processing</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.60</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/grievance</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.60</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
   <url>
     <loc>https://gatelink.in/cookies</loc>
-    <lastmod>2026-08-23</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.40</priority>
+    <lastmod>2026-08-26</lastmod>
   </url>
 </urlset>

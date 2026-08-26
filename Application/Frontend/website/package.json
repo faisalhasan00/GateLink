@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && node scripts/generate-seo.js",
     "build:staging": "vite build --mode staging",
     "lint": "oxlint",
     "preview": "vite preview"
