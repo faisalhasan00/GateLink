@@ -22,8 +22,8 @@ if (localPropertiesFile.exists()) {
     localPropertiesFile.inputStream().use { localProperties.load(it) }
 }
 
-val flutterVersionCode = localProperties.getProperty("flutter.versionCode")?.toInt() ?: 6
-val flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "1.0.5"
+val flutterVersionCode = localProperties.getProperty("flutter.versionCode")?.toInt() ?: 7
+val flutterVersionName = localProperties.getProperty("flutter.versionName") ?: "1.0.6"
 
 android {
     namespace = "in.gatelink.app"
