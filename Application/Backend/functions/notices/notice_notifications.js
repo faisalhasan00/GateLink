@@ -216,7 +216,11 @@ const notifyOnBroadcastCreated = onDocumentCreated(
  * Replaces client-side service account JWT signing.
  */
 const sendAdminFcmBroadcast = onCall(
-  { invoker: "public", cors: true, enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
+  {
+    invoker: "public",
+    cors: ["https://app.gatelink.in", "https://admin.gatelink.in", "https://gatelink.in", "http://localhost:5173", "http://localhost:5174", "http://localhost:5175"],
+    enforceAppCheck: false
+  },
   async (request) => {
   const { title, body, category, scope, societyId, data } = request.data || {};
 

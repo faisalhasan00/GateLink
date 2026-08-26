@@ -36,7 +36,7 @@ class MaintenanceRepositoryImpl implements MaintenanceRepository {
     final snap = await _db
         .collection(
             'societies/${_firestoreService.societyId}/maintenance_bills')
-        .where('residentUid', isEqualTo: residentUid)
+        .where('residentUid', whereIn: [residentUid, 'ALL'])
         .get();
 
     if (snap.docs.isEmpty) return null;

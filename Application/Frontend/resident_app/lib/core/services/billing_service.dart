@@ -14,7 +14,7 @@ class BillingService {
     if (societyId.isEmpty || uid.isEmpty) return const Stream.empty();
     return _db
         .collection('societies/$societyId/maintenance_bills')
-        .where('residentUid', isEqualTo: uid)
+        .where('residentUid', whereIn: [uid, 'ALL'])
         .snapshots();
   }
 
