@@ -11,7 +11,7 @@ const ALLOWED_STAFF_ROLES = ["guard", "security", "staff", "manager"];
  * Client-side self-assignment is strictly blocked.
  */
 const setSuperAdminRole = onCall(
-  { enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
+  { cors: true, enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
   async (request) => {
     await verifyActiveCallableUser(request);
 
@@ -56,7 +56,7 @@ const setSuperAdminRole = onCall(
  * Restricted to staff roles: 'guard', 'security', 'staff', 'manager'.
  */
 const createStaffUser = onCall(
-  { enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
+  { cors: true, enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
   async (request) => {
     const { email, password, name, role, societyId, phone, department } = request.data || {};
 

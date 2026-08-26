@@ -12,7 +12,7 @@ const ALLOWED_SCANNER_ROLES = ["guard", "security", "admin", "society_admin", "s
  * Restricted strictly to active/approved residents for their own registered flat within their own society.
  */
 const generateVisitorPasscode = onCall(
-  { enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
+  { cors: true, enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
   async (request) => {
     const { societyId, name, phone, purpose, hostFlat, expectedDate, expectedTime } = request.data || {};
     if (!societyId || !name) {
@@ -95,7 +95,7 @@ const generateVisitorPasscode = onCall(
  * Prevents passcode replay attacks and concurrent scan race conditions using Firestore Transaction.
  */
 const validateVisitorPasscode = onCall(
-  { enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
+  { cors: true, enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
   async (request) => {
     const { societyId, passCode } = request.data || {};
   if (!societyId || !passCode) {

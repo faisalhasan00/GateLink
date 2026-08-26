@@ -102,7 +102,7 @@ export function useMaintenance() {
         flatNumber: resObj?.flatNumber || 'N/A',
       });
 
-      alert(`Successfully generated maintenance bill #${billNo}.`);
+      alert(`Successfully generated maintenance bill #${invoiceNo}.`);
       setIsSubmitting(false);
       setIsGenerateModalOpen(false);
     } catch (e) {

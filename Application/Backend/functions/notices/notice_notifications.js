@@ -216,7 +216,7 @@ const notifyOnBroadcastCreated = onDocumentCreated(
  * Replaces client-side service account JWT signing.
  */
 const sendAdminFcmBroadcast = onCall(
-  { enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
+  { cors: true, enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
   async (request) => {
   const { title, body, category, scope, societyId, data } = request.data || {};
 

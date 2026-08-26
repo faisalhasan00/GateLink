@@ -16,7 +16,7 @@ const GRACE_PERIOD_MS = 7 * 24 * 60 * 60 * 1000; // 7-day grace period in millis
  * 5. Queues request in /account_deletion_requests/{requestId} for 7-day grace period
  */
 const requestAccountDeletion = onCall(
-  { enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
+  { cors: true, enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
   async (request) => {
     if (!request.auth || !request.auth.uid) {
       throw new HttpsError("unauthenticated", "Authentication required.");
@@ -181,7 +181,7 @@ const requestAccountDeletion = onCall(
  * 4. Sets request status to 'cancelled'
  */
 const cancelAccountDeletion = onCall(
-  { enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
+  { cors: true, enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
   async (request) => {
     if (!request.auth || !request.auth.uid) {
       throw new HttpsError("unauthenticated", "Authentication required.");
