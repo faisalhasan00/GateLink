@@ -107,6 +107,8 @@ export const maintenanceService = {
       } catch (err) {
         console.warn('Bill push notification dispatch error:', err);
       }
+    }).catch((err) => {
+      console.warn('Bill push notification dispatch exception:', err);
     });
 
     return docRef.id;

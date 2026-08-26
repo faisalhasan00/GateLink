@@ -1,0 +1,69 @@
+{
+  "firestore": {
+    "rules": "Application/Backend/firestore.rules",
+    "indexes": "Application/Backend/firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "Application/Backend/storage.rules"
+  },
+  "functions": [
+    {
+      "source": "Application/Backend/functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.iml"
+      ]
+    }
+  ],
+  "hosting": [
+    {
+      "target": "website",
+      "public": "Application/Frontend/website/dist",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    {
+      "target": "society_admin",
+      "public": "Application/Frontend/society_admin/dist",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    {
+      "target": "super_admin",
+      "public": "Application/Frontend/super_admin/dist",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  ]
+}
