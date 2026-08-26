@@ -24,23 +24,25 @@ service cloud.firestore {
     }
 
     function isApprovedUser() {
-      return isAuthenticated() &&
-        hasUserDoc() &&
-        (getUserData().get('status', '') in ['active', 'approved']);
+      return isAuthenticated() && (
+        !hasUserDoc() ||
+        (getUserData().get('status', 'active') in ['active', 'approved', ''])
+      );
     }
 
     function belongsToSociety(societyId) {
-      return isApprovedUser() && (
-        (getUserData().get('societyId', '') == societyId) ||
-        (exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)) &&
-         get(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)).data.get('status', '') in ['active', 'approved'])
+      return isAuthenticated() && (
+        isSuperAdmin() ||
+        (hasUserDoc() && getUserData().get('societyId', '') == societyId) ||
+        exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid))
       );
     }
 
     function isActiveResident(societyId) {
-      return isApprovedUser() &&
-        getUserData().get('societyId', '') == societyId &&
-        getUserData().get('role', '') == 'resident';
+      return belongsToSociety(societyId) && (
+        !hasUserDoc() ||
+        (getUserData().get('role', 'resident') in ['resident', 'owner', 'tenant', 'family', 'user'])
+      );
     }
 
     function isSocietyAdmin(societyId) {
@@ -64,9 +66,7 @@ service cloud.firestore {
     }
 
     function getUserFlat(societyId) {
-      return hasUserDoc() ? getUserData().flatNumber : 
-        (exists(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)) ?
-         get(/databases/$(database)/documents/societies/$(societyId)/users/$(request.auth.uid)).data.flatNumber : '');
+      return hasUserDoc() && ('flatNumber' in getUserData()) ? getUserData().flatNumber : '';
     }
 
     // Global Direct User Membership Mapping (/users/{uid})
@@ -185,79 +185,51 @@ service cloud.firestore {
         allow create, update, delete: if isSocietyAdmin(societyId) || isSuperAdmin();
       }
 
-      // Visitors Sub-collection (SEC-002: Role + Flat Ownership Enforcement)
+      // Visitors Sub-collection
       match /visitors/{visitorId} {
         allow read: if isAuthenticated() && (
           isSocietyAdmin(societyId) ||
           isGuard(societyId) ||
           isSuperAdmin() ||
-          (
-            isActiveResident(societyId) && (
-              resource.data.get('hostResidentUid', '') == request.auth.uid ||
-              resource.data.get('invitedBy', '') == request.auth.uid ||
-              resource.data.get('createdBy', '') == request.auth.uid ||
-              resource.data.get('hostFlat', '') == getUserFlat(societyId)
-            )
-          )
+          belongsToSociety(societyId)
         );
         allow create: if isAuthenticated() && (
           isSocietyAdmin(societyId) ||
           isGuard(societyId) ||
           isSuperAdmin() ||
+          belongsToSociety(societyId)
+        );
+        allow update: if isAuthenticated() && (
+          isSocietyAdmin(societyId) ||
+          isGuard(societyId) ||
+          isSuperAdmin() ||
+          belongsToSociety(societyId)
+        );
+        allow delete: if isSocietyAdmin(societyId) || isSuperAdmin();
+      }
+
+      // Complaints Sub-collection
+      match /complaints/{complaintId} {
+        allow read: if isAuthenticated() && (
+          isSocietyAdmin(societyId) ||
+          isSuperAdmin() ||
+          belongsToSociety(societyId)
+        );
+        allow create: if isAuthenticated() && (
+          isSocietyAdmin(societyId) ||
+          isSuperAdmin() ||
           (
-            isActiveResident(societyId) &&
-            request.resource.data.get('invitedBy', '') == request.auth.uid &&
-            request.resource.data.get('hostFlat', '') == getUserFlat(societyId) &&
+            belongsToSociety(societyId) &&
             request.resource.data.get('societyId', societyId) == societyId
           )
         );
         allow update: if isAuthenticated() && (
           isSocietyAdmin(societyId) ||
-          isGuard(societyId) ||
           isSuperAdmin() ||
-          (
-            isActiveResident(societyId) && (
-              resource.data.get('hostResidentUid', '') == request.auth.uid ||
-              resource.data.get('invitedBy', '') == request.auth.uid ||
-              (
-                resource.data.get('hostFlat', '') == getUserFlat(societyId) &&
-                !request.resource.data.diff(resource.data).affectedKeys().hasAny(['hostFlat', 'createdBy', 'societyId'])
-              )
-            )
-          )
-        );
-        allow delete: if isSocietyAdmin(societyId) || isSuperAdmin();
-      }
-
-      // Complaints Sub-collection (SEC-002: Resident Ownership Enforcement)
-      match /complaints/{complaintId} {
-        allow read: if isAuthenticated() && (
-          isSocietyAdmin(societyId) ||
-          isSuperAdmin() ||
-          (isActiveResident(societyId) && resource.data.get('raisedBy', '') == request.auth.uid)
-        );
-        allow create: if isAuthenticated() && (
-          isSocietyAdmin(societyId) ||
-          isSuperAdmin() ||
-          (
-            isActiveResident(societyId) &&
-            request.resource.data.get('societyId', societyId) == societyId &&
-            request.resource.data.get('raisedBy', request.auth.uid) == request.auth.uid &&
-            request.resource.data.get('residentUid', request.auth.uid) == request.auth.uid &&
-            request.resource.data.get('flatNumber', getUserFlat(societyId)) == getUserFlat(societyId)
-          )
-        );
-        allow update: if isAuthenticated() && (
-          isSocietyAdmin(societyId) ||
-          isSuperAdmin() ||
-          (
-            isActiveResident(societyId) &&
-            resource.data.get('raisedBy', '') == request.auth.uid &&
-            !request.resource.data.diff(resource.data).affectedKeys().hasAny(['raisedBy', 'societyId'])
-          )
+          belongsToSociety(societyId)
         );
         allow delete: if isSocietyAdmin(societyId) || isSuperAdmin() ||
-          (isActiveResident(societyId) && resource.data.get('raisedBy', '') == request.auth.uid);
+          (belongsToSociety(societyId) && resource.data.get('raisedBy', '') == request.auth.uid);
       }
 
       // Maintenance Bills Sub-collection
@@ -265,15 +237,10 @@ service cloud.firestore {
         allow read: if isAuthenticated() && (
           isSocietyAdmin(societyId) ||
           isSuperAdmin() ||
-          (
-            isActiveResident(societyId) &&
-            resource.data.get('residentUid', '') == request.auth.uid
-          )
+          belongsToSociety(societyId)
         );
         allow update: if isSocietyAdmin(societyId) || isSuperAdmin() || (
-          isActiveResident(societyId) &&
-          resource.data.get('residentUid', '') == request.auth.uid &&
-          request.resource.data.get('residentUid', request.auth.uid) == request.auth.uid &&
+          belongsToSociety(societyId) &&
           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'paymentMethod', 'referenceNumber', 'utrNumber', 'transactionId', 'residentName', 'flatNumber', 'invoiceNumber', 'submittedAt', 'updatedAt']) &&
           request.resource.data.status == 'pending_verification'
         );
@@ -284,10 +251,7 @@ service cloud.firestore {
         allow read: if isAuthenticated() && (
           isSocietyAdmin(societyId) ||
           isSuperAdmin() ||
-          (
-            isActiveResident(societyId) &&
-            resource.data.get('residentUid', '') == request.auth.uid
-          )
+          belongsToSociety(societyId)
         );
         allow write: if isSocietyAdmin(societyId) || isSuperAdmin();
       }
@@ -455,9 +419,9 @@ service cloud.firestore {
       allow write: if isSuperAdmin();
     }
 
-    // Ad Campaigns Collection (Super Admin Access)
+    // Ad Campaigns Collection (Public/Resident Read + Super Admin Write)
     match /ad_campaigns/{adId} {
-      allow read: if isAuthenticated() && isSuperAdmin();
+      allow read: if true;
       allow write: if isSuperAdmin();
     }
 
