@@ -60,7 +60,7 @@ class CashfreePaymentProvider {
         customer_email: customerEmail || "resident@societysphere.com",
       },
       order_meta: {
-        return_url: `https://societysphere.com/payment-status?order_id=${orderId}`,
+        return_url: `https://gatelink.in/payment-status?order_id=${orderId}`,
       },
     };
 
