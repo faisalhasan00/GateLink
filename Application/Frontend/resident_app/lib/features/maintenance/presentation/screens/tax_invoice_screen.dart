@@ -56,14 +56,14 @@ class TaxInvoiceScreen extends StatelessWidget {
         margin: const pw.EdgeInsets.all(36),
         build: (pw.Context context) {
           return pw.Column(
-            cross: pw.CrossAxisAlignment.start,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               // Top Brand Banner & Stamp Header
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Column(
-                    cross: pw.CrossAxisAlignment.start,
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text(
                         'GATELINK SOCIETY OS',
@@ -128,11 +128,11 @@ class TaxInvoiceScreen extends StatelessWidget {
 
               // 2-Column Issuer & Billed To Details
               pw.Row(
-                cross: pw.CrossAxisAlignment.start,
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
                   pw.Expanded(
                     child: pw.Column(
-                      cross: pw.CrossAxisAlignment.start,
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Text('ISSUER / SOCIETY DETAILS:',
                             style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColor.fromHex('#1E3A8A'))),
@@ -145,7 +145,7 @@ class TaxInvoiceScreen extends StatelessWidget {
                   ),
                   pw.Expanded(
                     child: pw.Column(
-                      cross: pw.CrossAxisAlignment.start,
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
                       children: [
                         pw.Text('BILLED TO (RESIDENT OWNER):',
                             style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold, color: PdfColor.fromHex('#1E3A8A'))),
@@ -255,14 +255,14 @@ class TaxInvoiceScreen extends StatelessWidget {
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
                 children: [
                   pw.Column(
-                    cross: pw.CrossAxisAlignment.start,
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
                       pw.Text('Verification URL:', style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
                       pw.Text('https://gatelink.in/verify-invoice?id=$invoiceNumber', style: const pw.TextStyle(fontSize: 8)),
                     ],
                   ),
                   pw.Column(
-                    cross: pw.CrossAxisAlignment.center,
+                    crossAxisAlignment: pw.CrossAxisAlignment.center,
                     children: [
                       pw.Container(
                         padding: const pw.EdgeInsets.symmetric(horizontal: 10, vertical: 4),
