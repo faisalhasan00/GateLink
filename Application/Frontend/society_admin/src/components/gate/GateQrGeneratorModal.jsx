@@ -1,12 +1,22 @@
 import React, { useRef } from 'react';
 import { QrCode, Printer, X } from 'lucide-react';
 
-export default function GateQrGeneratorModal({ isOpen, onClose, societyId = 'SOC-001', societyName = 'Palm Meadows Residency', gateName = 'Main Gate 1' }) {
+export default function GateQrGeneratorModal({ 
+  isOpen = true, 
+  onClose, 
+  society, 
+  societyId, 
+  societyName, 
+  gateName = 'Main Gate 1' 
+}) {
   const printRef = useRef(null);
 
   if (!isOpen) return null;
 
-  const targetQrUrl = `https://gatelink.in/gate?soc=${encodeURIComponent(societyId)}&gate=${encodeURIComponent(gateName)}`;
+  const activeSocietyId = societyId || society?.id || 'SOC-001';
+  const activeSocietyName = societyName || society?.name || 'Palm Meadows Residency';
+
+  const targetQrUrl = `https://gatelink.in/gate?soc=${encodeURIComponent(activeSocietyId)}&gate=${encodeURIComponent(gateName)}`;
   const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(targetQrUrl)}`;
 
   const handlePrint = () => {
@@ -20,7 +30,7 @@ export default function GateQrGeneratorModal({ isOpen, onClose, societyId = 'SOC
       printWindow.document.write(`
         <html>
           <head>
-            <title>GateLink Gate QR Poster - ${societyName}</title>
+            <title>GateLink Gate QR Poster - ${activeSocietyName}</title>
             <style>
               body { font-family: 'Inter', sans-serif; text-align: center; padding: 40px; background: #ffffff; color: #0f172a; }
               .poster-card { border: 4px solid #1e3a8a; border-radius: 24px; padding: 40px; max-width: 500px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
@@ -34,7 +44,7 @@ export default function GateQrGeneratorModal({ isOpen, onClose, societyId = 'SOC
           </head>
           <body>
             <div class="poster-card">
-              <div class="header">🛡️ ${societyName}</div>
+              <div class="header">🛡️ ${activeSocietyName}</div>
               <div class="sub">Gate Security Check-in • ${gateName}</div>
               <div class="qr-box">
                 ${printContent.innerHTML}
@@ -89,7 +99,7 @@ export default function GateQrGeneratorModal({ isOpen, onClose, societyId = 'SOC
           </div>
           <div>
             <h3 style={{ fontSize: '18px', fontWeight: 900, margin: 0, color: '#1E293B' }}>Gate Standee QR Generator</h3>
-            <div style={{ fontSize: '12px', color: '#64748B' }}>{societyName} • {gateName}</div>
+            <div style={{ fontSize: '12px', color: '#64748B' }}>{activeSocietyName} • {gateName}</div>
           </div>
         </div>
 
