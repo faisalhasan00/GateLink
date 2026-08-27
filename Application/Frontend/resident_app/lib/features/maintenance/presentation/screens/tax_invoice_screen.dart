@@ -119,7 +119,7 @@ Issued via GateLink Society OS (gatelink.in)
                 border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               child: Column(
-                crossAxisAlignment: CrossAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Top Header Banner (Navy Primary Token)
                   Container(
@@ -135,7 +135,7 @@ Issued via GateLink Society OS (gatelink.in)
                       children: [
                         Expanded(
                           child: Column(
-                            crossAxisAlignment: CrossAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
                                 displaySociety.toUpperCase(),
@@ -198,14 +198,14 @@ Issued via GateLink Society OS (gatelink.in)
                   Padding(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     child: Column(
-                      crossAxisAlignment: CrossAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         // Invoice # & Date Row
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Column(
-                              crossAxisAlignment: CrossAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text(
                                   'INVOICE NUMBER',
@@ -228,7 +228,7 @@ Issued via GateLink Society OS (gatelink.in)
                               ],
                             ),
                             Column(
-                              crossAxisAlignment: CrossAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 const Text(
                                   'PAYMENT DATE',
@@ -268,7 +268,7 @@ Issued via GateLink Society OS (gatelink.in)
                             border: Border.all(color: const Color(0xFFF1F5F9)),
                           ),
                           child: Column(
-                            crossAxisAlignment: CrossAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
                                 'BILLED TO (RESIDENT OWNER)',
@@ -364,7 +364,7 @@ Issued via GateLink Society OS (gatelink.in)
                             border: Border.all(color: const Color(0xFFBFDBFE)),
                           ),
                           child: Column(
-                            crossAxisAlignment: CrossAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
                                 'PAYMENT AUDIT TRAIL',

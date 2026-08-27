@@ -316,7 +316,7 @@ class _BillCard extends StatelessWidget {
                           amount: bill.amount,
                           transactionId: txnRef,
                           invoiceNumber: bill.invoiceNumber,
-                          billingPeriod: bill.monthYear,
+                          billingPeriod: bill.billingPeriod,
                         ),
                       ),
                     );
