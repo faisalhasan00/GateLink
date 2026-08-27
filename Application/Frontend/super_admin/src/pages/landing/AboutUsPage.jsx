@@ -47,7 +47,7 @@ export default function AboutUsPage() {
           {/* Header Banner */}
           <div style={{ textAlign: 'center', maxWidth: '850px', margin: '0 auto 60px auto' }}>
             <span style={{ fontSize: '12px', fontWeight: 900, color: '#00B589', letterSpacing: '1px', textTransform: 'uppercase' }}>
-              ABOUT HOMEHNI HOOD
+              ABOUT GATELINK
             </span>
             <h1 style={{ fontSize: '42px', fontWeight: 900, color: isDark ? '#FFFFFF' : '#2C2C2C', letterSpacing: '-1px', margin: '12px 0 16px 0', lineHeight: 1.15 }}>
               Pioneering Gated Community & Gatekeeper Security OS

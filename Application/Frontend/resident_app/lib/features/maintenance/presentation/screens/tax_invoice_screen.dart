@@ -3,6 +3,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
+/// Clean Simple Tax Invoice & Digital Receipt Screen for GateLink
 class TaxInvoiceScreen extends StatelessWidget {
   final String invoiceNumber;
   final double amount;
@@ -11,6 +12,7 @@ class TaxInvoiceScreen extends StatelessWidget {
   final String? paymentMethod;
   final String? residentName;
   final String? flatNumber;
+  final String? blockName;
   final String? societyName;
   final String? paidAt;
 
@@ -23,37 +25,41 @@ class TaxInvoiceScreen extends StatelessWidget {
     this.paymentMethod,
     this.residentName,
     this.flatNumber,
+    this.blockName,
     this.societyName,
     this.paidAt,
   });
 
   void _shareInvoiceSummary(BuildContext context) {
     final text = '''
-🧾 *GateLink Official Tax Receipt & Invoice*
+🧾 *GateLink Official Digital Receipt*
 ----------------------------------------
 Invoice #: $invoiceNumber
-Society: ${societyName ?? 'HomeHni Residency'}
-Resident: ${residentName ?? 'Resident Owner'} (${flatNumber ?? 'Flat A-402'})
+Brand: GateLink (gatelink.in)
+Society / Apartment: ${societyName ?? 'Royal Residency'}
+Resident: ${residentName ?? 'Resident Owner'}
+Block & Flat: ${blockName ?? 'Block A'}, Flat ${flatNumber ?? '402'}
 Billing Period: ${billingPeriod ?? 'Current Month'}
 
 Amount Paid: ₹${amount.toStringAsFixed(2)}
 Payment Status: PAID & VERIFIED ✓
-Payment Method: ${paymentMethod ?? 'Online Cashfree Gateway'}
+Payment Method: ${paymentMethod ?? 'Online Instant Gateway'}
 Transaction Ref / UTR: $transactionId
 SAC Code: 999598 (Services by RWAs)
 
-Issued via GateLink Society OS (gatelink.in)
+Computer-generated receipt issued via GateLink Society OS
 ----------------------------------------
 ''';
-    Share.share(text, subject: 'Tax Invoice $invoiceNumber');
+    Share.share(text, subject: 'GateLink Invoice $invoiceNumber');
   }
 
   void _downloadInvoicePdf(BuildContext context) {
     _shareInvoiceSummary(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Tax Invoice $invoiceNumber receipt summary shared.'),
+        content: Text('GateLink Invoice $invoiceNumber receipt ready for download/share.'),
         backgroundColor: AppColors.primary,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -62,12 +68,13 @@ Issued via GateLink Society OS (gatelink.in)
   Widget build(BuildContext context) {
     final displayPeriod = billingPeriod ?? 'August 2026';
     final displayResident = residentName ?? 'Resident Owner';
-    final displayFlat = flatNumber ?? 'Wing A - 402';
-    final displaySociety = societyName ?? 'HomeHni Smart Residency';
+    final displayFlat = flatNumber ?? '402';
+    final displayBlock = blockName ?? 'Block A';
+    final displaySociety = societyName ?? 'Royal Residency Apartments';
     final displayDate = paidAt ?? '27 Aug 2026, 10:15 AM';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFFF1F5F9),
       appBar: AppBar(
         title: const Text(
           'Tax Invoice & Receipt',
@@ -90,12 +97,12 @@ Issued via GateLink Society OS (gatelink.in)
         actions: [
           IconButton(
             icon: const Icon(Icons.share_rounded, color: AppColors.primary),
-            tooltip: 'Share Invoice',
+            tooltip: 'Share Receipt',
             onPressed: () => _shareInvoiceSummary(context),
           ),
           IconButton(
-            icon: const Icon(Icons.picture_as_pdf_rounded, color: AppColors.primary),
-            tooltip: 'Download PDF',
+            icon: const Icon(Icons.download_rounded, color: AppColors.primary),
+            tooltip: 'Download Receipt',
             onPressed: () => _downloadInvoicePdf(context),
           ),
         ],
@@ -104,7 +111,7 @@ Issued via GateLink Society OS (gatelink.in)
         padding: const EdgeInsets.all(AppSpacing.lg),
         child: Column(
           children: [
-            // Main Official Tax Invoice Card
+            // Simple Clean Invoice Card
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -121,157 +128,107 @@ Issued via GateLink Society OS (gatelink.in)
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Top Header Banner (Navy Primary Token)
+                  // Top GateLink Brand Header
                   Container(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     decoration: const BoxDecoration(
-                      color: Color(0xFF1E3A8A), // Navy Primary
+                      color: Color(0xFF1E3A8A), // GateLink Primary Navy
                       borderRadius: BorderRadius.vertical(
                         top: Radius.circular(AppRadius.xl),
                       ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    child: Column(
+                      crossAxisAlignment: CrossAlignment.start,
                       children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                displaySociety.toUpperCase(),
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white,
-                                  letterSpacing: 0.5,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Row(
+                              children: [
+                                Icon(Icons.shield_rounded,
+                                    color: Color(0xFF38BDF8), size: 24),
+                                SizedBox(width: 8),
+                                Text(
+                                  'GateLink',
+                                  style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white,
+                                    letterSpacing: 0.5,
+                                  ),
                                 ),
+                              ],
+                            ),
+                            // Green Paid Pill Badge
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF10B981), // Green Paid
+                                borderRadius:
+                                    BorderRadius.circular(AppRadius.full),
                               ),
-                              const SizedBox(height: 4),
-                              const Text(
-                                'Official Society OS  •  gatelink.in',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Color(0xFFE0F2FE),
-                                  fontWeight: FontWeight.w500,
-                                ),
+                              child: const Row(
+                                children: [
+                                  Icon(Icons.check_circle_rounded,
+                                      color: Colors.white, size: 14),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'PAID',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 12,
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 2),
-                              const Text(
-                                'GSTIN: 07AAAAA0000A1Z5  •  SAC: 999598',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  color: Color(0xFFBAE6FD),
-                                ),
-                              ),
-                            ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          displaySociety,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 6),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF10B981), // Green Paid Stamp
-                            borderRadius: BorderRadius.circular(AppRadius.full),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(Icons.check_circle_rounded,
-                                  color: Colors.white, size: 14),
-                              SizedBox(width: 4),
-                              Text(
-                                'PAID',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w900,
-                                  fontSize: 12,
-                                  letterSpacing: 1,
-                                ),
-                              ),
-                            ],
+                        const SizedBox(height: 2),
+                        const Text(
+                          'gatelink.in  •  SAC Code: 999598 (RWA Services)',
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Color(0xFFBAE6FD),
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
                   ),
 
-                  // Invoice Details Section
+                  // Resident, Apartment & Bill Meta Section
                   Padding(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Invoice # & Date Row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'INVOICE NUMBER',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.textSecondary,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  invoiceNumber,
-                                  style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w900,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                const Text(
-                                  'PAYMENT DATE',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.textSecondary,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  displayDate,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-
-                        const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 14),
-                          child: Divider(color: Color(0xFFE2E8F0)),
-                        ),
-
-                        // Billed To Box
+                        // Apartment / Resident Box
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(AppSpacing.md),
                           decoration: BoxDecoration(
                             color: const Color(0xFFF8FAFC),
-                            borderRadius: BorderRadius.circular(AppRadius.md),
-                            border: Border.all(color: const Color(0xFFF1F5F9)),
+                            borderRadius: BorderRadius.circular(AppRadius.lg),
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
-                                'BILLED TO (RESIDENT OWNER)',
+                                'APARTMENT & RESIDENT DETAILS',
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w900,
@@ -283,29 +240,48 @@ Issued via GateLink Society OS (gatelink.in)
                               Text(
                                 displayResident,
                                 style: const TextStyle(
-                                  fontSize: 14,
+                                  fontSize: 15,
                                   fontWeight: FontWeight.w800,
                                   color: AppColors.textPrimary,
                                 ),
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Flat Unit: $displayFlat  •  Billing Period: $displayPeriod',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  const Icon(Icons.apartment_rounded,
+                                      size: 14, color: AppColors.textSecondary),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '$displayBlock  •  Flat $displayFlat',
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ),
 
-                        const SizedBox(height: AppSpacing.lg),
+                        const SizedBox(height: AppSpacing.md),
 
-                        // Itemized Table Header
+                        // Invoice # & Date Rows
+                        _buildMetaRow('Invoice Number', invoiceNumber),
+                        const SizedBox(height: 4),
+                        _buildMetaRow('Billing Period', displayPeriod),
+                        const SizedBox(height: 4),
+                        _buildMetaRow('Payment Date', displayDate),
+
+                        const Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Divider(color: Color(0xFFE2E8F0)),
+                        ),
+
+                        // Simple Breakdown Header
                         const Text(
-                          'ITEMIZED CHARGES BREAKDOWN',
+                          'SIMPLE BILL BREAKDOWN',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w900,
@@ -319,9 +295,9 @@ Issued via GateLink Society OS (gatelink.in)
                             amount > 500 ? (amount - 300) : amount),
                         if (amount > 500) ...[
                           const SizedBox(height: 6),
-                          _buildLineItem('Water & Common Utility Surcharge', 200.0),
+                          _buildLineItem('Water & Utility Charge', 200.0),
                           const SizedBox(height: 6),
-                          _buildLineItem('Security & Reserve Fund Contribution', 100.0),
+                          _buildLineItem('Security & Reserve Fund', 100.0),
                         ],
 
                         const Padding(
@@ -334,9 +310,9 @@ Issued via GateLink Society OS (gatelink.in)
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text(
-                              'TOTAL AMOUNT PAID',
+                              'TOTAL PAID',
                               style: TextStyle(
-                                fontSize: 13,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w900,
                                 color: AppColors.textPrimary,
                               ),
@@ -344,9 +320,9 @@ Issued via GateLink Society OS (gatelink.in)
                             Text(
                               '₹${amount.toStringAsFixed(2)}',
                               style: const TextStyle(
-                                fontSize: 20,
+                                fontSize: 22,
                                 fontWeight: FontWeight.w900,
-                                color: Color(0xFF1E3A8A), // Navy Primary
+                                color: Color(0xFF1E3A8A), // Navy
                               ),
                             ),
                           ],
@@ -354,7 +330,7 @@ Issued via GateLink Society OS (gatelink.in)
 
                         const SizedBox(height: AppSpacing.lg),
 
-                        // Audit Trail Box
+                        // UTR Reference Box
                         Container(
                           width: double.infinity,
                           padding: const EdgeInsets.all(AppSpacing.md),
@@ -364,10 +340,10 @@ Issued via GateLink Society OS (gatelink.in)
                             border: Border.all(color: const Color(0xFFBFDBFE)),
                           ),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            crossAxisAlignment: CrossAlignment.start,
                             children: [
                               const Text(
-                                'PAYMENT AUDIT TRAIL',
+                                'TRANSACTION VERIFICATION',
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.w900,
@@ -375,29 +351,45 @@ Issued via GateLink Society OS (gatelink.in)
                                   letterSpacing: 0.5,
                                 ),
                               ),
-                              const SizedBox(height: 6),
-                              _buildAuditRow('Payment Gateway',
-                                  paymentMethod ?? 'Online Cashfree Gateway'),
                               const SizedBox(height: 4),
-                              _buildAuditRow('Gateway Ref / UTR', transactionId,
-                                  isMono: true),
-                              const SizedBox(height: 4),
-                              _buildAuditRow('Status Verification', 'Verified & Settled Instant'),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Text('Gateway Ref / UTR:',
+                                      style: TextStyle(
+                                          fontSize: 11,
+                                          color: Color(0xFF3B82F6),
+                                          fontWeight: FontWeight.w600)),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      transactionId,
+                                      textAlign: TextAlign.end,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w800,
+                                        color: Color(0xFF1E3A8A),
+                                        fontFamily: 'monospace',
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ],
                           ),
                         ),
 
-                        const SizedBox(height: AppSpacing.lg),
+                        const SizedBox(height: AppSpacing.md),
 
-                        // IT Act Disclaimer
                         const Center(
                           child: Text(
-                            'Computer-generated Tax Invoice & Digital Receipt issued via GateLink Society OS (gatelink.in). Valid without physical signature under Section 13(2) of IT Act 2000.',
+                            'Official Computer-Generated Receipt issued via GateLink Society OS (gatelink.in).',
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 10,
                               color: AppColors.textSecondary,
-                              height: 1.4,
                               fontStyle: FontStyle.italic,
                             ),
                           ),
@@ -411,7 +403,7 @@ Issued via GateLink Society OS (gatelink.in)
 
             const SizedBox(height: AppSpacing.xl),
 
-            // Bottom Buttons
+            // Share & Download Buttons
             Row(
               children: [
                 Expanded(
@@ -434,7 +426,7 @@ Issued via GateLink Society OS (gatelink.in)
                   child: ElevatedButton.icon(
                     onPressed: () => _downloadInvoicePdf(context),
                     icon: const Icon(Icons.download_rounded, size: 18),
-                    label: const Text('Save / Download'),
+                    label: const Text('Download / Save'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
@@ -450,6 +442,30 @@ Issued via GateLink Society OS (gatelink.in)
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildMetaRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 12,
+            color: AppColors.textSecondary,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
+          ),
+        ),
+      ],
     );
   }
 
@@ -473,36 +489,6 @@ Issued via GateLink Society OS (gatelink.in)
             fontSize: 13,
             fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAuditRow(String label, String value, {bool isMono = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          '$label:',
-          style: const TextStyle(
-            fontSize: 11,
-            color: Color(0xFF3B82F6),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            value,
-            textAlign: TextAlign.end,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: const Color(0xFF1E3A8A),
-              fontFamily: isMono ? 'monospace' : null,
-            ),
           ),
         ),
       ],
