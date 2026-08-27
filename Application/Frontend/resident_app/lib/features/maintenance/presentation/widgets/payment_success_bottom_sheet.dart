@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../screens/tax_invoice_screen.dart';
 
 class PaymentSuccessBottomSheet extends StatelessWidget {
   final double amount;
@@ -99,7 +100,16 @@ class PaymentSuccessBottomSheet extends StatelessWidget {
             child: ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
-                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => TaxInvoiceScreen(
+                      amount: amount,
+                      transactionId: transactionId,
+                      invoiceNumber: invoiceNumber,
+                    ),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.success,

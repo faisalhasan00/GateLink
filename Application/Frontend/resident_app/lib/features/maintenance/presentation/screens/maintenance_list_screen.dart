@@ -8,6 +8,7 @@ import '../../domain/models/maintenance_bill_model.dart';
 import '../../domain/models/payment_status.dart';
 import '../../providers/maintenance_providers.dart';
 import 'pay_maintenance_screen.dart';
+import 'tax_invoice_screen.dart';
 import '../widgets/payment_success_bottom_sheet.dart';
 
 class MaintenanceListScreen extends ConsumerStatefulWidget {
@@ -308,11 +309,16 @@ class _BillCard extends StatelessWidget {
                     final txnRef = (bill.utrNumber != null && bill.utrNumber!.isNotEmpty)
                         ? bill.utrNumber!
                         : (bill.transactionId ?? 'CF-PAY-OK');
-                    PaymentSuccessBottomSheet.show(
+                    Navigator.push(
                       context,
-                      amount: bill.amount,
-                      transactionId: txnRef,
-                      invoiceNumber: bill.invoiceNumber,
+                      MaterialPageRoute(
+                        builder: (_) => TaxInvoiceScreen(
+                          amount: bill.amount,
+                          transactionId: txnRef,
+                          invoiceNumber: bill.invoiceNumber,
+                          billingPeriod: bill.monthYear,
+                        ),
+                      ),
                     );
                   },
                   icon: const Icon(Icons.receipt_long_rounded, size: 18),
