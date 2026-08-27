@@ -651,11 +651,22 @@ class TaxInvoiceScreen extends StatelessWidget {
                             border: Border.all(color: const Color(0xFFE2E8F0)),
                           ),
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              _buildPaperMeta('INVOICE NO.', invoiceNumber),
-                              _buildPaperMeta('PAYMENT DATE', displayDate),
-                              _buildPaperMeta('STATUS', 'PAID & VERIFIED ✓'),
+                              Expanded(
+                                flex: 4,
+                                child: _buildPaperMeta('INVOICE NO.', invoiceNumber),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 4,
+                                child: _buildPaperMeta('PAYMENT DATE', displayDate),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 3,
+                                child: _buildPaperMeta('STATUS', 'PAID ✓', valueColor: const Color(0xFF059669)),
+                              ),
                             ],
                           ),
                         ),
@@ -883,7 +894,7 @@ class TaxInvoiceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPaperMeta(String title, String value) {
+  Widget _buildPaperMeta(String title, String value, {Color? valueColor}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -899,11 +910,13 @@ class TaxInvoiceScreen extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           value,
-          style: const TextStyle(
-            fontSize: 11,
+          style: TextStyle(
+            fontSize: 10,
             fontWeight: FontWeight.w800,
-            color: Color(0xFF0F172A),
+            color: valueColor ?? const Color(0xFF0F172A),
           ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
