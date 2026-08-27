@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -38,6 +39,12 @@ class TaxInvoiceScreen extends StatelessWidget {
   Future<Uint8List> _generatePdfData() async {
     final pdf = pw.Document();
 
+    pw.MemoryImage? logoImage;
+    try {
+      final logoImageBytes = await rootBundle.load('assets/images/gatelink_logo.png');
+      logoImage = pw.MemoryImage(logoImageBytes.buffer.asUint8List());
+    } catch (_) {}
+
     final displayPeriod = billingPeriod ?? 'August 2026';
     final displayResident = residentName ?? 'Mohammed Faisal Hasan';
     final displayFlat = flatNumber ?? '402';
@@ -65,14 +72,18 @@ class TaxInvoiceScreen extends StatelessWidget {
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text(
-                        'GATELINK SOCIETY OS',
-                        style: pw.TextStyle(
-                          fontSize: 20,
-                          fontWeight: pw.FontWeight.bold,
-                          color: PdfColor.fromHex('#1E3A8A'),
+                      if (logoImage != null)
+                        pw.Image(logoImage, height: 32, fit: pw.BoxFit.contain)
+                      else
+                        pw.Text(
+                          'GATELINK SOCIETY OS',
+                          style: pw.TextStyle(
+                            fontSize: 20,
+                            fontWeight: pw.FontWeight.bold,
+                            color: PdfColor.fromHex('#1E3A8A'),
+                          ),
                         ),
-                      ),
+                      pw.SizedBox(height: 2),
                       pw.Text(
                         'Smart Society OS • gatelink.in',
                         style: pw.TextStyle(
@@ -443,20 +454,25 @@ class TaxInvoiceScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Column(
+                            Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'GateLink',
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.w900,
-                                    color: Color(0xFF1E3A8A),
-                                    letterSpacing: -0.5,
-                                    fontFamily: 'serif',
+                                Image.asset(
+                                  'assets/images/gatelink_logo.png',
+                                  height: 38,
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (ctx, err, stack) => const Text(
+                                    'GateLink',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w900,
+                                      color: Color(0xFF1E3A8A),
+                                      letterSpacing: -0.5,
+                                    ),
                                   ),
                                 ),
-                                Text(
+                                const SizedBox(height: 4),
+                                const Text(
                                   'Smart Society OS • gatelink.in',
                                   style: TextStyle(
                                     fontSize: 11,
