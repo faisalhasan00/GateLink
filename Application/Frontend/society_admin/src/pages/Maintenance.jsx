@@ -10,6 +10,7 @@ import BankAccountCard from '../components/finance/BankAccountCard';
 
 export default function Maintenance() {
   const {
+    societyId,
     activeTab,
     setActiveTab,
     bills,
@@ -131,7 +132,7 @@ export default function Maintenance() {
           onOpenPaymentModal={setPaymentModalBill}
         />
       ) : (
-        <BankAccountCard />
+        <BankAccountCard societyId={societyId} />
       )}
 
       {/* Generate Bills Modal */}

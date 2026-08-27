@@ -12,6 +12,7 @@ import {
   Landmark
 } from 'lucide-react';
 import { societyAdminService } from '../../services/societyAdminService';
+import { getSocietyAdminSession } from '../../services/sessionManager';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
 import Badge from '../ui/Badge';
@@ -23,6 +24,9 @@ import Card from '../ui/Card';
  * for direct Cashfree auto-settlements.
  */
 export default function BankAccountCard({ societyId, isDark = false }) {
+  const session = getSocietyAdminSession();
+  const targetSocietyId = societyId || session?.societyId;
+
   const [bankData, setBankData] = useState({
     accountHolderName: '',
     bankName: '',
@@ -43,23 +47,23 @@ export default function BankAccountCard({ societyId, isDark = false }) {
   const [successMsg, setSuccessMsg] = useState('');
 
   useEffect(() => {
-    if (!societyId) {
+    if (!targetSocietyId) {
       setLoading(false);
       return;
     }
     loadBankDetails();
-  }, [societyId]);
+  }, [targetSocietyId]);
 
   const loadBankDetails = async () => {
     setLoading(true);
     try {
-      const data = await societyAdminService.getSocietyBankDetails(societyId);
+      const data = await societyAdminService.getSocietyBankDetails(targetSocietyId);
       if (data && data.accountNumber) {
         setBankData(data);
         setForm(data);
       } else {
         // Default fallback with society name
-        const society = await societyAdminService.getSocietyDetails(societyId);
+        const society = await societyAdminService.getSocietyDetails(targetSocietyId);
         const defaultName = society?.name ? `${society.name} RWA Account` : 'Resident Welfare Association';
         setBankData(prev => ({ ...prev, accountHolderName: defaultName }));
         setForm(prev => ({ ...prev, accountHolderName: defaultName }));
@@ -94,6 +98,11 @@ export default function BankAccountCard({ societyId, isDark = false }) {
       return;
     }
 
+    if (!targetSocietyId) {
+      setError('Failed to update bank details: Missing societyId in admin session.');
+      return;
+    }
+
     setSaving(true);
     try {
       const cleanData = {
@@ -106,7 +115,7 @@ export default function BankAccountCard({ societyId, isDark = false }) {
         branchName: form.branchName ? form.branchName.trim() : '',
       };
 
-      await societyAdminService.updateSocietyBankDetails(societyId, cleanData);
+      await societyAdminService.updateSocietyBankDetails(targetSocietyId, cleanData);
       setBankData({ ...bankData, ...cleanData, status: 'Verified' });
       setIsEditing(false);
       setSuccessMsg('Bank account details successfully verified and saved for auto-settlement!');

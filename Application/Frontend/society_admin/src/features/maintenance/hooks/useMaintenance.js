@@ -215,6 +215,7 @@ export function useMaintenance() {
     pendingBills,
     overdueBills,
     pendingVerifications,
-    session
+    session,
+    societyId
   };
 }
