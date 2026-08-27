@@ -138,7 +138,7 @@ Computer-generated receipt issued via GateLink Society OS
                       ),
                     ),
                     child: Column(
-                      crossAxisAlignment: CrossAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -340,7 +340,7 @@ Computer-generated receipt issued via GateLink Society OS
                             border: Border.all(color: const Color(0xFFBFDBFE)),
                           ),
                           child: Column(
-                            crossAxisAlignment: CrossAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const Text(
                                 'TRANSACTION VERIFICATION',
