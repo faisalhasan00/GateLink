@@ -21,22 +21,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
-  bool _isRegisterMode = false;
   bool _agreedToPrivacyPolicy = false;
   String? _consentError;
-
-  // Register fields
-  final _nameController = TextEditingController();
-  final _flatController = TextEditingController();
-  final _societyCodeController = TextEditingController();
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _nameController.dispose();
-    _flatController.dispose();
-    _societyCodeController.dispose();
     super.dispose();
   }
 
@@ -51,34 +42,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     setState(() => _isLoading = true);
     try {
       await ref.read(authServiceProvider).signInWithEmail(
-        _emailController.text,
+        _emailController.text.trim(),
         _passwordController.text,
       );
-      if (mounted) context.go('/home');
+      if (mounted) context.go('/guard/dashboard');
     } on FirebaseAuthException catch (e) {
-      _showError(e.message ?? 'Login failed. Please try again.');
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _handleRegister() async {
-    if (!_formKey.currentState!.validate()) return;
-    setState(() => _isLoading = true);
-    try {
-      await ref.read(authServiceProvider).registerWithEmail(
-        email: _emailController.text,
-        password: _passwordController.text,
-        name: _nameController.text,
-        flatNumber: _flatController.text,
-        societyCode: _societyCodeController.text,
-        role: 'resident',
-      );
-      if (mounted) context.go('/pending-approval');
-    } on FirebaseAuthException catch (e) {
-      _showError(e.message ?? 'Registration failed. Please try again.');
+      _showError(e.message ?? 'Login failed. Please verify your credentials.');
     } catch (e) {
-      _showError(e.toString().replaceAll('Exception: ', ''));
+      _showError('Login failed: $e');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -90,59 +61,114 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSpacing.pagePadding),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.pagePadding, vertical: AppSpacing.lg),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: AppSpacing.xl),
-                Container(
-                  width: 56,
-                  height: 56,
-                  decoration: BoxDecoration(
-                    color: AppColors.primarySurface,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                const SizedBox(height: AppSpacing.md),
+
+                // GateLink Security Guard Brand Header
+                Center(
+                  child: Column(
+                    children: [
+                      Container(
+                        width: 68,
+                        height: 68,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF1E3A8A), Color(0xFF0EA5E9)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFF0EA5E9).withValues(alpha: 0.3),
+                              blurRadius: 16,
+                              offset: const Offset(0, 6),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.security_rounded,
+                          color: Colors.white,
+                          size: 36,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'GateLink Guard',
+                        style: TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF0F172A),
+                          letterSpacing: -0.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Gate Security & Guard Terminal',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Color(0xFF64748B),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
                   ),
-                  child: const Icon(Icons.apartment_rounded, color: AppColors.primary, size: 30),
                 ),
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  _isRegisterMode ? 'Create Account' : 'Welcome Back',
-                  style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  _isRegisterMode ? 'Register your account to get started' : 'Sign in to your GateLink Guard account',
-                  style: const TextStyle(fontSize: 15, color: AppColors.textSecondary),
-                ),
+
                 const SizedBox(height: AppSpacing.xxl),
 
-                // Register-only fields
-                if (_isRegisterMode) ...[
-                  _buildField('Full Name', _nameController, hint: 'e.g. Arjun Kumar'),
-                  const SizedBox(height: AppSpacing.md),
-                  _buildField('Flat Number', _flatController, hint: 'e.g. A-101'),
-                  const SizedBox(height: AppSpacing.md),
-                  _buildField('Society Access Code', _societyCodeController, hint: 'e.g. GW-8492'),
-                  const SizedBox(height: AppSpacing.md),
-                ],
+                // Welcome back header
+                const Text(
+                  'Sign In to Terminal',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF0F172A),
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                const Text(
+                  'Enter your Admin-assigned security credentials',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF64748B),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
 
-                _buildField('Email Address', _emailController, hint: 'you@example.com', keyboardType: TextInputType.emailAddress),
+                const SizedBox(height: AppSpacing.lg),
+
+                // Email / Guard ID
+                _buildField(
+                  'Security Email / Guard ID',
+                  _emailController,
+                  hint: 'guard@society.com',
+                  keyboardType: TextInputType.emailAddress,
+                  prefixIcon: Icons.badge_outlined,
+                ),
                 const SizedBox(height: AppSpacing.md),
+
+                // Password / Shift PIN
                 _buildPasswordField(),
-                const SizedBox(height: AppSpacing.md),
+                const SizedBox(height: AppSpacing.lg),
 
-                // DPDP Privacy Consent Checkbox (Initially Unchecked false)
+                // DPDP Privacy Consent Checkbox
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SizedBox(
-                      width: 24,
-                      height: 24,
+                      width: 22,
+                      height: 22,
                       child: Checkbox(
                         value: _agreedToPrivacyPolicy,
                         activeColor: AppColors.primary,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                         onChanged: (val) {
                           setState(() {
                             _agreedToPrivacyPolicy = val ?? false;
@@ -155,7 +181,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     Expanded(
                       child: RichText(
                         text: TextSpan(
-                          style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
+                          style: const TextStyle(fontSize: 12, color: Color(0xFF64748B), height: 1.4),
                           children: [
                             const TextSpan(text: 'I agree to the GateLink '),
                             TextSpan(
@@ -191,9 +217,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     style: const TextStyle(color: AppColors.error, fontSize: 12, fontWeight: FontWeight.w500),
                   ),
                 ],
+
                 const SizedBox(height: AppSpacing.xl),
 
-                // Main Action Button
+                // Sign In Button
                 SizedBox(
                   width: double.infinity,
                   height: 52,
@@ -207,30 +234,63 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               });
                               return;
                             }
-                            if (_isRegisterMode) {
-                              _handleRegister();
-                            } else {
-                              _handleEmailLogin();
-                            }
+                            _handleEmailLogin();
                           },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
+                      backgroundColor: const Color(0xFF1E3A8A),
+                      foregroundColor: Colors.white,
+                      elevation: 2,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
                     ),
                     child: _isLoading
                         ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                        : Text(_isRegisterMode ? 'Create Account' : 'Sign In', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
+                        : const Text(
+                            'Sign In to Duty',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white),
+                          ),
                   ),
                 ),
 
-                const SizedBox(height: AppSpacing.xl),
-                Center(
-                  child: TextButton(
-                    onPressed: () => context.push('/register'),
-                    child: const Text(
-                      'New resident? Register & Add Home',
-                      style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700, fontSize: 15),
-                    ),
+                const SizedBox(height: AppSpacing.xxl),
+
+                // Official Admin Provisioning Notice (Replaces Public Sign-Up)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Icon(Icons.info_outline_rounded, color: Color(0xFF0EA5E9), size: 20),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: const [
+                            Text(
+                              'Authorized Personnel Only',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                            SizedBox(height: 4),
+                            Text(
+                              'Guard accounts are provisioned exclusively by the Society Administrator or Security Head. If you are a new guard on duty, please contact your Society Office to receive your terminal credentials.',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF64748B),
+                                height: 1.4,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -241,17 +301,43 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Widget _buildField(String label, TextEditingController controller, {String? hint, TextInputType? keyboardType}) {
+  Widget _buildField(
+    String label,
+    TextEditingController controller, {
+    String? hint,
+    TextInputType? keyboardType,
+    IconData? prefixIcon,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
-        const SizedBox(height: 8),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF334155)),
+        ),
+        const SizedBox(height: 6),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
-          decoration: InputDecoration(hintText: hint),
-          validator: (v) => (v == null || v.isEmpty) ? '$label is required' : null,
+          decoration: InputDecoration(
+            hintText: hint,
+            prefixIcon: prefixIcon != null ? Icon(prefixIcon, size: 20, color: const Color(0xFF64748B)) : null,
+            filled: true,
+            fillColor: const Color(0xFFF8FAFC),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              borderSide: const BorderSide(color: Color(0xFF1E3A8A), width: 1.5),
+            ),
+          ),
+          validator: (v) => (v == null || v.trim().isEmpty) ? '$label is required' : null,
         ),
       ],
     );
@@ -261,16 +347,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Password', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppColors.textPrimary)),
-        const SizedBox(height: 8),
+        const Text(
+          'Password / Shift PIN',
+          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: Color(0xFF334155)),
+        ),
+        const SizedBox(height: 6),
         TextFormField(
           controller: _passwordController,
           obscureText: _obscurePassword,
           decoration: InputDecoration(
             hintText: 'Enter your password',
+            prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20, color: Color(0xFF64748B)),
             suffixIcon: IconButton(
-              icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+              icon: Icon(_obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined, size: 20, color: const Color(0xFF64748B)),
               onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+            ),
+            filled: true,
+            fillColor: const Color(0xFFF8FAFC),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              borderSide: const BorderSide(color: Color(0xFF1E3A8A), width: 1.5),
             ),
           ),
           validator: (v) {

@@ -50,8 +50,8 @@ class _OtpScreenState extends State<OtpScreen> {
     await Future.delayed(const Duration(seconds: 1));
     setState(() => _isLoading = false);
     if (!mounted) return;
-    // TODO: Check if user is registered → go to dashboard; if not → register
-    context.go(AppRoutes.register);
+    // Navigate directly to guard terminal dashboard
+    context.go(AppRoutes.guardDashboard);
   }
 
   @override

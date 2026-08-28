@@ -5,7 +5,6 @@ import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
-import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/pending_approval_screen.dart';
 import '../../features/guard/presentation/screens/guard_shell.dart';
 import '../../features/guard/presentation/screens/guard_dashboard_screen.dart';
@@ -25,7 +24,6 @@ class AppRoutes {
   static const String onboarding = '/onboarding';
   static const String login = '/login';
   static const String otp = '/otp';
-  static const String register = '/register';
   static const String pendingApproval = '/pending-approval';
   
   // Guard Navigation Routes
@@ -79,7 +77,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isAuth = authState.value != null;
       final isSplash = state.uri.path == AppRoutes.splash;
       final isLoggingIn = state.uri.path == AppRoutes.login || 
-                          state.uri.path == AppRoutes.register ||
                           state.uri.path == AppRoutes.onboarding;
 
       final isPendingRoute = state.uri.path == AppRoutes.pendingApproval;
@@ -166,10 +163,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final mobile = state.uri.queryParameters['mobile'] ?? '';
           return OtpScreen(mobileNumber: mobile);
         },
-      ),
-      GoRoute(
-        path: AppRoutes.register,
-        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
         path: AppRoutes.pendingApproval,
