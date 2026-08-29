@@ -269,6 +269,65 @@ class VisitorPassService {
     };
   }
 
+  /// Creates a pre-approved visitor invite pass (One-Time or Multi-Day).
+  Future<Map<String, String>> createInvitePass({
+    required String name,
+    required String phone,
+    required String purpose,
+    required String hostFlat,
+    required String invitedBy,
+    required String expectedDate,
+    required String expectedTime,
+    String passType = 'one_time',
+    String? validFrom,
+    String? validUntil,
+  }) async {
+    final passCode = generatePassCode();
+    
+    DateTime expirationTime;
+    if (passType == 'multi_day' && validUntil != null && validUntil.isNotEmpty) {
+      try {
+        final parsedUntil = DateTime.parse(validUntil);
+        expirationTime = DateTime(parsedUntil.year, parsedUntil.month, parsedUntil.day, 23, 59, 59);
+      } catch (_) {
+        expirationTime = DateTime.now().add(const Duration(days: 7));
+      }
+    } else {
+      expirationTime = DateTime.now().add(const Duration(hours: 24));
+    }
+    final expiresAt = expirationTime.toIso8601String();
+
+    final docRef = await _db.collection('societies/$societyId/visitors').add({
+      'name': name.trim(),
+      'phone': phone.trim(),
+      'type': purpose,
+      'hostFlat': hostFlat,
+      'invitedBy': invitedBy,
+      'expectedDate': expectedDate,
+      'expectedTime': expectedTime,
+      'passType': passType,
+      'validFrom': validFrom ?? expectedDate,
+      'validUntil': validUntil ?? expectedDate,
+      'entryCount': 0,
+      'maxEntries': passType == 'multi_day' ? -1 : 1,
+      'passCode': passCode,
+      'qrCode': passCode,
+      'passCodeExpiresAt': expiresAt,
+      'entryTime': null,
+      'exitTime': null,
+      'status': 'expected',
+      'createdAt': DateTime.now().toIso8601String(),
+    });
+
+    return {
+      'visitorId': docRef.id,
+      'passCode': passCode,
+      'passType': passType,
+      'validFrom': validFrom ?? expectedDate,
+      'validUntil': validUntil ?? expectedDate,
+    };
+  }
+
   /// Processes domestic staff check-in or check-out, updates live state, and notifies resident.
   Future<bool> checkInOutHelper({
     required String helperId,
@@ -339,7 +398,7 @@ class VisitorPassService {
           await _db.collection('users/$residentUid/notifications').add(notifData);
         } catch (_) {}
 
-        // Dispatch FCM Push Notification
+        // Dispatch FCM Push Notification trigger delegate
         try {
           String? fcmToken;
           final uDoc = await _db.collection('users').doc(residentUid).get();
@@ -347,13 +406,11 @@ class VisitorPassService {
           if (fcmToken != null && fcmToken.isNotEmpty) {
             await FcmPushService.sendVisitorNotification(
               fcmToken: fcmToken,
-              title: notifTitle,
-              body: notifBody,
-              data: {
-                'type': 'helper_gate_activity',
-                'helperId': helperId,
-                'flatNumber': flatNumber,
-              },
+              visitorName: helperName,
+              visitorType: helperType,
+              hostFlat: flatNumber,
+              visitorId: helperId,
+              societyId: societyId,
             );
           }
         } catch (e) {
