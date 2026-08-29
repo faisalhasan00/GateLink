@@ -51,6 +51,9 @@ abstract class VisitorRepository {
     required String invitedBy,
     required String expectedDate,
     required String expectedTime,
+    String passType = 'one_time',
+    String? validFrom,
+    String? validUntil,
   });
 
   /// Mark visitor exit/checkout.

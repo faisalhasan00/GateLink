@@ -166,6 +166,9 @@ class VisitorRepositoryImpl implements VisitorRepository {
     required String invitedBy,
     required String expectedDate,
     required String expectedTime,
+    String passType = 'one_time',
+    String? validFrom,
+    String? validUntil,
   }) async {
     final map = await _firestoreService.inviteVisitor(
       name: name,
@@ -175,10 +178,16 @@ class VisitorRepositoryImpl implements VisitorRepository {
       invitedBy: invitedBy,
       expectedDate: expectedDate,
       expectedTime: expectedTime,
+      passType: passType,
+      validFrom: validFrom,
+      validUntil: validUntil,
     );
     return VisitorInviteResult(
       visitorId: map['visitorId'] ?? '',
       passCode: map['passCode'] ?? '100000',
+      passType: passType,
+      validFrom: validFrom ?? expectedDate,
+      validUntil: validUntil ?? expectedDate,
     );
   }
 

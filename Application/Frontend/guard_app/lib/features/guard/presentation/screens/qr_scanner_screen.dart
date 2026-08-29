@@ -123,23 +123,36 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
   }) {
     final isAlreadyUsed = reason == 'already_used';
     final isExpired = reason == 'expired';
+    final isMultiDayInside = reason == 'multi_day_inside';
+    final isNotYetValid = reason == 'not_yet_valid';
 
     String headerTitle = 'PASS VERIFIED ✅';
     String headerSub = 'Pre-approved visitor pass verified for gate entry.';
     Color primaryColor = AppColors.success;
     IconData statusIcon = Icons.verified_rounded;
 
-    if (isAlreadyUsed) {
+    if (isMultiDayInside) {
+      headerTitle = 'VISITOR INSIDE 🟢';
+      headerSub = 'Multi-Day guest is currently inside. Ready for check-out.';
+      primaryColor = AppColors.secondary;
+      statusIcon = Icons.exit_to_app_rounded;
+    } else if (isAlreadyUsed) {
       headerTitle = 'ALREADY USED ❌';
-      headerSub = 'This pass has already been used for entry.';
+      headerSub = 'This one-time pass has already been used for entry.';
       primaryColor = AppColors.error;
       statusIcon = Icons.cancel_rounded;
       HapticFeedback.heavyImpact();
     } else if (isExpired) {
-      headerTitle = 'QR CODE EXPIRED ❌';
-      headerSub = 'Pass expiration date & time has passed.';
+      headerTitle = 'PASS EXPIRED ❌';
+      headerSub = error ?? 'Pass expiration date & time has passed.';
       primaryColor = AppColors.error;
       statusIcon = Icons.timer_off_rounded;
+      HapticFeedback.heavyImpact();
+    } else if (isNotYetValid) {
+      headerTitle = 'NOT YET VALID ⏳';
+      headerSub = error ?? 'Pass date range has not started yet.';
+      primaryColor = AppColors.warning;
+      statusIcon = Icons.schedule_rounded;
       HapticFeedback.heavyImpact();
     } else if (!isValid) {
       headerTitle = 'INVALID QR CODE ❌';
@@ -206,6 +219,12 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
               _ModalInfoRow(label: 'Visitor Name', value: data['name'] as String? ?? '-'),
               _ModalInfoRow(label: 'Destination Flat', value: data['hostFlat'] as String? ?? '-'),
               _ModalInfoRow(label: 'Visitor Type', value: data['type'] as String? ?? 'Guest'),
+              _ModalInfoRow(
+                label: 'Pass Type',
+                value: (data['passType'] as String? ?? 'one_time') == 'multi_day'
+                    ? '📅 Multi-Day (${data['validFrom'] ?? ''} - ${data['validUntil'] ?? ''})'
+                    : '⚡ One-Time Single Entry',
+              ),
               _ModalInfoRow(label: 'Current Status', value: (data['status'] as String? ?? 'pending').toUpperCase()),
               _ModalInfoRow(label: 'Pass Code', value: code.length > 18 ? '${code.substring(0, 18)}...' : code),
             ] else ...[
@@ -215,7 +234,7 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
 
             Row(
               children: [
-                if (isAlreadyUsed && docId != null)
+                if ((isAlreadyUsed || isMultiDayInside) && docId != null)
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () async {

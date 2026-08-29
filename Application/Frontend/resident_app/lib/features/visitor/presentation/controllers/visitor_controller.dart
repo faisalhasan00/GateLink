@@ -22,6 +22,9 @@ class VisitorController extends StateNotifier<VisitorState> {
     required String invitedBy,
     required String expectedDate,
     required String expectedTime,
+    String passType = 'one_time',
+    String? validFrom,
+    String? validUntil,
   }) async {
     // Duplicate submission prevention
     if (state.isSubmitting) return null;
@@ -56,6 +59,9 @@ class VisitorController extends StateNotifier<VisitorState> {
         invitedBy: invitedBy,
         expectedDate: expectedDate,
         expectedTime: expectedTime,
+        passType: passType,
+        validFrom: validFrom,
+        validUntil: validUntil,
       );
 
       state = state.copyWith(

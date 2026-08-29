@@ -13,6 +13,11 @@ class VisitorModel {
   final String? passCode;
   final String? qrCode;
   final VisitorStatus status;
+  final String passType; // 'one_time' or 'multi_day'
+  final String? validFrom;
+  final String? validUntil;
+  final int entryCount;
+  final int maxEntries;
   final String? vehicleNumber;
   final String? vehicleType;
   final String? company;
@@ -47,6 +52,11 @@ class VisitorModel {
     this.passCode,
     this.qrCode,
     required this.status,
+    this.passType = 'one_time',
+    this.validFrom,
+    this.validUntil,
+    this.entryCount = 0,
+    this.maxEntries = 1,
     this.vehicleNumber,
     this.vehicleType,
     this.company,
@@ -76,6 +86,7 @@ class VisitorModel {
   }
 
   factory VisitorModel.fromMap(String docId, Map<String, dynamic> map) {
+    final pType = map['passType'] as String? ?? 'one_time';
     return VisitorModel(
       id: docId,
       name: map['name'] as String? ?? 'Unknown Visitor',
@@ -88,6 +99,11 @@ class VisitorModel {
       passCode: map['passCode'] as String?,
       qrCode: map['qrCode'] as String?,
       status: VisitorStatus.fromString(map['status'] as String?),
+      passType: pType,
+      validFrom: map['validFrom'] as String?,
+      validUntil: map['validUntil'] as String?,
+      entryCount: (map['entryCount'] as num?)?.toInt() ?? 0,
+      maxEntries: (map['maxEntries'] as num?)?.toInt() ?? (pType == 'multi_day' ? -1 : 1),
       vehicleNumber: map['vehicleNumber'] as String?,
       vehicleType: map['vehicleType'] as String?,
       company: map['company'] as String?,
@@ -124,6 +140,11 @@ class VisitorModel {
       if (passCode != null) 'passCode': passCode,
       if (qrCode != null) 'qrCode': qrCode,
       'status': status.toFirestore(),
+      'passType': passType,
+      if (validFrom != null) 'validFrom': validFrom,
+      if (validUntil != null) 'validUntil': validUntil,
+      'entryCount': entryCount,
+      'maxEntries': maxEntries,
       if (vehicleNumber != null) 'vehicleNumber': vehicleNumber,
       if (vehicleType != null) 'vehicleType': vehicleType,
       if (company != null) 'company': company,
@@ -157,6 +178,8 @@ class VisitorModel {
     return name[0].toUpperCase();
   }
 
+  bool get isOneTimePass => passType == 'one_time';
+  bool get isMultiDayPass => passType == 'multi_day';
   bool get isPending => status == VisitorStatus.pending;
   bool get isExpected => status == VisitorStatus.expected;
   bool get isApproved => status == VisitorStatus.approved;

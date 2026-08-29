@@ -127,6 +127,9 @@ class FirestoreService {
     required String invitedBy,
     required String expectedDate,
     required String expectedTime,
+    String passType = 'one_time',
+    String? validFrom,
+    String? validUntil,
   }) =>
       visitorService.inviteVisitor(
         name: name,
@@ -136,6 +139,9 @@ class FirestoreService {
         invitedBy: invitedBy,
         expectedDate: expectedDate,
         expectedTime: expectedTime,
+        passType: passType,
+        validFrom: validFrom,
+        validUntil: validUntil,
       );
 
   // ── AMENITIES DELEGATES ──────────────────────────────────────────────────

@@ -51,10 +51,19 @@ class MockVisitorRepository implements VisitorRepository {
     required String invitedBy,
     required String expectedDate,
     required String expectedTime,
+    String passType = 'one_time',
+    String? validFrom,
+    String? validUntil,
   }) async {
     inviteVisitorCalls++;
     if (shouldFail) throw Exception('Invite error');
-    return const VisitorInviteResult(visitorId: 'vis-101', passCode: '654321');
+    return VisitorInviteResult(
+      visitorId: 'vis-101',
+      passCode: '654321',
+      passType: passType,
+      validFrom: validFrom,
+      validUntil: validUntil,
+    );
   }
 
   @override

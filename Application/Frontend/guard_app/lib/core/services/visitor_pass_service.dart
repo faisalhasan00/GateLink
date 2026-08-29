@@ -41,7 +41,6 @@ class VisitorPassService {
       if (docCheck.exists) {
         helperDoc = docCheck;
       } else {
-        // Query by qrCodeData
         final q = await _db
             .collection('societies/$societyId/helpers')
             .where('qrCodeData', isEqualTo: cleanCode)
@@ -147,29 +146,118 @@ class VisitorPassService {
 
     final data = targetDoc.data() as Map<String, dynamic>;
     final status = data['status'] as String? ?? 'pending';
+    final passType = data['passType'] as String? ?? 'one_time';
+    final entryCount = (data['entryCount'] as num?)?.toInt() ?? 0;
     final expiresAtStr = (data['passCodeExpiresAt'] ?? data['expiresAt']) as String?;
 
-    // 4. Expiration Check
+    // 4. Denied / Rejected Status Check
+    if (status == 'denied' || status == 'rejected') {
+      return {
+        'valid': false,
+        'reason': 'denied',
+        'type': 'visitor',
+        'docId': targetDoc.id,
+        'data': data,
+        'error': 'Visitor Denied Entry by Flat Resident',
+      };
+    }
+
+    // 5. Expiration Check
     if (expiresAtStr != null && expiresAtStr.isNotEmpty) {
       try {
         final exp = DateTime.parse(expiresAtStr);
         if (DateTime.now().isAfter(exp)) {
-          return {'valid': false, 'reason': 'expired', 'docId': targetDoc.id, 'data': data, 'error': 'QR Code Expired'};
+          return {
+            'valid': false,
+            'reason': 'expired',
+            'type': 'visitor',
+            'docId': targetDoc.id,
+            'data': data,
+            'error': 'Pass Code Expired',
+          };
         }
       } catch (_) {}
     }
 
-    // 5. Duplicate Prevention Check
+    // 6. Multi-Day Pass Validation
+    if (passType == 'multi_day') {
+      final validFromStr = data['validFrom'] as String?;
+      final validUntilStr = data['validUntil'] as String?;
+      final now = DateTime.now();
+
+      if (validFromStr != null && validFromStr.isNotEmpty) {
+        try {
+          final from = DateTime.parse(validFromStr);
+          if (now.isBefore(DateTime(from.year, from.month, from.day))) {
+            return {
+              'valid': false,
+              'reason': 'not_yet_valid',
+              'type': 'visitor',
+              'docId': targetDoc.id,
+              'data': data,
+              'error': 'Pass not valid until $validFromStr',
+            };
+          }
+        } catch (_) {}
+      }
+
+      if (validUntilStr != null && validUntilStr.isNotEmpty) {
+        try {
+          final until = DateTime.parse(validUntilStr);
+          if (now.isAfter(DateTime(until.year, until.month, until.day, 23, 59, 59))) {
+            return {
+              'valid': false,
+              'reason': 'expired',
+              'type': 'visitor',
+              'docId': targetDoc.id,
+              'data': data,
+              'error': 'Multi-Day Pass expired on $validUntilStr',
+            };
+          }
+        } catch (_) {}
+      }
+
+      // If already inside, multi-day pass allows exit
+      if (status == 'inside') {
+        return {
+          'valid': true,
+          'reason': 'multi_day_inside',
+          'type': 'visitor',
+          'docId': targetDoc.id,
+          'data': data,
+        };
+      }
+
+      return {
+        'valid': true,
+        'reason': 'verified',
+        'type': 'visitor',
+        'docId': targetDoc.id,
+        'data': data,
+      };
+    }
+
+    // 7. One-Time Pass Validation (Single Use Only)
     if (status == 'inside') {
-      return {'valid': false, 'reason': 'already_used', 'docId': targetDoc.id, 'data': data, 'error': 'Pass Already Used'};
+      return {
+        'valid': false,
+        'reason': 'already_used',
+        'type': 'visitor',
+        'docId': targetDoc.id,
+        'data': data,
+        'error': '⚠️ One-Time Pass: Visitor already inside society.',
+      };
     }
 
-    if (status == 'denied' || status == 'rejected') {
-      return {'valid': false, 'reason': 'denied', 'docId': targetDoc.id, 'data': data, 'error': 'Visitor Denied Entry'};
-    }
-
-    if (status == 'checked_out' || status == 'left') {
-      return {'valid': false, 'reason': 'checked_out', 'docId': targetDoc.id, 'data': data, 'error': 'Visitor Already Checked Out'};
+    if (status == 'checked_out' || status == 'left' || entryCount >= 1) {
+      return {
+        'valid': false,
+        'reason': 'already_used',
+        'type': 'visitor',
+        'docId': targetDoc.id,
+        'data': data,
+        'error': '⛔ One-Time Pass has already been used and expired.',
+      };
     }
 
     return {
@@ -259,56 +347,24 @@ class VisitorPassService {
           if (fcmToken != null && fcmToken.isNotEmpty) {
             await FcmPushService.sendVisitorNotification(
               fcmToken: fcmToken,
-              visitorName: helperName,
-              visitorType: helperType,
-              hostFlat: flatNumber,
-              visitorId: helperId,
-              societyId: societyId,
+              title: notifTitle,
+              body: notifBody,
+              data: {
+                'type': 'helper_gate_activity',
+                'helperId': helperId,
+                'flatNumber': flatNumber,
+              },
             );
           }
         } catch (e) {
-          debugPrint('Helper FCM Notification error: $e');
+          debugPrint('FCM Push notification failed: $e');
         }
       }
 
       return true;
     } catch (e) {
-      debugPrint('Error processing helper check-in/out: $e');
+      debugPrint('Error updating helper gate check-in/out: $e');
       return false;
     }
-  }
-
-  /// Creates a pre-approved visitor invite pass with a 6-digit PIN.
-  Future<Map<String, String>> createInvitePass({
-    required String name,
-    required String phone,
-    required String purpose,
-    required String hostFlat,
-    required String invitedBy,
-    required String expectedDate,
-    required String expectedTime,
-  }) async {
-    final passCode = generatePassCode();
-    final expiresAt = DateTime.now().add(const Duration(hours: 24)).toIso8601String();
-
-    final docRef = await _db.collection('societies/$societyId/visitors').add({
-      'name': name.trim(),
-      'phone': phone.trim(),
-      'type': purpose,
-      'hostFlat': hostFlat,
-      'invitedBy': invitedBy,
-      'expectedDate': expectedDate,
-      'expectedTime': expectedTime,
-      'status': 'invited',
-      'passCode': passCode,
-      'passCodeExpiresAt': expiresAt,
-      'createdAt': DateTime.now().toIso8601String(),
-    });
-
-    return {
-      'visitorId': docRef.id,
-      'passCode': passCode,
-      'expiresAt': expiresAt,
-    };
   }
 }

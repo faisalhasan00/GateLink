@@ -73,6 +73,9 @@ class VisitorService {
     required String invitedBy,
     required String expectedDate,
     required String expectedTime,
+    String passType = 'one_time',
+    String? validFrom,
+    String? validUntil,
   }) =>
       passService.createInvitePass(
         name: name,
@@ -82,6 +85,9 @@ class VisitorService {
         invitedBy: invitedBy,
         expectedDate: expectedDate,
         expectedTime: expectedTime,
+        passType: passType,
+        validFrom: validFrom,
+        validUntil: validUntil,
       );
 
   // ── VISITOR LOGGING & OPERATIONS ──────────────────────────────────────────
