@@ -60,6 +60,41 @@ class NotificationService {
     debugPrint('Guard NotificationService initialized with custom guard_alert sound');
   }
 
+  /// Show arrival alert for incoming visitor
+  static Future<void> showVisitorAlert({
+    required String visitorName,
+    required String visitorType,
+    required String flatNumber,
+  }) async {
+    await init();
+    final title = '🚪 Visitor Arrival — Flat $flatNumber';
+    final body = '$visitorName ($visitorType) waiting for gate approval.';
+
+    await _plugin.show(
+      DateTime.now().millisecondsSinceEpoch.remainder(100000),
+      title,
+      body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          channelGuardSecurityId,
+          'Gate Clearance & Approvals',
+          channelDescription: 'Incoming visitor arrival alert',
+          importance: Importance.max,
+          priority: Priority.max,
+          playSound: true,
+          sound: _guardAlertSound,
+          enableVibration: true,
+          icon: '@mipmap/ic_launcher',
+          styleInformation: BigTextStyleInformation(
+            body,
+            contentTitle: title,
+            summaryText: 'Gate Alert',
+          ),
+        ),
+      ),
+    );
+  }
+
   /// Trigger resident approval/rejection gate clearance notification
   static Future<void> showVisitorDecisionAlert({
     required String visitorName,
