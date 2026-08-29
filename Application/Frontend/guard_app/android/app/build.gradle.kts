@@ -61,7 +61,7 @@ android {
     defaultConfig {
         applicationId = "in.gatelink.guard"
         minSdk = flutter.minSdkVersion
-        targetSdk = 35
+        targetSdk = 36
         versionCode = flutterVersionCode
         versionName = flutterVersionName
         resValue("string", "app_name", "GateLink Guard")
