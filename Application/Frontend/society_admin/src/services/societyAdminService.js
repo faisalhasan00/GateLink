@@ -11,6 +11,7 @@ import { residentService } from './domain/residentService';
 import { maintenanceService } from './domain/maintenanceService';
 import { complaintService } from './domain/complaintService';
 import { facilityService } from './domain/facilityService';
+import { pollService } from './domain/pollService';
 
 export const societyAdminService = {
   // ── RESIDENTS & STAFF ──────────────────────────────────────────────────
@@ -37,9 +38,10 @@ export const societyAdminService = {
   assignComplaintStaff: complaintService.assignComplaintStaff,
   subscribeSosAlerts: complaintService.subscribeSosAlerts,
   updateSosAlertStatus: complaintService.updateSosAlertStatus,
+  subscribeAuditLogs: complaintService.subscribeAuditLogs,
   logAuditAction: complaintService.logAuditAction,
 
-  // ── FACILITIES, NOTICES & SEARCH ──────────────────────────────────────
+  // ── FACILITIES, NOTICES, POLLS & SEARCH ────────────────────────────────
   getSocietyDetails: facilityService.getSocietyDetails,
   onboardSocietyBatch: facilityService.onboardSocietyBatch,
   subscribeVisitors: facilityService.subscribeVisitors,
@@ -52,6 +54,11 @@ export const societyAdminService = {
   subscribeNotices: facilityService.subscribeNotices,
   createNotice: facilityService.createNotice,
   deleteNotice: facilityService.deleteNotice,
+  subscribePolls: pollService.subscribePolls,
+  createPoll: pollService.createPoll,
+  closePoll: pollService.closePoll,
+  deletePoll: pollService.deletePoll,
+  getPollVotes: pollService.getPollVotes,
   subscribeDocuments: facilityService.subscribeDocuments,
   createDocumentRecord: facilityService.createDocumentRecord,
   subscribeParkingSlots: facilityService.subscribeParkingSlots,

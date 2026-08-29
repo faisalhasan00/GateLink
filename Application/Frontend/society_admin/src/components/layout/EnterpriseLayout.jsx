@@ -14,7 +14,8 @@ import {
   Truck, 
   BarChart2, 
   Building2, 
-  Contact 
+  Contact,
+  Vote 
 } from 'lucide-react';
 import EnterpriseHeader from './EnterpriseHeader';
 import EnterpriseSidebar from './EnterpriseSidebar';
@@ -30,6 +31,7 @@ const SOCIETY_ADMIN_NAV = [
   { name: 'Parking', path: '/parking', icon: <CarFront size={20} /> },
   { name: 'Complaints', path: '/complaints', icon: <ShieldAlert size={20} /> },
   { name: 'Notices', path: '/notices', icon: <Megaphone size={20} /> },
+  { name: 'AGM & Polls', path: '/polls', icon: <Vote size={20} /> },
   { name: 'Staff Management', path: '/staff', icon: <UserCheck size={20} /> },
   { name: 'Helpers & Deliveries', path: '/helpers', icon: <Truck size={20} /> },
   { name: 'Emergency SOS', path: '/sos', icon: <ShieldAlert size={20} /> },
@@ -49,6 +51,7 @@ const PAGE_TITLES = {
   '/parking': { title: 'Parking Allocation', subtitle: 'Manage parking slots, resident vehicles, and visitor parking' },
   '/complaints': { title: 'Helpdesk Complaints', subtitle: 'Track resident complaints, ticketing workflow, and staff assignment' },
   '/notices': { title: 'Notice Board', subtitle: 'Publish community announcements and official notices' },
+  '/polls': { title: 'AGM Voting & Polls', subtitle: 'Manage constitutional resolutions, facility voting, and opinion polls' },
   '/staff': { title: 'Staff Management', subtitle: 'Onboard society personnel and configure RBAC roles' },
   '/helpers': { title: 'Helpers & Deliveries', subtitle: 'Track domestic helpers, maids, cooks, and delivery entries' },
   '/sos': { title: 'Emergency SOS Command', subtitle: 'Real-time emergency SOS broadcast and response tracking' },
@@ -63,59 +66,43 @@ export default function EnterpriseLayout({ isSuperAdmin = false }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const currentRouteMeta = PAGE_TITLES[location.pathname] || {
-    title: 'Society Admin Panel',
-    subtitle: 'Enterprise Management System'
+  // Match current route for dynamic titles
+  const currentPath = location.pathname;
+  const pageMeta = PAGE_TITLES[currentPath] || {
+    title: 'Society Admin Portal',
+    subtitle: 'Manage and monitor your gated society operations',
   };
 
-  const navItems = SOCIETY_ADMIN_NAV;
-  const brandTitle = 'GateLink';
-
-  const handleToggleSidebar = () => {
-    if (window.innerWidth < 1024) {
-      setIsMobileOpen(prev => !prev);
-    } else {
-      setIsSidebarCollapsed(prev => !prev);
-    }
-  };
+  const navLinks = SOCIETY_ADMIN_NAV;
 
   return (
-    <div className="app-container" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', backgroundColor: 'var(--bg-color)' }}>
-      {/* Reusable Enterprise Sidebar */}
-      <EnterpriseSidebar 
+    <div className="flex h-screen bg-slate-50 font-sans antialiased overflow-hidden">
+      {/* ── 1. SIDEBAR (Collapsible Desktop + Drawer Mobile) ───────────────── */}
+      <EnterpriseSidebar
+        navLinks={navLinks}
         isCollapsed={isSidebarCollapsed}
         setIsCollapsed={setIsSidebarCollapsed}
-        navItems={navItems}
-        brandTitle={brandTitle}
+        isMobileOpen={isMobileOpen}
+        setIsMobileOpen={setIsMobileOpen}
         isSuperAdmin={isSuperAdmin}
-        isOpen={isMobileOpen}
-        setIsOpen={setIsMobileOpen}
       />
 
-      {/* Main Content Workspace */}
-      <main className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
-        {/* Reusable Enterprise Header */}
-        <EnterpriseHeader 
-          title={currentRouteMeta.title}
-          subtitle={currentRouteMeta.subtitle}
-          toggleSidebar={handleToggleSidebar}
-          isSuperAdmin={isSuperAdmin}
+      {/* ── 2. MAIN CONTENT AREA ────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Sticky Header */}
+        <EnterpriseHeader
+          title={pageMeta.title}
+          subtitle={pageMeta.subtitle}
+          onMenuToggle={() => setIsMobileOpen(!isMobileOpen)}
         />
 
-        {/* Dynamic Page Content */}
-        <div className="page-content" style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
-          <Outlet />
-        </div>
-      </main>
-
-      {/* Mobile Backdrop Overlay */}
-      {isMobileOpen && (
-        <div 
-          className="sidebar-overlay" 
-          onClick={() => setIsMobileOpen(false)}
-          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 99 }}
-        />
-      )}
+        {/* Dynamic Page Outlet with Custom Scrollbar */}
+        <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 bg-slate-50">
+          <div className="max-w-7xl mx-auto space-y-6">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }
