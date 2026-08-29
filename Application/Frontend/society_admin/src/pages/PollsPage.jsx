@@ -11,6 +11,11 @@ import {
   Download,
   AlertCircle,
   Check,
+  BarChart3,
+  Building2,
+  Layers,
+  Clock,
+  X
 } from 'lucide-react';
 import { getSocietyAdminSession } from '../services/sessionManager';
 import { societyAdminService } from '../services/societyAdminService';
@@ -104,65 +109,68 @@ export default function PollsPage() {
       votingRule: 'one_per_flat',
       isOwnerOnly: true,
       expiresAt: expiryStr,
-      options: ['Approve Proposal (Yes)', 'Reject Proposal (No)'],
+      options: ['', ''],
     });
     setIsModalOpen(true);
   };
 
-  const handleSubmit = async (e) => {
+  const handleCreatePoll = async (e) => {
     e.preventDefault();
-    const cleanOptions = formData.options.map((o) => o.trim()).filter(Boolean);
+    if (!societyId) return;
 
-    if (cleanOptions.length < 2) {
-      alert('Please provide at least 2 voting options.');
+    const trimmedTitle = formData.title.trim();
+    if (!trimmedTitle) {
+      alert('Please enter a poll question / resolution title');
       return;
     }
 
-    setIsSubmitting(true);
+    const validOptions = formData.options.map((o) => o.trim()).filter(Boolean);
+    if (validOptions.length < 2) {
+      alert('Please provide at least 2 non-empty poll options');
+      return;
+    }
+
     try {
+      setIsSubmitting(true);
       await societyAdminService.createPoll(
         societyId,
         {
-          title: formData.title,
-          description: formData.description,
+          title: trimmedTitle,
+          description: formData.description.trim(),
           category: formData.category,
           votingRule: formData.votingRule,
           allowedRoles: formData.isOwnerOnly ? ['owner'] : ['owner', 'tenant', 'resident'],
           expiresAt: formData.expiresAt ? new Date(formData.expiresAt).toISOString() : null,
-          options: cleanOptions,
+          options: validOptions,
         },
         adminUid
       );
 
       setIsModalOpen(false);
-      showToast('🎉 New voting poll published & residents notified via broadcast!');
+      showToast('🎉 Poll created & broadcasted to all residents!');
     } catch (err) {
       console.error('Error creating poll:', err);
-      alert(err.message || 'Failed to create poll');
+      alert('Failed to create poll: ' + err.message);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleClosePoll = async (pollId) => {
-    if (!window.confirm('Are you sure you want to close this poll early? No more votes will be accepted.')) {
-      return;
-    }
+  const handleClosePoll = async (pollId, title) => {
+    if (!window.confirm(`Are you sure you want to close voting for "${title}" early?`)) return;
     try {
       await societyAdminService.closePoll(societyId, pollId);
-      showToast('Poll marked as closed.');
+      showToast('Voting closed for poll');
     } catch (err) {
       alert('Failed to close poll: ' + err.message);
     }
   };
 
-  const handleDeletePoll = async (pollId) => {
-    if (!window.confirm('Are you sure you want to delete this poll and all its recorded votes?')) {
-      return;
-    }
+  const handleDeletePoll = async (pollId, title) => {
+    if (!window.confirm(`Are you sure you want to permanently delete poll "${title}"?`)) return;
     try {
       await societyAdminService.deletePoll(societyId, pollId);
-      showToast('Poll removed successfully.');
+      showToast('Poll deleted successfully');
     } catch (err) {
       alert('Failed to delete poll: ' + err.message);
     }
@@ -171,12 +179,11 @@ export default function PollsPage() {
   const handleExportVotes = async (poll) => {
     try {
       const votes = await societyAdminService.getPollVotes(societyId, poll.id);
-      if (votes.length === 0) {
-        alert('No votes recorded yet for this poll.');
+      if (!votes || votes.length === 0) {
+        alert('No votes have been recorded for this poll yet.');
         return;
       }
 
-      // Generate CSV
       const headers = ['Voter Name', 'Flat Number', 'Role', 'Selected Option', 'Voted At'];
       const rows = votes.map((v) => {
         const selectedOpt = poll.options.find((o) => o.id === v.optionId)?.text || v.optionId;
@@ -208,32 +215,84 @@ export default function PollsPage() {
   const agmCount = polls.filter((p) => p.category === 'AGM Resolution').length;
 
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-5 right-5 z-50 bg-emerald-700 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-2 animate-slide-in">
-          <CheckCircle2 size={18} />
-          <span className="font-semibold text-sm">{toastMessage}</span>
+        <div 
+          style={{
+            position: 'fixed',
+            top: '24px',
+            right: '24px',
+            zIndex: 9999,
+            backgroundColor: '#16A34A',
+            color: '#FFFFFF',
+            padding: '12px 22px',
+            borderRadius: '12px',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.15)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            fontWeight: 700,
+            fontSize: '14px'
+          }}
+        >
+          <CheckCircle2 size={20} />
+          <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-extrabold text-slate-900 flex items-center gap-3">
-            <span className="p-2.5 bg-blue-50 text-blue-800 rounded-xl">
-              <Vote size={26} />
-            </span>
-            AGM Voting & Community Polls
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Conduct constitutional AGM resolutions, facility upgrade voting, and member opinion polls with 1-vote-per-flat audit trails.
-          </p>
+      {/* Header Banner */}
+      <div 
+        className="card"
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '16px',
+          padding: '26px 30px',
+          background: 'linear-gradient(135deg, var(--gl-navy, #1E3A8A) 0%, #0F172A 100%)',
+          color: '#FFFFFF',
+          borderRadius: '16px',
+          border: 'none',
+          boxShadow: '0 10px 25px rgba(30, 58, 138, 0.2)'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div 
+            style={{
+              width: '54px',
+              height: '54px',
+              borderRadius: '14px',
+              backgroundColor: 'rgba(255, 255, 255, 0.12)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'var(--gl-sky, #0EA5E9)'
+            }}
+          >
+            <Vote size={30} />
+          </div>
+          <div>
+            <h2 style={{ fontSize: '24px', fontWeight: 800, margin: 0, color: '#FFFFFF', fontFamily: 'var(--font-display, Manrope)' }}>
+              AGM Voting & Community Polls
+            </h2>
+            <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.8)', margin: '4px 0 0 0' }}>
+              Conduct official AGM resolutions, facility upgrades, and member surveys with 1-vote-per-flat rules.
+            </p>
+          </div>
         </div>
 
         <button
           onClick={openCreateModal}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-800 hover:bg-blue-900 text-white text-sm font-bold rounded-xl transition shadow-md hover:shadow-lg"
+          className="btn btn-secondary"
+          style={{
+            padding: '12px 24px',
+            fontSize: '14px',
+            fontWeight: 700,
+            borderRadius: '12px',
+            boxShadow: '0 6px 18px rgba(14, 165, 233, 0.35)'
+          }}
         >
           <Plus size={18} />
           Create New Poll
@@ -241,72 +300,86 @@ export default function PollsPage() {
       </div>
 
       {/* Metrics Row */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-blue-50 text-blue-800 rounded-xl">
-            <Vote size={22} />
+      <div className="dashboard-grid">
+        <div className="stat-card" style={{ borderRadius: '16px' }}>
+          <div className="stat-icon" style={{ backgroundColor: 'var(--gl-navy-light, #EFF6FF)' }}>
+            <Vote size={24} color="var(--gl-navy, #1E3A8A)" />
           </div>
-          <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Polls</p>
-            <p className="text-2xl font-extrabold text-slate-900">{polls.length}</p>
-          </div>
-        </div>
-
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-            <CheckCircle2 size={22} />
-          </div>
-          <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Polls</p>
-            <p className="text-2xl font-extrabold text-slate-900">{activePolls}</p>
+          <div className="stat-info">
+            <p>Total Polls</p>
+            <h3>{polls.length}</h3>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-purple-50 text-purple-700 rounded-xl">
-            <Users size={22} />
+        <div className="stat-card" style={{ borderRadius: '16px' }}>
+          <div className="stat-icon" style={{ backgroundColor: 'var(--gl-success-bg, #DCFCE7)' }}>
+            <CheckCircle2 size={24} color="var(--gl-success, #16A34A)" />
           </div>
-          <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Votes Cast</p>
-            <p className="text-2xl font-extrabold text-slate-900">{totalVotesCast}</p>
+          <div className="stat-info">
+            <p>Active Voting</p>
+            <h3 style={{ color: 'var(--gl-success, #16A34A)' }}>{activePolls}</h3>
           </div>
         </div>
 
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
-            <Lock size={22} />
+        <div className="stat-card" style={{ borderRadius: '16px' }}>
+          <div className="stat-icon" style={{ backgroundColor: 'var(--gl-sky-100, #E0F2FE)' }}>
+            <Users size={24} color="var(--gl-sky, #0EA5E9)" />
           </div>
-          <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">AGM Resolutions</p>
-            <p className="text-2xl font-extrabold text-slate-900">{agmCount}</p>
+          <div className="stat-info">
+            <p>Total Votes Cast</p>
+            <h3 style={{ color: 'var(--gl-sky, #0EA5E9)' }}>{totalVotesCast}</h3>
+          </div>
+        </div>
+
+        <div className="stat-card" style={{ borderRadius: '16px' }}>
+          <div className="stat-icon" style={{ backgroundColor: 'var(--gl-amber-100, #FEF3C7)' }}>
+            <Lock size={24} color="var(--gl-amber, #F59E0B)" />
+          </div>
+          <div className="stat-info">
+            <p>AGM Resolutions</p>
+            <h3 style={{ color: 'var(--gl-amber-hover, #D97706)' }}>{agmCount}</h3>
           </div>
         </div>
       </div>
 
-      {/* Polls List / Grid */}
+      {/* Polls Grid */}
       {loading ? (
-        <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center text-slate-400">
-          Loading society polls...
+        <div className="card" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-secondary)', borderRadius: '16px' }}>
+          <p>Loading society polls & voting telemetry...</p>
         </div>
       ) : polls.length === 0 ? (
-        <div className="bg-white p-12 rounded-2xl border border-slate-200 text-center">
-          <div className="w-16 h-16 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Vote size={32} />
+        <div className="card" style={{ padding: '54px 24px', textAlign: 'center', borderRadius: '16px' }}>
+          <div 
+            style={{
+              width: '68px',
+              height: '68px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--gl-navy-light, #EFF6FF)',
+              color: 'var(--gl-navy, #1E3A8A)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 18px auto'
+            }}
+          >
+            <Vote size={34} />
           </div>
-          <h3 className="text-lg font-bold text-slate-800">No Polls Created Yet</h3>
-          <p className="text-sm text-slate-500 max-w-md mx-auto mt-1 mb-6">
-            Create an AGM resolution or community opinion poll to collect member votes from the GateLink Mobile App.
+          <h3 style={{ fontSize: '19px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px' }}>
+            No Polls Created Yet
+          </h3>
+          <p style={{ fontSize: '14px', color: 'var(--text-secondary)', maxWidth: '440px', margin: '0 auto 24px auto' }}>
+            Publish an AGM resolution, maintenance budget approval, or community poll for residents on the mobile app.
           </p>
           <button
             onClick={openCreateModal}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-800 text-white text-sm font-bold rounded-xl hover:bg-blue-900 transition"
+            className="btn btn-primary"
+            style={{ padding: '12px 24px', fontWeight: 700, borderRadius: '12px' }}
           >
-            <Plus size={18} />
-            Create First Poll
+            <Plus size={18} /> Create First Poll
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))', gap: '24px' }}>
           {polls.map((poll) => {
             const isActive = poll.status === 'active';
             const isOwnerOnly =
@@ -317,61 +390,85 @@ export default function PollsPage() {
             return (
               <div
                 key={poll.id}
-                className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition flex flex-col justify-between"
+                className="card hover-card-elevate"
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  gap: '16px',
+                  borderRadius: '16px',
+                  border: isActive ? '1px solid var(--border-color)' : '1px dashed #CBD5E1',
+                  opacity: isActive ? 1 : 0.85
+                }}
               >
                 <div>
-                  {/* Top Badges */}
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="px-2.5 py-1 text-xs font-bold rounded-lg bg-blue-50 text-blue-800">
+                  {/* Category & Status Bar */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                      <span className="badge primary">
                         {poll.category || 'General Poll'}
                       </span>
                       {isOwnerOnly && (
-                        <span className="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-bold rounded-lg bg-amber-50 text-amber-700">
-                          <Lock size={12} />
-                          Owner Only
+                        <span className="badge warning" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Lock size={12} /> Owner Only
                         </span>
                       )}
-                      <span className="px-2 py-0.5 text-xs text-slate-500 font-medium">
+                      <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontWeight: 600 }}>
                         {poll.votingRule === 'one_per_flat' ? '1 vote / flat' : '1 vote / resident'}
                       </span>
                     </div>
 
-                    <span
-                      className={`px-2.5 py-1 text-xs font-extrabold rounded-lg ${
-                        isActive
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'bg-slate-100 text-slate-600'
-                      }`}
-                    >
+                    <span className={`badge ${isActive ? 'success' : 'outline'}`} style={{ backgroundColor: isActive ? 'var(--gl-success-bg, #DCFCE7)' : '#F1F5F9', color: isActive ? 'var(--gl-success, #16A34A)' : '#64748B' }}>
                       {isActive ? '🟢 ACTIVE' : '⚪ CLOSED'}
                     </span>
                   </div>
 
                   {/* Title & Description */}
-                  <h3 className="text-lg font-extrabold text-slate-900 mb-1">{poll.title}</h3>
+                  <h3 style={{ fontSize: '17px', fontWeight: 800, color: 'var(--text-primary)', margin: '0 0 6px 0', lineHeight: 1.35 }}>
+                    {poll.title}
+                  </h3>
                   {poll.description && (
-                    <p className="text-sm text-slate-600 mb-4 line-clamp-2">{poll.description}</p>
+                    <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 16px 0', lineHeight: 1.45 }}>
+                      {poll.description}
+                    </p>
                   )}
 
-                  {/* Options Progress Visualizer */}
-                  <div className="space-y-3 my-4">
-                    {poll.options?.map((opt) => {
-                      const percentage =
-                        poll.totalVotes > 0 ? Math.round((opt.voteCount / poll.totalVotes) * 100) : 0;
+                  {/* Options & Live Progress Bars */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '14px' }}>
+                    {(poll.options || []).map((opt) => {
+                      const percentage = poll.totalVotes > 0
+                        ? Math.round(((opt.voteCount || 0) / poll.totalVotes) * 100)
+                        : 0;
 
                       return (
-                        <div key={opt.id} className="bg-slate-50 p-3 rounded-xl border border-slate-200">
-                          <div className="flex items-center justify-between text-xs font-bold text-slate-800 mb-1.5">
-                            <span>{opt.text}</span>
-                            <span className="text-blue-800">
-                              {percentage}% ({opt.voteCount} votes)
+                        <div 
+                          key={opt.id}
+                          style={{
+                            padding: '12px 16px',
+                            borderRadius: '12px',
+                            backgroundColor: 'var(--bg-color)',
+                            border: '1px solid var(--border-color)',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '6px'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 600 }}>
+                            <span style={{ color: 'var(--text-primary)' }}>{opt.text}</span>
+                            <span style={{ color: 'var(--text-secondary)', fontWeight: 700 }}>
+                              {opt.voteCount || 0} votes ({percentage}%)
                             </span>
                           </div>
-                          <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-                            <div
-                              className="bg-blue-800 h-2 rounded-full transition-all duration-500"
-                              style={{ width: `${percentage}%` }}
+                          {/* Progress bar */}
+                          <div style={{ height: '7px', borderRadius: '999px', backgroundColor: '#E2E8F0', overflow: 'hidden' }}>
+                            <div 
+                              style={{
+                                width: `${percentage}%`,
+                                height: '100%',
+                                backgroundColor: 'var(--gl-navy, #1E3A8A)',
+                                borderRadius: '999px',
+                                transition: 'width 0.4s ease'
+                              }}
                             />
                           </div>
                         </div>
@@ -381,32 +478,70 @@ export default function PollsPage() {
                 </div>
 
                 {/* Footer Controls */}
-                <div className="pt-4 mt-2 border-t border-slate-100 flex items-center justify-between flex-wrap gap-2 text-xs">
-                  <span className="text-slate-500 font-medium flex items-center gap-1">
-                    <Calendar size={13} />
-                    {poll.expiresAt ? `Closes ${new Date(poll.expiresAt).toLocaleDateString()}` : 'No Expiry'}
-                  </span>
+                <div 
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    paddingTop: '16px',
+                    borderTop: '1px solid var(--border-color)',
+                    fontSize: '12px',
+                    color: 'var(--text-secondary)'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Calendar size={14} />
+                    <span>
+                      {poll.expiresAt ? `Ends ${new Date(poll.expiresAt).toLocaleDateString()}` : 'No expiration date'}
+                    </span>
+                  </div>
 
-                  <div className="flex items-center gap-2">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <button
                       onClick={() => handleExportVotes(poll)}
-                      title="Download CSV Audit Report"
-                      className="p-2 text-slate-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition"
+                      title="Download Voters Audit CSV"
+                      className="btn btn-outline"
+                      style={{
+                        padding: '6px 12px',
+                        fontSize: '12px',
+                        borderRadius: '8px',
+                        fontWeight: 700
+                      }}
                     >
-                      <Download size={16} />
+                      <Download size={14} /> CSV Audit
                     </button>
+
                     {isActive && (
                       <button
-                        onClick={() => handleClosePoll(poll.id)}
-                        className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-lg transition"
+                        onClick={() => handleClosePoll(poll.id, poll.title)}
+                        title="Close voting early"
+                        style={{
+                          background: 'var(--gl-amber-100, #FEF3C7)',
+                          border: '1px solid #FCD34D',
+                          color: '#B45309',
+                          padding: '6px 12px',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          transition: 'all 0.2s'
+                        }}
                       >
-                        End Poll
+                        Close
                       </button>
                     )}
+
                     <button
-                      onClick={() => handleDeletePoll(poll.id)}
-                      title="Delete Poll"
-                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+                      onClick={() => handleDeletePoll(poll.id, poll.title)}
+                      title="Delete poll"
+                      style={{
+                        background: 'transparent',
+                        border: 'none',
+                        color: 'var(--gl-danger, #DC2626)',
+                        padding: '6px',
+                        cursor: 'pointer',
+                        borderRadius: '6px'
+                      }}
                     >
                       <Trash2 size={16} />
                     </button>
@@ -418,166 +553,184 @@ export default function PollsPage() {
         </div>
       )}
 
-      {/* ── CREATE POLL MODAL ──────────────────────────────────────────────── */}
+      {/* CREATE POLL MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-                <Vote size={22} className="text-blue-800" />
-                Publish New Society Poll
-              </h2>
-              <button
+        <div className="modal-overlay">
+          <div className="modal-content" style={{ maxWidth: '640px', borderRadius: '16px' }}>
+            <div className="modal-header">
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <Vote size={24} color="var(--gl-navy, #1E3A8A)" />
+                <h3 className="card-title" style={{ fontFamily: 'var(--font-display, Manrope)' }}>Create Society Poll / Resolution</h3>
+              </div>
+              <button 
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600 p-1"
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}
               >
-                <XCircle size={22} />
+                <X size={20} />
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Poll / Resolution Title *
-                </label>
+            <form onSubmit={handleCreatePoll} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* Category */}
+              <div className="form-group">
+                <label>Category</label>
+                <select
+                  value={formData.category}
+                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                >
+                  {POLL_CATEGORIES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Title */}
+              <div className="form-group">
+                <label>Poll Title / Resolution Question *</label>
                 <input
                   type="text"
-                  required
-                  placeholder="e.g. Approval for Solar Rooftop Installation (Phase 1)"
+                  placeholder="e.g. Approve Club House Renovation Budget (₹5,00,000)"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-800 text-sm"
+                  required
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                  Detailed Description
-                </label>
+              {/* Description */}
+              <div className="form-group">
+                <label>Description / Agenda Details</label>
                 <textarea
-                  rows={3}
-                  placeholder="Explain the background, budget, timeline or benefits for residents..."
+                  rows="3"
+                  placeholder="Provide background context, quotes, or meeting minutes..."
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-800 text-sm"
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Category
-                  </label>
-                  <select
-                    value={formData.category}
-                    onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-800 text-sm bg-white"
+              {/* Options */}
+              <div className="form-group">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ margin: 0 }}>Voting Options *</label>
+                  <button
+                    type="button"
+                    onClick={handleAddOption}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--gl-navy, #1E3A8A)',
+                      fontWeight: 700,
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}
                   >
-                    {POLL_CATEGORIES.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
+                    <Plus size={15} /> Add Option
+                  </button>
                 </div>
 
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
-                    Closing Date & Time
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={formData.expiresAt}
-                    onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-800 text-sm"
-                  />
-                </div>
-              </div>
-
-              {/* Voting Permissions */}
-              <div className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-                <p className="text-xs font-extrabold text-slate-800 uppercase tracking-wider">
-                  Voting Rules & Eligibility
-                </p>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-bold text-slate-800">Restrict to Verified Flat Owners</p>
-                    <p className="text-xs text-slate-500">Only Flat Owners can vote (Mandatory for AGM resolutions)</p>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={formData.isOwnerOnly}
-                    onChange={(e) => setFormData({ ...formData, isOwnerOnly: e.target.checked })}
-                    className="w-5 h-5 rounded text-blue-800 focus:ring-blue-800"
-                  />
-                </div>
-
-                <div className="flex items-center justify-between pt-2 border-t border-slate-200">
-                  <div>
-                    <p className="text-sm font-bold text-slate-800">1 Vote Per Flat</p>
-                    <p className="text-xs text-slate-500">Only 1 submission allowed per unit (e.g. Flat A-402)</p>
-                  </div>
-                  <span className="px-2.5 py-1 bg-blue-100 text-blue-800 text-xs font-bold rounded-md">
-                    Enabled
-                  </span>
-                </div>
-              </div>
-
-              {/* Dynamic Options List */}
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                  Voting Choices (At least 2)
-                </label>
-                <div className="space-y-2">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {formData.options.map((opt, idx) => (
-                    <div key={idx} className="flex items-center gap-2">
-                      <span className="w-6 text-xs font-bold text-slate-400 text-center">
-                        {idx + 1}.
-                      </span>
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <input
                         type="text"
-                        required
-                        placeholder={`Option ${idx + 1}`}
+                        placeholder={`Option ${idx + 1} (e.g. Yes / No / Abstain)`}
                         value={opt}
                         onChange={(e) => handleOptionChange(idx, e.target.value)}
-                        className="flex-1 px-3.5 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-800"
+                        required
                       />
                       {formData.options.length > 2 && (
                         <button
                           type="button"
                           onClick={() => handleRemoveOption(idx)}
-                          className="p-2 text-slate-400 hover:text-red-600 rounded-lg"
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: 'var(--gl-danger, #DC2626)',
+                            cursor: 'pointer',
+                            padding: '4px'
+                          }}
                         >
-                          <Trash2 size={16} />
+                          <Trash2 size={18} />
                         </button>
                       )}
                     </div>
                   ))}
                 </div>
-
-                <button
-                  type="button"
-                  onClick={handleAddOption}
-                  className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-blue-800 hover:text-blue-900"
-                >
-                  <Plus size={14} /> Add Another Option
-                </button>
               </div>
 
-              {/* Modal Actions */}
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+              {/* Expiry Date & Time */}
+              <div className="form-group">
+                <label>Voting End Date & Time</label>
+                <input
+                  type="datetime-local"
+                  value={formData.expiresAt}
+                  onChange={(e) => setFormData({ ...formData, expiresAt: e.target.value })}
+                />
+              </div>
+
+              {/* Voting Permissions & Rules */}
+              <div 
+                style={{
+                  padding: '16px',
+                  borderRadius: '12px',
+                  backgroundColor: 'var(--bg-color)',
+                  border: '1px solid var(--border-color)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px'
+                }}
+              >
+                <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', fontWeight: 600 }}>
+                  <input
+                    type="checkbox"
+                    checked={formData.isOwnerOnly}
+                    onChange={(e) => setFormData({ ...formData, isOwnerOnly: e.target.checked })}
+                    style={{ width: '16px', height: '16px' }}
+                  />
+                  <span>Restrict voting to <strong>Flat Owners Only</strong> (recommended for AGM)</span>
+                </label>
+
+                <div style={{ display: 'flex', gap: '20px', fontSize: '13px', fontWeight: 600 }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="votingRule"
+                      value="one_per_flat"
+                      checked={formData.votingRule === 'one_per_flat'}
+                      onChange={(e) => setFormData({ ...formData, votingRule: e.target.value })}
+                    />
+                    <span>1 Vote per Flat</span>
+                  </label>
+
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                    <input
+                      type="radio"
+                      name="votingRule"
+                      value="one_per_user"
+                      checked={formData.votingRule === 'one_per_user'}
+                      onChange={(e) => setFormData({ ...formData, votingRule: e.target.value })}
+                    />
+                    <span>1 Vote per Member</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '12px' }}>
                 <button
                   type="button"
+                  className="btn btn-outline"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
+                  className="btn btn-primary"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-blue-800 hover:bg-blue-900 text-white text-sm font-bold transition shadow-md disabled:opacity-50 flex items-center gap-2"
+                  style={{ minWidth: '150px' }}
                 >
                   {isSubmitting ? 'Publishing...' : 'Publish & Broadcast'}
                 </button>

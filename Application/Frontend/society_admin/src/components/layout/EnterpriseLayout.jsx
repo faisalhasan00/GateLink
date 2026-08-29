@@ -76,8 +76,25 @@ export default function EnterpriseLayout({ isSuperAdmin = false }) {
   const navLinks = SOCIETY_ADMIN_NAV;
 
   return (
-    <div className="flex h-screen bg-slate-50 font-sans antialiased overflow-hidden">
-      {/* ── 1. SIDEBAR (Collapsible Desktop + Drawer Mobile) ───────────────── */}
+    <div 
+      className="app-container" 
+      style={{ 
+        display: 'flex', 
+        width: '100vw', 
+        height: '100vh', 
+        overflow: 'hidden', 
+        backgroundColor: 'var(--bg-color)' 
+      }}
+    >
+      {/* ── 1. MOBILE OVERLAY BACKDROP ──────────────────────────────────────── */}
+      {isMobileOpen && (
+        <div 
+          className="sidebar-overlay"
+          onClick={() => setIsMobileOpen(false)}
+        />
+      )}
+
+      {/* ── 2. SIDEBAR (Collapsible Desktop + Drawer Mobile) ───────────────── */}
       <EnterpriseSidebar
         navLinks={navLinks}
         isCollapsed={isSidebarCollapsed}
@@ -87,18 +104,38 @@ export default function EnterpriseLayout({ isSuperAdmin = false }) {
         isSuperAdmin={isSuperAdmin}
       />
 
-      {/* ── 2. MAIN CONTENT AREA ────────────────────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      {/* ── 3. MAIN CONTENT AREA (Flex 1, Column, Scrollable) ─────────────── */}
+      <div 
+        className="main-content" 
+        style={{ 
+          flex: 1, 
+          display: 'flex', 
+          flexDirection: 'column', 
+          minWidth: 0, 
+          height: '100vh', 
+          overflow: 'hidden',
+          backgroundColor: 'var(--bg-color)'
+        }}
+      >
         {/* Sticky Header */}
         <EnterpriseHeader
           title={pageMeta.title}
           subtitle={pageMeta.subtitle}
+          toggleSidebar={() => setIsMobileOpen(!isMobileOpen)}
           onMenuToggle={() => setIsMobileOpen(!isMobileOpen)}
+          isSuperAdmin={isSuperAdmin}
         />
 
         {/* Dynamic Page Outlet with Custom Scrollbar */}
-        <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 bg-slate-50">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <main 
+          style={{ 
+            flex: 1, 
+            overflowY: 'auto', 
+            padding: '24px 32px', 
+            backgroundColor: 'var(--bg-color)' 
+          }}
+        >
+          <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
             <Outlet />
           </div>
         </main>
