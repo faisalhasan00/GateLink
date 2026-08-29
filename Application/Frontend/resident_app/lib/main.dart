@@ -19,6 +19,7 @@ import 'core/providers/firebase_providers.dart';
 /// Background FCM handler — must be top-level
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  WidgetsFlutterBinding.ensureInitialized();
   try {
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -45,16 +46,14 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
         societyId: societyId,
       );
     } else if (type == 'sos' || type == 'emergency') {
-      if (message.notification == null) {
-        final residentName = data['residentName'] as String? ?? 'Resident';
-        final flatNumber = data['flatNumber'] as String? ?? '';
-        final alertType = data['alertType'] as String? ?? 'Emergency';
-        await NotificationService.showSosAlert(
-          residentName: residentName,
-          flatNumber: flatNumber,
-          alertType: alertType,
-        );
-      }
+      final residentName = data['residentName'] as String? ?? 'Resident';
+      final flatNumber = data['flatNumber'] as String? ?? '';
+      final alertType = data['alertType'] as String? ?? 'Emergency';
+      await NotificationService.showSosAlert(
+        residentName: residentName,
+        flatNumber: flatNumber,
+        alertType: alertType,
+      );
     } else if (message.notification == null) {
       // Only show local notification if Android OS did not automatically display the FCM payload
       await NotificationService.showNoticeAlert(
@@ -232,6 +231,36 @@ void main() async {
       );
       await saveFcmToken();
       FirebaseMessaging.instance.onTokenRefresh.listen((_) => saveFcmToken());
+
+      // Foreground FCM Listener
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+        debugPrint('FCM foreground message received: ${message.messageId}');
+        final data = message.data;
+        final type = data['type'] as String? ?? '';
+        final title = message.notification?.title ?? data['title'] as String? ?? 'GateLink';
+        final body = message.notification?.body ?? data['body'] as String? ?? 'New notification';
+
+        if (type == 'visitor_pending') {
+          await NotificationService.showVisitorAlert(
+            visitorName: data['visitorName'] as String? ?? 'Visitor',
+            visitorType: data['visitorType'] as String? ?? 'Guest',
+            flatNumber: data['hostFlat'] as String? ?? '',
+            visitorId: data['visitorId'] as String?,
+            societyId: data['societyId'] as String?,
+          );
+        } else if (type == 'sos' || type == 'emergency') {
+          await NotificationService.showSosAlert(
+            residentName: data['residentName'] as String? ?? 'Resident',
+            flatNumber: data['flatNumber'] as String? ?? '',
+            alertType: data['alertType'] as String? ?? 'Emergency',
+          );
+        } else {
+          await NotificationService.showNoticeAlert(
+            title: title,
+            body: body,
+          );
+        }
+      });
     } catch (e) {
       debugPrint('FCM token setup error: $e');
     }

@@ -104,7 +104,7 @@ const notifyResidentOnVisitorArrival = onDocumentCreated(
         db.collection(`users/${residentId}/notifications`).add(notifData)
       );
 
-      // 2. Dispatch FCM Push Notification (Zomato-style Heads-Up Alert)
+      // 2. Dispatch FCM Push Notification with Custom Resident Bell Sound
       if (fcmToken) {
         const message = {
           token: fcmToken,
@@ -124,9 +124,10 @@ const notifyResidentOnVisitorArrival = onDocumentCreated(
           android: {
             priority: "high",
             notification: {
-              channelId: "gate_security_channel",
+              channelId: "gate_security_channel_v2",
               priority: "max",
-              defaultSound: true,
+              sound: "resident_bell",
+              defaultSound: false,
               defaultVibrateTimings: true,
               visibility: "public",
             },
@@ -209,7 +210,26 @@ const notifyGuardOnVisitorDecision = onDocumentUpdated(
             .send({
               token: fcmToken,
               notification: { title, body },
-              data: { type: "visitor_decision", visitorId, status, societyId },
+              data: {
+                type: status === "approved" ? "visitor_approved" : "visitor_rejected",
+                visitorId,
+                status,
+                societyId,
+                visitorName,
+                hostFlat: after.hostFlat || "",
+                click_action: "FLUTTER_NOTIFICATION_CLICK",
+              },
+              android: {
+                priority: "high",
+                notification: {
+                  channelId: "guard_security_channel_v2",
+                  priority: "max",
+                  sound: "guard_alert",
+                  defaultSound: false,
+                  defaultVibrateTimings: true,
+                  visibility: "public",
+                },
+              },
             })
             .catch((err) =>
               logger.error("FCM Guard Notify Error", {

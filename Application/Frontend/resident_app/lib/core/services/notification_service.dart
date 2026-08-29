@@ -53,30 +53,35 @@ Future<void> notificationBackgroundActionHandler(NotificationResponse response) 
 }
 
 /// Production-grade Local & Heads-up Notification Engine.
-/// Configures high-importance Android channels with sound, vibration, and
+/// Configures high-importance Android channels with custom Resident Bell sound, vibration, and
 /// interactive Action Buttons (Approve & Reject) for instant delivery.
 class NotificationService {
   NotificationService._();
   static final _plugin = FlutterLocalNotificationsPlugin();
   static bool _initialized = false;
 
-  static const String channelGateId = 'gate_security_channel';
-  static const String channelEmergencyId = 'emergency_alerts_channel';
-  static const String channelUpdatesId = 'society_updates_channel';
+  // v2 Channel IDs enforce fresh custom sound registration on Android devices
+  static const String channelGateId = 'gate_security_channel_v2';
+  static const String channelEmergencyId = 'emergency_alerts_channel_v2';
+  static const String channelUpdatesId = 'society_updates_channel_v2';
 
   static const String actionApprove = 'action_approve';
   static const String actionReject = 'action_reject';
 
+  static const RawResourceAndroidNotificationSound _residentBellSound =
+      RawResourceAndroidNotificationSound('resident_bell');
+
   static Future<void> init() async {
     if (_initialized) return;
 
-    // 1. Android Notification Channels (High Priority & Heads-up Banner)
+    // 1. Android Notification Channels (High Priority, Custom Resident Bell Chime)
     const gateChannel = AndroidNotificationChannel(
       channelGateId,
       'Gate & Visitor Alerts',
       description: 'Immediate alerts with Approve/Reject buttons when visitors arrive.',
       importance: Importance.max,
       playSound: true,
+      sound: _residentBellSound,
       enableVibration: true,
     );
 
@@ -86,6 +91,7 @@ class NotificationService {
       description: 'High-priority emergency alerts and safety broadcasts.',
       importance: Importance.max,
       playSound: true,
+      sound: _residentBellSound,
       enableVibration: true,
     );
 
@@ -95,6 +101,7 @@ class NotificationService {
       description: 'Announcements, maintenance invoices, and society notices.',
       importance: Importance.high,
       playSound: true,
+      sound: _residentBellSound,
     );
 
     final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
@@ -128,7 +135,7 @@ class NotificationService {
     );
 
     _initialized = true;
-    debugPrint('NotificationService initialized successfully with action buttons');
+    debugPrint('NotificationService initialized successfully with custom Resident sound');
   }
 
   /// Trigger a heads-up gate arrival notification with 2 action buttons: Approve and Reject
@@ -164,6 +171,7 @@ class NotificationService {
           importance: Importance.max,
           priority: Priority.max,
           playSound: true,
+          sound: _residentBellSound,
           enableVibration: true,
           icon: '@mipmap/ic_launcher',
           styleInformation: BigTextStyleInformation(
@@ -210,6 +218,7 @@ class NotificationService {
           importance: Importance.max,
           priority: Priority.max,
           playSound: true,
+          sound: _residentBellSound,
           enableVibration: true,
           icon: '@mipmap/ic_launcher',
           styleInformation: BigTextStyleInformation(''),
@@ -236,6 +245,7 @@ class NotificationService {
           importance: Importance.high,
           priority: Priority.high,
           playSound: true,
+          sound: _residentBellSound,
           icon: '@mipmap/ic_launcher',
           styleInformation: BigTextStyleInformation(''),
         ),
@@ -261,6 +271,7 @@ class NotificationService {
           importance: Importance.high,
           priority: Priority.high,
           playSound: true,
+          sound: _residentBellSound,
           icon: '@mipmap/ic_launcher',
           styleInformation: BigTextStyleInformation(''),
         ),

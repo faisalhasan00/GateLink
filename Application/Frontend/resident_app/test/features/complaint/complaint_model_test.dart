@@ -30,7 +30,7 @@ void main() {
       expect(model.ticketNumber, '#CMP-101');
       expect(model.title, 'Water Leakage');
       expect(model.category, 'Plumbing');
-      expect(model.status, 'In Progress');
+      expect(model.status, 'in progress');
       expect(model.raisedBy, 'user-101');
       expect(model.residentName, 'Jane Doe');
       expect(model.flatNumber, '101');
@@ -47,7 +47,7 @@ void main() {
       expect(model.id, '');
       expect(model.title, 'Complaint');
       expect(model.category, 'General');
-      expect(model.status, 'Open');
+      expect(model.status, 'open');
       expect(model.priority, 'medium');
       expect(model.residentName, 'Resident');
       expect(model.isResolved, false);

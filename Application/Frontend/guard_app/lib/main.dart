@@ -18,8 +18,42 @@ import 'core/services/notification_service.dart';
 /// Background FCM handler — must be top-level
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  debugPrint('Background FCM message: ${message.notification?.title}');
+  WidgetsFlutterBinding.ensureInitialized();
+  try {
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    }
+    await NotificationService.init();
+
+    final data = message.data;
+    final type = data['type'] as String? ?? '';
+    final title = message.notification?.title ?? data['title'] as String? ?? 'GateLink Guard Alert';
+    final body = message.notification?.body ?? data['body'] as String? ?? 'New gate activity recorded';
+
+    if (type == 'visitor_approved' || type == 'visitor_rejected') {
+      final visitorName = data['visitorName'] as String? ?? 'Visitor';
+      final decision = type == 'visitor_approved' ? 'approved' : 'rejected';
+      final flatNumber = data['flatNumber'] as String? ?? data['hostFlat'] as String? ?? '';
+      await NotificationService.showVisitorDecisionAlert(
+        visitorName: visitorName,
+        decision: decision,
+        flatNumber: flatNumber,
+      );
+    } else if (type == 'sos' || type == 'emergency') {
+      final residentName = data['residentName'] as String? ?? 'Resident';
+      final flatNumber = data['flatNumber'] as String? ?? '';
+      final alertType = data['alertType'] as String? ?? 'Emergency';
+      await NotificationService.showSosAlert(
+        residentName: residentName,
+        flatNumber: flatNumber,
+        alertType: alertType,
+      );
+    } else if (message.notification == null) {
+      await NotificationService.showGeneralAlert(title: title, body: body);
+    }
+  } catch (e) {
+    debugPrint('Guard background FCM error: $e');
+  }
 }
 
 /// Saves the device FCM token to Firestore so Cloud Functions can reach this device.
@@ -146,6 +180,35 @@ void main() async {
       );
       await saveFcmToken();
       FirebaseMessaging.instance.onTokenRefresh.listen((_) => saveFcmToken());
+
+      // Foreground FCM Listener for Guards
+      FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
+        debugPrint('Guard FCM foreground message received: ${message.messageId}');
+        final data = message.data;
+        final type = data['type'] as String? ?? '';
+        final title = message.notification?.title ?? data['title'] as String? ?? 'GateLink Guard Alert';
+        final body = message.notification?.body ?? data['body'] as String? ?? 'New gate activity recorded';
+
+        if (type == 'visitor_approved' || type == 'visitor_rejected') {
+          await NotificationService.showVisitorDecisionAlert(
+            visitorName: data['visitorName'] as String? ?? 'Visitor',
+            decision: type == 'visitor_approved' ? 'approved' : 'rejected',
+            flatNumber: data['flatNumber'] as String? ?? data['hostFlat'] as String? ?? '',
+            visitorType: data['visitorType'] as String?,
+          );
+        } else if (type == 'sos' || type == 'emergency') {
+          await NotificationService.showSosAlert(
+            residentName: data['residentName'] as String? ?? 'Resident',
+            flatNumber: data['flatNumber'] as String? ?? '',
+            alertType: data['alertType'] as String? ?? 'Emergency',
+          );
+        } else {
+          await NotificationService.showGeneralAlert(
+            title: title,
+            body: body,
+          );
+        }
+      });
     } catch (e) {
       debugPrint('FCM token setup error: $e');
     }
