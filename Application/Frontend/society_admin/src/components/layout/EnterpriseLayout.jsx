@@ -66,59 +66,43 @@ export default function EnterpriseLayout({ isSuperAdmin = false }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const currentRouteMeta = PAGE_TITLES[location.pathname] || {
-    title: 'Society Admin Panel',
-    subtitle: 'Enterprise Management System'
+  // Match current route for dynamic titles
+  const currentPath = location.pathname;
+  const pageMeta = PAGE_TITLES[currentPath] || {
+    title: 'Society Admin Portal',
+    subtitle: 'Manage and monitor your gated society operations',
   };
 
-  const navItems = SOCIETY_ADMIN_NAV;
-  const brandTitle = 'GateLink';
-
-  const handleToggleSidebar = () => {
-    if (window.innerWidth < 1024) {
-      setIsMobileOpen(prev => !prev);
-    } else {
-      setIsSidebarCollapsed(prev => !prev);
-    }
-  };
+  const navLinks = SOCIETY_ADMIN_NAV;
 
   return (
-    <div className="app-container" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden', backgroundColor: 'var(--bg-color)' }}>
-      {/* Reusable Enterprise Sidebar */}
-      <EnterpriseSidebar 
+    <div className="flex h-screen bg-slate-50 font-sans antialiased overflow-hidden">
+      {/* ── 1. SIDEBAR (Collapsible Desktop + Drawer Mobile) ───────────────── */}
+      <EnterpriseSidebar
+        navLinks={navLinks}
         isCollapsed={isSidebarCollapsed}
         setIsCollapsed={setIsSidebarCollapsed}
-        navItems={navItems}
-        brandTitle={brandTitle}
+        isMobileOpen={isMobileOpen}
+        setIsMobileOpen={setIsMobileOpen}
         isSuperAdmin={isSuperAdmin}
-        isOpen={isMobileOpen}
-        setIsOpen={setIsMobileOpen}
       />
 
-      {/* Main Content Workspace */}
-      <main className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
-        {/* Reusable Enterprise Header */}
-        <EnterpriseHeader 
-          title={currentRouteMeta.title}
-          subtitle={currentRouteMeta.subtitle}
-          toggleSidebar={handleToggleSidebar}
-          isSuperAdmin={isSuperAdmin}
+      {/* ── 2. MAIN CONTENT AREA ────────────────────────────────────────── */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        {/* Sticky Header */}
+        <EnterpriseHeader
+          title={pageMeta.title}
+          subtitle={pageMeta.subtitle}
+          onMenuToggle={() => setIsMobileOpen(!isMobileOpen)}
         />
 
-        {/* Dynamic Page Content */}
-        <div className="page-content" style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
-          <Outlet />
-        </div>
-      </main>
-
-      {/* Mobile Backdrop Overlay */}
-      {isMobileOpen && (
-        <div 
-          className="sidebar-overlay" 
-          onClick={() => setIsMobileOpen(false)}
-          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 99 }}
-        />
-      )}
+        {/* Dynamic Page Outlet with Custom Scrollbar */}
+        <main className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-6 bg-slate-50">
+          <div className="max-w-7xl mx-auto space-y-6">
+            <Outlet />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

@@ -27,18 +27,24 @@ export const societyAdminService = {
   createHelper: residentService.createHelper,
   updateHelperStatus: residentService.updateHelperStatus,
   deleteHelper: residentService.deleteHelper,
+  subscribeStaff: residentService.subscribeStaff,
+  addStaff: residentService.addStaff,
 
-  // ── MAINTENANCE & BILLING ──────────────────────────────────────────────
-  subscribeBills: maintenanceService.subscribeBills,
-  createBill: maintenanceService.createBill,
+  // ── MAINTENANCE & BANK SETTLEMENTS ────────────────────────────────────
+  getSocietyBankDetails: maintenanceService.getSocietyBankDetails,
+  updateSocietyBankDetails: (societyId, bankData) => 
+    maintenanceService.updateSocietyBankDetails(societyId, bankData, complaintService.logAuditAction),
+  subscribeMaintenanceBills: maintenanceService.subscribeMaintenanceBills,
+  createMaintenanceBill: maintenanceService.createMaintenanceBill,
   updateBillStatus: maintenanceService.updateBillStatus,
-  recordOfflinePayment: maintenanceService.recordOfflinePayment,
-  generateBillsBatch: maintenanceService.generateBillsBatch,
-  subscribeInvoices: maintenanceService.subscribeInvoices,
+  markBillPaid: maintenanceService.markBillPaid,
 
-  // ── COMPLAINTS & AUDIT LOGS ────────────────────────────────────────────
+  // ── COMPLAINTS, SOS & AUDIT ───────────────────────────────────────────
   subscribeComplaints: complaintService.subscribeComplaints,
   updateComplaintStatus: complaintService.updateComplaintStatus,
+  assignComplaintStaff: complaintService.assignComplaintStaff,
+  subscribeSosAlerts: complaintService.subscribeSosAlerts,
+  updateSosAlertStatus: complaintService.updateSosAlertStatus,
   subscribeAuditLogs: complaintService.subscribeAuditLogs,
   logAuditAction: complaintService.logAuditAction,
 
