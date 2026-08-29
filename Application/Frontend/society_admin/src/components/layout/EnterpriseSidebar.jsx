@@ -9,13 +9,19 @@ import GateLinkLogo from '../ui/GateLinkLogo';
 export default function EnterpriseSidebar({ 
   isCollapsed = false, 
   setIsCollapsed, 
-  navItems = [], 
+  navItems, 
+  navLinks,
   brandTitle = 'GateLink',
   isSuperAdmin = false,
-  isOpen = false,
-  setIsOpen 
+  isOpen,
+  setIsOpen,
+  isMobileOpen,
+  setIsMobileOpen 
 }) {
   const navigate = useNavigate();
+  const items = navItems || navLinks || [];
+  const mobileOpen = isOpen !== undefined ? isOpen : (isMobileOpen || false);
+  const closeMobile = setIsOpen || setIsMobileOpen;
 
   const handleLogout = async () => {
     try {
@@ -28,7 +34,7 @@ export default function EnterpriseSidebar({
 
   return (
     <aside 
-      className={`enterprise-sidebar ${isCollapsed ? 'collapsed' : ''} ${isOpen ? 'open' : ''}`}
+      className={`enterprise-sidebar ${isCollapsed ? 'collapsed' : ''} ${mobileOpen ? 'open' : ''}`}
       style={{
         width: isCollapsed ? '80px' : '280px',
         minWidth: isCollapsed ? '80px' : '280px',
@@ -81,11 +87,11 @@ export default function EnterpriseSidebar({
           gap: '4px'
         }}
       >
-        {navItems.map((item) => (
+        {items.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
-            onClick={() => { if (setIsOpen) setIsOpen(false); }}
+            onClick={() => { if (closeMobile) closeMobile(false); }}
             className={({ isActive }) => `enterprise-nav-item ${isActive ? 'active' : ''}`}
             title={isCollapsed ? item.name : undefined}
             style={({ isActive }) => ({
