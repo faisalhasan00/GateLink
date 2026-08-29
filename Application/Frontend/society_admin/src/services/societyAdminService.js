@@ -11,6 +11,7 @@ import { residentService } from './domain/residentService';
 import { maintenanceService } from './domain/maintenanceService';
 import { complaintService } from './domain/complaintService';
 import { facilityService } from './domain/facilityService';
+import { pollService } from './domain/pollService';
 
 export const societyAdminService = {
   // ── RESIDENTS & STAFF ──────────────────────────────────────────────────
@@ -18,28 +19,30 @@ export const societyAdminService = {
   addResident: residentService.addResident,
   updateResidentStatus: residentService.updateResidentStatus,
   deleteResident: residentService.deleteResident,
+  subscribeGuards: residentService.subscribeGuards,
+  createGuardUser: residentService.createGuardUser,
+  updateGuardStatus: residentService.updateGuardStatus,
+  deleteGuardUser: residentService.deleteGuardUser,
   subscribeHelpers: residentService.subscribeHelpers,
-  subscribeStaff: residentService.subscribeStaff,
-  addStaff: residentService.addStaff,
+  createHelper: residentService.createHelper,
+  updateHelperStatus: residentService.updateHelperStatus,
+  deleteHelper: residentService.deleteHelper,
 
-  // ── MAINTENANCE & BANK SETTLEMENTS ────────────────────────────────────
-  getSocietyBankDetails: maintenanceService.getSocietyBankDetails,
-  updateSocietyBankDetails: (societyId, bankData) => 
-    maintenanceService.updateSocietyBankDetails(societyId, bankData, complaintService.logAuditAction),
-  subscribeMaintenanceBills: maintenanceService.subscribeMaintenanceBills,
-  createMaintenanceBill: maintenanceService.createMaintenanceBill,
+  // ── MAINTENANCE & BILLING ──────────────────────────────────────────────
+  subscribeBills: maintenanceService.subscribeBills,
+  createBill: maintenanceService.createBill,
   updateBillStatus: maintenanceService.updateBillStatus,
-  markBillPaid: maintenanceService.markBillPaid,
+  recordOfflinePayment: maintenanceService.recordOfflinePayment,
+  generateBillsBatch: maintenanceService.generateBillsBatch,
+  subscribeInvoices: maintenanceService.subscribeInvoices,
 
-  // ── COMPLAINTS, SOS & AUDIT ───────────────────────────────────────────
+  // ── COMPLAINTS & AUDIT LOGS ────────────────────────────────────────────
   subscribeComplaints: complaintService.subscribeComplaints,
   updateComplaintStatus: complaintService.updateComplaintStatus,
-  assignComplaintStaff: complaintService.assignComplaintStaff,
-  subscribeSosAlerts: complaintService.subscribeSosAlerts,
-  updateSosAlertStatus: complaintService.updateSosAlertStatus,
+  subscribeAuditLogs: complaintService.subscribeAuditLogs,
   logAuditAction: complaintService.logAuditAction,
 
-  // ── FACILITIES, NOTICES & SEARCH ──────────────────────────────────────
+  // ── FACILITIES, NOTICES, POLLS & SEARCH ────────────────────────────────
   getSocietyDetails: facilityService.getSocietyDetails,
   onboardSocietyBatch: facilityService.onboardSocietyBatch,
   subscribeVisitors: facilityService.subscribeVisitors,
@@ -52,6 +55,11 @@ export const societyAdminService = {
   subscribeNotices: facilityService.subscribeNotices,
   createNotice: facilityService.createNotice,
   deleteNotice: facilityService.deleteNotice,
+  subscribePolls: pollService.subscribePolls,
+  createPoll: pollService.createPoll,
+  closePoll: pollService.closePoll,
+  deletePoll: pollService.deletePoll,
+  getPollVotes: pollService.getPollVotes,
   subscribeDocuments: facilityService.subscribeDocuments,
   createDocumentRecord: facilityService.createDocumentRecord,
   subscribeParkingSlots: facilityService.subscribeParkingSlots,

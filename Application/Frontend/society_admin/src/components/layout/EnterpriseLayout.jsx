@@ -14,7 +14,8 @@ import {
   Truck, 
   BarChart2, 
   Building2, 
-  Contact 
+  Contact,
+  Vote 
 } from 'lucide-react';
 import EnterpriseHeader from './EnterpriseHeader';
 import EnterpriseSidebar from './EnterpriseSidebar';
@@ -30,6 +31,7 @@ const SOCIETY_ADMIN_NAV = [
   { name: 'Parking', path: '/parking', icon: <CarFront size={20} /> },
   { name: 'Complaints', path: '/complaints', icon: <ShieldAlert size={20} /> },
   { name: 'Notices', path: '/notices', icon: <Megaphone size={20} /> },
+  { name: 'AGM & Polls', path: '/polls', icon: <Vote size={20} /> },
   { name: 'Staff Management', path: '/staff', icon: <UserCheck size={20} /> },
   { name: 'Helpers & Deliveries', path: '/helpers', icon: <Truck size={20} /> },
   { name: 'Emergency SOS', path: '/sos', icon: <ShieldAlert size={20} /> },
@@ -49,6 +51,7 @@ const PAGE_TITLES = {
   '/parking': { title: 'Parking Allocation', subtitle: 'Manage parking slots, resident vehicles, and visitor parking' },
   '/complaints': { title: 'Helpdesk Complaints', subtitle: 'Track resident complaints, ticketing workflow, and staff assignment' },
   '/notices': { title: 'Notice Board', subtitle: 'Publish community announcements and official notices' },
+  '/polls': { title: 'AGM Voting & Polls', subtitle: 'Manage constitutional resolutions, facility voting, and opinion polls' },
   '/staff': { title: 'Staff Management', subtitle: 'Onboard society personnel and configure RBAC roles' },
   '/helpers': { title: 'Helpers & Deliveries', subtitle: 'Track domestic helpers, maids, cooks, and delivery entries' },
   '/sos': { title: 'Emergency SOS Command', subtitle: 'Real-time emergency SOS broadcast and response tracking' },

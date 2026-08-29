@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Users, UserCheck, ShieldAlert, Settings, LogOut, FileText, Wrench, CarFront, Waves, Megaphone, Truck, BarChart2 } from 'lucide-react';
+import { LayoutDashboard, Users, UserCheck, ShieldAlert, Settings, LogOut, FileText, Wrench, CarFront, Waves, Megaphone, Truck, BarChart2, Vote } from 'lucide-react';
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase';
 
@@ -24,6 +24,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { name: 'Parking', path: '/parking', icon: <CarFront size={20} /> },
     { name: 'Complaints', path: '/complaints', icon: <ShieldAlert size={20} /> },
     { name: 'Notices', path: '/notices', icon: <Megaphone size={20} /> },
+    { name: 'AGM & Polls', path: '/polls', icon: <Vote size={20} /> },
     { name: 'Staff Management', path: '/staff', icon: <UserCheck size={20} /> },
     { name: 'Helpers & Deliveries', path: '/helpers', icon: <Truck size={20} /> },
     { name: 'Emergency SOS', path: '/sos', icon: <ShieldAlert size={20} /> },
