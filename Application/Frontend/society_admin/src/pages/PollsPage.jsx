@@ -285,13 +285,16 @@ export default function PollsPage() {
 
         <button
           onClick={openCreateModal}
-          className="btn btn-secondary"
+          className="btn btn-primary"
           style={{
+            backgroundColor: 'var(--gl-navy, #1E3A8A)',
+            color: '#FFFFFF',
             padding: '12px 24px',
             fontSize: '14px',
             fontWeight: 700,
             borderRadius: '12px',
-            boxShadow: '0 6px 18px rgba(14, 165, 233, 0.35)'
+            boxShadow: '0 6px 18px rgba(30, 58, 138, 0.35)',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
           }}
         >
           <Plus size={18} />
