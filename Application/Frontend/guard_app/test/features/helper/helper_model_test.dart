@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:societysphere/features/helper/domain/models/helper_log_model.dart';
 import 'package:societysphere/features/helper/domain/models/helper_model.dart';
 
 void main() {
@@ -26,16 +27,16 @@ void main() {
     test('HelperLogModel parses correctly from map', () {
       final map = {
         'helperId': 'help_123',
-        'name': 'Sunita Devi',
-        'action': 'ENTRY',
+        'helperName': 'Sunita Devi',
+        'type': 'ENTRY',
         'gateName': 'Gate 1',
         'timestamp': '2026-08-14T08:30:00.000Z',
       };
 
-      final log = HelperLogModel.fromMap(map, 'log_456');
+      final log = HelperLogModel.fromMap(map, defaultId: 'log_456');
 
       expect(log.id, equals('log_456'));
-      expect(log.action, equals('ENTRY'));
+      expect(log.type, equals('ENTRY'));
       expect(log.gateName, equals('Gate 1'));
     });
   });

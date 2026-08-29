@@ -76,11 +76,11 @@ class _RegisterHelperScreenState extends ConsumerState<RegisterHelperScreen> {
         govtIdNumber: _idNumberController.text.trim(),
         workingDays: _workingDays,
         emergencyContact: _emergencyController.text.trim(),
-        residentUid: user?.uid,
+        residentUid: user?.uid ?? '',
         residentName: residentName,
         flatNumber: flatNumber,
         status: 'Active',
-        createdAt: DateTime.now(),
+        createdAt: DateTime.now().toIso8601String(),
       );
 
       await ref.read(helperControllerProvider.notifier).registerHelper(helper);

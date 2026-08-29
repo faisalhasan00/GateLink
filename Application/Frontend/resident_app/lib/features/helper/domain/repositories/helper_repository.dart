@@ -18,4 +18,13 @@ abstract class HelperRepository {
     required String workingDays,
     required String emergencyContact,
   });
+  Future<void> updateHelperStatus({
+    required String societyId,
+    required String helperId,
+    required String status,
+  });
+  Future<void> deleteHelper({
+    required String societyId,
+    required String helperId,
+  });
 }

@@ -5,6 +5,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../visitor/presentation/controllers/visitor_controller.dart';
+import '../widgets/helper_scan_modal.dart';
 
 class QrScannerScreen extends ConsumerStatefulWidget {
   const QrScannerScreen({super.key});
@@ -58,6 +59,22 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
       final String reason = result['reason'] as String? ?? 'invalid';
       final String? docId = result['docId'] as String?;
       final Map<String, dynamic> data = (result['data'] as Map<String, dynamic>?) ?? {};
+      final String? scanType = result['type'] as String?;
+
+      // Dedicated Domestic Staff & Helper Permanent Pass Modal
+      if (scanType == 'helper') {
+        HelperScanModal.show(
+          context,
+          data: data,
+          helperId: docId ?? '',
+          isValid: isValid,
+          error: result['error'] as String?,
+          onDismiss: () {
+            if (mounted) setState(() => _isProcessing = false);
+          },
+        );
+        return;
+      }
 
       _showValidationModal(
         code: code,

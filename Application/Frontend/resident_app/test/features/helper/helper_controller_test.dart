@@ -37,6 +37,23 @@ class MockHelperRepository implements HelperRepository {
     registerCalls++;
     if (shouldFail) throw Exception('Failed to register helper');
   }
+
+  @override
+  Future<void> updateHelperStatus({
+    required String societyId,
+    required String helperId,
+    required String status,
+  }) async {
+    if (shouldFail) throw Exception('Failed to update helper status');
+  }
+
+  @override
+  Future<void> deleteHelper({
+    required String societyId,
+    required String helperId,
+  }) async {
+    if (shouldFail) throw Exception('Failed to delete helper');
+  }
 }
 
 void main() {

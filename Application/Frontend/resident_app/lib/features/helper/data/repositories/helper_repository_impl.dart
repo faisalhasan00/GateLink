@@ -20,7 +20,9 @@ class HelperRepositoryImpl implements HelperRepository {
         .snapshots()
         .map((snapshot) {
       return snapshot.docs.map((doc) {
-        return HelperModel.fromMap(doc.data(), defaultId: doc.id);
+        final data = doc.data();
+        data['societyId'] = societyId;
+        return HelperModel.fromMap(data, defaultId: doc.id);
       }).toList();
     });
   }
@@ -54,7 +56,13 @@ class HelperRepositoryImpl implements HelperRepository {
     required String workingDays,
     required String emergencyContact,
   }) async {
+    final docRef = _firestore.collection('societies/$societyId/helpers').doc();
+    final helperId = docRef.id;
+    final qrString = 'GATELINK:HELPER:$societyId:$helperId';
+
     final docData = {
+      'id': helperId,
+      'societyId': societyId,
       'name': name.trim(),
       'phone': phone.trim(),
       'type': type,
@@ -66,9 +74,31 @@ class HelperRepositoryImpl implements HelperRepository {
       'residentName': residentName,
       'flatNumber': flatNumber,
       'status': 'Active',
+      'isInside': false,
+      'qrCodeData': qrString,
       'createdAt': DateTime.now().toIso8601String(),
     };
 
-    await _firestore.collection('societies/$societyId/helpers').add(docData);
+    await docRef.set(docData);
+  }
+
+  @override
+  Future<void> updateHelperStatus({
+    required String societyId,
+    required String helperId,
+    required String status,
+  }) async {
+    await _firestore.doc('societies/$societyId/helpers/$helperId').update({
+      'status': status,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
+  Future<void> deleteHelper({
+    required String societyId,
+    required String helperId,
+  }) async {
+    await _firestore.doc('societies/$societyId/helpers/$helperId').delete();
   }
 }

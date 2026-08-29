@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/providers/firebase_providers.dart';
 import '../data/repositories/helper_repository_impl.dart';
+import '../domain/models/helper_log_model.dart';
 import '../domain/models/helper_model.dart';
 import '../domain/repositories/helper_repository.dart';
 

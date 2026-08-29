@@ -129,8 +129,8 @@ class DomesticHelperScreen extends ConsumerWidget {
                   separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
                   itemBuilder: (context, index) {
                     final log = logs[index];
-                    final isEntry = log.action == 'ENTRY';
-                    final time = log.timestamp.toLocal().toString().substring(11, 16);
+                    final isEntry = log.type == 'ENTRY';
+                    final time = log.formattedTime;
 
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -147,12 +147,12 @@ class DomesticHelperScreen extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(log.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                                Text('${log.gateName} • $time', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                                Text(log.helperName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                Text('${log.helperType} • ${log.gateName} • $time', style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                               ],
                             ),
                           ),
-                          Text(log.action, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: isEntry ? AppColors.success : AppColors.warning)),
+                          Text(log.type, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: isEntry ? AppColors.success : AppColors.warning)),
                         ],
                       ),
                     );

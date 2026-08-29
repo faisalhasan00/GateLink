@@ -11,6 +11,10 @@ class HelperModel {
   final String residentName;
   final String flatNumber;
   final String status;
+  final bool isInside;
+  final String? lastCheckIn;
+  final String? lastCheckOut;
+  final String? qrCodeData;
   final String createdAt;
 
   const HelperModel({
@@ -26,15 +30,21 @@ class HelperModel {
     required this.residentName,
     required this.flatNumber,
     required this.status,
+    this.isInside = false,
+    this.lastCheckIn,
+    this.lastCheckOut,
+    this.qrCodeData,
     required this.createdAt,
   });
 
   factory HelperModel.fromMap(Map<String, dynamic> map, {String? defaultId}) {
+    final rawId = map['id'] as String? ?? defaultId ?? '';
+    final socId = map['societyId'] as String? ?? '';
     return HelperModel(
-      id: map['id'] as String? ?? defaultId ?? '',
-      name: map['name'] as String? ?? 'Helper',
+      id: rawId,
+      name: map['name'] as String? ?? 'Domestic Staff',
       phone: map['phone'] as String? ?? '',
-      type: map['type'] as String? ?? 'Maid',
+      type: map['type'] as String? ?? (map['category'] as String? ?? 'Maid'),
       govtIdType: map['govtIdType'] as String? ?? 'Aadhaar Card',
       govtIdNumber: map['govtIdNumber'] as String? ?? '',
       workingDays: map['workingDays'] as String? ?? 'Mon - Sat',
@@ -43,6 +53,10 @@ class HelperModel {
       residentName: map['residentName'] as String? ?? 'Resident',
       flatNumber: map['flatNumber'] as String? ?? 'A-402',
       status: map['status'] as String? ?? 'Active',
+      isInside: map['isInside'] as bool? ?? false,
+      lastCheckIn: map['lastCheckIn'] as String?,
+      lastCheckOut: map['lastCheckOut'] as String?,
+      qrCodeData: map['qrCodeData'] as String? ?? (rawId.isNotEmpty ? 'GATELINK:HELPER:$socId:$rawId' : null),
       createdAt: map['createdAt'] as String? ?? '',
     );
   }
@@ -61,11 +75,16 @@ class HelperModel {
       'residentName': residentName,
       'flatNumber': flatNumber,
       'status': status,
+      'isInside': isInside,
+      'lastCheckIn': lastCheckIn,
+      'lastCheckOut': lastCheckOut,
+      'qrCodeData': qrCodeData ?? 'GATELINK:HELPER:$id',
       'createdAt': createdAt,
     };
   }
 
   bool get isActive => status.toLowerCase() == 'active';
+  bool get isRevoked => status.toLowerCase() == 'revoked' || status.toLowerCase() == 'inactive';
 
   HelperModel copyWith({
     String? id,
@@ -80,6 +99,10 @@ class HelperModel {
     String? residentName,
     String? flatNumber,
     String? status,
+    bool? isInside,
+    String? lastCheckIn,
+    String? lastCheckOut,
+    String? qrCodeData,
     String? createdAt,
   }) {
     return HelperModel(
@@ -95,6 +118,10 @@ class HelperModel {
       residentName: residentName ?? this.residentName,
       flatNumber: flatNumber ?? this.flatNumber,
       status: status ?? this.status,
+      isInside: isInside ?? this.isInside,
+      lastCheckIn: lastCheckIn ?? this.lastCheckIn,
+      lastCheckOut: lastCheckOut ?? this.lastCheckOut,
+      qrCodeData: qrCodeData ?? this.qrCodeData,
       createdAt: createdAt ?? this.createdAt,
     );
   }

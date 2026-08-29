@@ -1,3 +1,4 @@
+import '../models/helper_log_model.dart';
 import '../models/helper_model.dart';
 
 abstract class HelperRepository {

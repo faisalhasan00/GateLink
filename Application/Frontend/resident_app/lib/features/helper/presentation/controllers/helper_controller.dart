@@ -61,7 +61,7 @@ class HelperController extends StateNotifier<HelperState> {
 
       state = state.copyWith(
         status: HelperActionStatus.success,
-        successMessage: 'Successfully registered $name as $type!',
+        successMessage: 'Successfully registered $name as $type with Permanent QR Pass!',
       );
       return true;
     } catch (e) {
@@ -69,6 +69,83 @@ class HelperController extends StateNotifier<HelperState> {
         status: HelperActionStatus.error,
         errorMessage:
             'Error registering helper: ${e.toString().replaceAll('Exception: ', '')}',
+      );
+      return false;
+    }
+  }
+
+  Future<bool> revokeHelperAccess({
+    required String societyId,
+    required String helperId,
+    required String helperName,
+  }) async {
+    state = state.copyWith(status: HelperActionStatus.loading);
+    try {
+      await _repository.updateHelperStatus(
+        societyId: societyId,
+        helperId: helperId,
+        status: 'Revoked',
+      );
+      state = state.copyWith(
+        status: HelperActionStatus.success,
+        successMessage: 'Access revoked for $helperName. Gate entry is now blocked.',
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        status: HelperActionStatus.error,
+        errorMessage: 'Error revoking access: $e',
+      );
+      return false;
+    }
+  }
+
+  Future<bool> reactivateHelperAccess({
+    required String societyId,
+    required String helperId,
+    required String helperName,
+  }) async {
+    state = state.copyWith(status: HelperActionStatus.loading);
+    try {
+      await _repository.updateHelperStatus(
+        societyId: societyId,
+        helperId: helperId,
+        status: 'Active',
+      );
+      state = state.copyWith(
+        status: HelperActionStatus.success,
+        successMessage: 'Access reactivated for $helperName. QR pass is now active.',
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        status: HelperActionStatus.error,
+        errorMessage: 'Error reactivating access: $e',
+      );
+      return false;
+    }
+  }
+
+  Future<bool> deleteHelper({
+    required String societyId,
+    required String helperId,
+    required String helperName,
+  }) async {
+    state = state.copyWith(status: HelperActionStatus.loading);
+    try {
+      await _repository.deleteHelper(
+        societyId: societyId,
+        helperId: helperId,
+      );
+      state = state.copyWith(
+        status: HelperActionStatus.success,
+        successMessage: 'Helper $helperName deleted successfully.',
+      );
+      return true;
+    } catch (e) {
+      state = state.copyWith(
+        status: HelperActionStatus.error,
+        errorMessage: 'Error deleting helper: $e',
       );
       return false;
     }

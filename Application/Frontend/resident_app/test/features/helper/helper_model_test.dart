@@ -42,7 +42,7 @@ void main() {
       final model = HelperModel.fromMap({});
 
       expect(model.id, '');
-      expect(model.name, 'Helper');
+      expect(model.name, 'Domestic Staff');
       expect(model.type, 'Maid');
       expect(model.govtIdType, 'Aadhaar Card');
       expect(model.workingDays, 'Mon - Sat');
