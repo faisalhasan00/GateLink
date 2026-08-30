@@ -1,0 +1,26 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "in.gatelink.app",
+      "sha256_cert_fingerprints": [
+        "14:6D:E5:C9:4A:26:0D:37:EB:20:EE:D3:53:9F:50:5F:AE:D3:93:33:6B:55:76:F1:C9:C3:63:F2:66:35:E1:92"
+      ]
+    }
+  },
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "in.gatelink.guard",
+      "sha256_cert_fingerprints": [
+        "14:6D:E5:C9:4A:26:0D:37:EB:20:EE:D3:53:9F:50:5F:AE:D3:93:33:6B:55:76:F1:C9:C3:63:F2:66:35:E1:92"
+      ]
+    }
+  }
+]
