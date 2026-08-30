@@ -9,8 +9,8 @@ class NotificationService {
   static final _plugin = FlutterLocalNotificationsPlugin();
   static bool _initialized = false;
 
-  static const String channelGuardSecurityId = 'guard_security_channel_v2';
-  static const String channelGuardEmergencyId = 'guard_emergency_channel_v2';
+  static const String channelGuardSecurityId = 'gatelink_guard_alarm_v3';
+  static const String channelGuardEmergencyId = 'gatelink_guard_emergency_v3';
 
   static const RawResourceAndroidNotificationSound _guardAlertSound =
       RawResourceAndroidNotificationSound('guard_alert');
@@ -21,28 +21,35 @@ class NotificationService {
     // 1. Android Notification Channels (Urgent Guard Gate Siren Tone)
     const securityChannel = AndroidNotificationChannel(
       channelGuardSecurityId,
-      'Gate Clearance & Approvals',
+      '🛡️ Gate Clearance & Approvals',
       description: 'Instant notification when resident approves or rejects a visitor at the gate.',
       importance: Importance.max,
       playSound: true,
       sound: _guardAlertSound,
+      audioAttributesUsage: AudioAttributesUsage.notificationRingtone,
       enableVibration: true,
+      showBadge: true,
     );
 
     const emergencyChannel = AndroidNotificationChannel(
       channelGuardEmergencyId,
-      'Emergency SOS Sirens',
+      '🚨 Emergency SOS Sirens',
       description: 'High-priority emergency panic alarms from society residents.',
       importance: Importance.max,
       playSound: true,
       sound: _guardAlertSound,
+      audioAttributesUsage: AudioAttributesUsage.alarm,
       enableVibration: true,
+      showBadge: true,
     );
 
     final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
 
     if (androidPlugin != null) {
+      await androidPlugin.deleteNotificationChannel('visitors');
+      await androidPlugin.deleteNotificationChannel('guard_security_channel_v2');
+
       await androidPlugin.createNotificationChannel(securityChannel);
       await androidPlugin.createNotificationChannel(emergencyChannel);
 
@@ -77,12 +84,13 @@ class NotificationService {
       NotificationDetails(
         android: AndroidNotificationDetails(
           channelGuardSecurityId,
-          'Gate Clearance & Approvals',
+          '🛡️ Gate Clearance & Approvals',
           channelDescription: 'Incoming visitor arrival alert',
           importance: Importance.max,
           priority: Priority.max,
           playSound: true,
           sound: _guardAlertSound,
+          audioAttributesUsage: AudioAttributesUsage.notificationRingtone,
           enableVibration: true,
           icon: '@mipmap/ic_launcher',
           styleInformation: BigTextStyleInformation(
@@ -118,12 +126,13 @@ class NotificationService {
       NotificationDetails(
         android: AndroidNotificationDetails(
           channelGuardSecurityId,
-          'Gate Clearance & Approvals',
+          '🛡️ Gate Clearance & Approvals',
           channelDescription: 'Notifications when a resident decides on visitor entry',
           importance: Importance.max,
           priority: Priority.max,
           playSound: true,
           sound: _guardAlertSound,
+          audioAttributesUsage: AudioAttributesUsage.notificationRingtone,
           enableVibration: true,
           icon: '@mipmap/ic_launcher',
           styleInformation: BigTextStyleInformation(
@@ -153,12 +162,13 @@ class NotificationService {
       NotificationDetails(
         android: AndroidNotificationDetails(
           channelGuardEmergencyId,
-          'Emergency SOS Sirens',
+          '🚨 Emergency SOS Sirens',
           channelDescription: 'Critical life-safety alerts from residents',
           importance: Importance.max,
           priority: Priority.max,
           playSound: true,
           sound: _guardAlertSound,
+          audioAttributesUsage: AudioAttributesUsage.alarm,
           enableVibration: true,
           icon: '@mipmap/ic_launcher',
           styleInformation: BigTextStyleInformation(
@@ -184,12 +194,13 @@ class NotificationService {
       NotificationDetails(
         android: AndroidNotificationDetails(
           channelGuardSecurityId,
-          'Gate Clearance & Approvals',
+          '🛡️ Gate Clearance & Approvals',
           channelDescription: 'Gate notifications',
           importance: Importance.high,
           priority: Priority.high,
           playSound: true,
           sound: _guardAlertSound,
+          audioAttributesUsage: AudioAttributesUsage.notificationRingtone,
           icon: '@mipmap/ic_launcher',
           styleInformation: BigTextStyleInformation(body),
         ),

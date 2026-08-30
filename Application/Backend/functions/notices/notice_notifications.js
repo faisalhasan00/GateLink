@@ -85,7 +85,7 @@ const notifyOnNoticeCreated = onDocumentCreated(
         android: {
           priority: "high",
           notification: {
-            channelId: "gate_security_channel_v2",
+            channelId: "gatelink_resident_doorbell_v3",
             notificationPriority: "PRIORITY_MAX",
             sound: "resident_bell",
             defaultSound: false,
@@ -182,7 +182,7 @@ const notifyOnBroadcastCreated = onDocumentCreated(
         android: {
           priority: "high",
           notification: {
-            channelId: "gate_security_channel_v2",
+            channelId: "gatelink_resident_doorbell_v3",
             notificationPriority: "PRIORITY_MAX",
             sound: "resident_bell",
             defaultSound: false,
@@ -322,7 +322,7 @@ const sendAdminFcmBroadcast = onCall(
       android: {
         priority: "high",
         notification: {
-          channelId: "gate_security_channel_v2",
+          channelId: "gatelink_resident_doorbell_v3",
           notificationPriority: "PRIORITY_MAX",
           sound: "resident_bell",
           defaultSound: false,

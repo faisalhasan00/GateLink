@@ -124,7 +124,7 @@ const notifyResidentOnVisitorArrival = onDocumentCreated(
           android: {
             priority: "high",
             notification: {
-              channelId: "gate_security_channel_v2",
+              channelId: "gatelink_resident_doorbell_v3",
               priority: "max",
               sound: "resident_bell",
               defaultSound: false,
@@ -222,7 +222,7 @@ const notifyGuardOnVisitorDecision = onDocumentUpdated(
               android: {
                 priority: "high",
                 notification: {
-                  channelId: "guard_security_channel_v2",
+                  channelId: "gatelink_guard_alarm_v3",
                   priority: "max",
                   sound: "guard_alert",
                   defaultSound: false,

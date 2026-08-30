@@ -36,7 +36,7 @@
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="gate_security_channel_v2" />
+            android:value="gatelink_resident_doorbell_v3" />
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

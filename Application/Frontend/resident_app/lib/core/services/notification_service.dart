@@ -60,10 +60,10 @@ class NotificationService {
   static final _plugin = FlutterLocalNotificationsPlugin();
   static bool _initialized = false;
 
-  // v2 Channel IDs enforce fresh custom sound registration on Android devices
-  static const String channelGateId = 'gate_security_channel_v2';
-  static const String channelEmergencyId = 'emergency_alerts_channel_v2';
-  static const String channelUpdatesId = 'society_updates_channel_v2';
+  // v3 Channel IDs enforce distinct custom doorbell tone on Android devices
+  static const String channelGateId = 'gatelink_resident_doorbell_v3';
+  static const String channelEmergencyId = 'gatelink_resident_emergency_v3';
+  static const String channelUpdatesId = 'gatelink_resident_updates_v3';
 
   static const String actionApprove = 'action_approve';
   static const String actionReject = 'action_reject';
@@ -74,40 +74,50 @@ class NotificationService {
   static Future<void> init() async {
     if (_initialized) return;
 
-    // 1. Android Notification Channels (High Priority, Custom Resident Bell Chime)
+    // 1. Android Notification Channels (High Priority, Custom Doorbell Ringtone)
     const gateChannel = AndroidNotificationChannel(
       channelGateId,
-      'Gate & Visitor Alerts',
-      description: 'Immediate alerts with Approve/Reject buttons when visitors arrive.',
+      '🚪 Gate & Visitor Doorbell',
+      description: 'Immediate alerts with custom GateLink doorbell chime when visitors arrive.',
       importance: Importance.max,
       playSound: true,
       sound: _residentBellSound,
+      audioAttributesUsage: AudioAttributesUsage.notificationRingtone,
       enableVibration: true,
+      showBadge: true,
     );
 
     const emergencyChannel = AndroidNotificationChannel(
       channelEmergencyId,
-      'Emergency SOS Alerts',
+      '🚨 Emergency SOS Alerts',
       description: 'High-priority emergency alerts and safety broadcasts.',
       importance: Importance.max,
       playSound: true,
       sound: _residentBellSound,
+      audioAttributesUsage: AudioAttributesUsage.alarm,
       enableVibration: true,
+      showBadge: true,
     );
 
     const updatesChannel = AndroidNotificationChannel(
       channelUpdatesId,
-      'Society Notices & Bills',
+      '📢 Society Notices & Bills',
       description: 'Announcements, maintenance invoices, and society notices.',
       importance: Importance.high,
       playSound: true,
       sound: _residentBellSound,
+      audioAttributesUsage: AudioAttributesUsage.notification,
+      showBadge: true,
     );
 
     final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
         AndroidFlutterLocalNotificationsPlugin>();
 
     if (androidPlugin != null) {
+      // Delete old default channels so they don't conflict
+      await androidPlugin.deleteNotificationChannel('gate_security_channel');
+      await androidPlugin.deleteNotificationChannel('gate_security_channel_v2');
+
       await androidPlugin.createNotificationChannel(gateChannel);
       await androidPlugin.createNotificationChannel(emergencyChannel);
       await androidPlugin.createNotificationChannel(updatesChannel);
@@ -135,7 +145,7 @@ class NotificationService {
     );
 
     _initialized = true;
-    debugPrint('NotificationService initialized successfully with custom Resident sound');
+    debugPrint('NotificationService initialized successfully with gatelink_resident_doorbell_v3 custom sound');
   }
 
   /// Trigger a heads-up gate arrival notification with 2 action buttons: Approve and Reject
@@ -166,12 +176,13 @@ class NotificationService {
       NotificationDetails(
         android: AndroidNotificationDetails(
           channelGateId,
-          'Gate & Visitor Alerts',
-          channelDescription: 'Visitor arrival alerts with Approve/Reject buttons',
+          '🚪 Gate & Visitor Doorbell',
+          channelDescription: 'Visitor arrival alerts with custom doorbell chime and quick action buttons',
           importance: Importance.max,
           priority: Priority.max,
           playSound: true,
           sound: _residentBellSound,
+          audioAttributesUsage: AudioAttributesUsage.notificationRingtone,
           enableVibration: true,
           icon: '@mipmap/ic_launcher',
           styleInformation: BigTextStyleInformation(
@@ -213,12 +224,13 @@ class NotificationService {
       const NotificationDetails(
         android: AndroidNotificationDetails(
           channelEmergencyId,
-          'Emergency SOS Alerts',
+          '🚨 Emergency SOS Alerts',
           channelDescription: 'Critical life-safety alerts',
           importance: Importance.max,
           priority: Priority.max,
           playSound: true,
           sound: _residentBellSound,
+          audioAttributesUsage: AudioAttributesUsage.alarm,
           enableVibration: true,
           icon: '@mipmap/ic_launcher',
           styleInformation: BigTextStyleInformation(''),
@@ -240,12 +252,13 @@ class NotificationService {
       const NotificationDetails(
         android: AndroidNotificationDetails(
           channelUpdatesId,
-          'Society Notices & Bills',
+          '📢 Society Notices & Bills',
           channelDescription: 'Updates and broadcasts from management',
           importance: Importance.high,
           priority: Priority.high,
           playSound: true,
           sound: _residentBellSound,
+          audioAttributesUsage: AudioAttributesUsage.notification,
           icon: '@mipmap/ic_launcher',
           styleInformation: BigTextStyleInformation(''),
         ),
@@ -266,12 +279,13 @@ class NotificationService {
       const NotificationDetails(
         android: AndroidNotificationDetails(
           channelUpdatesId,
-          'Society Notices & Bills',
+          '📢 Society Notices & Bills',
           channelDescription: 'Maintenance and payment receipts',
           importance: Importance.high,
           priority: Priority.high,
           playSound: true,
           sound: _residentBellSound,
+          audioAttributesUsage: AudioAttributesUsage.notification,
           icon: '@mipmap/ic_launcher',
           styleInformation: BigTextStyleInformation(''),
         ),
