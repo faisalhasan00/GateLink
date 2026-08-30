@@ -35,6 +35,7 @@ import '../../features/guard/presentation/screens/qr_scanner_screen.dart';
 import '../../features/guard/presentation/screens/quick_entry_screen.dart';
 import '../../features/guard/presentation/screens/vehicle_log_screen.dart';
 import '../../features/referral/presentation/screens/referral_screen.dart';
+import '../../features/helper/presentation/screens/domestic_helper_screen.dart';
 
 /// All route paths in one place
 class AppRoutes {
@@ -68,6 +69,8 @@ class AppRoutes {
   // Notice
   static const String notices = '/home/notices';
   static const String noticeDetail = '/home/notices/:id';
+  // Domestic Helpers / Daily Help
+  static const String helpers = '/home/helpers';
   // Parking
   static const String parking = '/home/parking';
   // Documents
@@ -311,6 +314,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.parking,
             builder: (context, state) => const ParkingScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.helpers,
+            builder: (context, state) => const DomesticHelperScreen(),
           ),
           GoRoute(
             path: AppRoutes.documents,

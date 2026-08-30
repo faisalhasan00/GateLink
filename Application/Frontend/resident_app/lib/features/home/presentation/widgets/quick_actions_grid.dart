@@ -17,6 +17,12 @@ class QuickActionsGrid extends StatelessWidget {
         route: AppRoutes.inviteVisitor,
       ),
       _QuickAction(
+        icon: Icons.badge_rounded,
+        label: 'Daily Help',
+        color: const Color(0xFF0EA5E9),
+        route: AppRoutes.helpers,
+      ),
+      _QuickAction(
         icon: Icons.support_agent_rounded,
         label: 'Raise Ticket',
         color: AppColors.complaint,
@@ -46,15 +52,21 @@ class QuickActionsGrid extends StatelessWidget {
         color: const Color(0xFF475569),
         route: AppRoutes.documents,
       ),
+      _QuickAction(
+        icon: Icons.card_giftcard_rounded,
+        label: 'Refer & Earn',
+        color: const Color(0xFFF59E0B),
+        route: AppRoutes.referral,
+      ),
     ];
 
     return GridView.count(
-      crossAxisCount: 3,
+      crossAxisCount: 4,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: AppSpacing.sm,
       crossAxisSpacing: AppSpacing.sm,
-      childAspectRatio: 1.15,
+      childAspectRatio: 0.88,
       children: actions.map((a) => _QuickActionCard(action: a)).toList(),
     );
   }
@@ -86,8 +98,8 @@ class _QuickActionCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 38,
-              height: 38,
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
                 color: action.color.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppRadius.md),
@@ -101,7 +113,7 @@ class _QuickActionCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
-                fontSize: 11,
+                fontSize: 10.5,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF1E293B),
                 letterSpacing: -0.2,
