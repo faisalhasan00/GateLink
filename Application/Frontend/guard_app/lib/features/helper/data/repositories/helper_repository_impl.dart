@@ -52,4 +52,48 @@ class HelperRepositoryImpl implements HelperRepository {
     if (societyId.isEmpty) throw ArgumentError('Society ID is required');
     await _firestore.collection('societies/$societyId/helper_logs').add(log.toMap());
   }
+
+  @override
+  Future<bool> toggleHelperAttendance({
+    required String societyId,
+    required HelperModel helper,
+    required String guardName,
+    String? gateName,
+  }) async {
+    if (societyId.isEmpty || helper.id.isEmpty) {
+      throw ArgumentError('Society ID and Helper ID are required');
+    }
+
+    final newIsInside = !helper.isInside;
+    final nowIso = DateTime.now().toIso8601String();
+    final logType = newIsInside ? 'ENTRY' : 'EXIT';
+
+    final helperRef = _firestore.doc('societies/$societyId/helpers/${helper.id}');
+    final logRef = _firestore.collection('societies/$societyId/helper_logs').doc();
+
+    final log = HelperLogModel(
+      id: logRef.id,
+      helperId: helper.id,
+      helperName: helper.name,
+      helperType: helper.type,
+      flatNumber: helper.flatNumber,
+      residentUid: helper.residentUid,
+      societyId: societyId,
+      gateName: gateName != null && gateName.isNotEmpty ? gateName : 'Main Gate',
+      guardName: guardName.isNotEmpty ? guardName : 'Security Guard',
+      type: logType,
+      timestamp: nowIso,
+    );
+
+    final batch = _firestore.batch();
+    batch.update(helperRef, {
+      'isInside': newIsInside,
+      if (newIsInside) 'lastCheckIn': nowIso else 'lastCheckOut': nowIso,
+      'updatedAt': FieldValue.serverTimestamp(),
+    });
+    batch.set(logRef, log.toMap());
+
+    await batch.commit();
+    return newIsInside;
+  }
 }

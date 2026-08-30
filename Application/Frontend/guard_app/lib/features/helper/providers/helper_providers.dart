@@ -14,10 +14,10 @@ final helperRepositoryProvider = Provider<HelperRepository>((ref) {
 final registeredHelpersStreamProvider = StreamProvider<List<HelperModel>>((ref) {
   final userProfileAsync = ref.watch(userProfileProvider);
   final societyId = userProfileAsync.value?['societyId'] as String?;
-  final residentUid = ref.watch(authServiceProvider).currentUser?.uid;
   if (societyId == null || societyId.isEmpty) return Stream.value([]);
   final repository = ref.watch(helperRepositoryProvider);
-  return repository.watchRegisteredHelpers(societyId, residentUid: residentUid);
+  // Guards see all helpers across the society
+  return repository.watchRegisteredHelpers(societyId);
 });
 
 final helperLogsStreamProvider = StreamProvider<List<HelperLogModel>>((ref) {

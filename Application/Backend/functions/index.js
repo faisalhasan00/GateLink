@@ -18,6 +18,11 @@ const {
   validateVisitorPasscode,
 } = require("./visitors/visitor_passcode");
 
+// 1b. Domestic Staff Attendance Triggers
+const {
+  notifyResidentOnHelperLog,
+} = require("./helpers/helper_notifications");
+
 // 2. Super Admin Authorization & Staff Provisioning
 const { setSuperAdminRole, createStaffUser } = require("./admin/super_admin");
 
@@ -60,6 +65,9 @@ module.exports = {
   notifyGuardOnVisitorDecision,
   generateVisitorPasscode,
   validateVisitorPasscode,
+
+  // Staff & Helper Attendance Management
+  notifyResidentOnHelperLog,
 
   // Admin & Staff Management
   setSuperAdminRole,

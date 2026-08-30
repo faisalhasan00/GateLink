@@ -6,4 +6,10 @@ abstract class HelperRepository {
   Stream<List<HelperLogModel>> watchHelperLogs(String societyId);
   Future<void> registerHelper(String societyId, HelperModel helper);
   Future<void> logHelperEntryExit(String societyId, HelperLogModel log);
+  Future<bool> toggleHelperAttendance({
+    required String societyId,
+    required HelperModel helper,
+    required String guardName,
+    String? gateName,
+  });
 }
