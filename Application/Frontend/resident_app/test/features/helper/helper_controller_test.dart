@@ -5,6 +5,9 @@ import 'package:societysphere/features/helper/domain/repositories/helper_reposit
 import 'package:societysphere/features/helper/presentation/controllers/helper_controller.dart';
 import 'package:societysphere/features/helper/presentation/controllers/helper_state.dart';
 
+import 'package:societysphere/features/helper/domain/models/helper_attendance_day.dart';
+import 'package:societysphere/features/helper/domain/models/helper_salary_record.dart';
+
 class MockHelperRepository implements HelperRepository {
   bool shouldFail = false;
   int registerCalls = 0;
@@ -19,6 +22,29 @@ class MockHelperRepository implements HelperRepository {
   Stream<List<HelperLogModel>> watchTodayHelperLogs(String societyId) {
     return Stream.value([]);
   }
+
+  @override
+  Future<List<HelperAttendanceDay>> getMonthlyAttendance(
+      String societyId, String helperId, int year, int month) async {
+    return [
+      HelperAttendanceDay(date: DateTime(year, month, 1), isPresent: true),
+      HelperAttendanceDay(date: DateTime(year, month, 2), isPresent: false),
+    ];
+  }
+
+  @override
+  Future<HelperSalaryRecord?> getSalaryRecord(
+      String societyId, String helperId, String yearMonth) async {
+    return null;
+  }
+
+  @override
+  Future<void> saveSalaryRecord(
+      String societyId, String helperId, HelperSalaryRecord record) async {}
+
+  @override
+  Future<void> updateHelperSalaryConfig(
+      String societyId, String helperId, double monthlySalary, String salaryCalculationType) async {}
 
   @override
   Future<void> registerHelper({

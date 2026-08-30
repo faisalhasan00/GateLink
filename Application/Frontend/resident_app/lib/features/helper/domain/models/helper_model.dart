@@ -16,6 +16,8 @@ class HelperModel {
   final String? lastCheckOut;
   final String? qrCodeData;
   final String createdAt;
+  final double? monthlySalary;
+  final String salaryCalculationType; // 'pro_rata' | 'fixed_with_deductions'
 
   const HelperModel({
     required this.id,
@@ -35,6 +37,8 @@ class HelperModel {
     this.lastCheckOut,
     this.qrCodeData,
     required this.createdAt,
+    this.monthlySalary,
+    this.salaryCalculationType = 'pro_rata',
   });
 
   factory HelperModel.fromMap(Map<String, dynamic> map, {String? defaultId}) {
@@ -58,6 +62,8 @@ class HelperModel {
       lastCheckOut: map['lastCheckOut'] as String?,
       qrCodeData: map['qrCodeData'] as String? ?? (rawId.isNotEmpty ? 'GATELINK:HELPER:$socId:$rawId' : null),
       createdAt: map['createdAt'] as String? ?? '',
+      monthlySalary: (map['monthlySalary'] as num?)?.toDouble() ?? 3500.0,
+      salaryCalculationType: map['salaryCalculationType'] as String? ?? 'pro_rata',
     );
   }
 
@@ -80,6 +86,8 @@ class HelperModel {
       'lastCheckOut': lastCheckOut,
       'qrCodeData': qrCodeData ?? 'GATELINK:HELPER:$id',
       'createdAt': createdAt,
+      'monthlySalary': monthlySalary ?? 3500.0,
+      'salaryCalculationType': salaryCalculationType,
     };
   }
 
@@ -104,6 +112,8 @@ class HelperModel {
     String? lastCheckOut,
     String? qrCodeData,
     String? createdAt,
+    double? monthlySalary,
+    String? salaryCalculationType,
   }) {
     return HelperModel(
       id: id ?? this.id,
@@ -123,6 +133,8 @@ class HelperModel {
       lastCheckOut: lastCheckOut ?? this.lastCheckOut,
       qrCodeData: qrCodeData ?? this.qrCodeData,
       createdAt: createdAt ?? this.createdAt,
+      monthlySalary: monthlySalary ?? this.monthlySalary,
+      salaryCalculationType: salaryCalculationType ?? this.salaryCalculationType,
     );
   }
 }

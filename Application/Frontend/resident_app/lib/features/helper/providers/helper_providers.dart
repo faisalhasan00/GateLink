@@ -8,6 +8,9 @@ import '../domain/repositories/helper_repository.dart';
 import '../presentation/controllers/helper_controller.dart';
 import '../presentation/controllers/helper_state.dart';
 
+import '../presentation/controllers/helper_timesheet_controller.dart';
+import '../presentation/controllers/helper_timesheet_state.dart';
+
 final helperRepositoryProvider = Provider<HelperRepository>((ref) {
   return HelperRepositoryImpl(FirebaseFirestore.instance);
 });
@@ -16,6 +19,20 @@ final helperControllerProvider =
     StateNotifierProvider<HelperController, HelperState>((ref) {
   final repository = ref.watch(helperRepositoryProvider);
   return HelperController(repository);
+});
+
+final helperTimesheetProvider = StateNotifierProvider.autoDispose
+    .family<HelperTimesheetController, HelperTimesheetState, HelperModel>(
+        (ref, helper) {
+  final repository = ref.watch(helperRepositoryProvider);
+  final profile = ref.watch(userProfileProvider).value;
+  final societyId = profile?.societyId ?? '';
+
+  return HelperTimesheetController(
+    repository: repository,
+    societyId: societyId,
+    helper: helper,
+  );
 });
 
 final myHelpersStreamProvider = StreamProvider<List<HelperModel>>((ref) {
@@ -37,3 +54,4 @@ final todayHelperLogsStreamProvider =
   final repository = ref.watch(helperRepositoryProvider);
   return repository.watchTodayHelperLogs(societyId);
 });
+

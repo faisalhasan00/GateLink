@@ -5,6 +5,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../domain/models/helper_model.dart';
 import '../../providers/helper_providers.dart';
 import '../controllers/helper_controller.dart';
+import '../screens/helper_timesheet_screen.dart';
 import '../widgets/helper_id_pass_dialog.dart';
 
 class HelperCardWidget extends ConsumerWidget {
@@ -354,7 +355,70 @@ class HelperCardWidget extends ConsumerWidget {
               ],
             ),
 
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
+
+            // Timesheet & Salary Entry Banner Button
+            InkWell(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (ctx) => HelperTimesheetScreen(
+                      helper: helper,
+                      societyName: societyName,
+                    ),
+                  ),
+                );
+              },
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEFF6FF),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: const Color(0xFFBFDBFE)),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF1E3A8A),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Icon(Icons.calendar_month_rounded, color: Colors.white, size: 14),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Monthly Attendance & Salary',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1E3A8A),
+                            ),
+                          ),
+                          Text(
+                            'Base: ₹${(helper.monthlySalary ?? 3500.0).toStringAsFixed(0)}/mo • View Timesheet',
+                            style: const TextStyle(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                              color: Color(0xFF64748B),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const Icon(Icons.arrow_forward_ios_rounded, size: 12, color: Color(0xFF1E3A8A)),
+                  ],
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
 
             // Buttons: View Digital QR Pass & Revoke Access
             Row(
