@@ -20,17 +20,18 @@ export default function NavDropdown({
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '4px',
-          fontSize: '14px',
+          gap: '5px',
+          fontSize: '15px',
           fontWeight: 600,
-          color: isDark ? '#E2E8F0' : '#444444',
+          color: isDark ? '#E2E8F0' : '#334155',
           position: 'relative',
-          paddingBottom: '4px',
+          padding: '6px 4px',
           fontFamily: 'Inter, sans-serif',
+          transition: 'color 0.15s ease',
         }}
       >
         <span>{label}</span>
-        <ChevronDown size={15} color={isDark ? '#94A3B8' : '#666666'} />
+        <ChevronDown size={16} color={isDark ? '#94A3B8' : '#64748B'} />
         {isOpen && (
           <div
             style={{

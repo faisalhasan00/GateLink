@@ -7,8 +7,10 @@ export default function GateLinkLogo({ isDark = false, size = 'medium', classNam
     : size === 'large' 
     ? '68px' 
     : size === 'responsive' 
-    ? 'clamp(38px, 6.5vw, 54px)' 
-    : '48px';
+    ? 'clamp(40px, 6.5vw, 54px)' 
+    : size === 'nav'
+    ? '52px'
+    : '50px';
 
   return (
     <div className={`gatelink-logo-wrap ${className}`} style={{ display: 'flex', alignItems: 'center', userSelect: 'none', maxWidth: '100%' }}>

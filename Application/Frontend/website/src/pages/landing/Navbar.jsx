@@ -48,31 +48,33 @@ export default function Navbar({ onOpenDemo }) {
         right: 0,
         zIndex: 1000,
         transition: 'all 0.2s ease',
-        backgroundColor: isDark ? '#0F172A' : '#FFFFFF',
-        borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E5E7EB',
-        boxShadow: isScrolled ? '0 2px 10px rgba(0, 0, 0, 0.06)' : 'none',
-        height: '60px',
+        backgroundColor: isDark ? 'rgba(15, 23, 42, 0.96)' : 'rgba(255, 255, 255, 0.96)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        borderBottom: isDark ? '1px solid rgba(255, 255, 255, 0.1)' : '1px solid #E2E8F0',
+        boxShadow: isScrolled ? '0 4px 20px rgba(0, 0, 0, 0.08)' : '0 1px 3px rgba(0, 0, 0, 0.02)',
+        height: '74px',
         display: 'flex',
         alignItems: 'center',
       }}
     >
       <div
         style={{
-          maxWidth: '1320px',
+          maxWidth: '1360px',
           width: '100%',
           margin: '0 auto',
-          padding: isMobile ? '0 14px' : '0 24px',
+          padding: isMobile ? '0 16px' : '0 28px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
         }}
       >
         {/* Left Side: Brand Logo + Desktop Nav */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '30px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '36px' }}>
           <NavBrand isDark={isDark} isMobile={isMobile} />
 
           {!isMobile && (
-            <nav style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            <nav style={{ display: 'flex', alignItems: 'center', gap: '28px' }}>
               <NavDropdown
                 label="About Us"
                 isOpen={aboutDropdownOpen}
@@ -92,10 +94,12 @@ export default function Navbar({ onOpenDemo }) {
               <Link
                 to="/partners"
                 style={{
-                  fontSize: '14px',
+                  fontSize: '15px',
                   fontWeight: 700,
-                  color: isDark ? '#38BDF8' : '#0D9488',
+                  color: isDark ? '#38BDF8' : '#0284C7',
                   textDecoration: 'none',
+                  padding: '6px 2px',
+                  transition: 'color 0.15s ease',
                 }}
               >
                 Partner & Earn
@@ -103,10 +107,12 @@ export default function Navbar({ onOpenDemo }) {
               <Link
                 to="/contact"
                 style={{
-                  fontSize: '14px',
+                  fontSize: '15px',
                   fontWeight: 600,
-                  color: isDark ? '#E2E8F0' : '#444444',
+                  color: isDark ? '#E2E8F0' : '#334155',
                   textDecoration: 'none',
+                  padding: '6px 2px',
+                  transition: 'color 0.15s ease',
                 }}
               >
                 Contact Us
@@ -123,11 +129,17 @@ export default function Navbar({ onOpenDemo }) {
             onEnrollClick={handleEnrollClick}
           />
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Button
               variant="primary"
               size="small"
               onClick={handleEnrollClick}
+              style={{
+                height: '38px',
+                padding: '0 16px',
+                fontSize: '13px',
+                fontWeight: 700,
+              }}
             >
               Enroll
             </Button>
@@ -135,11 +147,11 @@ export default function Navbar({ onOpenDemo }) {
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Toggle Menu"
               style={{
-                width: '34px',
-                height: '34px',
-                borderRadius: '8px',
-                background: isDark ? '#1E293B' : '#F8FAFC',
-                border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #E5E7EB',
+                width: '38px',
+                height: '38px',
+                borderRadius: '10px',
+                background: isDark ? '#1E293B' : '#F1F5F9',
+                border: isDark ? '1px solid rgba(255,255,255,0.1)' : '1px solid #CBD5E1',
                 color: isDark ? '#FFFFFF' : '#1E3A8A',
                 display: 'flex',
                 alignItems: 'center',
@@ -147,7 +159,7 @@ export default function Navbar({ onOpenDemo }) {
                 cursor: 'pointer',
               }}
             >
-              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
         )}

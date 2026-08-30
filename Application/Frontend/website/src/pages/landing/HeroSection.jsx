@@ -22,7 +22,7 @@ export default function HeroSection({ onOpenDemo }) {
     <section
       id="home"
       style={{
-        paddingTop: '80px',
+        paddingTop: '96px',
         paddingBottom: '60px',
         background: '#FFFFFF',
         position: 'relative',
