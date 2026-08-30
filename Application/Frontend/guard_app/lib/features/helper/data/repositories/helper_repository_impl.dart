@@ -34,7 +34,7 @@ class HelperRepositoryImpl implements HelperRepository {
         .snapshots()
         .map((snapshot) {
       final list = snapshot.docs
-          .map((doc) => HelperLogModel.fromMap(doc.data() as Map<String, dynamic>, defaultId: doc.id))
+          .map((doc) => HelperLogModel.fromMap(doc.data(), defaultId: doc.id))
           .toList();
       list.sort((a, b) => b.timestamp.compareTo(a.timestamp));
       return list;
