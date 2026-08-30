@@ -324,6 +324,9 @@ service cloud.firestore {
             request.resource.data.get('uid', request.auth.uid) == request.auth.uid
           )
         );
+        match /salary_records/{recordId} {
+          allow read, write: if isAuthenticated() && (belongsToSociety(societyId) || isSocietyAdmin(societyId) || isSuperAdmin());
+        }
       }
 
       match /helper_logs/{logId} {
@@ -356,6 +359,16 @@ service cloud.firestore {
       match /notices/{noticeId} {
         allow read: if isAuthenticated() && belongsToSociety(societyId);
         allow write: if isSocietyAdmin(societyId);
+      }
+
+      match /polls/{pollId} {
+        allow read: if isAuthenticated() && (belongsToSociety(societyId) || isSocietyAdmin(societyId) || isSuperAdmin());
+        allow create, delete: if isSocietyAdmin(societyId) || isSuperAdmin();
+        allow update: if isAuthenticated() && (belongsToSociety(societyId) || isSocietyAdmin(societyId) || isSuperAdmin());
+
+        match /votes/{voteId} {
+          allow read, write: if isAuthenticated() && (belongsToSociety(societyId) || isSocietyAdmin(societyId) || isSuperAdmin());
+        }
       }
 
       match /notifications/{notifId} {
