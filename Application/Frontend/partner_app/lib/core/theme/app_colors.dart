@@ -10,6 +10,10 @@ class AppColors {
   static const Color accentLight = Color(0xFFFEF3C7);
   static const Color success = Color(0xFF059669); // Emerald Green
   static const Color successLight = Color(0xFFECFDF5);
+  static const Color error = Color(0xFFDC2626); // Red
+  static const Color errorLight = Color(0xFFFEF2F2);
+  static const Color warning = Color(0xFFD97706); // Amber Warning
+  static const Color warningLight = Color(0xFFFFFBEB);
   
   static const Color background = Color(0xFFF8FAFC);
   static const Color cardBg = Colors.white;

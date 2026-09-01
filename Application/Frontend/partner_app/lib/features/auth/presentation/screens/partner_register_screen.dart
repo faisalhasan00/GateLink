@@ -18,10 +18,12 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _passwordController = TextEditingController();
   final _emailController = TextEditingController();
   final _upiController = TextEditingController();
   final _cityController = TextEditingController();
 
+  bool _obscurePassword = true;
   String _selectedCategory = 'Real Estate Broker';
   bool _acceptedTerms = true;
   bool _isLoading = false;
@@ -39,6 +41,7 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
+    _passwordController.dispose();
     _emailController.dispose();
     _upiController.dispose();
     _cityController.dispose();
@@ -58,6 +61,7 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
     try {
       final name = _nameController.text.trim();
       final phone = _phoneController.text.trim().replaceAll(RegExp(r'[^0-9]'), '');
+      final password = _passwordController.text.trim();
       final email = _emailController.text.trim();
       final upi = _upiController.text.trim();
       final city = _cityController.text.trim();
@@ -67,6 +71,7 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
       await FirebaseFirestore.instance.collection('partners').doc(phone).set({
         'name': name,
         'phone': phone,
+        'password': password,
         'email': email,
         'category': _selectedCategory,
         'upiId': upi,
@@ -223,6 +228,26 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
                 validator: (val) => val == null || val.trim().replaceAll(RegExp(r'[^0-9]'), '').length < 10
                     ? 'Enter valid 10-digit mobile number'
                     : null,
+              ),
+              const SizedBox(height: 14),
+
+              TextFormField(
+                controller: _passwordController,
+                obscureText: _obscurePassword,
+                decoration: InputDecoration(
+                  labelText: 'Password *',
+                  hintText: 'Minimum 6 characters',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                  prefixIcon: const Icon(Icons.lock_rounded, color: AppColors.primary),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                      color: Colors.grey.shade600,
+                    ),
+                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                  ),
+                ),
+                validator: (val) => val == null || val.trim().length < 6 ? 'Password must be at least 6 characters' : null,
               ),
               const SizedBox(height: 14),
 

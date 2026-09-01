@@ -17,40 +17,24 @@ class PartnerLoginScreen extends ConsumerStatefulWidget {
 }
 
 class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _phoneController = TextEditingController();
-  final _otpController = TextEditingController();
-  bool _otpSent = false;
+  final _passwordController = TextEditingController();
+  bool _obscurePassword = true;
   bool _isLoading = false;
 
   @override
   void dispose() {
     _phoneController.dispose();
-    _otpController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  void _sendOtp() {
-    final phone = _phoneController.text.trim();
-    if (phone.length < 10) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid 10-digit mobile number')),
-      );
-      return;
-    }
-    setState(() => _otpSent = true);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Verification code sent to +91 $phone')),
-    );
-  }
+  Future<void> _handlePasswordLogin() async {
+    if (!_formKey.currentState!.validate()) return;
 
-  Future<void> _verifyOtpAndLogin() async {
-    final phone = _phoneController.text.trim();
-    if (phone.isEmpty || phone.length < 10) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid mobile number')),
-      );
-      return;
-    }
+    final phone = _phoneController.text.trim().replaceAll(RegExp(r'[^0-9]'), '');
+    final password = _passwordController.text.trim();
 
     setState(() => _isLoading = true);
 
@@ -59,6 +43,29 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
 
       if (doc.exists && doc.data() != null) {
         final data = doc.data()!;
+        final storedPassword = data['password'] as String?;
+
+        // If password is set in DB, verify it
+        if (storedPassword != null && storedPassword.isNotEmpty && storedPassword != password) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Incorrect password. Please check and try again.'),
+                backgroundColor: AppColors.error,
+              ),
+            );
+          }
+          return;
+        }
+
+        // If legacy account without password, backfill it
+        if (storedPassword == null || storedPassword.isEmpty) {
+          await FirebaseFirestore.instance.collection('partners').doc(phone).update({
+            'password': password,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+        }
+
         await ref.read(partnerAuthProvider.notifier).loginOrRegister(
           name: data['name'] ?? 'Partner User',
           phone: phone,
@@ -69,6 +76,12 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
         );
 
         if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('✓ Welcome back, ${data['name'] ?? 'Partner'}!'),
+              backgroundColor: AppColors.success,
+            ),
+          );
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => const PartnerDashboardScreen()),
@@ -77,7 +90,10 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('No partner account found with this phone number. Please register.')),
+            const SnackBar(
+              content: Text('No partner account found with this phone number. Please register first.'),
+              backgroundColor: AppColors.warning,
+            ),
           );
           Navigator.push(
             context,
@@ -88,7 +104,10 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
     } catch (err) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Login error: $err')),
+          SnackBar(
+            content: Text('Login error: $err'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     } finally {
@@ -103,143 +122,166 @@ class _PartnerLoginScreenState extends ConsumerState<PartnerLoginScreen> {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.pagePadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 30),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 30),
 
-              // Logo & Brand Header
-              Center(
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(color: AppColors.border),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.1),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: const PartnerLogo(
-                        size: PartnerLogoSize.large,
-                        showTagline: true,
-                        isDark: false,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 36),
-
-              // Phone Login Card Container
-              Container(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: AppColors.border),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Partner Login',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Enter your registered 10-digit mobile number to login',
-                      style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                    ),
-                    const SizedBox(height: 20),
-
-                    TextFormField(
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        labelText: 'Mobile Number',
-                        hintText: 'Enter 10-digit number',
-                        prefixText: '+91 ',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                        prefixIcon: const Icon(Icons.phone_rounded, color: AppColors.primary),
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    if (_otpSent) ...[
-                      TextFormField(
-                        controller: _otpController,
-                        keyboardType: TextInputType.number,
-                        maxLength: 6,
-                        decoration: InputDecoration(
-                          labelText: 'Enter 6-Digit OTP Code',
-                          hintText: '6-digit verification code',
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                          prefixIcon: const Icon(Icons.lock_rounded, color: AppColors.secondary),
+                // Logo & Brand Header
+                Center(
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: AppColors.border),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.1),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
                         ),
+                        child: const PartnerLogo(
+                          size: PartnerLogoSize.large,
+                          showTagline: true,
+                          isDark: false,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 36),
+
+                // Phone & Password Login Card
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    border: Border.all(color: AppColors.border),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Partner Sign In',
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Enter your registered phone number & password to access your partner portal',
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Mobile Number Field
+                      TextFormField(
+                        controller: _phoneController,
+                        keyboardType: TextInputType.phone,
+                        decoration: InputDecoration(
+                          labelText: 'Mobile Number',
+                          hintText: 'Enter 10-digit number',
+                          prefixText: '+91 ',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                          prefixIcon: const Icon(Icons.phone_rounded, color: AppColors.primary),
+                        ),
+                        validator: (val) {
+                          if (val == null || val.trim().replaceAll(RegExp(r'[^0-9]'), '').length < 10) {
+                            return 'Please enter a valid 10-digit mobile number';
+                          }
+                          return null;
+                        },
                       ),
                       const SizedBox(height: 16),
-                    ],
 
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50,
-                      child: ElevatedButton(
-                        onPressed: _isLoading
-                            ? null
-                            : (_otpSent ? _verifyOtpAndLogin : _sendOtp),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                          elevation: 0,
+                      // Password Field
+                      TextFormField(
+                        controller: _passwordController,
+                        obscureText: _obscurePassword,
+                        decoration: InputDecoration(
+                          labelText: 'Password',
+                          hintText: 'Enter your password',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                          prefixIcon: const Icon(Icons.lock_rounded, color: AppColors.primary),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _obscurePassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                              color: Colors.grey.shade600,
+                            ),
+                            onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                          ),
                         ),
-                        child: _isLoading
-                            ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                            : Text(
-                                _otpSent ? 'Verify & Login' : 'Get Verification Code',
-                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                              ),
+                        validator: (val) {
+                          if (val == null || val.trim().isEmpty) {
+                            return 'Please enter your password';
+                          }
+                          if (val.trim().length < 6) {
+                            return 'Password must be at least 6 characters';
+                          }
+                          return null;
+                        },
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 36),
+                      const SizedBox(height: 22),
 
-              // Registration Link Footer
-              Center(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text("Don't have a partner account? ", style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
-                    GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const PartnerRegisterScreen()),
+                      // Sign In Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _handlePasswordLogin,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                            elevation: 0,
+                          ),
+                          child: _isLoading
+                              ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                              : const Text(
+                                  'Sign In to Dashboard',
+                                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                ),
+                        ),
                       ),
-                      child: const Text(
-                        'Register Now',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.primary),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 36),
+
+                // Registration Link Footer
+                Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Don't have a partner account? ", style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                      GestureDetector(
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (_) => const PartnerRegisterScreen()),
+                        ),
+                        child: const Text(
+                          'Register Now',
+                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.primary),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
