@@ -509,5 +509,35 @@ service cloud.firestore {
         allow write: if false;
       }
     }
+
+    // Partner & Referral Ecosystem Rules
+    match /partners/{phone} {
+      allow read: if isAuthenticated() || isSuperAdmin();
+      allow create, update: if true; // Public/partner signup & profile update
+      allow delete: if isSuperAdmin();
+    }
+
+    match /partner_registration_logs/{logId} {
+      allow read: if isAuthenticated() || isSuperAdmin();
+      allow create, update: if true;
+      allow delete: if isSuperAdmin();
+    }
+
+    match /partner_leads/{leadId} {
+      allow read: if true; // Allows partners & residents to stream leads by phone/email
+      allow create: if true; // Allows leads submitted from resident app, partner app, or web
+      allow update: if isSuperAdmin() || isAuthenticated();
+      allow delete: if isSuperAdmin();
+
+      match /payout_history/{historyId} {
+        allow read: if isAuthenticated() || isSuperAdmin();
+        allow write: if isSuperAdmin();
+      }
+    }
+
+    match /system_config/{configId} {
+      allow read: if true; // Public access for system config (e.g. partner commission tiers)
+      allow write: if isSuperAdmin();
+    }
   }
 }
