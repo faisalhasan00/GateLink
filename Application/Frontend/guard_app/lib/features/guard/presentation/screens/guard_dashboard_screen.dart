@@ -272,7 +272,7 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                       ),
                       const SizedBox(height: AppSpacing.lg),
 
-                      // Quick Action Buttons Grid
+                      // Quick Action Buttons Grid (4 Actions)
                       Row(
                         children: [
                           Expanded(
@@ -280,25 +280,34 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
                               icon: Icons.person_add_alt_1_rounded,
                               label: 'Log Entry',
                               color: AppColors.primary,
-                              onTap: () => context.go(AppRoutes.guardQuickEntry),
+                              onTap: () => context.push(AppRoutes.guardQuickEntry),
                             ),
                           ),
-                          const SizedBox(width: AppSpacing.sm),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: QuickActionButton(
                               icon: Icons.qr_code_scanner_rounded,
                               label: 'Scan QR',
                               color: const Color(0xFF1A2A3A),
-                              onTap: () => context.go(AppRoutes.guardScan),
+                              onTap: () => context.push(AppRoutes.guardScan),
                             ),
                           ),
-                          const SizedBox(width: AppSpacing.sm),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: QuickActionButton(
+                              icon: Icons.shield_moon_rounded,
+                              label: 'Patrol QR',
+                              color: const Color(0xFF7C3AED),
+                              onTap: () => context.push(AppRoutes.guardPatrol),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
                           Expanded(
                             child: QuickActionButton(
                               icon: Icons.directions_car_rounded,
                               label: 'Vehicles',
                               color: AppColors.success,
-                              onTap: () => context.go(AppRoutes.guardVehicles),
+                              onTap: () => context.push(AppRoutes.guardVehicles),
                             ),
                           ),
                         ],

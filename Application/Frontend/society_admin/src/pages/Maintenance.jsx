@@ -1,11 +1,11 @@
-import React from 'react';
-import { CreditCard, Landmark } from 'lucide-react';
+import { CreditCard, Landmark, Zap } from 'lucide-react';
 import { useMaintenance } from '../features/maintenance/hooks/useMaintenance';
 import MaintenanceStatCards from '../features/maintenance/components/MaintenanceStatCards';
 import MaintenanceTable from '../features/maintenance/components/MaintenanceTable';
 import GenerateBillsModal from '../features/maintenance/components/GenerateBillsModal';
 import RecordPaymentModal from '../features/maintenance/components/RecordPaymentModal';
 import InvoiceDetailModal from '../features/maintenance/components/InvoiceDetailModal';
+import AutoBillingConfigCard from '../features/maintenance/components/AutoBillingConfigCard';
 import BankAccountCard from '../components/finance/BankAccountCard';
 
 export default function Maintenance() {
@@ -96,6 +96,26 @@ export default function Maintenance() {
 
         <button
           type="button"
+          onClick={() => setActiveTab('automation')}
+          style={{
+            padding: '8px 18px',
+            borderRadius: '10px',
+            border: 'none',
+            backgroundColor: activeTab === 'automation' ? '#1E3A8A' : 'transparent',
+            color: activeTab === 'automation' ? '#FFFFFF' : 'var(--text-secondary)',
+            fontWeight: 800,
+            fontSize: '13px',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          <Zap size={15} /> Billing Automation & Cron
+        </button>
+
+        <button
+          type="button"
           onClick={() => setActiveTab('bank_account')}
           style={{
             padding: '8px 18px',
@@ -130,6 +150,11 @@ export default function Maintenance() {
           onRejectVerification={handleRejectVerification}
           onSelectInvoice={setSelectedInvoice}
           onOpenPaymentModal={setPaymentModalBill}
+        />
+      ) : activeTab === 'automation' ? (
+        <AutoBillingConfigCard
+          societyId={societyId}
+          onBillingGenerated={() => setActiveTab('invoices')}
         />
       ) : (
         <BankAccountCard societyId={societyId} />

@@ -38,6 +38,16 @@ class _NoticeListScreenState extends ConsumerState<NoticeListScreen>
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home/dashboard');
+            }
+          },
+        ),
         title: const Text(
           'Community Hub',
           style: TextStyle(fontWeight: FontWeight.w800, fontSize: 18),

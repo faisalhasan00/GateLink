@@ -37,6 +37,8 @@ import '../../features/guard/presentation/screens/vehicle_log_screen.dart';
 import '../../features/referral/presentation/screens/referral_screen.dart';
 import '../../features/helper/presentation/screens/domestic_helper_screen.dart';
 
+import '../../features/auth/presentation/screens/unauthorized_access_screen.dart';
+
 /// All route paths in one place
 class AppRoutes {
   static const String splash = '/';
@@ -45,6 +47,7 @@ class AppRoutes {
   static const String otp = '/otp';
   static const String register = '/register';
   static const String pendingApproval = '/pending-approval';
+  static const String unauthorized = '/unauthorized';
   static const String home = '/home';
   static const String dashboard = '/home/dashboard';
   static const String notifications = '/home/notifications';
@@ -103,23 +106,35 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           state.uri.path == AppRoutes.onboarding;
 
       final isPendingRoute = state.uri.path == AppRoutes.pendingApproval;
+      final isUnauthorizedRoute = state.uri.path == AppRoutes.unauthorized;
 
-      if (isSplash) {
-        if (!isAuth) return AppRoutes.onboarding;
-        final status = userProfile?.status ?? 'active';
-        if (status == 'active' || status == 'approved') {
-          return AppRoutes.dashboard;
-        }
-        return AppRoutes.pendingApproval;
-      }
-
-      if (!isAuth && !isLoggingIn) {
+      if (!isAuth && !isLoggingIn && !isSplash) {
         return AppRoutes.login;
       }
 
       if (isAuth) {
+        // Strict Application Role-Gating for Resident App
+        final role = (userProfile?.role ?? 'resident').toLowerCase();
+        const allowedResidentRoles = ['resident', 'owner', 'tenant', 'family', 'user', 'super_admin'];
+
+        if (!allowedResidentRoles.contains(role)) {
+          if (!isUnauthorizedRoute) {
+            return AppRoutes.unauthorized;
+          }
+          return null;
+        }
+
+        if (isUnauthorizedRoute) {
+          return AppRoutes.dashboard;
+        }
+
         final status = userProfile?.status ?? 'active';
         final isApproved = status == 'active' || status == 'approved';
+
+        if (isSplash) {
+          if (isApproved) return AppRoutes.dashboard;
+          return AppRoutes.pendingApproval;
+        }
 
         if (!isApproved && !isPendingRoute) {
           return AppRoutes.pendingApproval;
@@ -128,6 +143,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         if (isApproved && (isLoggingIn || isPendingRoute)) {
           return AppRoutes.dashboard;
         }
+      } else if (isSplash) {
+        return AppRoutes.onboarding;
       }
 
       return null;
@@ -135,6 +152,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     errorBuilder: (context, state) => const DashboardScreen(),
     debugLogDiagnostics: true,
     routes: [
+      GoRoute(
+        path: AppRoutes.unauthorized,
+        builder: (context, state) => const UnauthorizedAccessScreen(),
+      ),
       // Top-level Aliases & Shortcuts to prevent No-Route GoExceptions
       GoRoute(
         path: '/home',

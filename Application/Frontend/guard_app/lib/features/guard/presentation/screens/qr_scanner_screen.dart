@@ -1,11 +1,17 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/providers/auth_providers.dart';
 import '../../../visitor/presentation/controllers/visitor_controller.dart';
 import '../widgets/helper_scan_modal.dart';
+import '../widgets/patrol_incident_modal.dart';
+import '../../providers/patrol_providers.dart';
+import '../../domain/models/patrol_checkpoint_model.dart';
 
 class QrScannerScreen extends ConsumerStatefulWidget {
   const QrScannerScreen({super.key});
@@ -49,6 +55,12 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
   }
 
   Future<void> _processQrCode(String code) async {
+    // 1. Patrol Checkpoint QR Scan Check
+    if (code.startsWith('gatelink://patrol') || code.contains('type=patrol') || code.contains('"type":"patrol"')) {
+      await _handlePatrolScan(code);
+      return;
+    }
+
     try {
       final controller = ref.read(visitorControllerProvider.notifier);
       final result = await controller.validateAndProcessQrScan(code);
@@ -96,6 +108,190 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
         );
       }
     }
+  }
+
+  Future<void> _handlePatrolScan(String rawCode) async {
+    try {
+      String checkpointId = '';
+      String cpCode = 'CP-01';
+      String cpName = 'Checkpoint';
+      String cpArea = 'Society Grounds';
+      String societyId = '';
+
+      if (rawCode.startsWith('gatelink://patrol')) {
+        final uri = Uri.parse(rawCode);
+        checkpointId = uri.queryParameters['cid'] ?? uri.queryParameters['checkpointId'] ?? '';
+        cpCode = uri.queryParameters['code'] ?? 'CP-01';
+        cpName = uri.queryParameters['name'] ?? 'Patrol Checkpoint';
+        cpArea = uri.queryParameters['area'] ?? 'Perimeter';
+        societyId = uri.queryParameters['sid'] ?? uri.queryParameters['societyId'] ?? '';
+      } else if (rawCode.startsWith('{')) {
+        final parsed = jsonDecode(rawCode) as Map<String, dynamic>;
+        checkpointId = parsed['cid'] as String? ?? parsed['checkpointId'] as String? ?? '';
+        cpCode = parsed['code'] as String? ?? 'CP-01';
+        cpName = parsed['name'] as String? ?? 'Patrol Checkpoint';
+        cpArea = parsed['area'] as String? ?? 'Perimeter';
+        societyId = parsed['sid'] as String? ?? parsed['societyId'] as String? ?? '';
+      }
+
+      final userProfile = ref.read(userProfileProvider).value;
+      final authState = ref.read(authStateProvider).value;
+      final effectiveSocId = societyId.isNotEmpty ? societyId : (userProfile?['societyId'] as String? ?? '');
+      final guardUid = authState?.uid ?? '';
+      final guardName = (userProfile?['name'] as String?) ?? 'Security Guard';
+
+      final repo = ref.read(patrolRepositoryProvider);
+      await repo.recordCheckpointScan(
+        societyId: effectiveSocId,
+        checkpointId: checkpointId.isNotEmpty ? checkpointId : 'cp_${cpCode.toLowerCase()}',
+        checkpointCode: cpCode,
+        checkpointName: cpName,
+        checkpointArea: cpArea,
+        guardUid: guardUid,
+        guardName: guardName,
+      );
+
+      if (!mounted) return;
+      _showPatrolScanSuccessModal(
+        checkpoint: PatrolCheckpointModel(
+          id: checkpointId,
+          code: cpCode,
+          name: cpName,
+          area: cpArea,
+        ),
+        guardName: guardName,
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Patrol scan error: $e'), backgroundColor: AppColors.error),
+      );
+      setState(() => _isProcessing = false);
+    }
+  }
+
+  void _showPatrolScanSuccessModal({
+    required PatrolCheckpointModel checkpoint,
+    required String guardName,
+  }) {
+    final scanTime = DateFormat('hh:mm:ss a').format(DateTime.now());
+
+    showModalBottomSheet(
+      context: context,
+      isDismissible: false,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFDCFCE7),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.verified_rounded, color: Color(0xFF16A34A), size: 44),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Checkpoint Verified & Logged',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Timestamp: $scanTime',
+              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      checkpoint.code,
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          checkpoint.name,
+                          style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: AppColors.textPrimary),
+                        ),
+                        Text(
+                          checkpoint.area,
+                          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      PatrolIncidentModal.show(context, checkpoint: checkpoint);
+                    },
+                    icon: const Icon(Icons.warning_amber_rounded, size: 18),
+                    label: const Text('Report Issue', style: TextStyle(fontWeight: FontWeight.w700)),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.error,
+                      side: const BorderSide(color: AppColors.error),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(ctx);
+                      if (mounted) setState(() => _isProcessing = false);
+                    },
+                    icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                    label: const Text('Next Point', style: TextStyle(fontWeight: FontWeight.w800)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      elevation: 0,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ).then((_) {
+      if (mounted) setState(() => _isProcessing = false);
+    });
   }
 
   Future<void> _allowEntry(String docId) async {

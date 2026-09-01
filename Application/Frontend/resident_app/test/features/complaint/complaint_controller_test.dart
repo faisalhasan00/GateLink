@@ -136,5 +136,26 @@ void main() {
       expect(controller.state.status, ComplaintActionStatus.error);
       expect(mockRepository.raiseCalls, 1);
     });
+
+    test('raiseComplaint ignores duplicate concurrent call when already loading', () async {
+      // Simulate controller already in loading state
+      controller.state = controller.state.copyWith(status: ComplaintActionStatus.loading);
+
+      final success = await controller.raiseComplaint(
+        societyId: 'SOC-001',
+        residentUid: 'user-101',
+        residentName: 'Jane Doe',
+        flatNumber: '101',
+        title: 'Pipe Leakage',
+        description: 'Bathroom pipe issue',
+        category: 'Plumbing',
+        block: 'Tower A',
+        floor: '1st Floor',
+        priority: 'medium',
+      );
+
+      expect(success, false);
+      expect(mockRepository.raiseCalls, 0);
+    });
   });
 }

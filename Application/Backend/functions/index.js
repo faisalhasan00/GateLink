@@ -59,6 +59,14 @@ const {
   processScheduledAccountDeletion,
 } = require("./admin/account_deletion");
 
+// 7. Automated Monthly Invoicing & Billing Configuration
+const {
+  scheduledMonthlyInvoicing,
+  triggerManualMonthlyInvoicing,
+  getBillingConfig,
+  updateBillingConfig,
+} = require("./maintenance/scheduled_invoicing");
+
 module.exports = {
   // Visitor Management
   notifyResidentOnVisitorArrival,
@@ -92,6 +100,12 @@ module.exports = {
   reconcilePendingPayments,
   triggerCashfreePayout,
   scheduledMonthlyPartnerPayouts,
+
+  // Automated Monthly Maintenance Invoicing
+  scheduledMonthlyInvoicing,
+  triggerManualMonthlyInvoicing,
+  getBillingConfig,
+  updateBillingConfig,
 
   // Automated System Backups
   scheduledFirestoreBackup,

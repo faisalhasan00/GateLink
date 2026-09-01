@@ -70,7 +70,7 @@ class DashboardScreen extends ConsumerWidget {
                   _SectionTitle(
                     title: 'Pending Visitor Approvals',
                     action: TextButton(
-                      onPressed: () => context.go(AppRoutes.visitors),
+                      onPressed: () => context.push(AppRoutes.visitors),
                       child: const Text('View All'),
                     ),
                   ),
@@ -82,7 +82,7 @@ class DashboardScreen extends ConsumerWidget {
                   _SectionTitle(
                     title: 'My Complaints',
                     action: TextButton(
-                      onPressed: () => context.go(AppRoutes.raiseComplaint),
+                      onPressed: () => context.push(AppRoutes.complaints),
                       child: const Text('View All'),
                     ),
                   ),
@@ -94,7 +94,7 @@ class DashboardScreen extends ConsumerWidget {
                   _SectionTitle(
                     title: 'Recent Notices',
                     action: TextButton(
-                      onPressed: () => context.go(AppRoutes.notices),
+                      onPressed: () => context.push(AppRoutes.notices),
                       child: const Text('View All'),
                     ),
                   ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/auth_providers.dart';
@@ -162,8 +164,8 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
         );
       }
     } catch (e) {
-      setState(() => _isLoading = false);
       if (mounted) {
+        setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
         );
@@ -208,6 +210,16 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.dashboard);
+            }
+          },
+        ),
         title: const Text(
           'Invite Visitor / Pass',
           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18),

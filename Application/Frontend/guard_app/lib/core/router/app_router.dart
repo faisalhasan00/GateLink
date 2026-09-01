@@ -13,10 +13,13 @@ import '../../features/guard/presentation/screens/quick_entry_screen.dart';
 import '../../features/guard/presentation/screens/vehicle_log_screen.dart';
 import '../../features/guard/presentation/screens/guard_visitor_history_screen.dart';
 import '../../features/guard/presentation/screens/guard_profile_screen.dart';
+import '../../features/guard/presentation/screens/patrol_screen.dart';
 import '../../features/visitor/presentation/screens/visitor_detail_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/notice/presentation/screens/notice_list_screen.dart';
 import '../../features/notice/presentation/screens/notice_detail_screen.dart';
+
+import '../../features/auth/presentation/screens/unauthorized_access_screen.dart';
 
 /// All route paths for GateLink Guard App
 class AppRoutes {
@@ -25,10 +28,12 @@ class AppRoutes {
   static const String login = '/login';
   static const String otp = '/otp';
   static const String pendingApproval = '/pending-approval';
+  static const String unauthorized = '/unauthorized';
   
   // Guard Navigation Routes
   static const String guardDashboard = '/guard/dashboard';
   static const String guardScan = '/guard/scan';
+  static const String guardPatrol = '/guard/patrol';
   static const String guardQuickEntry = '/guard/quick-entry';
   static const String guardVehicles = '/guard/vehicles';
   static const String guardHistory = '/guard/history';
@@ -80,24 +85,55 @@ final appRouterProvider = Provider<GoRouter>((ref) {
                           state.uri.path == AppRoutes.onboarding;
 
       final isPendingRoute = state.uri.path == AppRoutes.pendingApproval;
+      final isUnauthorizedRoute = state.uri.path == AppRoutes.unauthorized;
 
-      if (isSplash) {
-        if (!isAuth) return AppRoutes.onboarding;
-        return AppRoutes.guardDashboard;
-      }
-
-      if (!isAuth && !isLoggingIn) {
+      if (!isAuth && !isLoggingIn && !isSplash) {
         return AppRoutes.login;
       }
 
-      if (isAuth && isLoggingIn) {
-        return AppRoutes.guardDashboard;
+      if (isAuth) {
+        // Strict Application Role-Gating for Guard App
+        final role = (userProfile?['role'] as String? ?? 'guard').toLowerCase();
+        const allowedGuardRoles = ['guard', 'security', 'super_admin'];
+
+        if (!allowedGuardRoles.contains(role)) {
+          if (!isUnauthorizedRoute) {
+            return AppRoutes.unauthorized;
+          }
+          return null;
+        }
+
+        if (isUnauthorizedRoute) {
+          return AppRoutes.guardDashboard;
+        }
+
+        final status = (userProfile?['status'] as String? ?? 'active').toLowerCase();
+        final isApproved = status == 'active' || status == 'approved';
+
+        if (isSplash) {
+          if (isApproved) return AppRoutes.guardDashboard;
+          return AppRoutes.pendingApproval;
+        }
+
+        if (!isApproved && !isPendingRoute) {
+          return AppRoutes.pendingApproval;
+        }
+
+        if (isApproved && (isLoggingIn || isPendingRoute)) {
+          return AppRoutes.guardDashboard;
+        }
+      } else if (isSplash) {
+        return AppRoutes.onboarding;
       }
 
       return null;
     },
     debugLogDiagnostics: true,
     routes: [
+      GoRoute(
+        path: AppRoutes.unauthorized,
+        builder: (context, state) => const UnauthorizedAccessScreen(),
+      ),
       // Top-level Aliases & Shortcuts
       GoRoute(
         path: '/dashboard',
@@ -180,6 +216,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: AppRoutes.guardScan,
             builder: (context, state) => const QrScannerScreen(),
+          ),
+          GoRoute(
+            path: AppRoutes.guardPatrol,
+            builder: (context, state) => const PatrolScreen(),
           ),
           GoRoute(
             path: AppRoutes.guardQuickEntry,

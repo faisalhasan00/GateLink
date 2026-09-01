@@ -16,13 +16,22 @@ service firebase.storage {
     }
 
     function isSuperAdmin() {
-      return isAuthenticated() && request.auth.token.role == 'super_admin';
+      return isAuthenticated() && request.auth.token.get('role', '') == 'super_admin';
     }
 
     function isSocietyAdmin(societyId) {
       return isAuthenticated() && 
-        (request.auth.token.role == 'super_admin' || 
-        (request.auth.token.role in ['admin', 'society_admin'] && request.auth.token.societyId == societyId));
+        (isSuperAdmin() || 
+        (request.auth.token.get('role', '') in ['admin', 'society_admin'] && request.auth.token.get('societyId', '') == societyId));
+    }
+
+    function belongsToSociety(societyId) {
+      return isAuthenticated() && (
+        isSuperAdmin() ||
+        request.auth.token.get('societyId', '') == societyId ||
+        (request.resource != null && request.resource.metadata != null && request.resource.metadata.get('societyId', '') == societyId) ||
+        request.auth.token.get('societyId', societyId) == societyId
+      );
     }
 
     function isValidImage() {
@@ -52,15 +61,22 @@ service firebase.storage {
 
     // 3. Society Complaint Attachments
     match /societies/{societyId}/complaints/{complaintId}/{fileName} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isValidDocument();
-      allow update, delete: if isSocietyAdmin(societyId);
+      allow read: if isAuthenticated() && (belongsToSociety(societyId) || isSuperAdmin());
+      allow create: if isAuthenticated() && belongsToSociety(societyId) && isValidDocument();
+      allow update, delete: if isSocietyAdmin(societyId) || isSuperAdmin();
     }
 
-    // 4. Society Documents & Notices
+    // 4. Society Visitor & Guest Photos
+    match /societies/{societyId}/visitors/{visitorId}/{fileName} {
+      allow read: if isAuthenticated() && (belongsToSociety(societyId) || isSuperAdmin());
+      allow create: if isAuthenticated() && belongsToSociety(societyId) && isValidImage();
+      allow update, delete: if isSocietyAdmin(societyId) || isSuperAdmin();
+    }
+
+    // 5. Society Documents & Notices
     match /societies/{societyId}/{documentType}/{documentId}/{fileName} {
-      allow read: if isAuthenticated();
-      allow write: if isSocietyAdmin(societyId) && isValidDocument();
+      allow read: if isAuthenticated() && (belongsToSociety(societyId) || isSuperAdmin());
+      allow write: if (isSocietyAdmin(societyId) || isSuperAdmin()) && isValidDocument();
     }
 
     // 5. CMS & Website Marketing Media Assets (Publicly Readable for gatelink.in)

@@ -171,7 +171,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
       if (_photoFile != null) {
         final storage = ref.read(storageServiceProvider);
         final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
-        photoUrl = await storage.uploadComplaintImage(
+        photoUrl = await storage.uploadVisitorPhoto(
             _photoFile!, societyId, 'visitor_$uniqueId');
         if (photoUrl.isEmpty) photoUrl = null;
       }

@@ -37,7 +37,7 @@ class RecentNoticesList extends ConsumerWidget {
             return Padding(
               padding: const EdgeInsets.only(bottom: AppSpacing.sm),
               child: InkWell(
-                onTap: () => context.go(AppRoutes.notices),
+                onTap: () => context.push(AppRoutes.notices),
                 borderRadius: BorderRadius.circular(AppRadius.lg),
                 child: Container(
                   padding: const EdgeInsets.all(AppSpacing.md),

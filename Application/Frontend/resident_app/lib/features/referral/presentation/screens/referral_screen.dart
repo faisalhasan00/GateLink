@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../../core/providers/auth_providers.dart';
@@ -22,6 +23,16 @@ class ReferralScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20, color: Colors.white),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home/dashboard');
+            }
+          },
+        ),
         title: const Text('Partner Refer & Earn', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,

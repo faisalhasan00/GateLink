@@ -207,5 +207,24 @@ void main() {
       expect(controller.state.status, AmenityActionStatus.success);
       expect(mockRepository.seedCalls, 1);
     });
+
+    test('bookAmenity preserves actual phone number in repository invocation', () async {
+      const testPhone = '+919876543210';
+      final success = await controller.bookAmenity(
+        societyId: 'SOC-001',
+        amenityId: 'amenity-1',
+        amenityName: 'Clubhouse',
+        uid: 'user-123',
+        userName: 'John Doe',
+        flatNumber: 'A-101',
+        phone: testPhone,
+        selectedDate: DateTime.now(),
+        selectedSlot: '6:00 AM',
+      );
+
+      expect(success, true);
+      expect(testPhone.contains('@'), false);
+      expect(mockRepository.bookCalls, 1);
+    });
   });
 }

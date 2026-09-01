@@ -13,6 +13,7 @@ const PATH_NAME_MAP = {
   'parking': 'Parking Allocation',
   'notices': 'Notice Board',
   'staff': 'Staff Management',
+  'patrol': 'Guard Night Patrolling',
   'helpers': 'Helpers & Deliveries',
   'sos': 'Emergency SOS',
   'reports': 'Reports & Analytics',

@@ -131,5 +131,59 @@ export const maintenanceService = {
       ...paymentData,
       updatedAt: new Date().toISOString(),
     });
+  },
+
+  async getBillingConfig(societyId) {
+    if (!societyId) return null;
+    const docRef = doc(db, `societies/${societyId}/metadata/billingConfig`);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      return {
+        isAutoBillingEnabled: true,
+        billingDayOfMonth: 1,
+        dueDayOfMonth: 15,
+        baseMaintenanceCharge: 3500,
+        parkingCharge: 500,
+        waterCharge: 300,
+        sinkingFund: 200,
+        billingTitle: 'Monthly Maintenance & Society Facilities',
+      };
+    }
+    return docSnap.data();
+  },
+
+  async updateBillingConfig(societyId, config, logAuditAction) {
+    if (!societyId) throw new Error('Society ID is required');
+    const docRef = doc(db, `societies/${societyId}/metadata/billingConfig`);
+    const updated = {
+      isAutoBillingEnabled: config.isAutoBillingEnabled ?? true,
+      billingDayOfMonth: Number(config.billingDayOfMonth ?? 1),
+      dueDayOfMonth: Number(config.dueDayOfMonth ?? 15),
+      baseMaintenanceCharge: Number(config.baseMaintenanceCharge ?? 3500),
+      parkingCharge: Number(config.parkingCharge ?? 0),
+      waterCharge: Number(config.waterCharge ?? 0),
+      sinkingFund: Number(config.sinkingFund ?? 0),
+      billingTitle: config.billingTitle || 'Monthly Maintenance & Society Facilities',
+      updatedAt: new Date().toISOString(),
+    };
+    await setDoc(docRef, updated, { merge: true });
+
+    if (logAuditAction) {
+      await logAuditAction(societyId, {
+        action: 'Billing Configuration Updated',
+        description: `Updated auto-invoicing rules (Auto: ${updated.isAutoBillingEnabled ? 'ON' : 'OFF'}, Base: ₹${updated.baseMaintenanceCharge}, Bill Day: ${updated.billingDayOfMonth}st/th, Due: ${updated.dueDayOfMonth}th)`
+      });
+    }
+    return updated;
+  },
+
+  async triggerAutoInvoicing(societyId, options = {}) {
+    if (!societyId) throw new Error('Society ID is required');
+    const { httpsCallable } = await import('firebase/functions');
+    const { functions } = await import('../../firebase');
+    const triggerFn = httpsCallable(functions, 'triggerManualMonthlyInvoicing');
+    const res = await triggerFn({ societyId, ...options });
+    return res.data;
   }
 };
+

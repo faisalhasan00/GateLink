@@ -12,6 +12,7 @@ class GuardShell extends StatefulWidget {
 
 class _GuardShellState extends State<GuardShell> {
   int _currentIndex = 0;
+  DateTime? _lastBackPressTime;
 
   final List<_GuardNavItem> _navItems = const [
     _GuardNavItem(
@@ -54,8 +55,49 @@ class _GuardShellState extends State<GuardShell> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: widget.child,
+    final currentPath = GoRouterState.of(context).uri.path;
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+
+        if (GoRouter.of(context).canPop()) {
+          context.pop();
+          return;
+        }
+
+        final isDashboard = currentPath == '/dashboard' || currentPath == '/guard/dashboard' || currentPath == '/guard';
+        if (!isDashboard) {
+          context.go('/dashboard');
+          return;
+        }
+
+        final now = DateTime.now();
+        if (_lastBackPressTime == null ||
+            now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
+          _lastBackPressTime = now;
+          ScaffoldMessenger.of(context).removeCurrentSnackBar();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text(
+                'Press back again to exit GateLink Guard',
+                style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white),
+              ),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: AppColors.textPrimary,
+              duration: const Duration(seconds: 2),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            ),
+          );
+          return;
+        }
+
+        Navigator.of(context, rootNavigator: true).maybePop();
+      },
+      child: Scaffold(
+        body: widget.child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppColors.secondary, // Dark sleek theme for Security Guard app
@@ -121,8 +163,9 @@ class _GuardShellState extends State<GuardShell> {
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 class _GuardNavItem {

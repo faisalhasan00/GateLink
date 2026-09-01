@@ -12,6 +12,7 @@ import { maintenanceService } from './domain/maintenanceService';
 import { complaintService } from './domain/complaintService';
 import { facilityService } from './domain/facilityService';
 import { pollService } from './domain/pollService';
+import { patrolService } from './domain/patrolService';
 
 export const societyAdminService = {
   // ── RESIDENTS & STAFF ──────────────────────────────────────────────────
@@ -38,6 +39,10 @@ export const societyAdminService = {
   createMaintenanceBill: maintenanceService.createMaintenanceBill,
   updateBillStatus: maintenanceService.updateBillStatus,
   markBillPaid: maintenanceService.markBillPaid,
+  getBillingConfig: maintenanceService.getBillingConfig,
+  updateBillingConfig: (societyId, config) =>
+    maintenanceService.updateBillingConfig(societyId, config, complaintService.logAuditAction),
+  triggerAutoInvoicing: maintenanceService.triggerAutoInvoicing,
 
   // ── COMPLAINTS, SOS & AUDIT ───────────────────────────────────────────
   subscribeComplaints: complaintService.subscribeComplaints,
@@ -47,6 +52,19 @@ export const societyAdminService = {
   updateSosAlertStatus: complaintService.updateSosAlertStatus,
   subscribeAuditLogs: complaintService.subscribeAuditLogs,
   logAuditAction: complaintService.logAuditAction,
+
+  // ── GUARD PATROL & CHECKPOINTS ────────────────────────────────────────
+  subscribeCheckpoints: patrolService.subscribeCheckpoints,
+  createCheckpoint: (societyId, cpData) =>
+    patrolService.createCheckpoint(societyId, cpData, complaintService.logAuditAction),
+  updateCheckpoint: (societyId, cpId, updateData) =>
+    patrolService.updateCheckpoint(societyId, cpId, updateData, complaintService.logAuditAction),
+  deleteCheckpoint: (societyId, cpId, code) =>
+    patrolService.deleteCheckpoint(societyId, cpId, code, complaintService.logAuditAction),
+  subscribePatrolLogs: patrolService.subscribePatrolLogs,
+  subscribePatrolIncidents: patrolService.subscribePatrolIncidents,
+  updateIncidentStatus: (societyId, incId, status, notes) =>
+    patrolService.updateIncidentStatus(societyId, incId, status, notes, complaintService.logAuditAction),
 
   // ── FACILITIES, NOTICES, POLLS & SEARCH ────────────────────────────────
   getSocietyDetails: facilityService.getSocietyDetails,

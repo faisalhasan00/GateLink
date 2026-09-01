@@ -124,7 +124,9 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
         ? profile.displayName
         : (profile.name.isNotEmpty ? profile.name : 'Resident');
     final flatNumber = profile.flatNumber;
-    final phone = profile.email;
+    final phone = profile.phone.isNotEmpty
+        ? profile.phone
+        : (user.phoneNumber ?? '');
     final targetAmenityName = _amenityModel?.name ?? 'Society Amenity';
 
     final success =

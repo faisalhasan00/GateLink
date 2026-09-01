@@ -46,6 +46,8 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
     'Other',
   ];
 
+  bool _isSubmitting = false;
+
   @override
   void dispose() {
     _titleController.dispose();
@@ -64,6 +66,7 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
   }
 
   Future<void> _submit() async {
+    if (_isSubmitting) return;
     if (!_formKey.currentState!.validate()) return;
     if (_selectedCategory == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -82,6 +85,8 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
       );
       return;
     }
+
+    setState(() => _isSubmitting = true);
 
     try {
       String? photoUrl;
@@ -143,6 +148,10 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
           backgroundColor: AppColors.error,
         ),
       );
+    } finally {
+      if (mounted) {
+        setState(() => _isSubmitting = false);
+      }
     }
   }
 
@@ -157,6 +166,16 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.complaints);
+            }
+          },
+        ),
         title: const Text('Raise Complaint'),
       ),
       body: SingleChildScrollView(
@@ -259,8 +278,8 @@ class _RaiseComplaintScreenState extends ConsumerState<RaiseComplaintScreen> {
                 width: double.infinity,
                 height: 48,
                 child: ElevatedButton(
-                  onPressed: state.isLoading ? null : _submit,
-                  child: state.isLoading
+                  onPressed: (_isSubmitting || state.isLoading) ? null : _submit,
+                  child: (_isSubmitting || state.isLoading)
                       ? const SizedBox(
                           height: 20,
                           width: 20,

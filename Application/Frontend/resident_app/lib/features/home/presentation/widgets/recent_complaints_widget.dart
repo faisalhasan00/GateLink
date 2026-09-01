@@ -66,7 +66,7 @@ class RecentComplaintsWidget extends ConsumerWidget {
                 ),
               ),
               TextButton(
-                onPressed: () => context.go('/home/complaints/${complaint.id}'),
+                onPressed: () => context.push('/home/complaints/${complaint.id}'),
                 child: Text(
                   isResolved ? 'View' : 'Track',
                   style: const TextStyle(

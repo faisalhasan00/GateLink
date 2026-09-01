@@ -57,7 +57,7 @@ class DashboardAppBar extends ConsumerWidget {
             size: AppAvatarSize.sm,
             showBorder: true,
             borderColor: const Color(0xFFE2E8F0),
-            onTap: () => context.go(AppRoutes.profile),
+            onTap: () => context.push(AppRoutes.profile),
           ),
           const SizedBox(width: 12),
 
@@ -181,7 +181,7 @@ class DashboardAppBar extends ConsumerWidget {
                 border: Border.all(color: const Color(0xFFE2E8F0)),
               ),
               child: IconButton(
-                onPressed: () => context.go(AppRoutes.notifications),
+                onPressed: () => context.push(AppRoutes.notifications),
                 icon: Stack(
                   clipBehavior: Clip.none,
                   children: [

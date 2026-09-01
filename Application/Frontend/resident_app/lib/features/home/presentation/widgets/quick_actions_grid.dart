@@ -79,7 +79,7 @@ class _QuickActionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.go(action.route),
+      onTap: () => context.push(action.route),
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/firebase_providers.dart';
@@ -36,6 +37,16 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home/dashboard');
+            }
+          },
+        ),
         title: const Text('Society Documents'),
         backgroundColor: Colors.white,
         foregroundColor: AppColors.textPrimary,

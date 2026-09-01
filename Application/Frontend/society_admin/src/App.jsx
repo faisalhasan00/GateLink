@@ -22,6 +22,7 @@ const Parking = lazy(() => import('./pages/Parking'))
 const Notices = lazy(() => import('./pages/Notices'))
 const PollsPage = lazy(() => import('./pages/PollsPage'))
 const Staff = lazy(() => import('./pages/Staff'))
+const PatrolManagement = lazy(() => import('./pages/PatrolManagement'))
 const HelpersDeliveries = lazy(() => import('./pages/HelpersDeliveries'))
 const EmergencySos = lazy(() => import('./pages/EmergencySos'))
 const Reports = lazy(() => import('./pages/Reports'))
@@ -147,6 +148,7 @@ export default function App() {
               <Route path="notices" element={<Notices />} />
               <Route path="polls" element={<PollsPage />} />
               <Route path="staff" element={<Staff />} />
+              <Route path="patrol" element={<PatrolManagement />} />
               <Route path="helpers" element={<HelpersDeliveries />} />
               <Route path="sos" element={<EmergencySos />} />
               <Route path="reports" element={<Reports />} />

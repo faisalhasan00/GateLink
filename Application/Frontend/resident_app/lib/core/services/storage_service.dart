@@ -53,4 +53,27 @@ class StorageService {
       }
     }
   }
+
+  /// Uploads a visitor photo to Firebase Storage and returns the download URL
+  Future<String> uploadVisitorPhoto(
+      File imageFile, String societyId, String visitorId) async {
+    try {
+      final fileName = 'visitor_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final ref = _storage
+          .ref()
+          .child('societies/$societyId/visitors/$visitorId/$fileName');
+
+      final uploadTask = await ref.putFile(imageFile);
+      return await uploadTask.ref.getDownloadURL();
+    } catch (e) {
+      print('Firebase Storage Visitor Fallback: $e');
+      try {
+        final bytes = await imageFile.readAsBytes();
+        final base64Str = base64Encode(bytes);
+        return 'data:image/jpeg;base64,$base64Str';
+      } catch (_) {
+        return '';
+      }
+    }
+  }
 }

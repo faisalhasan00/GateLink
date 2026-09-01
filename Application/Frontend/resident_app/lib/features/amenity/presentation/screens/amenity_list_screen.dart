@@ -48,6 +48,16 @@ class _AmenityListScreenState extends ConsumerState<AmenityListScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/home/dashboard');
+            }
+          },
+        ),
         title: const Text('Amenities'),
         actions: [
           TextButton.icon(

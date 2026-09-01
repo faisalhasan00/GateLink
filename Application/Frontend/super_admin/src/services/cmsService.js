@@ -24,12 +24,17 @@ import { db, storage, auth } from '../firebase';
  */
 export async function ensureFirebaseAuth() {
   if (auth.currentUser) return auth.currentUser;
+  const adminEmail = import.meta.env.VITE_ADMIN_EMAIL;
+  const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
+  if (!adminEmail || !adminPassword) {
+    return auth.currentUser;
+  }
   try {
-    const cred = await signInWithEmailAndPassword(auth, 'mohammedfaisalhasan@gmail.com', 'Raj786f@');
+    const cred = await signInWithEmailAndPassword(auth, adminEmail, adminPassword);
     return cred.user;
   } catch (err) {
-    console.warn('Firebase Auth auto-login note:', err.message);
-    return null;
+    console.warn('Firebase Auth fallback sign-in note:', err.message);
+    return auth.currentUser;
   }
 }
 
