@@ -6,6 +6,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/partner_auth_provider.dart';
 import '../../../../core/widgets/partner_logo.dart';
 import '../../../home/presentation/screens/partner_dashboard_screen.dart';
+import 'partner_login_screen.dart';
 
 class PartnerRegisterScreen extends ConsumerStatefulWidget {
   const PartnerRegisterScreen({super.key});
@@ -19,11 +20,13 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _emailController = TextEditingController();
   final _upiController = TextEditingController();
   final _cityController = TextEditingController();
 
   bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   String _selectedCategory = 'Real Estate Broker';
   bool _acceptedTerms = true;
   bool _isLoading = false;
@@ -42,6 +45,7 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
     _nameController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     _emailController.dispose();
     _upiController.dispose();
     _cityController.dispose();
@@ -52,7 +56,10 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
     if (!_formKey.currentState!.validate()) return;
     if (!_acceptedTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please accept the Partner Terms & Code of Conduct')),
+        const SnackBar(
+          content: Text('Please accept the Partner Terms & Code of Conduct'),
+          backgroundColor: AppColors.warning,
+        ),
       );
       return;
     }
@@ -65,6 +72,25 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
       final email = _emailController.text.trim();
       final upi = _upiController.text.trim();
       final city = _cityController.text.trim();
+
+      // Check if partner already exists
+      final existingDoc = await FirebaseFirestore.instance.collection('partners').doc(phone).get();
+      if (existingDoc.exists) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('An account already exists with this mobile number. Please Sign In.'),
+              backgroundColor: AppColors.warning,
+            ),
+          );
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const PartnerLoginScreen()),
+          );
+        }
+        return;
+      }
+
       final regLogId = 'REG-LOG-${DateTime.now().millisecondsSinceEpoch}';
 
       // 1. Save to Firestore 'partners' collection
@@ -74,12 +100,12 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
         'password': password,
         'email': email,
         'category': _selectedCategory,
-        'upiId': upi,
+        'upiId': upi.isNotEmpty ? upi : '',
         'city': city,
         'status': 'active',
         'registrationLogId': regLogId,
         'createdAt': FieldValue.serverTimestamp(),
-      }, SetOptions(merge: true));
+      });
 
       // 2. Save structured Partner Registration Audit Log
       await FirebaseFirestore.instance.collection('partner_registration_logs').doc(phone).set({
@@ -88,26 +114,26 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
         'partnerName': name,
         'partnerEmail': email,
         'category': _selectedCategory,
-        'upiId': upi,
+        'upiId': upi.isNotEmpty ? upi : '',
         'city': city,
         'status': 'verified_active',
         'registeredAt': FieldValue.serverTimestamp(),
       });
 
-      // 3. Save locally
+      // 3. Save locally & set authenticated session
       await ref.read(partnerAuthProvider.notifier).loginOrRegister(
         name: name,
         phone: phone,
         email: email,
         category: _selectedCategory,
-        upiId: upi,
+        upiId: upi.isNotEmpty ? upi : '',
         city: city,
       );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('✓ Registration Logged & Partner Account Created Successfully!'),
+            content: Text('✓ Welcome to GateLink Partner Network! Registration successful.'),
             backgroundColor: AppColors.success,
           ),
         );
@@ -119,7 +145,10 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
     } catch (err) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Registration error: $err')),
+          SnackBar(
+            content: Text('Registration error: $err'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     } finally {
@@ -148,7 +177,7 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Card with Logo
+              // Header Card with Brand Gradient
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppSpacing.lg),
@@ -198,11 +227,17 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
               const SizedBox(height: 20),
 
               const Text(
-                'Personal & Business Registration',
+                'Partner Registration',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: 4),
+              const Text(
+                'Create your partner profile to start referring and onboarding societies',
+                style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 16),
 
+              // Full Name
               TextFormField(
                 controller: _nameController,
                 decoration: InputDecoration(
@@ -211,26 +246,30 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                   prefixIcon: const Icon(Icons.person_rounded, color: AppColors.primary),
                 ),
-                validator: (val) => val == null || val.trim().isEmpty ? 'Enter your name' : null,
+                validator: (val) => val == null || val.trim().isEmpty ? 'Please enter your full name' : null,
               ),
               const SizedBox(height: 14),
 
+              // 10-Digit Mobile Number
               TextFormField(
                 controller: _phoneController,
                 keyboardType: TextInputType.phone,
                 decoration: InputDecoration(
-                  labelText: '10-Digit Mobile / WhatsApp *',
+                  labelText: '10-Digit Mobile Number *',
                   hintText: 'e.g. 9845011223',
                   prefixText: '+91 ',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                   prefixIcon: const Icon(Icons.phone_rounded, color: AppColors.primary),
                 ),
-                validator: (val) => val == null || val.trim().replaceAll(RegExp(r'[^0-9]'), '').length < 10
-                    ? 'Enter valid 10-digit mobile number'
-                    : null,
+                validator: (val) {
+                  final clean = val?.trim().replaceAll(RegExp(r'[^0-9]'), '') ?? '';
+                  if (clean.length < 10) return 'Enter a valid 10-digit mobile number';
+                  return null;
+                },
               ),
               const SizedBox(height: 14),
 
+              // Password
               TextFormField(
                 controller: _passwordController,
                 obscureText: _obscurePassword,
@@ -251,6 +290,32 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
               ),
               const SizedBox(height: 14),
 
+              // Confirm Password
+              TextFormField(
+                controller: _confirmPasswordController,
+                obscureText: _obscureConfirmPassword,
+                decoration: InputDecoration(
+                  labelText: 'Confirm Password *',
+                  hintText: 'Re-enter your password',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
+                  prefixIcon: const Icon(Icons.lock_outline_rounded, color: AppColors.primary),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureConfirmPassword ? Icons.visibility_off_rounded : Icons.visibility_rounded,
+                      color: Colors.grey.shade600,
+                    ),
+                    onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                  ),
+                ),
+                validator: (val) {
+                  if (val == null || val.trim().isEmpty) return 'Please confirm your password';
+                  if (val.trim() != _passwordController.text.trim()) return 'Passwords do not match';
+                  return null;
+                },
+              ),
+              const SizedBox(height: 14),
+
+              // Email Address
               TextFormField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -260,10 +325,11 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                   prefixIcon: const Icon(Icons.email_rounded, color: AppColors.primary),
                 ),
-                validator: (val) => val == null || !val.contains('@') ? 'Enter valid email address' : null,
+                validator: (val) => val == null || !val.contains('@') ? 'Enter a valid email address' : null,
               ),
               const SizedBox(height: 14),
 
+              // Partner Category
               DropdownButtonFormField<String>(
                 initialValue: _selectedCategory,
                 decoration: InputDecoration(
@@ -276,29 +342,28 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
               ),
               const SizedBox(height: 14),
 
+              // Payout UPI ID
               TextFormField(
                 controller: _upiController,
                 decoration: InputDecoration(
-                  labelText: 'Payout UPI ID (for instant ₹500 + 2%) *',
-                  hintText: 'e.g. rajesh@okicici',
+                  labelText: 'Payout UPI ID (e.g. name@okhdfcbank)',
+                  hintText: 'For direct Cashfree bank transfers',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                   prefixIcon: const Icon(Icons.account_balance_wallet_rounded, color: AppColors.secondary),
                 ),
-                validator: (val) => val == null || val.trim().isEmpty || !val.contains('@')
-                    ? 'Enter valid UPI ID (e.g. name@bank)'
-                    : null,
               ),
               const SizedBox(height: 14),
 
+              // Operating City
               TextFormField(
                 controller: _cityController,
                 decoration: InputDecoration(
                   labelText: 'Operating City / Region *',
-                  hintText: 'e.g. Hyderabad / Pune / Mumbai',
+                  hintText: 'e.g. Hyderabad / Pune / Bengaluru',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
                   prefixIcon: const Icon(Icons.location_city_rounded, color: AppColors.primary),
                 ),
-                validator: (val) => val == null || val.trim().isEmpty ? 'Enter operating city' : null,
+                validator: (val) => val == null || val.trim().isEmpty ? 'Enter your operating city' : null,
               ),
               const SizedBox(height: 14),
 
@@ -315,6 +380,7 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
               ),
               const SizedBox(height: 16),
 
+              // Register Button
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -327,9 +393,31 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
                   ),
                   child: _isLoading
                       ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Text('Complete Registration & Create Audit Log', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                      : const Text('Complete Registration & Start Earning', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                 ),
               ),
+              const SizedBox(height: 24),
+
+              // Already have an account link
+              Center(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text("Already have a partner account? ", style: TextStyle(fontSize: 14, color: AppColors.textSecondary)),
+                    GestureDetector(
+                      onTap: () => Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const PartnerLoginScreen()),
+                      ),
+                      child: const Text(
+                        'Sign In',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.primary),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -337,4 +425,3 @@ class _PartnerRegisterScreenState extends ConsumerState<PartnerRegisterScreen> {
     );
   }
 }
-
