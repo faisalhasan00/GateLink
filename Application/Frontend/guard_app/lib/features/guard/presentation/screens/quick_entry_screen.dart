@@ -260,11 +260,22 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
         profile?['name'] ?? user?.displayName ?? 'Security Guard';
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        backgroundColor: AppColors.secondary,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF1E3A8A), Color(0xFF0F172A)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
         foregroundColor: Colors.white,
-        title: const Text('Log New Visitor Entry'),
+        title: const Text(
+          'Fast Gate Entry',
+          style: TextStyle(fontWeight: FontWeight.w900, fontSize: 18),
+        ),
         elevation: 0,
       ),
       body: SingleChildScrollView(
@@ -282,10 +293,19 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // 2. Modular Category Selector
+              // 2. Modular Category Selector with 1-Tap Presets
               EntryCategorySelector(
                 selectedType: _selectedType,
                 onTypeChanged: (t) => setState(() => _selectedType = t),
+                onBrandPresetSelected: (brand, type, defaultName) {
+                  setState(() {
+                    _selectedType = type;
+                    _companyController.text = brand;
+                    if (_nameController.text.isEmpty || _nameController.text.contains('Executive') || _nameController.text.contains('Driver')) {
+                      _nameController.text = defaultName;
+                    }
+                  });
+                },
               ),
               const SizedBox(height: AppSpacing.lg),
 

@@ -1,54 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/providers/language_provider.dart';
 
-class GuardShell extends StatefulWidget {
+class GuardShell extends ConsumerStatefulWidget {
   final Widget child;
   const GuardShell({super.key, required this.child});
 
-  static const List<_GuardNavItem> _navItems = [
-    _GuardNavItem(
-      label: 'Gate Log',
-      icon: Icons.shield_outlined,
-      activeIcon: Icons.shield_rounded,
-      route: '/guard/dashboard',
-    ),
-    _GuardNavItem(
-      label: 'QR Scan',
-      icon: Icons.qr_code_scanner_outlined,
-      activeIcon: Icons.qr_code_scanner_rounded,
-      route: '/guard/scan',
-    ),
-    _GuardNavItem(
-      label: 'Quick Entry',
-      icon: Icons.person_add_alt_outlined,
-      activeIcon: Icons.person_add_alt_1_rounded,
-      route: '/guard/quick-entry',
-    ),
-    _GuardNavItem(
-      label: 'Vehicles',
-      icon: Icons.directions_car_outlined,
-      activeIcon: Icons.directions_car_rounded,
-      route: '/guard/vehicles',
-    ),
-    _GuardNavItem(
-      label: 'Profile',
-      icon: Icons.person_outline_rounded,
-      activeIcon: Icons.person_rounded,
-      route: '/guard/profile',
-    ),
-  ];
-
   @override
-  State<GuardShell> createState() => _GuardShellState();
+  ConsumerState<GuardShell> createState() => _GuardShellState();
 }
 
-class _GuardShellState extends State<GuardShell> {
+class _GuardShellState extends ConsumerState<GuardShell> {
   DateTime? _lastBackPressTime;
 
   @override
   Widget build(BuildContext context) {
+    final tr = ref.watch(stringsProvider);
     final currentPath = GoRouterState.of(context).uri.path;
+
+    final navItems = [
+      _GuardNavItem(
+        label: tr.get('nav_gate'),
+        icon: Icons.shield_outlined,
+        activeIcon: Icons.shield_rounded,
+        route: '/guard/dashboard',
+      ),
+      _GuardNavItem(
+        label: tr.get('nav_qr_scan'),
+        icon: Icons.qr_code_scanner_outlined,
+        activeIcon: Icons.qr_code_scanner_rounded,
+        route: '/guard/scan',
+      ),
+      _GuardNavItem(
+        label: tr.get('nav_quick_entry'),
+        icon: Icons.person_add_alt_outlined,
+        activeIcon: Icons.person_add_alt_1_rounded,
+        route: '/guard/quick-entry',
+      ),
+      _GuardNavItem(
+        label: tr.get('nav_vehicles'),
+        icon: Icons.directions_car_outlined,
+        activeIcon: Icons.directions_car_rounded,
+        route: '/guard/vehicles',
+      ),
+      _GuardNavItem(
+        label: tr.get('nav_profile'),
+        icon: Icons.person_outline_rounded,
+        activeIcon: Icons.person_rounded,
+        route: '/guard/profile',
+      ),
+    ];
 
     return PopScope(
       canPop: false,
@@ -114,8 +117,8 @@ class _GuardShellState extends State<GuardShell> {
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: List.generate(GuardShell._navItems.length, (index) {
-                  final item = GuardShell._navItems[index];
+                children: List.generate(navItems.length, (index) {
+                  final item = navItems[index];
                   final isActive = currentPath.startsWith(item.route) ||
                       (item.route == '/guard/dashboard' && currentPath == '/guard');
 
@@ -128,7 +131,7 @@ class _GuardShellState extends State<GuardShell> {
                         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
                         decoration: BoxDecoration(
                           color: isActive
-                              ? AppColors.primary.withValues(alpha: 0.1)
+                              ? const Color(0xFF1E3A8A).withValues(alpha: 0.1)
                               : Colors.transparent,
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -137,7 +140,7 @@ class _GuardShellState extends State<GuardShell> {
                           children: [
                             Icon(
                               isActive ? item.activeIcon : item.icon,
-                              color: isActive ? AppColors.primary : AppColors.gray600,
+                              color: isActive ? const Color(0xFF1E3A8A) : AppColors.gray600,
                               size: 24,
                             ),
                             const SizedBox(height: 4),
@@ -147,8 +150,8 @@ class _GuardShellState extends State<GuardShell> {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontSize: 11,
-                                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                                color: isActive ? AppColors.primary : AppColors.gray600,
+                                fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+                                color: isActive ? const Color(0xFF1E3A8A) : AppColors.gray600,
                                 letterSpacing: 0.1,
                               ),
                             ),
