@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -70,31 +70,30 @@ class AppRoutes {
   static const String inviteVisitor = '/guard/quick-entry';
 }
 
-/// Helper class that converts a Stream into a Listenable for GoRouter.refreshListenable
-class GoRouterRefreshStream extends ChangeNotifier {
-  late final dynamic _subscription;
+/// Notifier that bridges Riverpod auth & user profile streams to GoRouter.refreshListenable
+class RouterNotifier extends ChangeNotifier {
+  final Ref _ref;
 
-  GoRouterRefreshStream(Stream<dynamic> stream) {
-    notifyListeners();
-    _subscription = stream.asBroadcastStream().listen((_) => notifyListeners());
-  }
-
-  @override
-  void dispose() {
-    _subscription.cancel();
-    super.dispose();
+  RouterNotifier(this._ref) {
+    _ref.listen<User?>(currentUserProvider, (_, __) => notifyListeners());
+    _ref.listen<AsyncValue<Map<String, dynamic>?>>(userProfileProvider, (_, __) => notifyListeners());
   }
 }
 
+final routerNotifierProvider = Provider<RouterNotifier>((ref) {
+  return RouterNotifier(ref);
+});
+
 final appRouterProvider = Provider<GoRouter>((ref) {
+  final notifier = ref.watch(routerNotifierProvider);
   final authService = ref.watch(authServiceProvider);
 
   return GoRouter(
     initialLocation: AppRoutes.splash,
-    refreshListenable: GoRouterRefreshStream(authService.authStateChanges),
+    refreshListenable: notifier,
     errorBuilder: (context, state) => const GuardDashboardScreen(),
     redirect: (context, state) {
-      final user = authService.currentUser;
+      final user = authService.currentUser ?? ref.read(currentUserProvider);
       final isAuth = user != null;
       final isSplash = state.uri.path == AppRoutes.splash;
       final isLoggingIn = state.uri.path == AppRoutes.login || 
@@ -115,6 +114,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       if (isAuth) {
+        // Authenticated guards on login routes should go directly to dashboard
+        if (isLoggingIn) {
+          return AppRoutes.guardDashboard;
+        }
         final profileAsync = ref.read(userProfileProvider);
         final userProfile = profileAsync.value;
 

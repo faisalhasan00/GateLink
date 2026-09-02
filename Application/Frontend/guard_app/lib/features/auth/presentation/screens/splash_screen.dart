@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -40,11 +41,25 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   Future<void> _resolveAuthAndNavigate() async {
-    // Give animation smooth visual duration (minimum 1.0 second)
-    await Future.delayed(const Duration(milliseconds: 1000));
+    // 1. Ensure minimum animation brand duration of 1.0s
+    final animationFuture = Future.delayed(const Duration(milliseconds: 1000));
+
+    // 2. Wait for Firebase Auth to definitively restore cached session from secure disk
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      try {
+        user = await FirebaseAuth.instance
+            .authStateChanges()
+            .first
+            .timeout(const Duration(seconds: 4), onTimeout: () => FirebaseAuth.instance.currentUser);
+      } catch (_) {
+        user = FirebaseAuth.instance.currentUser;
+      }
+    }
+
+    await animationFuture;
     if (!mounted) return;
 
-    final user = ref.read(authServiceProvider).currentUser;
     if (user != null) {
       context.go(AppRoutes.guardDashboard);
     } else {
