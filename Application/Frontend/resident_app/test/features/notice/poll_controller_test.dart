@@ -39,6 +39,9 @@ class MockPollRepository implements PollRepository {
     if (shouldFail) throw Exception('Your flat has already voted on this poll.');
     return true;
   }
+
+  @override
+  Future<void> seedDemoPolls(String societyId) async {}
 }
 
 void main() {

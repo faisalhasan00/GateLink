@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shimmer/shimmer.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/auth_providers.dart';
@@ -67,7 +68,7 @@ class _MaintenanceListScreenState extends ConsumerState<MaintenanceListScreen>
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator()),
+        loading: () => const _MaintenanceSkeletonList(),
         error: (e, st) => Center(child: Text('Error: $e')),
       ),
     );
@@ -99,15 +100,14 @@ class _BillsListView extends StatelessWidget {
                   : 'No pending maintenance bills 🎉',
               style: const TextStyle(color: AppColors.textSecondary)),
           const SizedBox(height: AppSpacing.lg),
-          if (kDebugMode && !isPaid)
+          if (!isPaid)
             ElevatedButton.icon(
               onPressed: () async {
                 try {
                   final user = ref.read(currentUserProvider);
-                  final userProfile = ref.read(userProfileProvider).value;
-                  final activeSocId =
-                      userProfile?['societyId'] as String? ?? '';
-                  final flatNum = userProfile?['flatNumber'] ?? 'A-101';
+                  final profile = ref.read(userProfileProvider).value;
+                  final activeSocId = profile?.societyId ?? '';
+                  final flatNum = profile?.displayFlatNumber ?? 'Flat A-402';
                   if (activeSocId.isEmpty || user == null) return;
 
                   await ref
@@ -121,8 +121,15 @@ class _BillsListView extends StatelessWidget {
                   debugPrint('Seeding error: $e');
                 }
               },
-              icon: const Icon(Icons.receipt_rounded),
-              label: const Text('Generate Sample Maintenance Bills'),
+              icon: const Icon(Icons.receipt_long_rounded, size: 18),
+              label: const Text('Generate Sample Maintenance Bill'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E3A8A),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
             ),
         ]),
       );
@@ -357,6 +364,30 @@ class _BillCard extends StatelessWidget {
                   fontWeight: FontWeight.w600,
                   color: isWarning ? AppColors.error : AppColors.textPrimary)),
         ],
+      ),
+    );
+  }
+}
+
+class _MaintenanceSkeletonList extends StatelessWidget {
+  const _MaintenanceSkeletonList();
+
+  @override
+  Widget build(BuildContext context) {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFFE2E8F0),
+      highlightColor: const Color(0xFFF8FAFC),
+      child: ListView.builder(
+        padding: const EdgeInsets.all(AppSpacing.pagePadding),
+        itemCount: 3,
+        itemBuilder: (_, __) => Container(
+          margin: const EdgeInsets.only(bottom: AppSpacing.md),
+          height: 160,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+          ),
+        ),
       ),
     );
   }

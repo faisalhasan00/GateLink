@@ -38,6 +38,16 @@ class MockComplaintRepository implements ComplaintRepository {
     if (shouldFail) throw Exception('Failed to raise complaint');
     return 'cmp-doc-123';
   }
+
+  @override
+  Future<void> submitRating({
+    required String societyId,
+    required String complaintId,
+    required int rating,
+    String? feedback,
+  }) async {
+    if (shouldFail) throw Exception('Failed to submit rating');
+  }
 }
 
 void main() {

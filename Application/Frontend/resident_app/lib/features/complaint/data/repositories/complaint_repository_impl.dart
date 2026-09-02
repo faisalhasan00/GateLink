@@ -109,4 +109,21 @@ class ComplaintRepositoryImpl implements ComplaintRepository {
 
     return docRef.id;
   }
+
+  @override
+  Future<void> submitRating({
+    required String societyId,
+    required String complaintId,
+    required int rating,
+    String? feedback,
+  }) async {
+    if (societyId.isEmpty || complaintId.isEmpty) return;
+
+    await _firestore.collection('societies/$societyId/complaints').doc(complaintId).update({
+      'rating': rating,
+      'ratingFeedback': feedback?.trim(),
+      'ratedAt': DateTime.now().toIso8601String(),
+      'updatedAt': DateTime.now().toIso8601String(),
+    });
+  }
 }

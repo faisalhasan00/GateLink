@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
@@ -25,6 +26,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
   // Mode: 'one_time' or 'multi_day'
   String _passType = 'one_time';
   String _selectedPurpose = 'Guest / Friend';
+  String? _selectedInstruction;
 
   // One-time pass dates
   DateTime _singleDate = DateTime.now();
@@ -36,13 +38,57 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
 
   bool _isLoading = false;
 
-  final List<Map<String, dynamic>> _oneTimePresets = [
-    {'label': '🍕 Delivery', 'purpose': 'Delivery', 'defaultName': 'Delivery Partner'},
-    {'label': '🚕 Cab / Taxi', 'purpose': 'Cab / Taxi', 'defaultName': 'Cab Driver'},
-    {'label': '👥 Guest / Friend', 'purpose': 'Personal Visit', 'defaultName': ''},
-    {'label': '🔧 Service Repair', 'purpose': 'Maintenance Work', 'defaultName': 'Service Technician'},
-    {'label': '📦 Courier', 'purpose': 'Delivery', 'defaultName': 'Courier Agent'},
-    {'label': '🩺 Doctor / Medical', 'purpose': 'Medical Visit', 'defaultName': ''},
+  final List<Map<String, dynamic>> _deliveryBrands = [
+    {
+      'name': 'Swiggy',
+      'icon': Icons.delivery_dining_rounded,
+      'color': const Color(0xFFFC8019),
+      'defaultName': 'Swiggy Delivery',
+      'purpose': 'Delivery',
+    },
+    {
+      'name': 'Zomato',
+      'icon': Icons.restaurant_rounded,
+      'color': const Color(0xFFCB202D),
+      'defaultName': 'Zomato Delivery',
+      'purpose': 'Delivery',
+    },
+    {
+      'name': 'Blinkit',
+      'icon': Icons.shopping_bag_rounded,
+      'color': const Color(0xFFEAB308),
+      'defaultName': 'Blinkit Delivery',
+      'purpose': 'Delivery',
+    },
+    {
+      'name': 'Amazon',
+      'icon': Icons.local_shipping_rounded,
+      'color': const Color(0xFF0F172A),
+      'defaultName': 'Amazon Delivery',
+      'purpose': 'Delivery',
+    },
+    {
+      'name': 'Zepto',
+      'icon': Icons.flash_on_rounded,
+      'color': const Color(0xFF7C3AED),
+      'defaultName': 'Zepto Delivery',
+      'purpose': 'Delivery',
+    },
+    {
+      'name': 'Uber / Cab',
+      'icon': Icons.local_taxi_rounded,
+      'color': const Color(0xFF0284C7),
+      'defaultName': 'Cab Driver',
+      'purpose': 'Cab / Taxi',
+    },
+  ];
+
+  final List<Map<String, dynamic>> _instructionOptions = [
+    {'label': 'Leave at Door', 'icon': Icons.door_front_door_outlined},
+    {'label': 'Leave at Gate', 'icon': Icons.shield_outlined},
+    {'label': 'Collect OTP at Door', 'icon': Icons.pin_outlined},
+    {'label': 'Don\'t Ring Bell', 'icon': Icons.notifications_off_outlined},
+    {'label': 'Call on Arrival', 'icon': Icons.call_outlined},
   ];
 
   final List<Map<String, dynamic>> _multiDayPresets = [
@@ -95,6 +141,18 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
         _multiUntilDate = picked.end;
       });
     }
+  }
+
+  void _selectDeliveryBrand(Map<String, dynamic> brand) {
+    HapticFeedback.selectionClick();
+    setState(() {
+      _passType = 'one_time';
+      _selectedPurpose = brand['purpose'] as String;
+      _nameController.text = brand['defaultName'] as String;
+      if (_mobileController.text.isEmpty) {
+        _mobileController.text = '9999999999';
+      }
+    });
   }
 
   Future<void> _submit() async {
@@ -199,6 +257,64 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
         passType: _passType,
         validFrom: validFrom,
         validUntil: validUntil,
+        instructions: _selectedInstruction,
+      ),
+    );
+  }
+
+  Widget _buildCategoryTab({
+    required String label,
+    required IconData icon,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
+          decoration: BoxDecoration(
+            color: isSelected ? const Color(0xFF1E3A8A) : Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: isSelected ? const Color(0xFF1E3A8A) : const Color(0xFFCBD5E1),
+              width: isSelected ? 1.5 : 1.0,
+            ),
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: const Color(0xFF1E3A8A).withValues(alpha: 0.25),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 18,
+                color: isSelected ? Colors.white : const Color(0xFF475569),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                  color: isSelected ? Colors.white : const Color(0xFF334155),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -281,7 +397,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.flash_on_rounded,
+                                Icons.timer_outlined,
                                 size: 18,
                                 color: isSingle
                                     ? const Color(0xFF1E3A8A)
@@ -289,7 +405,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                '⚡ One-Time Pass',
+                                'One-Time Pass',
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: isSingle
@@ -336,7 +452,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                '📅 Multi-Day Stay',
+                                'Multi-Day Stay',
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: !isSingle
@@ -392,62 +508,220 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // ── 2. QUICK PRESET CHIPS ──────────────────────────────────────
-              Text(
-                isSingle ? 'QUICK CATEGORY' : 'VISIT PURPOSE',
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.8,
-                  color: Color(0xFF64748B),
+              // ── 2. VISITOR CATEGORY SELECTOR ────────────────────────────
+              if (isSingle) ...[
+                const Text(
+                  'VISITING PURPOSE',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                    color: Color(0xFF64748B),
+                  ),
                 ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: (isSingle ? _oneTimePresets : _multiDayPresets).map((preset) {
-                  final label = preset['label'] as String;
-                  final isSelected = _selectedPurpose == preset['purpose'];
-                  return ChoiceChip(
-                    label: Text(label),
-                    selected: isSelected,
-                    onSelected: (selected) {
-                      if (selected) {
+                const SizedBox(height: AppSpacing.sm),
+                Row(
+                  children: [
+                    _buildCategoryTab(
+                      label: 'Guest / Friend',
+                      icon: Icons.people_alt_outlined,
+                      isSelected: _selectedPurpose == 'Guest / Friend' || _selectedPurpose == 'Personal Visit',
+                      onTap: () {
+                        HapticFeedback.selectionClick();
                         setState(() {
-                          _selectedPurpose = preset['purpose'] as String;
-                          final defName = preset['defaultName'] as String? ?? '';
-                          if (defName.isNotEmpty && _nameController.text.isEmpty) {
-                            _nameController.text = defName;
-                          }
-                          if (!isSingle && preset['days'] != null) {
-                            final days = preset['days'] as int;
-                            _multiUntilDate = _multiFromDate.add(Duration(days: days));
+                          _selectedPurpose = 'Guest / Friend';
+                          _nameController.clear();
+                          _mobileController.clear();
+                        });
+                      },
+                    ),
+                    const SizedBox(width: 8),
+                    _buildCategoryTab(
+                      label: 'Delivery',
+                      icon: Icons.delivery_dining_outlined,
+                      isSelected: _selectedPurpose == 'Delivery',
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() {
+                          _selectedPurpose = 'Delivery';
+                          if (_nameController.text.isEmpty) {
+                            _nameController.text = 'Delivery Partner';
                           }
                         });
-                      }
-                    },
-                    selectedColor: isSingle ? const Color(0xFF1E3A8A) : const Color(0xFF0EA5E9),
-                    labelStyle: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: isSelected ? Colors.white : const Color(0xFF334155),
+                      },
                     ),
-                    backgroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      side: BorderSide(
-                        color: isSelected
-                            ? Colors.transparent
-                            : const Color(0xFFCBD5E1),
-                      ),
+                    const SizedBox(width: 8),
+                    _buildCategoryTab(
+                      label: 'Cab / Taxi',
+                      icon: Icons.local_taxi_outlined,
+                      isSelected: _selectedPurpose == 'Cab / Taxi',
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() {
+                          _selectedPurpose = 'Cab / Taxi';
+                          _nameController.text = 'Cab Driver';
+                        });
+                      },
                     ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: AppSpacing.lg),
+                    const SizedBox(width: 8),
+                    _buildCategoryTab(
+                      label: 'Service',
+                      icon: Icons.build_outlined,
+                      isSelected: _selectedPurpose == 'Maintenance Work',
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        setState(() {
+                          _selectedPurpose = 'Maintenance Work';
+                          _nameController.text = 'Service Technician';
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                const SizedBox(height: AppSpacing.md),
 
-              // ── 3. VISITOR DETAILS FORM ────────────────────────────────────
+                // If Delivery is chosen, show quick brand pills
+                if (_selectedPurpose == 'Delivery') ...[
+                  const Row(
+                    children: [
+                      Text(
+                        'QUICK DELIVERY BRANDS',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                      SizedBox(width: 6),
+                      Text(
+                        '• 1-Tap Autofill',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0EA5E9),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 38,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _deliveryBrands.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        final brand = _deliveryBrands[index];
+                        final isSelected = _nameController.text == brand['defaultName'];
+                        final brandColor = brand['color'] as Color;
+
+                        return InkWell(
+                          onTap: () => _selectDeliveryBrand(brand),
+                          borderRadius: BorderRadius.circular(10),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected ? brandColor : Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: isSelected ? brandColor : const Color(0xFFE2E8F0),
+                                width: isSelected ? 1.5 : 1.0,
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: isSelected
+                                      ? brandColor.withValues(alpha: 0.25)
+                                      : Colors.black.withValues(alpha: 0.03),
+                                  blurRadius: isSelected ? 6 : 4,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  brand['icon'] as IconData,
+                                  size: 15,
+                                  color: isSelected ? Colors.white : brandColor,
+                                ),
+                                const SizedBox(width: 6),
+                                Text(
+                                  brand['name'] as String,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w800,
+                                    color: isSelected ? Colors.white : const Color(0xFF0F172A),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                ],
+              ],
+
+              // ── 3. MULTI-DAY PURPOSE PRESETS ────────────────────────────
+              if (!isSingle) ...[
+                const Text(
+                  'STAY PURPOSE',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _multiDayPresets.map((preset) {
+                    final label = preset['label'] as String;
+                    final isSelected = _selectedPurpose == preset['purpose'];
+                    return ChoiceChip(
+                      label: Text(label),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        if (selected) {
+                          HapticFeedback.selectionClick();
+                          setState(() {
+                            _selectedPurpose = preset['purpose'] as String;
+                            if (preset['days'] != null) {
+                              final days = preset['days'] as int;
+                              _multiUntilDate = _multiFromDate.add(Duration(days: days));
+                            }
+                          });
+                        }
+                      },
+                      selectedColor: const Color(0xFF0EA5E9),
+                      labelStyle: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: isSelected ? Colors.white : const Color(0xFF334155),
+                      ),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: BorderSide(
+                          color: isSelected
+                              ? Colors.transparent
+                              : const Color(0xFFCBD5E1),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+              ],
+
+              // ── 4. VISITOR DETAILS FORM ────────────────────────────────────
               const Text(
                 'VISITOR DETAILS',
                 style: TextStyle(
@@ -472,7 +746,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
                       TextFormField(
                         controller: _nameController,
                         decoration: InputDecoration(
-                          labelText: 'Visitor Name *',
+                          labelText: 'Visitor / Delivery Partner Name *',
                           hintText: isSingle ? 'e.g. Rahul / Swiggy Delivery' : 'e.g. Rakesh Sharma',
                           prefixIcon: const Icon(Icons.person_outline_rounded, color: Color(0xFF64748B)),
                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
@@ -511,6 +785,59 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
+
+              // ── 5. DELIVERY INSTRUCTIONS ──────────────────────────────────
+              if (isSingle) ...[
+                const Text(
+                  'DELIVERY & GATE INSTRUCTIONS',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: _instructionOptions.map((opt) {
+                    final label = opt['label'] as String;
+                    final icon = opt['icon'] as IconData;
+                    final isSelected = _selectedInstruction == label;
+
+                    return FilterChip(
+                      avatar: Icon(
+                        icon,
+                        size: 14,
+                        color: isSelected ? Colors.white : const Color(0xFF1E3A8A),
+                      ),
+                      label: Text(label),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        HapticFeedback.selectionClick();
+                        setState(() {
+                          _selectedInstruction = selected ? label : null;
+                        });
+                      },
+                      selectedColor: const Color(0xFF1E3A8A),
+                      labelStyle: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: isSelected ? Colors.white : const Color(0xFF334155),
+                      ),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: BorderSide(
+                          color: isSelected ? Colors.transparent : const Color(0xFFCBD5E1),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+              ],
 
               // ── 4. SCHEDULE & TIMINGS ──────────────────────────────────────
               Text(
@@ -657,7 +984,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(isSingle ? Icons.flash_on_rounded : Icons.check_circle_rounded, size: 20),
+                            Icon(isSingle ? Icons.qr_code_rounded : Icons.check_circle_rounded, size: 20),
                             const SizedBox(width: 8),
                             Text(
                               isSingle ? 'Generate One-Time Pass' : 'Generate Multi-Day Pass',

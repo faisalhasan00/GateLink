@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
+import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../domain/models/helper_model.dart';
 import '../../providers/helper_providers.dart';
 import '../controllers/helper_controller.dart';
@@ -19,6 +19,24 @@ class HelperCardWidget extends ConsumerWidget {
     required this.societyId,
     this.societyName = 'GateLink Community',
   });
+
+  String _formatTime(String? isoString) {
+    if (isoString == null || isoString.isEmpty) return '';
+    try {
+      final dt = DateTime.parse(isoString).toLocal();
+      return DateFormat('hh:mm a').format(dt);
+    } catch (_) {
+      return isoString;
+    }
+  }
+
+  Future<void> _makeCall(String phone) async {
+    if (phone.isEmpty) return;
+    final uri = Uri.parse('tel:$phone');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
 
   Color _getRoleColor(String type) {
     switch (type.toLowerCase()) {
@@ -303,6 +321,35 @@ class HelperCardWidget extends ConsumerWidget {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
+                          if (helper.phone.isNotEmpty) ...[
+                            const SizedBox(width: 6),
+                            InkWell(
+                              onTap: () => _makeCall(helper.phone),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFDCFCE7),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: const [
+                                    Icon(Icons.phone_rounded, size: 11, color: Color(0xFF15803D)),
+                                    SizedBox(width: 3),
+                                    Text(
+                                      'Call',
+                                      style: TextStyle(
+                                        fontSize: 10.5,
+                                        fontWeight: FontWeight.w700,
+                                        color: Color(0xFF15803D),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ),
                     ],
@@ -313,7 +360,7 @@ class HelperCardWidget extends ConsumerWidget {
 
             const SizedBox(height: 12),
             const Divider(height: 1, color: Color(0xFFF1F5F9)),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
 
             // Live Inside Gate status + Working Days info
             Row(
@@ -322,34 +369,73 @@ class HelperCardWidget extends ConsumerWidget {
                 Row(
                   children: [
                     Container(
-                      width: 8,
-                      height: 8,
+                      width: 10,
+                      height: 10,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: helper.isInside
                             ? const Color(0xFF10B981)
                             : const Color(0xFF94A3B8),
+                        boxShadow: helper.isInside
+                            ? [
+                                BoxShadow(
+                                  color: const Color(0xFF10B981).withValues(alpha: 0.5),
+                                  blurRadius: 6,
+                                  spreadRadius: 1,
+                                ),
+                              ]
+                            : null,
                       ),
                     ),
-                    const SizedBox(width: 6),
-                    Text(
-                      helper.isInside ? 'Inside Society Now' : 'Outside Society',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: helper.isInside
-                            ? const Color(0xFF059669)
-                            : const Color(0xFF64748B),
-                      ),
+                    const SizedBox(width: 8),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          helper.isInside ? 'Inside Society Now' : 'Outside Society',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w800,
+                            color: helper.isInside
+                                ? const Color(0xFF059669)
+                                : const Color(0xFF64748B),
+                          ),
+                        ),
+                        if (helper.isInside && helper.lastCheckIn != null && helper.lastCheckIn!.isNotEmpty)
+                          Text(
+                            'Checked In: ${_formatTime(helper.lastCheckIn)}',
+                            style: const TextStyle(
+                              fontSize: 10.5,
+                              color: Color(0xFF10B981),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          )
+                        else if (!helper.isInside && helper.lastCheckOut != null && helper.lastCheckOut!.isNotEmpty)
+                          Text(
+                            'Last Exit: ${_formatTime(helper.lastCheckOut)}',
+                            style: const TextStyle(
+                              fontSize: 10.5,
+                              color: Color(0xFF94A3B8),
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),
-                Text(
-                  'Days: ${helper.workingDays}',
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF64748B),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                  ),
+                  child: Text(
+                    helper.workingDays,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF475569),
+                    ),
                   ),
                 ),
               ],

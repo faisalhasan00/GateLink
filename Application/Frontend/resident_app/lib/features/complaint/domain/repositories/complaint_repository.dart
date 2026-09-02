@@ -18,4 +18,10 @@ abstract class ComplaintRepository {
     required String priority,
     String? photoUrl,
   });
+  Future<void> submitRating({
+    required String societyId,
+    required String complaintId,
+    required int rating,
+    String? feedback,
+  });
 }

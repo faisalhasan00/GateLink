@@ -141,18 +141,65 @@ class DomesticHelperScreen extends ConsumerWidget {
                     );
                   }
 
-                  return ListView.separated(
+                  final insideCount = helpers.where((h) => h.isInside).length;
+                  final outsideCount = helpers.length - insideCount;
+
+                  return ListView(
                     padding: const EdgeInsets.all(AppSpacing.pagePadding),
-                    itemCount: helpers.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.md),
-                    itemBuilder: (context, index) {
-                      final helper = helpers[index];
-                      return HelperCardWidget(
-                        helper: helper,
-                        societyId: societyId,
-                        societyName: societyName,
-                      );
-                    },
+                    children: [
+                      // ── PRESENCE SUMMARY BAR ─────────────────────────────
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.02),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildStatItem(
+                              label: 'Inside Society',
+                              value: '$insideCount',
+                              color: const Color(0xFF10B981),
+                              icon: Icons.check_circle_rounded,
+                            ),
+                            Container(width: 1, height: 28, color: const Color(0xFFE2E8F0)),
+                            _buildStatItem(
+                              label: 'Outside / Off-Duty',
+                              value: '$outsideCount',
+                              color: const Color(0xFF64748B),
+                              icon: Icons.logout_rounded,
+                            ),
+                            Container(width: 1, height: 28, color: const Color(0xFFE2E8F0)),
+                            _buildStatItem(
+                              label: 'Total Staff',
+                              value: '${helpers.length}',
+                              color: const Color(0xFF1E3A8A),
+                              icon: Icons.badge_rounded,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+
+                      // ── STAFF CARDS ──────────────────────────────────────
+                      ...helpers.map((helper) => Padding(
+                            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                            child: HelperCardWidget(
+                              helper: helper,
+                              societyId: societyId,
+                              societyName: societyName,
+                            ),
+                          )),
+                    ],
                   );
                 },
               ),
@@ -203,7 +250,7 @@ class DomesticHelperScreen extends ConsumerWidget {
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(14),
                           border: Border.all(color: const Color(0xFFE2E8F0)),
                         ),
                         child: Row(
@@ -225,9 +272,29 @@ class DomesticHelperScreen extends ConsumerWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    log.helperName,
-                                    style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF0F172A)),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        log.helperName,
+                                        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, color: Color(0xFF0F172A)),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                                        decoration: BoxDecoration(
+                                          color: isEntry ? const Color(0xFFDCFCE7) : const Color(0xFFDBEAFE),
+                                          borderRadius: BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          isEntry ? 'CHECKED IN' : 'CHECKED OUT',
+                                          style: TextStyle(
+                                            fontSize: 9.5,
+                                            fontWeight: FontWeight.w800,
+                                            color: isEntry ? const Color(0xFF15803D) : const Color(0xFF1D4ED8),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
@@ -262,6 +329,43 @@ class DomesticHelperScreen extends ConsumerWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildStatItem({
+    required String label,
+    required String value,
+    required Color color,
+    required IconData icon,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 4),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 10.5,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF64748B),
+          ),
+        ),
+      ],
     );
   }
 }
