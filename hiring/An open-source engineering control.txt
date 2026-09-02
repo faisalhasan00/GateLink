@@ -1,1 +1,0 @@
-An open-source engineering control layer that keeps AI coding agents aligned with a project's architecture, security, requirements and quality rules as they continuously modify the codebase.

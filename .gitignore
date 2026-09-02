@@ -15,12 +15,17 @@ doc/
 test.md
 *.log
 
+# Marketing, Design Assets & Scratch
+Linkdin/
+PlayStore_Submission_Kit/
+Social Media Post/
+hiring/
+scratch/
+
 # Large Binaries & Release Archives
 *.aab
 *.apk
 *.zip
-PlayStore_Submission_Kit/**/*.aab
-PlayStore_Submission_Kit/*.zip
 
 # Flutter & Android build caches
 .dart_tool/
