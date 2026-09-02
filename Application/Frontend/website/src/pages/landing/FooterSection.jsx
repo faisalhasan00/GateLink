@@ -24,7 +24,7 @@ export default function FooterSection() {
           
           {/* Col 1: Brand Info & Social Media */}
           <div style={{ gridColumn: 'span 1' }}>
-            <Link to="/landing" style={{ textDecoration: 'none', display: 'inline-block', marginBottom: '16px' }}>
+            <Link to="/" style={{ textDecoration: 'none', display: 'inline-block', marginBottom: '16px' }}>
               <GateLinkLogo isDark={true} size="medium" />
             </Link>
             <p style={{ fontSize: '13px', lineHeight: 1.65, color: '#94A3B8', marginBottom: '18px', maxWidth: '320px' }}>

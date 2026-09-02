@@ -1,26 +1,50 @@
 # GateLink Search Engine & Bot Crawling Instructions
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /
-
-# Block Aggressive Uncontrolled AI Scrapers
-User-agent: GPTBot
-Disallow: /
-
-User-agent: CCBot
-Disallow: /
-
-User-agent: Bytespider
-Disallow: /
-
-User-agent: ClaudeBot
-Disallow: /
+# Website: https://gatelink.in
 
 User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /super-admin/
+Disallow: /gate
 
+# Primary Search Engine Crawlers
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /super-admin/
+Disallow: /gate
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin/
+Disallow: /super-admin/
+Disallow: /gate
+
+# AI Search Engines & Conversational Assistants
+User-agent: GPTBot
+Allow: /
+Disallow: /admin/
+Disallow: /super-admin/
+Disallow: /gate
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin/
+Disallow: /super-admin/
+Disallow: /gate
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin/
+Disallow: /super-admin/
+Disallow: /gate
+
+User-agent: CCBot
+Allow: /
+Disallow: /admin/
+Disallow: /super-admin/
+Disallow: /gate
+
+# XML Sitemap
 Sitemap: https://gatelink.in/sitemap.xml
+

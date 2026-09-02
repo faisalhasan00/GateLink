@@ -72,8 +72,8 @@ export default function BlogPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
-  const [articles, setArticles] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [articles, setArticles] = useState(INITIAL_SEED_ARTICLES);
+  const [loading, setLoading] = useState(false);
 
   const postsPerPage = 6;
   const categories = ['All', 'Security', 'Finance', 'Governance', 'Resident Living', 'Tech & AI'];

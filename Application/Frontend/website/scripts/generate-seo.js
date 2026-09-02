@@ -43,85 +43,304 @@ const SEO_ROUTES = [
   {
     path: 'society-management-software',
     title: 'Society Management Software for Housing Societies & RWAs | GateLink',
-    description: 'GateLink is India’s leading society management software. Streamline RWA administration, maintenance billing collections, resident registries, visitor entry, and gate security.',
+    description: 'All-in-one society management software for housing societies and RWAs. Automate maintenance billing, resident directories, visitor gate security, and complaints with GateLink.',
     canonicalUrl: 'https://gatelink.in/society-management-software',
     ogImage: 'https://gatelink.in/logo.png',
     schemaData: {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "GateLink Society Management Software",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web, Android, iOS",
-      "url": "https://gatelink.in/society-management-software",
-      "description": "Complete society management software for housing societies and RWAs in India.",
-      "author": {
-        "@type": "Organization",
-        "name": "GateLink Technologies Private Limited",
-        "url": "https://gatelink.in"
-      }
+      "@graph": [
+        {
+          "@type": "WebPage",
+          "@id": "https://gatelink.in/society-management-software#webpage",
+          "url": "https://gatelink.in/society-management-software",
+          "name": "Society Management Software for Housing Societies & RWAs | GateLink",
+          "description": "All-in-one society management software for housing societies and RWAs. Automate maintenance billing, resident directories, visitor gate security, and complaints with GateLink.",
+          "isPartOf": {
+            "@id": "https://gatelink.in/#website"
+          },
+          "about": {
+            "@id": "https://gatelink.in/society-management-software#software"
+          },
+          "breadcrumb": {
+            "@id": "https://gatelink.in/society-management-software#breadcrumb"
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://gatelink.in/society-management-software#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://gatelink.in/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Society Management Software",
+              "item": "https://gatelink.in/society-management-software"
+            }
+          ]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://gatelink.in/society-management-software#software",
+          "name": "GateLink Society Management Software",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web, Android, iOS",
+          "url": "https://gatelink.in/society-management-software",
+          "description": "Complete society management software for housing societies and RWAs in India.",
+          "author": {
+            "@type": "Organization",
+            "@id": "https://gatelink.in/#organization",
+            "name": "GateLink Technologies Private Limited",
+            "url": "https://gatelink.in"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "@id": "https://gatelink.in/#organization",
+            "name": "GateLink Technologies Private Limited",
+            "url": "https://gatelink.in"
+          },
+          "featureList": [
+            "Resident & Property Directory",
+            "Automated Maintenance Billing",
+            "Gate Security & Visitor Control",
+            "Helpdesk & Complaint Ticketing",
+            "Digital Notice Board & Broadcasts",
+            "Clubhouse & Amenity Booking"
+          ]
+        }
+      ]
     }
   },
   {
     path: 'visitor-management',
-    title: 'Visitor Management System for Housing Societies & Apartments | GateLink',
-    description: 'GateLink Visitor Management System replaces manual paper registers with digital QR passes, real-time resident approval notifications, delivery staff tracking, and gate security automation.',
+    title: 'Visitor Management System for Housing Societies | GateLink',
+    description: 'Digital visitor management system for housing societies. Verify guest QR passes, approve visitors in real time, and track delivery and daily staff with GateLink.',
     canonicalUrl: 'https://gatelink.in/visitor-management',
     ogImage: 'https://gatelink.in/logo.png',
     schemaData: {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "GateLink Visitor Management System",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web, Android, iOS",
-      "url": "https://gatelink.in/visitor-management",
-      "description": "Digital visitor management system for apartment societies and gated communities in India.",
-      "author": {
-        "@type": "Organization",
-        "name": "GateLink Technologies Private Limited",
-        "url": "https://gatelink.in"
-      }
+      "@graph": [
+        {
+          "@type": "WebPage",
+          "@id": "https://gatelink.in/visitor-management#webpage",
+          "url": "https://gatelink.in/visitor-management",
+          "name": "Visitor Management System for Housing Societies | GateLink",
+          "description": "Digital visitor management system for housing societies. Verify guest QR passes, approve visitors in real time, and track delivery and daily staff with GateLink.",
+          "isPartOf": {
+            "@id": "https://gatelink.in/#website"
+          },
+          "about": {
+            "@id": "https://gatelink.in/visitor-management#software"
+          },
+          "breadcrumb": {
+            "@id": "https://gatelink.in/visitor-management#breadcrumb"
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://gatelink.in/visitor-management#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://gatelink.in/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Visitor Management System",
+              "item": "https://gatelink.in/visitor-management"
+            }
+          ]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://gatelink.in/visitor-management#software",
+          "name": "GateLink Visitor Management System",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web, Android, iOS",
+          "url": "https://gatelink.in/visitor-management",
+          "description": "Digital visitor management system for apartment societies and gated communities in India. Pre-approve guests, track delivery personnel, and verify entry with QR passes.",
+          "author": {
+            "@type": "Organization",
+            "@id": "https://gatelink.in/#organization",
+            "name": "GateLink Technologies Private Limited",
+            "url": "https://gatelink.in"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "@id": "https://gatelink.in/#organization",
+            "name": "GateLink Technologies Private Limited",
+            "url": "https://gatelink.in"
+          },
+          "featureList": [
+            "Pre-Approved QR & OTP Guest Passes",
+            "Instant Resident Approval Notifications",
+            "Delivery & Courier Entry Tracking",
+            "Domestic Helper & Staff Attendance",
+            "Multi-Gate Visitor Synchronization",
+            "Vehicle Registration Logging",
+            "Suspect & Blacklisted Visitor Alerts",
+            "Guard-Side Visitor Verification",
+            "Expected Guest Invitations"
+          ]
+        }
+      ]
     }
   },
   {
     path: 'maintenance-management',
     title: 'Society Maintenance Billing & Accounting Software | GateLink',
-    description: 'GateLink automates housing society maintenance billing, UPI/Card online payments via Cashfree, automated WhatsApp receipts, GST invoice calculations, and default tracking.',
+    description: 'Maintenance billing software for housing societies. Automate recurring bills, UPI/card payments, GST invoices, overdue tracking, and payment records with GateLink.',
     canonicalUrl: 'https://gatelink.in/maintenance-management',
     ogImage: 'https://gatelink.in/logo.png',
     schemaData: {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "GateLink Society Maintenance & Billing Software",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web, Android, iOS",
-      "url": "https://gatelink.in/maintenance-management",
-      "description": "Automated maintenance billing software for housing societies and RWAs in India.",
-      "author": {
-        "@type": "Organization",
-        "name": "GateLink Technologies Private Limited",
-        "url": "https://gatelink.in"
-      }
+      "@graph": [
+        {
+          "@type": "WebPage",
+          "@id": "https://gatelink.in/maintenance-management#webpage",
+          "url": "https://gatelink.in/maintenance-management",
+          "name": "Society Maintenance Billing & Accounting Software | GateLink",
+          "description": "Maintenance billing software for housing societies. Automate recurring bills, UPI/card payments, GST invoices, overdue tracking, and payment records with GateLink.",
+          "isPartOf": {
+            "@id": "https://gatelink.in/#website"
+          },
+          "about": {
+            "@id": "https://gatelink.in/maintenance-management#software"
+          },
+          "breadcrumb": {
+            "@id": "https://gatelink.in/maintenance-management#breadcrumb"
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://gatelink.in/maintenance-management#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://gatelink.in/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Maintenance Management",
+              "item": "https://gatelink.in/maintenance-management"
+            }
+          ]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://gatelink.in/maintenance-management#software",
+          "name": "GateLink Maintenance Management Software",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web, Android, iOS",
+          "url": "https://gatelink.in/maintenance-management",
+          "description": "Maintenance billing and payment management software for housing societies and RWAs, with recurring invoicing, online payments, GST tax invoices, overdue tracking, and payment records.",
+          "author": {
+            "@type": "Organization",
+            "@id": "https://gatelink.in/#organization",
+            "name": "GateLink Technologies Private Limited",
+            "url": "https://gatelink.in"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "@id": "https://gatelink.in/#organization",
+            "name": "GateLink Technologies Private Limited",
+            "url": "https://gatelink.in"
+          },
+          "featureList": [
+            "Automated Multi-Component Invoicing",
+            "Cashfree UPI & Card Payments",
+            "GST Tax Invoices & Digital Receipts",
+            "Overdue Dues & Defaulter Tracking",
+            "Offline Cheque & NEFT Payment Recording",
+            "Financial Payment History & Ledger Records"
+          ]
+        }
+      ]
     }
   },
   {
     path: 'security-management',
     title: 'Apartment Security Management & Guard App | GateLink',
-    description: 'GateLink Guard App empowers security guards with instant visitor verification, blacklisted entry alerts, emergency SOS panic buttons, and main gate access control.',
+    description: 'Apartment security management software for gated communities. Manage guard gate entry, QR/OTP verification, patrol checkpoints, SOS alerts, and vehicle logs with GateLink.',
     canonicalUrl: 'https://gatelink.in/security-management',
     ogImage: 'https://gatelink.in/logo.png',
     schemaData: {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "GateLink Apartment Security & Guard App",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web, Android, iOS",
-      "url": "https://gatelink.in/security-management",
-      "description": "Smart gate security and guard management system for residential complexes and gated communities.",
-      "author": {
-        "@type": "Organization",
-        "name": "GateLink Technologies Private Limited",
-        "url": "https://gatelink.in"
-      }
+      "@graph": [
+        {
+          "@type": "WebPage",
+          "@id": "https://gatelink.in/security-management#webpage",
+          "url": "https://gatelink.in/security-management",
+          "name": "Apartment Security Management & Guard App | GateLink",
+          "description": "Apartment security management software for gated communities. Manage guard gate entry, QR/OTP verification, patrol checkpoints, SOS alerts, and vehicle logs with GateLink.",
+          "isPartOf": {
+            "@id": "https://gatelink.in/#website"
+          },
+          "about": {
+            "@id": "https://gatelink.in/security-management#software"
+          },
+          "breadcrumb": {
+            "@id": "https://gatelink.in/security-management#breadcrumb"
+          }
+        },
+        {
+          "@type": "BreadcrumbList",
+          "@id": "https://gatelink.in/security-management#breadcrumb",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://gatelink.in/"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Security Management",
+              "item": "https://gatelink.in/security-management"
+            }
+          ]
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://gatelink.in/security-management#software",
+          "name": "GateLink Security Management Software",
+          "applicationCategory": "BusinessApplication",
+          "operatingSystem": "Web, Android, iOS",
+          "url": "https://gatelink.in/security-management",
+          "description": "Apartment security management software for gated communities that helps security teams manage gate verification, guard operations, patrol checkpoints, emergency alerts, vehicle logs, and multi-gate security records.",
+          "author": {
+            "@type": "Organization",
+            "@id": "https://gatelink.in/#organization",
+            "name": "GateLink Technologies Private Limited",
+            "url": "https://gatelink.in"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "@id": "https://gatelink.in/#organization",
+            "name": "GateLink Technologies Private Limited",
+            "url": "https://gatelink.in"
+          },
+          "featureList": [
+            "Guard Mobile Gatekeeper App",
+            "QR & OTP Gate Entry Verification",
+            "Night Patrol & QR Checkpoint Tracking",
+            "One-Touch Emergency SOS Siren Alerts",
+            "Vehicle License Plate & Exit Logging",
+            "Multi-Gate Cloud Synchronization"
+          ]
+        }
+      ]
     }
   },
   {
@@ -206,6 +425,13 @@ const SEO_ROUTES = [
     title: 'Privacy Policy & DPDP Compliance - GateLink',
     description: 'GateLink Privacy Policy detailing data collection, encryption, DPDP compliance, and privacy rights for residents and society administration.',
     canonicalUrl: 'https://gatelink.in/privacy',
+    ogImage: 'https://gatelink.in/logo.png'
+  },
+  {
+    path: 'delete-account',
+    title: 'Account Deletion Request - GateLink',
+    description: 'Request account and associated personal data deletion for GateLink Resident and Guard mobile apps in compliance with Google Play Store policies.',
+    canonicalUrl: 'https://gatelink.in/delete-account',
     ogImage: 'https://gatelink.in/logo.png'
   },
   {
@@ -367,10 +593,23 @@ function injectSeoMetadata(html, route) {
   return result;
 }
 
-function main() {
+async function main() {
   if (!fs.existsSync(TEMPLATE_PATH)) {
     console.error('Error: dist/index.html template not found. Run vite build first.');
     process.exit(1);
+  }
+
+  // Load compiled server entry if available
+  const serverEntryPath = path.join(DIST_DIR, 'server/entry-server.js');
+  let render = null;
+  if (fs.existsSync(serverEntryPath)) {
+    try {
+      const serverEntryUrl = new URL(`file://${serverEntryPath.replace(/\\/g, '/')}`).href;
+      const serverModule = await import(serverEntryUrl);
+      render = serverModule.render;
+    } catch (err) {
+      console.warn('[SSG] Could not load SSR module, falling back to shell injection:', err.message);
+    }
   }
 
   const baseHtml = fs.readFileSync(TEMPLATE_PATH, 'utf8');
@@ -379,7 +618,23 @@ function main() {
   let prerenderedCount = 0;
 
   for (const route of SEO_ROUTES) {
-    const preRenderedHtml = injectSeoMetadata(baseHtml, route);
+    let preRenderedHtml = injectSeoMetadata(baseHtml, route);
+
+    // Prerender actual React component body HTML
+    if (render) {
+      try {
+        const routeUrl = route.path === '' ? '/' : `/${route.path}`;
+        const appBodyHtml = render(routeUrl);
+        if (appBodyHtml) {
+          preRenderedHtml = preRenderedHtml.replace(
+            '<div id="root"></div>',
+            `<div id="root">${appBodyHtml}</div>`
+          );
+        }
+      } catch (err) {
+        console.warn(`[SSG] Warning rendering body for '/${route.path}':`, err.message);
+      }
+    }
 
     if (route.path === '') {
       // Root index.html
@@ -398,7 +653,14 @@ function main() {
     prerenderedCount++;
   }
 
-  console.log(`Successfully pre-rendered static HTML metadata for ${prerenderedCount} routes!`);
+  // Clean up temporary server build directory
+  const serverDir = path.join(DIST_DIR, 'server');
+  if (fs.existsSync(serverDir)) {
+    fs.rmSync(serverDir, { recursive: true, force: true });
+  }
+
+  console.log(`Successfully pre-rendered static HTML metadata and body content for ${prerenderedCount} routes!`);
 }
 
 main();
+

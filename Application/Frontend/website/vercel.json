@@ -1,7 +1,55 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    {
+      "source": "/landing",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/refunds",
+      "destination": "/refund-policy",
+      "permanent": true
+    },
+    {
+      "source": "/dpa",
+      "destination": "/data-processing",
+      "permanent": true
+    },
+    {
+      "source": "/grievance-redressal",
+      "destination": "/grievance",
+      "permanent": true
+    },
+    {
+      "source": "/account-deletion",
+      "destination": "/delete-account",
+      "permanent": true
+    },
+    {
+      "source": "/refer",
+      "destination": "/partners",
+      "permanent": true
+    },
+    {
+      "source": "/book-demo",
+      "destination": "/contact",
+      "permanent": true
+    },
+    {
+      "source": "/privacy-policy.html",
+      "destination": "/privacy",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/blog/:slug*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/gate",
       "destination": "/index.html"
     }
   ]

@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 
 import { ThemeProvider } from './context/ThemeContext'
 import ScrollProgressBar from './components/ui/ScrollProgressBar'
@@ -51,16 +51,16 @@ export default function App() {
           <Routes>
             {/* Public SaaS Landing & Product Pages */}
             <Route path="/" element={<LandingPage />} />
-            <Route path="/landing" element={<LandingPage />} />
+            <Route path="/landing" element={<Navigate to="/" replace />} />
             <Route path="/about" element={<AboutUsPage />} />
             <Route path="/security" element={<SecurityCenterPage />} />
             <Route path="/features" element={<FeaturesPage />} />
             <Route path="/solutions" element={<SolutionsPage />} />
             <Route path="/contact" element={<LeadGenerationPage />} />
-            <Route path="/book-demo" element={<LeadGenerationPage />} />
+            <Route path="/book-demo" element={<Navigate to="/contact" replace />} />
             <Route path="/download" element={<DownloadAppPage />} />
             <Route path="/partners" element={<PartnersPage />} />
-            <Route path="/refer" element={<PartnersPage />} />
+            <Route path="/refer" element={<Navigate to="/partners" replace />} />
             <Route path="/gate" element={<GateSelfEntryPage />} />
 
             {/* Dedicated High-Value Feature SEO Landing Pages */}
@@ -77,15 +77,15 @@ export default function App() {
             <Route path="/docs" element={<DocsPage />} />
             <Route path="/privacy" element={<PrivacyPolicyPage />} />
             <Route path="/delete-account" element={<AccountDeletionPage />} />
-            <Route path="/account-deletion" element={<AccountDeletionPage />} />
+            <Route path="/account-deletion" element={<Navigate to="/delete-account" replace />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/cookies" element={<CookiePolicyPage />} />
             <Route path="/refund-policy" element={<RefundPolicyPage />} />
-            <Route path="/refunds" element={<RefundPolicyPage />} />
+            <Route path="/refunds" element={<Navigate to="/refund-policy" replace />} />
             <Route path="/data-processing" element={<DataProcessingPage />} />
-            <Route path="/dpa" element={<DataProcessingPage />} />
+            <Route path="/dpa" element={<Navigate to="/data-processing" replace />} />
             <Route path="/grievance" element={<GrievancePolicyPage />} />
-            <Route path="/grievance-redressal" element={<GrievancePolicyPage />} />
+            <Route path="/grievance-redressal" element={<Navigate to="/grievance" replace />} />
 
             {/* 404 Catch-All Route */}
             <Route path="*" element={<NotFoundPage />} />
