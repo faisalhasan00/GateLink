@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
-class SplashScreen extends StatefulWidget {
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
@@ -22,7 +24,7 @@ class _SplashScreenState extends State<SplashScreen>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 900),
     );
 
     _scaleAnimation = Tween<double>(begin: 0.7, end: 1.0).animate(
@@ -34,13 +36,20 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _controller.forward();
-    _navigateAfterDelay();
+    _resolveAuthAndNavigate();
   }
 
-  Future<void> _navigateAfterDelay() async {
-    await Future.delayed(const Duration(milliseconds: 500));
+  Future<void> _resolveAuthAndNavigate() async {
+    // Give animation smooth visual duration (minimum 1.0 second)
+    await Future.delayed(const Duration(milliseconds: 1000));
     if (!mounted) return;
-    context.go(AppRoutes.dashboard);
+
+    final user = ref.read(authServiceProvider).currentUser;
+    if (user != null) {
+      context.go(AppRoutes.dashboard);
+    } else {
+      context.go(AppRoutes.login);
+    }
   }
 
   @override

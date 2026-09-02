@@ -89,62 +89,98 @@ class AppRoutes {
   static const String guardVehicles = '/guard/vehicles';
 }
 
+/// Helper class that converts a Stream into a Listenable for GoRouter.refreshListenable
+class GoRouterRefreshStream extends ChangeNotifier {
+  late final dynamic _subscription;
+
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen((_) => notifyListeners());
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}
+
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authStateProvider);
-  final userProfile = ref.watch(userProfileProvider).value;
+  final authService = ref.watch(authServiceProvider);
 
   return GoRouter(
     initialLocation: AppRoutes.splash,
+    refreshListenable: GoRouterRefreshStream(authService.authStateChanges),
     redirect: (context, state) {
-      final isLoading = authState.isLoading;
-      if (isLoading) return null;
-
-      final isAuth = authState.value != null;
+      final user = authService.currentUser;
+      final isAuth = user != null;
       final isSplash = state.uri.path == AppRoutes.splash;
       final isLoggingIn = state.uri.path == AppRoutes.login ||
           state.uri.path == AppRoutes.register ||
-          state.uri.path == AppRoutes.onboarding;
+          state.uri.path == AppRoutes.onboarding ||
+          state.uri.path == AppRoutes.otp;
 
       final isPendingRoute = state.uri.path == AppRoutes.pendingApproval;
       final isUnauthorizedRoute = state.uri.path == AppRoutes.unauthorized;
 
-      if (!isAuth && !isLoggingIn && !isSplash) {
+      // Allow splash to perform initialization without premature kicking to login
+      if (isSplash) {
+        return null;
+      }
+
+      // If user is unauthenticated and attempting to access protected screens
+      if (!isAuth && !isLoggingIn) {
         return AppRoutes.login;
       }
 
       if (isAuth) {
-        // Strict Application Role-Gating for Resident App
-        final role = (userProfile?.role ?? 'resident').toLowerCase();
-        const allowedResidentRoles = ['resident', 'owner', 'tenant', 'family', 'user', 'super_admin'];
+        final profileAsync = ref.read(userProfileProvider);
+        final userProfile = profileAsync.value;
 
-        if (!allowedResidentRoles.contains(role)) {
-          if (!isUnauthorizedRoute) {
-            return AppRoutes.unauthorized;
+        // If profile document has synced from Firestore, apply role-gating
+        if (userProfile != null) {
+          final role = userProfile.role.toLowerCase();
+          const allowedResidentRoles = [
+            'resident',
+            'owner',
+            'tenant',
+            'family',
+            'family_member',
+            'user',
+            'member',
+            'admin',
+            'society_admin',
+            'super_admin',
+            'primary_resident',
+          ];
+
+          if (!allowedResidentRoles.contains(role)) {
+            if (!isUnauthorizedRoute) {
+              return AppRoutes.unauthorized;
+            }
+            return null;
           }
-          return null;
-        }
 
-        if (isUnauthorizedRoute) {
-          return AppRoutes.dashboard;
-        }
+          if (isUnauthorizedRoute) {
+            return AppRoutes.dashboard;
+          }
 
-        final status = userProfile?.status ?? 'active';
-        final isApproved = status == 'active' || status == 'approved';
+          final status = userProfile.status.toLowerCase();
+          final isApproved = status == 'active' || status == 'approved';
 
-        if (isSplash) {
-          if (isApproved) return AppRoutes.dashboard;
-          return AppRoutes.pendingApproval;
-        }
+          if (!isApproved && !isPendingRoute) {
+            return AppRoutes.pendingApproval;
+          }
 
-        if (!isApproved && !isPendingRoute) {
-          return AppRoutes.pendingApproval;
+          if (isApproved && (isLoggingIn || isPendingRoute)) {
+            return AppRoutes.dashboard;
+          }
+        } else {
+          // Profile is still loading in background; allow logged-in user to go to dashboard from login screens
+          if (isLoggingIn || isPendingRoute) {
+            return AppRoutes.dashboard;
+          }
         }
-
-        if (isApproved && (isLoggingIn || isPendingRoute)) {
-          return AppRoutes.dashboard;
-        }
-      } else if (isSplash) {
-        return AppRoutes.onboarding;
       }
 
       return null;
