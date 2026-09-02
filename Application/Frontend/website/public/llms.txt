@@ -1,0 +1,42 @@
+# GateLink — Smart Society OS & Gated Community ERP
+
+> GateLink (https://gatelink.in) is India's next-generation society management software, security guard app, and automated RWA accounting platform designed for modern housing societies and gated communities.
+
+## Overview
+GateLink simplifies residential complex operations through four integrated software modules:
+1. **Society Management ERP**: Real-time resident directory, facility bookings, AGM voting, complaint desk, digital notice broadcast, and staff management.
+2. **Visitor & Gate Management**: 4-digit numeric & QR gate passes, delivery pre-approvals, vehicle number lookup, and visitor pass logs.
+3. **Maintenance & Financial Management**: Automated monthly invoicing, GST calculation, SAC 999598 compliance, Cashfree online payment gateway, and instant ledger reconciliation.
+4. **Security Guard Mobile App**: Fast entry logging, offline-first fallback, domestic helper attendance, and GPS-stamped QR night patrol checkpoints.
+
+## Key Product Pages
+- [Society Management Software](https://gatelink.in/society-management-software): Complete RWA enterprise resource planning software for housing societies and apartment associations in India.
+- [Visitor Management System](https://gatelink.in/visitor-management): Fast QR pass check-in, delivery driver pre-approval, and vehicle access controls.
+- [Maintenance Management Software](https://gatelink.in/maintenance-management): Automated monthly maintenance invoicing, online payments via Cashfree, automated payment receipts, and society accounts ledger.
+- [Security Management & Guard App](https://gatelink.in/security-management): Security guard mobile app, visitor authentication, emergency SOS alarms, and QR patrol monitoring.
+- [Security & DPDP Compliance Center](https://gatelink.in/security): Digital Personal Data Protection (DPDP) Act 2023 compliance, TLS 1.3 encryption, AES-256 vault storage, and multi-tenant isolation.
+- [Pricing & Demo](https://gatelink.in/contact): Transparent flat pricing (₹15–₹25/flat/month), 0 setup fees, 14-day free pilot for RWAs.
+- [Partner & Vendor Program](https://gatelink.in/partners): Security agencies, facility management firms, and system integrators partnership portal.
+- [Download Apps](https://gatelink.in/download): Native Android & iOS apps for residents, owners, and security guards.
+- [Knowledge Base & Blog](https://gatelink.in/blog): Guides on society accounting, RWA bylaws compliance, gate security best practices, and facility automation.
+
+## Legal & Compliance
+- [Privacy Policy](https://gatelink.in/privacy): DPDP Act 2023 compliant data collection, processing, and erasure policies.
+- [Terms of Service](https://gatelink.in/terms): Service level agreement, subscription terms, and user guidelines.
+- [Data Processing Agreement](https://gatelink.in/data-processing): Enterprise DPA for housing societies and facility management agencies.
+- [Grievance Redressal](https://gatelink.in/grievance): Data Protection Officer (DPO) contact and statutory grievance escalation mechanism.
+- [Account Deletion](https://gatelink.in/delete-account): Self-service account deletion and data anonymization portal.
+- [Refund Policy](https://gatelink.in/refund-policy): SaaS subscription cancellation and payment refund terms.
+
+## Technical Specifications
+- **Architecture**: Multi-tenant cloud backend with isolated society scopes.
+- **Mobile Clients**: Flutter native applications for Android & iOS (Resident App & Guard App).
+- **Web Portals**: React & Vite portals for Residents, Society Management Committee Admins, and Super Admins.
+- **Payments**: Integrated Cashfree Payments gateway supporting UPI, Net Banking, Credit/Debit Cards with automated webhook reconciliation.
+- **Communications**: Firebase Cloud Messaging (FCM) push notifications, automated WhatsApp visitor approvals, and SMS alerts.
+
+## Contact & Support
+- Website: https://gatelink.in
+- Email: support@gatelink.in / privacy@gatelink.in
+- Sales & Demo: sales@gatelink.in
+- Address: GateLink Technologies Private Limited, Bengaluru, Karnataka, India

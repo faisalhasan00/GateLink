@@ -1,0 +1,91 @@
+# GateLink — Complete Product & System Architecture Documentation
+
+> GateLink (https://gatelink.in) is India's leading unified Operating System for Apartment Housing Societies, Residential Welfare Associations (RWAs), and Gated Communities.
+
+---
+
+## 1. Executive Product Summary
+GateLink replaces disconnected paper visitor registers, manual WhatsApp payment chasing, physical logbooks, and fragmented spreadsheets with a single, cloud-native platform connecting:
+- **Residents & Owners** (via Flutter Mobile App)
+- **Security Guards & Gate Staff** (via Flutter Guard Mobile App)
+- **Management Committees & RWA Treasurers** (via React Web Dashboard at app.gatelink.in)
+- **System Super Administrators** (via React Control Portal at admin.gatelink.in)
+
+---
+
+## 2. Core Functional Modules
+
+### 2.1 Society Management & Governance ERP
+- **Digital Resident Directory**: Strict role-based unit association (Owner, Tenant, Family Member) with vehicle license plate mapping and tenant verification logs.
+- **Official AGM & Polls System**: Conduct Annual General Body Meetings, voting resolutions, and rule changes with strict 1-vote-per-flat or 1-vote-per-member governance rules.
+- **Facility & Clubhouse Booking**: Configurable booking slots for clubhouses, tennis courts, banquet halls, and swimming pools with automated deposit tracking and cancellation policies.
+- **Helpdesk & Ticket Desk**: SLA-driven ticket management for plumbing, electrical, security, and general maintenance with photo attachments and resident satisfaction ratings.
+- **Digital Notice Board**: Categorized broadcast bulletins with push notifications, read receipts, and priority alerts for water/power maintenance schedules.
+- **Emergency SOS Broadcast**: Instant resident-to-gate and guard-to-resident SOS alarms with physical location and flat details.
+
+### 2.2 Visitor Management System
+- **Pre-Approved Invites**: Residents create guest passes with 4-digit PINs or QR codes sent via WhatsApp/SMS for contactless gate check-in.
+- **Delivery Management**: Automated quick check-in for Amazon, Flipkart, Swiggy, Zomato, Blinkit, and courier agents with resident passcodes or 'Leave at Gate' confirmations.
+- **Cab & Ride-Hailing Entry**: Uber/Ola driver vehicle number verification with time-bounded entry permissions.
+- **Frequent Visitors & Daily Staff**: Domestic helper, driver, cleaner, and cook attendance logging using QR biometric cards with instant resident arrival alerts.
+- **Vehicle Access Control**: Fast vehicle registration number lookup, parking slot validation, and unauthorized vehicle tagging.
+
+### 2.3 Accounting & Maintenance Billing
+- **Automated Monthly Invoicing**: Generate itemized maintenance bills with custom formulas (per sq. ft. rate, fixed unit rate, or hybrid tier).
+- **GST & SAC Compliance**: Fully compliant with SAC 999598 (RWA Services) and Indian GST laws, including standard ₹7,500/month exemption thresholds.
+- **Payment Gateway Integration**: Embedded Cashfree Payments gateway supporting instant UPI (Google Pay, PhonePe, Paytm), Net Banking (50+ Indian banks), Debit/Credit Cards.
+- **Automated Reconciliation**: Real-time webhook processing immediately marks invoices as PAID and automatically issues computer-generated GST tax receipts.
+- **Offline & Cheque Recording**: Treasurer dashboard to verify and approve cash/cheque/NEFT receipts with maker-checker audit controls.
+- **Dues Management & Penalties**: Configurable late payment grace periods, percentage/flat penalty interest, and automated WhatsApp/SMS due reminders.
+
+### 2.4 Security Management & Guard App
+- **High-Speed Gate Entry**: Under 15-second entry verification optimized for low-end Android smartphones (Android 8.0+).
+- **Offline-First Resilience**: Local caching allows guards to verify pre-approved guest codes and record physical visitor photos even during broadband drops.
+- **Guard Patrol Tracking**: Night security patrols verified via geo-tagged, timestamped QR checkpoints mounted throughout the society perimeter.
+- **Shift Handover Logs**: Digital logbook documenting gate incidents, visitor pass counts, and guard shift changeovers.
+
+---
+
+## 3. Data Privacy & Compliance (DPDP Act 2023)
+GateLink is built in strict adherence to India's **Digital Personal Data Protection (DPDP) Act 2023**:
+- **Data Minimization**: Only strictly necessary personal data (name, phone, unit number) is collected for residential safety and billing.
+- **Right to Erasure & Deletion**: Residents and guards can request permanent account deletion via our self-serve portal (`https://gatelink.in/delete-account`).
+- **Data Retention Boundaries**: Visitor phone logs and security CCTV references are retained only for society security audit windows (typically 90–180 days) before automated purging.
+- **Statutory Financial Records**: Maintenance tax invoices and GST records are archived in compliance with Indian accounting laws.
+- **Encryption Standards**: All data is encrypted in transit using TLS 1.3 and at rest using AES-256 vault storage with isolated multi-tenant database rules.
+
+---
+
+## 4. Technology Stack
+- **Frontend Web Portals**: React 18, Vite, Vanilla CSS Design System with GateLink tokens.
+- **Mobile Applications**: Flutter 3.x (Resident App & Guard App) with Riverpod state management.
+- **Backend**: Firebase Cloud Functions v2 (Node.js serverless microservices) and Cloud Firestore with multi-tenant security rules.
+- **Authentication**: Firebase Phone Auth (SMS OTP) with invisible reCAPTCHA Enterprise and custom token verification.
+- **Payments**: Cashfree Payments SDK with secure webhook signing.
+- **Push Notifications**: Firebase Cloud Messaging (FCM) multi-channel notification system.
+
+---
+
+## 5. Pricing & Deployment
+- **Standard Tier**: ₹15 per flat / month for communities up to 100 flats.
+- **Premium Tier**: ₹20 per flat / month with full accounting, gate management, and patrol tracking.
+- **Enterprise Tier**: ₹25 per flat / month with dedicated account manager, on-site guard onboarding, and custom ERP integrations.
+- **Trial**: 14-day free pilot for any registered housing society in India without setup fees.
+
+---
+
+## 6. Official URL Directory
+- Homepage: https://gatelink.in
+- Society Management: https://gatelink.in/society-management-software
+- Visitor Management: https://gatelink.in/visitor-management
+- Maintenance Billing: https://gatelink.in/maintenance-management
+- Security & Guard App: https://gatelink.in/security-management
+- Security & Compliance: https://gatelink.in/security
+- Partners & System Integrators: https://gatelink.in/partners
+- Mobile App Download: https://gatelink.in/download
+- Knowledge Base: https://gatelink.in/blog
+- Privacy Policy: https://gatelink.in/privacy
+- Terms of Service: https://gatelink.in/terms
+- Data Processing Agreement: https://gatelink.in/data-processing
+- Grievance Redressal: https://gatelink.in/grievance
+- Account Deletion: https://gatelink.in/delete-account

@@ -45,6 +45,8 @@ Disallow: /admin/
 Disallow: /super-admin/
 Disallow: /gate
 
-# XML Sitemap
+# XML Sitemap & AI LLM Manifests
 Sitemap: https://gatelink.in/sitemap.xml
+# LLMs.txt AI Manifest: https://gatelink.in/llms.txt
+# LLMs-full.txt AI Manifest: https://gatelink.in/llms-full.txt
 
