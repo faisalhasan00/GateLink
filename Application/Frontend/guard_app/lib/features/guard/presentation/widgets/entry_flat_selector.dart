@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/widgets.dart';
@@ -24,6 +25,15 @@ class EntryFlatSelector extends StatelessWidget {
     required this.onFlatChanged,
   });
 
+  Future<void> _callResident(String phone) async {
+    if (phone.isEmpty) return;
+    final clean = phone.replaceAll(RegExp(r'[^0-9+]'), '');
+    final uri = Uri.parse('tel:$clean');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -41,8 +51,8 @@ class EntryFlatSelector extends StatelessWidget {
                     'Block / Tower',
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w800,
+                      color: Color(0xFF0F172A),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -52,8 +62,15 @@ class EntryFlatSelector extends StatelessWidget {
                     decoration: InputDecoration(
                       contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12, vertical: 14),
+                      filled: true,
+                      fillColor: const Color(0xFFF8FAFC),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppRadius.md),
+                        borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.md),
+                        borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
                       ),
                     ),
                     items: towers
@@ -62,7 +79,7 @@ class EntryFlatSelector extends StatelessWidget {
                               child: Text(
                                 t,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 12),
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
                               ),
                             ))
                         .toList(),
@@ -80,12 +97,12 @@ class EntryFlatSelector extends StatelessWidget {
                 label: 'Flat No.',
                 isRequired: true,
                 controller: flatController,
-                keyboardType: TextInputType.number,
-                hintText: 'e.g. 101',
+                keyboardType: TextInputType.text,
+                hintText: 'e.g. 101 or 402',
                 prefixIcon: Icons.home_outlined,
                 onChanged: onFlatChanged,
                 validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    (v == null || v.trim().isEmpty) ? 'Flat number is required' : null,
               ),
             ),
           ],
@@ -93,33 +110,32 @@ class EntryFlatSelector extends StatelessWidget {
         const SizedBox(height: 6),
         if (isValidating)
           const Padding(
-            padding: EdgeInsets.symmetric(vertical: 4),
+            padding: EdgeInsets.symmetric(vertical: 6),
             child: Row(children: [
               SizedBox(
                 width: 14,
                 height: 14,
-                child: CircularProgressIndicator(strokeWidth: 2),
+                child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF1E3A8A)),
               ),
               SizedBox(width: 8),
               Text(
-                'Validating flat assignment...',
-                style:
-                    TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                'Looking up resident in directory...',
+                style: TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
               ),
             ]),
           )
         else if (validationResult != null)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
               color: validationResult!.isValid
-                  ? AppColors.successSurface.withValues(alpha: 0.2)
-                  : AppColors.errorSurface.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(AppRadius.md),
+                  ? const Color(0xFFECFDF5)
+                  : const Color(0xFFFEF2F2),
+              borderRadius: BorderRadius.circular(10),
               border: Border.all(
                 color: validationResult!.isValid
-                    ? AppColors.success
-                    : AppColors.error,
+                    ? const Color(0xFF6EE7B7)
+                    : const Color(0xFFFCA5A5),
               ),
             ),
             child: Row(
@@ -127,25 +143,35 @@ class EntryFlatSelector extends StatelessWidget {
                 Icon(
                   validationResult!.isValid
                       ? Icons.check_circle_rounded
-                      : Icons.error_rounded,
-                  size: 16,
+                      : Icons.error_outline_rounded,
+                  size: 18,
                   color: validationResult!.isValid
-                      ? AppColors.success
-                      : AppColors.error,
+                      ? const Color(0xFF059669)
+                      : const Color(0xFFDC2626),
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 8),
                 Expanded(
-                  child: Text(
-                    validationResult!.isValid
-                        ? 'Resident: ${validationResult!.residentName ?? ""}'
-                        : (validationResult!.error ?? 'Invalid Flat'),
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: validationResult!.isValid
-                          ? AppColors.success
-                          : AppColors.error,
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        validationResult!.isValid
+                            ? 'Resident: ${validationResult!.residentName ?? "Registered Resident"}'
+                            : (validationResult!.error ?? 'Invalid Flat / Not Found'),
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w800,
+                          color: validationResult!.isValid
+                              ? const Color(0xFF065F46)
+                              : const Color(0xFF991B1B),
+                        ),
+                      ),
+                      if (validationResult!.isValid)
+                        const Text(
+                          'Verified Society Occupant',
+                          style: TextStyle(fontSize: 10.5, color: Color(0xFF059669), fontWeight: FontWeight.w500),
+                        ),
+                    ],
                   ),
                 ),
               ],

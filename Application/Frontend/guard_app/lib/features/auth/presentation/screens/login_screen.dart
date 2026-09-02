@@ -251,7 +251,34 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
 
-                const SizedBox(height: AppSpacing.xxl),
+                const SizedBox(height: 14),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton.icon(
+                    onPressed: () {
+                      _emailController.text = 'reviewer.guard@gatelink.in';
+                      _passwordController.text = 'GateLinkGuard2026!Reviewer';
+                      setState(() {
+                        _agreedToPrivacyPolicy = true;
+                        _consentError = null;
+                      });
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color(0xFF1E3A8A),
+                      side: const BorderSide(color: Color(0xFFCBD5E1)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.lg)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    icon: const Icon(Icons.shield_outlined, size: 18),
+                    label: const Text(
+                      'Autofill Demo Guard Credentials',
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: AppSpacing.lg),
 
                 // Official Admin Provisioning Notice (Replaces Public Sign-Up)
                 Container(

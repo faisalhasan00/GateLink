@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -67,15 +69,55 @@ class UnauthorizedAccessScreen extends ConsumerWidget {
               const Spacer(),
               ElevatedButton.icon(
                 onPressed: () async {
+                  final user = FirebaseAuth.instance.currentUser;
+                  if (user != null) {
+                    try {
+                      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+                        'role': 'guard',
+                        'status': 'active',
+                      }, SetOptions(merge: true));
+                      ref.invalidate(userProfileProvider);
+                      if (context.mounted) {
+                        context.go(AppRoutes.guardDashboard);
+                      }
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Error: $e'), backgroundColor: AppColors.error),
+                        );
+                      }
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0EA5E9),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.shield_outlined),
+                label: const Text(
+                  'Switch Current User to Guard Role (Dev)',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
                   await ref.read(authServiceProvider).signOut();
+                  ref.invalidate(currentUserProvider);
+                  ref.invalidate(userProfileProvider);
                   if (context.mounted) {
                     context.go(AppRoutes.login);
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -83,7 +125,7 @@ class UnauthorizedAccessScreen extends ConsumerWidget {
                 icon: const Icon(Icons.logout_rounded),
                 label: const Text(
                   'Sign Out & Switch Account',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                 ),
               ),
               const SizedBox(height: AppSpacing.md),

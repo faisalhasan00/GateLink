@@ -109,59 +109,62 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       }
 
       // If user is unauthenticated and attempting to access protected screens
-      if (!isAuth && !isLoggingIn) {
-        return AppRoutes.login;
+      if (!isAuth) {
+        if (!isLoggingIn) {
+          return AppRoutes.login;
+        }
+        return null;
       }
 
-      if (isAuth) {
-        // Authenticated guards on login routes should go directly to dashboard
-        if (isLoggingIn) {
-          return AppRoutes.guardDashboard;
-        }
-        final profileAsync = ref.read(userProfileProvider);
-        final userProfile = profileAsync.value;
+      // Authenticated user checks
+      final profileAsync = ref.read(userProfileProvider);
+      final userProfile = profileAsync.value;
 
-        // If profile document has synced from Firestore, apply role-gating
-        if (userProfile != null) {
-          final role = (userProfile['role'] as String? ?? 'guard').toLowerCase();
-          const allowedGuardRoles = [
-            'guard',
-            'security',
-            'security_guard',
-            'staff',
-            'gatekeeper',
-            'guard_leader',
-            'admin',
-            'society_admin',
-            'super_admin',
-          ];
+      // If profile document has synced from Firestore, apply role-gating
+      if (userProfile != null) {
+        final role = (userProfile['role'] as String? ?? 'guard').toLowerCase();
+        const allowedGuardRoles = [
+          'guard',
+          'security',
+          'security_guard',
+          'staff',
+          'gatekeeper',
+          'guard_leader',
+          'admin',
+          'society_admin',
+          'super_admin',
+        ];
 
-          if (!allowedGuardRoles.contains(role)) {
-            if (!isUnauthorizedRoute) {
-              return AppRoutes.unauthorized;
-            }
+        // Non-guard accounts: allow login page if they explicitly navigated there to switch
+        if (!allowedGuardRoles.contains(role)) {
+          if (isLoggingIn) {
             return null;
           }
-
-          if (isUnauthorizedRoute) {
-            return AppRoutes.guardDashboard;
+          if (!isUnauthorizedRoute) {
+            return AppRoutes.unauthorized;
           }
+          return null;
+        }
 
-          final status = (userProfile['status'] as String? ?? 'active').toLowerCase();
-          final isApproved = status == 'active' || status == 'approved';
+        // Valid guard accounts:
+        if (isUnauthorizedRoute) {
+          return AppRoutes.guardDashboard;
+        }
 
-          if (!isApproved && !isPendingRoute) {
-            return AppRoutes.pendingApproval;
-          }
+        final status = (userProfile['status'] as String? ?? 'active').toLowerCase();
+        final isApproved = status == 'active' || status == 'approved';
 
-          if (isApproved && (isLoggingIn || isPendingRoute)) {
-            return AppRoutes.guardDashboard;
-          }
-        } else {
-          // Profile is still loading in background; allow logged-in guard to proceed to dashboard
-          if (isLoggingIn || isPendingRoute) {
-            return AppRoutes.guardDashboard;
-          }
+        if (!isApproved && !isPendingRoute) {
+          return AppRoutes.pendingApproval;
+        }
+
+        if (isApproved && (isLoggingIn || isPendingRoute)) {
+          return AppRoutes.guardDashboard;
+        }
+      } else {
+        // Profile is still loading in background
+        if (isLoggingIn || isPendingRoute) {
+          return AppRoutes.guardDashboard;
         }
       }
 
