@@ -4,6 +4,7 @@ import '../../../../core/theme/app_spacing.dart';
 
 class ProfileActionsMenu extends StatelessWidget {
   final VoidCallback onEditProfile;
+  final VoidCallback onVehicles;
   final VoidCallback onChangePassword;
   final VoidCallback onNotificationPreferences;
   final VoidCallback onReferral;
@@ -15,6 +16,7 @@ class ProfileActionsMenu extends StatelessWidget {
   const ProfileActionsMenu({
     super.key,
     required this.onEditProfile,
+    required this.onVehicles,
     required this.onChangePassword,
     required this.onNotificationPreferences,
     required this.onReferral,
@@ -39,6 +41,13 @@ class ProfileActionsMenu extends StatelessWidget {
             title: 'Edit Profile & Details',
             subtitle: 'Name, phone, date of birth & gender',
             onTap: onEditProfile,
+          ),
+          const Divider(height: 1),
+          _MenuItem(
+            icon: Icons.directions_car_outlined,
+            title: 'My Vehicles & Parking',
+            subtitle: 'Manage 4-wheelers, 2-wheelers & RFID gate tags',
+            onTap: onVehicles,
           ),
           const Divider(height: 1),
           _MenuItem(

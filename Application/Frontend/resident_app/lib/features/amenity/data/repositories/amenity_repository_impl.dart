@@ -181,8 +181,10 @@ class AmenityRepositoryImpl implements AmenityRepository {
         'iconKey': 'pool',
         'timing': '6:00 AM - 9:00 PM',
         'available': true,
+        'capacity': 15,
         'availableSlots': 15,
         'fee': 'Free',
+        'approvalPolicy': 'auto',
         'location': 'Clubhouse Level 1'
       },
       {
@@ -190,8 +192,10 @@ class AmenityRepositoryImpl implements AmenityRepository {
         'iconKey': 'gym',
         'timing': '5:00 AM - 11:00 PM',
         'available': true,
+        'capacity': 30,
         'availableSlots': 30,
         'fee': 'Free',
+        'approvalPolicy': 'auto',
         'location': 'Block A Ground'
       },
       {
@@ -199,8 +203,10 @@ class AmenityRepositoryImpl implements AmenityRepository {
         'iconKey': 'clubhouse',
         'timing': '8:00 AM - 10:00 PM',
         'available': true,
+        'capacity': 5,
         'availableSlots': 5,
         'fee': '₹1,500/slot',
+        'approvalPolicy': 'manual',
         'location': 'Main Clubhouse'
       },
       {
@@ -208,8 +214,10 @@ class AmenityRepositoryImpl implements AmenityRepository {
         'iconKey': 'tennis',
         'timing': '6:00 AM - 8:00 PM',
         'available': true,
+        'capacity': 8,
         'availableSlots': 8,
         'fee': 'Free',
+        'approvalPolicy': 'auto',
         'location': 'Sports Complex'
       },
       {
@@ -217,8 +225,10 @@ class AmenityRepositoryImpl implements AmenityRepository {
         'iconKey': 'badminton',
         'timing': '6:00 AM - 10:00 PM',
         'available': true,
+        'capacity': 10,
         'availableSlots': 10,
         'fee': 'Free',
+        'approvalPolicy': 'auto',
         'location': 'Indoor Arena'
       },
       {
@@ -226,8 +236,10 @@ class AmenityRepositoryImpl implements AmenityRepository {
         'iconKey': 'kids',
         'timing': '7:00 AM - 8:00 PM',
         'available': true,
+        'capacity': 20,
         'availableSlots': 20,
         'fee': 'Free',
+        'approvalPolicy': 'auto',
         'location': 'Central Park'
       },
       {
@@ -235,8 +247,10 @@ class AmenityRepositoryImpl implements AmenityRepository {
         'iconKey': 'garden',
         'timing': '6:00 AM - 7:00 PM',
         'available': true,
+        'capacity': 50,
         'availableSlots': 50,
         'fee': 'Free',
+        'approvalPolicy': 'auto',
         'location': 'East Lawn'
       },
     ];

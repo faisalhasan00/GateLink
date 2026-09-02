@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -19,25 +22,31 @@ class AmenityBookingScreen extends ConsumerStatefulWidget {
 }
 
 class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
-  DateTime? _selectedDate;
+  DateTime _selectedDate = DateTime.now();
   String? _selectedSlot;
   int _guestCount = 1;
 
   AmenityModel? _amenityModel;
   bool _isLoadingAmenity = true;
 
-  final List<String> _slots = [
+  final List<String> _morningSlots = [
     '6:00 AM',
     '7:00 AM',
     '8:00 AM',
     '9:00 AM',
     '10:00 AM',
+    '11:00 AM',
+  ];
+
+  final List<String> _eveningSlots = [
     '4:00 PM',
     '5:00 PM',
     '6:00 PM',
     '7:00 PM',
-    '8:00 PM'
+    '8:00 PM',
+    '9:00 PM',
   ];
+
   Set<String> _bookedSlots = {};
   bool _isFetchingSlots = false;
 
@@ -45,6 +54,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
   void initState() {
     super.initState();
     _fetchAmenityProfile();
+    _fetchBookedSlots(_selectedDate);
   }
 
   Future<void> _fetchAmenityProfile() async {
@@ -70,11 +80,12 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
     final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
-      initialDate: now,
+      initialDate: _selectedDate,
       firstDate: now,
-      lastDate: now.add(const Duration(days: 30)),
+      lastDate: now.add(const Duration(days: 60)),
     );
     if (picked != null) {
+      HapticFeedback.selectionClick();
       setState(() {
         _selectedDate = picked;
         _selectedSlot = null;
@@ -100,7 +111,7 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
           _isFetchingSlots = false;
         });
       }
-    } catch (e) {
+    } catch (_) {
       if (mounted) {
         setState(() => _isFetchingSlots = false);
       }
@@ -119,6 +130,17 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
       return;
     }
 
+    if (_selectedSlot == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an available time slot.'),
+          backgroundColor: Color(0xFFF59E0B),
+        ),
+      );
+      return;
+    }
+
+    HapticFeedback.mediumImpact();
     final activeSocId = profile.societyId;
     final userName = profile.displayName.isNotEmpty
         ? profile.displayName
@@ -144,7 +166,11 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
             );
 
     if (success && mounted) {
-      _showSuccessDialog(targetAmenityName);
+      _showBookingPassBottomSheet(
+        amenityName: targetAmenityName,
+        flatNumber: flatNumber,
+        residentName: userName,
+      );
     } else if (mounted) {
       final errorMsg = ref.read(amenityControllerProvider).errorMessage ??
           'Failed to book slot.';
@@ -155,37 +181,151 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
     }
   }
 
-  void _showSuccessDialog(String targetAmenityName) {
-    showDialog(
+  void _showBookingPassBottomSheet({
+    required String amenityName,
+    required String flatNumber,
+    required String residentName,
+  }) {
+    final formattedDate =
+        DateFormat('EEE, dd MMM yyyy').format(_selectedDate);
+    final passCode =
+        'AMN-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}';
+
+    showModalBottomSheet(
       context: context,
-      barrierDismissible: false,
-      builder: (dialogCtx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppRadius.xl)),
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          const Icon(Icons.check_circle_rounded,
-              color: AppColors.success, size: 56),
-          const SizedBox(height: AppSpacing.md),
-          const Text('Booking Confirmed!',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
-          const SizedBox(height: 8),
-          Text(
-              'Your slot for $targetAmenityName at $_selectedSlot has been booked.',
-              style: const TextStyle(color: AppColors.textSecondary),
-              textAlign: TextAlign.center),
-        ]),
-        actions: [
-          ElevatedButton(
-            onPressed: () {
-              Navigator.of(dialogCtx).pop();
-              if (mounted) {
-                context.go(AppRoutes.myBookings);
-              }
-            },
-            child: const Text('View My Bookings'),
-          ),
-        ],
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: const Color(0xFFCBD5E1),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Icon(Icons.check_circle_rounded,
+                color: Color(0xFF10B981), size: 52),
+            const SizedBox(height: 8),
+            const Text(
+              'Amenity Slot Confirmed!',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Show this QR pass to the facility attendant or guard.',
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: Column(
+                children: [
+                  QrImageView(
+                    data: 'GATELINK:AMENITY:$passCode:${widget.amenityId}',
+                    version: QrVersions.auto,
+                    size: 140,
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    passCode,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 2,
+                      color: Color(0xFF1E3A8A),
+                    ),
+                  ),
+                  const Divider(height: 20),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildPassDetail('Facility', amenityName),
+                      _buildPassDetail('Date', formattedDate),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildPassDetail('Slot', _selectedSlot ?? ''),
+                      _buildPassDetail('Unit', 'Flat $flatNumber ($residentName)'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  context.go(AppRoutes.myBookings);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E3A8A),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'View in My Bookings',
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildPassDetail(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF94A3B8),
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 12.5,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF0F172A),
+          ),
+        ),
+      ],
     );
   }
 
@@ -199,265 +339,526 @@ class _AmenityBookingScreenState extends ConsumerState<AmenityBookingScreen> {
     final controllerState = ref.watch(amenityControllerProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(title: Text(amenityName)),
+      backgroundColor: const Color(0xFFF8FAFC),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(AppRoutes.amenities);
+            }
+          },
+        ),
+        title: Text(
+          amenityName,
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18),
+        ),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF0F172A),
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(color: const Color(0xFFE2E8F0), height: 1),
+        ),
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(AppSpacing.md),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: const Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -3),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: SizedBox(
+            height: 48,
+            child: ElevatedButton(
+              onPressed: (controllerState.isLoading || _selectedSlot == null)
+                  ? null
+                  : _bookSlot,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E3A8A),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: controllerState.isLoading
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.confirmation_number_outlined, size: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          _selectedSlot == null
+                              ? 'Select a Slot to Continue'
+                              : 'Confirm Booking • $_selectedSlot',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+        ),
+      ),
       body: _isLoadingAmenity
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(
+              child: CircularProgressIndicator(color: Color(0xFF1E3A8A)),
+            )
           : SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.pagePadding),
+              padding: const EdgeInsets.all(AppSpacing.md),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Amenity Header Banner
+                  // ── 1. AMENITY HEADER CARD ──────────────────────────────
                   Container(
-                    padding: const EdgeInsets.all(AppSpacing.md),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [AppColors.primary, AppColors.primaryLight],
+                        colors: [Color(0xFF1E3A8A), Color(0xFF0EA5E9)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      borderRadius: BorderRadius.circular(AppRadius.xl),
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF0EA5E9).withValues(alpha: 0.25),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(amenityName,
-                            style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white)),
-                        const SizedBox(height: 4),
-                        Row(children: [
-                          const Icon(Icons.access_time_rounded,
-                              size: 14, color: Colors.white70),
-                          const SizedBox(width: 4),
-                          Text(amenityTiming,
-                              style: const TextStyle(
-                                  fontSize: 12, color: Colors.white70)),
-                        ]),
-                        const SizedBox(height: 8),
-                        Row(children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              borderRadius:
-                                  BorderRadius.circular(AppRadius.full),
-                            ),
-                            child: Text('Fee: $feeText',
-                                style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white)),
-                          ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              borderRadius:
-                                  BorderRadius.circular(AppRadius.full),
-                            ),
-                            child: Text('Quota: $maxCapacity Slots/Hr',
-                                style: const TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.white)),
-                          ),
-                        ]),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.lg),
-
-                  // Date Picker Section
-                  const Text('Select Date',
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary)),
-                  const SizedBox(height: AppSpacing.sm),
-                  InkWell(
-                    onTap: _pickDate,
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                    child: Container(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(AppRadius.lg),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.calendar_today_rounded,
-                              color: AppColors.primary, size: 20),
-                          const SizedBox(width: AppSpacing.md),
-                          Expanded(
-                            child: Text(
-                              _selectedDate == null
-                                  ? 'Tap to select booking date'
-                                  : '${_selectedDate!.day}/${_selectedDate!.month}/${_selectedDate!.year}',
-                              style: TextStyle(
-                                color: _selectedDate == null
-                                    ? AppColors.textSecondary
-                                    : AppColors.textPrimary,
-                                fontWeight: _selectedDate == null
-                                    ? FontWeight.normal
-                                    : FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                          const Icon(Icons.chevron_right_rounded,
-                              color: AppColors.textSecondary),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: AppSpacing.lg),
-
-                  // Slot Selection Section
-                  if (_selectedDate != null) ...[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Select Time Slot',
-                            style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w700,
-                                color: AppColors.textPrimary)),
-                        if (_isFetchingSlots)
-                          const SizedBox(
-                              width: 14,
-                              height: 14,
-                              child: CircularProgressIndicator(strokeWidth: 2)),
-                      ],
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    Wrap(
-                      spacing: AppSpacing.sm,
-                      runSpacing: AppSpacing.sm,
-                      children: _slots.map((slot) {
-                        final isBooked = _bookedSlots.contains(slot);
-                        final isSelected = _selectedSlot == slot;
-
-                        return ChoiceChip(
-                          label: Text(slot),
-                          selected: isSelected,
-                          onSelected: isBooked
-                              ? null
-                              : (selected) {
-                                  setState(() {
-                                    _selectedSlot = selected ? slot : null;
-                                  });
-                                },
-                          selectedColor: AppColors.primary,
-                          labelStyle: TextStyle(
-                            color: isSelected
-                                ? Colors.white
-                                : (isBooked
-                                    ? AppColors.textDisabled
-                                    : AppColors.textPrimary),
-                            fontWeight: isSelected
-                                ? FontWeight.w700
-                                : FontWeight.normal,
-                          ),
-                          backgroundColor: Colors.white,
-                          disabledColor: AppColors.background,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppRadius.full),
-                            side: BorderSide(
-                              color: isSelected
-                                  ? AppColors.primary
-                                  : (isBooked
-                                      ? AppColors.border
-                                      : AppColors.border),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                  ],
-
-                  // Guest Counter
-                  const Text('Number of Guests',
-                      style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textPrimary)),
-                  const SizedBox(height: AppSpacing.sm),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.md, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Guests',
-                            style: TextStyle(color: AppColors.textSecondary)),
                         Row(
                           children: [
-                            IconButton(
-                              onPressed: _guestCount > 1
-                                  ? () => setState(() => _guestCount--)
-                                  : null,
-                              icon: const Icon(
-                                  Icons.remove_circle_outline_rounded),
-                              color: AppColors.primary,
+                            Text(
+                              amenityName,
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
                             ),
-                            Text('$_guestCount',
+                            const Spacer(),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                feeText.toUpperCase(),
                                 style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.w700)),
-                            IconButton(
-                              onPressed: _guestCount < maxCapacity
-                                  ? () => setState(() => _guestCount++)
-                                  : null,
-                              icon:
-                                  const Icon(Icons.add_circle_outline_rounded),
-                              color: AppColors.primary,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            const Icon(Icons.schedule_rounded,
+                                size: 14, color: Colors.white70),
+                            const SizedBox(width: 4),
+                            Text(
+                              amenityTiming,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.15),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                'Max Capacity: $maxCapacity Slots/Hr',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
                             ),
                           ],
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(height: AppSpacing.lg),
 
-                  const SizedBox(height: AppSpacing.xl),
-
-                  // Confirm Booking Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: controllerState.isLoading ? null : _bookSlot,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(AppRadius.lg)),
+                  // ── 2. 7-DAY INTERACTIVE DATE STRIP ───────────────────────
+                  Row(
+                    children: [
+                      const Text(
+                        'SELECT BOOKING DATE',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                          color: Color(0xFF64748B),
+                        ),
                       ),
-                      child: controllerState.isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white),
-                            )
-                          : const Text('Confirm Booking',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w700)),
+                      const Spacer(),
+                      IconButton(
+                        onPressed: _pickDate,
+                        tooltip: 'Choose Other Date',
+                        icon: const Icon(
+                          Icons.calendar_month_rounded,
+                          size: 20,
+                          color: Color(0xFF1E3A8A),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    height: 72,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: 7,
+                      separatorBuilder: (_, __) => const SizedBox(width: 8),
+                      itemBuilder: (context, index) {
+                        final date = DateTime.now().add(Duration(days: index));
+                        final isSelected = date.year == _selectedDate.year &&
+                            date.month == _selectedDate.month &&
+                            date.day == _selectedDate.day;
+
+                        final dayName = index == 0
+                            ? 'TODAY'
+                            : (index == 1
+                                ? 'TMRW'
+                                : DateFormat('EEE').format(date).toUpperCase());
+                        final dayNumber = DateFormat('dd').format(date);
+                        final monthName = DateFormat('MMM').format(date);
+
+                        return InkWell(
+                          onTap: () {
+                            HapticFeedback.selectionClick();
+                            setState(() {
+                              _selectedDate = date;
+                              _selectedSlot = null;
+                            });
+                            _fetchBookedSlots(date);
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 180),
+                            width: 58,
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xFF1E3A8A)
+                                  : Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isSelected
+                                    ? const Color(0xFF1E3A8A)
+                                    : const Color(0xFFE2E8F0),
+                                width: isSelected ? 1.5 : 1.0,
+                              ),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: const Color(0xFF1E3A8A)
+                                            .withValues(alpha: 0.25),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  dayName,
+                                  style: TextStyle(
+                                    fontSize: 9.5,
+                                    fontWeight: FontWeight.w800,
+                                    color: isSelected
+                                        ? const Color(0xFF93C5FD)
+                                        : const Color(0xFF64748B),
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  dayNumber,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                    color: isSelected
+                                        ? Colors.white
+                                        : const Color(0xFF0F172A),
+                                  ),
+                                ),
+                                Text(
+                                  monthName,
+                                  style: TextStyle(
+                                    fontSize: 9.5,
+                                    color: isSelected
+                                        ? Colors.white70
+                                        : const Color(0xFF94A3B8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── 3. TIME SLOT SELECTION (MORNING & EVENING) ─────────────
+                  Row(
+                    children: [
+                      const Text(
+                        'AVAILABLE TIME SLOTS',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 0.8,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      if (_isFetchingSlots)
+                        const SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Color(0xFF1E3A8A),
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+
+                  // Morning Slots
+                  _buildSlotSectionHeader('🌅 Morning Slots (6 AM - 11 AM)'),
+                  const SizedBox(height: 8),
+                  _buildSlotsGrid(_morningSlots),
+                  const SizedBox(height: 16),
+
+                  // Evening Slots
+                  _buildSlotSectionHeader('🌆 Evening Slots (4 PM - 9 PM)'),
+                  const SizedBox(height: 8),
+                  _buildSlotsGrid(_eveningSlots),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── 4. GUEST / PERSONS COUNT ───────────────────────────────
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFEFF6FF),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: const Icon(
+                            Icons.group_outlined,
+                            color: Color(0xFF1E3A8A),
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'Number of Persons',
+                              style: TextStyle(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.w800,
+                                color: Color(0xFF0F172A),
+                              ),
+                            ),
+                            Text(
+                              'Max allowed: $maxCapacity guests',
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Color(0xFF64748B),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF8FAFC),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: const Color(0xFFCBD5E1)),
+                          ),
+                          child: Row(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.remove, size: 16),
+                                onPressed: _guestCount > 1
+                                    ? () {
+                                        HapticFeedback.selectionClick();
+                                        setState(() => _guestCount--);
+                                      }
+                                    : null,
+                              ),
+                              Text(
+                                '$_guestCount',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  color: Color(0xFF0F172A),
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.add, size: 16),
+                                onPressed: _guestCount < maxCapacity
+                                    ? () {
+                                        HapticFeedback.selectionClick();
+                                        setState(() => _guestCount++);
+                                      }
+                                    : null,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xl),
                 ],
               ),
             ),
+    );
+  }
+
+  Widget _buildSlotSectionHeader(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        color: Color(0xFF475569),
+      ),
+    );
+  }
+
+  Widget _buildSlotsGrid(List<String> slots) {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: slots.map((slot) {
+        final isBooked = _bookedSlots.contains(slot);
+        final isSelected = _selectedSlot == slot;
+
+        return InkWell(
+          onTap: isBooked
+              ? null
+              : () {
+                  HapticFeedback.selectionClick();
+                  setState(() {
+                    _selectedSlot = isSelected ? null : slot;
+                  });
+                },
+          borderRadius: BorderRadius.circular(10),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 160),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? const Color(0xFF1E3A8A)
+                  : (isBooked ? const Color(0xFFF1F5F9) : Colors.white),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: isSelected
+                    ? const Color(0xFF1E3A8A)
+                    : (isBooked
+                        ? const Color(0xFFE2E8F0)
+                        : const Color(0xFFCBD5E1)),
+                width: isSelected ? 1.5 : 1.0,
+              ),
+              boxShadow: isSelected
+                  ? [
+                      BoxShadow(
+                        color: const Color(0xFF1E3A8A).withValues(alpha: 0.2),
+                        blurRadius: 6,
+                        offset: const Offset(0, 2),
+                      ),
+                    ]
+                  : null,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isSelected) ...[
+                  const Icon(Icons.check_circle_rounded,
+                      size: 14, color: Colors.white),
+                  const SizedBox(width: 6),
+                ] else if (isBooked) ...[
+                  const Icon(Icons.block_rounded,
+                      size: 13, color: Color(0xFF94A3B8)),
+                  const SizedBox(width: 6),
+                ],
+                Text(
+                  slot,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                    decoration:
+                        isBooked ? TextDecoration.lineThrough : null,
+                    color: isSelected
+                        ? Colors.white
+                        : (isBooked
+                            ? const Color(0xFF94A3B8)
+                            : const Color(0xFF0F172A)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

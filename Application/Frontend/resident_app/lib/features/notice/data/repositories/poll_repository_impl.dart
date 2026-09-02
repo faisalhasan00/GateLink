@@ -140,4 +140,56 @@ class PollRepositoryImpl implements PollRepository {
       return true;
     });
   }
+
+  @override
+  Future<void> seedDemoPolls(String societyId) async {
+    if (societyId.isEmpty) return;
+
+    final batch = _firestore.batch();
+    final now = DateTime.now();
+
+    final demoPolls = [
+      {
+        'title': '⚡ Rooftop Solar Panels Installation for Common Grid',
+        'description':
+            'Proposed 50kW solar panel array on Towers A & B rooftops to reduce common area electricity expenses by an estimated 35% annually. Estimated payback period is 3.5 years.',
+        'category': 'AGM Resolution',
+        'status': 'active',
+        'targetAudience': 'all',
+        'votingRule': 'one_per_flat',
+        'totalVotes': 28,
+        'createdAt': now.toIso8601String(),
+        'expiresAt': now.add(const Duration(days: 7)).toIso8601String(),
+        'options': [
+          {'id': 'opt_1', 'text': '✅ Strongly Approve & Proceed', 'voteCount': 19},
+          {'id': 'opt_2', 'text': '🤔 Request Vendor Demo & Cost Details', 'voteCount': 7},
+          {'id': 'opt_3', 'text': '❌ Disagree / Maintain Grid Power', 'voteCount': 2},
+        ],
+      },
+      {
+        'title': '🚗 EV Charging Stations in Basement Parking',
+        'description':
+            'Installation of 8 dedicated fast EV charging points in Visitor & Basement-1 parking with automated metering and app-based per-unit billing.',
+        'category': 'Facility Upgrade',
+        'status': 'active',
+        'targetAudience': 'all',
+        'votingRule': 'one_per_user',
+        'totalVotes': 45,
+        'createdAt': now.subtract(const Duration(days: 2)).toIso8601String(),
+        'expiresAt': now.add(const Duration(days: 12)).toIso8601String(),
+        'options': [
+          {'id': 'ev_1', 'text': '⚡ Yes, Install 8 Fast Charging Bays', 'voteCount': 34},
+          {'id': 'ev_2', 'text': '🔌 Start with 4 Charging Bays', 'voteCount': 9},
+          {'id': 'ev_3', 'text': '🚫 Not required at this time', 'voteCount': 2},
+        ],
+      },
+    ];
+
+    for (final poll in demoPolls) {
+      final docRef = _firestore.collection('societies/$societyId/polls').doc();
+      batch.set(docRef, poll);
+    }
+
+    await batch.commit();
+  }
 }

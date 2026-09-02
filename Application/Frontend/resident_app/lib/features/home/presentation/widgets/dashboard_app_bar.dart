@@ -11,16 +11,16 @@ import '../../../../core/widgets/widgets.dart';
 class DashboardAppBar extends ConsumerWidget {
   const DashboardAppBar({super.key});
 
-  String _getTimeBasedGreeting() {
+  Map<String, dynamic> _getTimeGreetingData() {
     final hour = DateTime.now().hour;
     if (hour >= 5 && hour < 12) {
-      return 'Good Morning';
+      return {'greeting': 'Good Morning', 'icon': Icons.wb_sunny_rounded, 'color': const Color(0xFFF59E0B)};
     } else if (hour >= 12 && hour < 17) {
-      return 'Good Afternoon';
+      return {'greeting': 'Good Afternoon', 'icon': Icons.wb_cloudy_rounded, 'color': const Color(0xFF0EA5E9)};
     } else if (hour >= 17 && hour < 21) {
-      return 'Good Evening';
+      return {'greeting': 'Good Evening', 'icon': Icons.wb_twilight_rounded, 'color': const Color(0xFFF97316)};
     } else {
-      return 'Good Night';
+      return {'greeting': 'Good Night', 'icon': Icons.nightlight_round, 'color': const Color(0xFF6366F1)};
     }
   }
 
@@ -39,7 +39,10 @@ class DashboardAppBar extends ConsumerWidget {
 
     final String societyName = profile?.displaySocietyName ?? '';
     final String flatNumber = profile?.displayFlatNumber ?? '';
-    final String greeting = _getTimeBasedGreeting();
+    final greetingData = _getTimeGreetingData();
+    final String greeting = greetingData['greeting'] as String;
+    final IconData greetingIcon = greetingData['icon'] as IconData;
+    final Color greetingColor = greetingData['color'] as Color;
 
     return SliverAppBar(
       pinned: true,
@@ -50,7 +53,7 @@ class DashboardAppBar extends ConsumerWidget {
       titleSpacing: AppSpacing.pagePadding,
       title: Row(
         children: [
-          // Resident Avatar using AppAvatar (supporting Base64 & Network URLs)
+          // Resident Avatar with soft border & profile tap
           AppAvatar(
             imageUrl: profile?.photoUrl,
             name: residentName,
@@ -67,20 +70,27 @@ class DashboardAppBar extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  greeting,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF64748B),
-                    fontWeight: FontWeight.w500,
-                    letterSpacing: 0.2,
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(greetingIcon, size: 12, color: greetingColor),
+                    const SizedBox(width: 4),
+                    Text(
+                      greeting,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Color(0xFF64748B),
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 1),
                 Text(
                   residentName,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 15.5,
                     fontWeight: FontWeight.w800,
                     color: Color(0xFF0F172A),
                     letterSpacing: -0.3,
@@ -93,24 +103,39 @@ class DashboardAppBar extends ConsumerWidget {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Icon(
-                        Icons.location_on_rounded,
-                        size: 11,
-                        color: AppColors.primary,
-                      ),
-                      const SizedBox(width: 3),
                       Flexible(
-                        child: Text(
-                          flatNumber.isNotEmpty
-                              ? '$societyName • Flat $flatNumber'
-                              : societyName,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w700,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1.5),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: const Color(0xFFE2E8F0), width: 0.8),
                           ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.apartment_rounded,
+                                size: 10,
+                                color: Color(0xFF1E3A8A),
+                              ),
+                              const SizedBox(width: 3),
+                              Flexible(
+                                child: Text(
+                                  flatNumber.isNotEmpty
+                                      ? '$societyName • Flat $flatNumber'
+                                      : societyName,
+                                  style: const TextStyle(
+                                    fontSize: 10.5,
+                                    color: Color(0xFF1E3A8A),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],

@@ -14,4 +14,7 @@ abstract class PollRepository {
     required String flatNumber,
     required String userRole,
   });
+
+  /// Seed demo AGM / community polls for testing.
+  Future<void> seedDemoPolls(String societyId);
 }

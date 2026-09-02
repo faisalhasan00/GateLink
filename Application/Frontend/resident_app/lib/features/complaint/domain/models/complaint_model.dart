@@ -16,6 +16,8 @@ class ComplaintModel {
   final String priority;
   final String? photoUrl;
   final String? assignedTo;
+  final int? rating;
+  final String? ratingFeedback;
   final String createdAt;
   final String updatedAt;
 
@@ -35,6 +37,8 @@ class ComplaintModel {
     required this.priority,
     this.photoUrl,
     this.assignedTo,
+    this.rating,
+    this.ratingFeedback,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -59,6 +63,8 @@ class ComplaintModel {
       priority: map['priority'] as String? ?? 'medium',
       photoUrl: map['photoUrl'] as String?,
       assignedTo: map['assignedTo'] as String?,
+      rating: map['rating'] is int ? map['rating'] as int : (map['rating'] is num ? (map['rating'] as num).toInt() : null),
+      ratingFeedback: map['ratingFeedback'] as String?,
       createdAt: map['createdAt'] as String? ?? '',
       updatedAt: map['updatedAt'] as String? ?? '',
     );
@@ -86,6 +92,8 @@ class ComplaintModel {
       'priority': priority,
       'photoUrl': photoUrl,
       'assignedTo': assignedTo,
+      'rating': rating,
+      'ratingFeedback': ratingFeedback,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };

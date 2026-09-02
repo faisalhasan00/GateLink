@@ -119,10 +119,10 @@ class _ComplaintCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final statusColor = complaint.isResolved
-        ? AppColors.success
+        ? const Color(0xFF10B981)
         : complaint.isInProgress
-            ? AppColors.info
-            : AppColors.warning;
+            ? const Color(0xFF0EA5E9)
+            : const Color(0xFFF59E0B);
 
     String dateStr = complaint.createdAt;
     try {
@@ -132,14 +132,22 @@ class _ComplaintCard extends StatelessWidget {
       }
     } catch (_) {}
 
-    return GestureDetector(
-      onTap: () => context.go('/home/complaints/${complaint.id}'),
+    return InkWell(
+      onTap: () => context.push('/home/complaints/${complaint.id}'),
+      borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -150,45 +158,100 @@ class _ComplaintCard extends StatelessWidget {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: AppColors.primarySurface,
-                    borderRadius: BorderRadius.circular(AppRadius.full),
+                    color: const Color(0xFFEFF6FF),
+                    borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Text(complaint.category,
-                      style: const TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          color: AppColors.primary)),
+                  child: Text(
+                    complaint.category,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1E3A8A),
+                    ),
+                  ),
                 ),
+                const SizedBox(width: 6),
+                if (complaint.priority.toLowerCase() == 'high')
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEE2E2),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: const Text(
+                      'HIGH',
+                      style: TextStyle(
+                        fontSize: 9.5,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFFDC2626),
+                      ),
+                    ),
+                  ),
                 const Spacer(),
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
                     color: statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(AppRadius.full),
+                    borderRadius: BorderRadius.circular(6),
+                    border: Border.all(color: statusColor.withValues(alpha: 0.3)),
                   ),
-                  child: Text(complaint.status.toUpperCase(),
-                      style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: statusColor)),
+                  child: Text(
+                    complaint.status.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w800,
+                      color: statusColor,
+                    ),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(complaint.title,
-                style:
-                    const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 4),
+            const SizedBox(height: 10),
+            Text(
+              complaint.title,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+            const SizedBox(height: 6),
             Row(
               children: [
-                Text(complaint.ticketNumber,
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.textSecondary)),
+                Text(
+                  complaint.ticketNumber,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF64748B),
+                  ),
+                ),
                 const Spacer(),
-                Text(dateStr,
-                    style: const TextStyle(
-                        fontSize: 12, color: AppColors.textSecondary)),
+                if (complaint.rating != null) ...[
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.star_rounded, size: 14, color: Color(0xFFF59E0B)),
+                      const SizedBox(width: 2),
+                      Text(
+                        '${complaint.rating}.0',
+                        style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800, color: Color(0xFF92400E)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Text(
+                  dateStr,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Color(0xFF94A3B8),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                const Icon(Icons.chevron_right_rounded, size: 16, color: Color(0xFF94A3B8)),
               ],
             ),
           ],

@@ -71,18 +71,41 @@ class _AmenityListScreenState extends ConsumerState<AmenityListScreen> {
         data: (amenities) {
           if (amenities.isEmpty) {
             return Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.sports_tennis_rounded,
-                      size: 56, color: AppColors.textDisabled),
-                  const SizedBox(height: AppSpacing.md),
-                  const Text('No amenities available',
-                      style: TextStyle(color: AppColors.textSecondary)),
-                  const SizedBox(height: AppSpacing.xl),
-                  if (kDebugMode)
+              child: Padding(
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFEFF6FF),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.sports_tennis_rounded,
+                        size: 48,
+                        color: Color(0xFF1E3A8A),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'No Amenities Listed Yet',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    const Text(
+                      'Activate standard society facilities (Swimming Pool, Gym, Clubhouse, Tennis & Badminton courts) to start booking slots.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 13, color: Color(0xFF64748B), height: 1.4),
+                    ),
+                    const SizedBox(height: 24),
                     if (controllerState.isLoading)
-                      const CircularProgressIndicator()
+                      const CircularProgressIndicator(color: Color(0xFF1E3A8A))
                     else
                       ElevatedButton.icon(
                         onPressed: () async {
@@ -92,10 +115,18 @@ class _AmenityListScreenState extends ConsumerState<AmenityListScreen> {
                               .read(amenityControllerProvider.notifier)
                               .seedDefaultAmenities(activeSocId);
                         },
-                        icon: const Icon(Icons.add_rounded),
-                        label: const Text('Seed Full Society Amenities'),
+                        icon: const Icon(Icons.flash_on_rounded, size: 18),
+                        label: const Text('Setup Society Amenities'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1E3A8A),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
                       ),
-                ],
+                  ],
+                ),
               ),
             );
           }
