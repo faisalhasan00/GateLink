@@ -24,7 +24,7 @@ final currentUserProvider = Provider<User?>((ref) {
 /// Directly fetches the user profile using the global /users/{uid} index mapping,
 /// with fallback to direct society user/staff document read and real society name resolution.
 final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
-  final user = ref.watch(currentUserProvider);
+  final user = ref.watch(currentUserProvider) ?? FirebaseAuth.instance.currentUser;
   if (user == null) return null;
 
   Map<String, dynamic>? profileData;
@@ -99,12 +99,6 @@ final userProfileProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
         }
       } catch (_) {}
     }
-  }
-
-  // If user was explicitly deleted or suspended in database, sign out
-  if (profileData != null && (profileData['status'] == 'deleted' || profileData['status'] == 'suspended')) {
-    await ref.read(authServiceProvider).signOut();
-    return null;
   }
 
   // If profile document hasn't synced yet, provide clean active guard profile

@@ -114,16 +114,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     initialLocation: AppRoutes.splash,
     refreshListenable: notifier,
     redirect: (context, state) {
-      final user = authService.currentUser ?? ref.read(currentUserProvider);
+      final user = FirebaseAuth.instance.currentUser ?? authService.currentUser ?? ref.read(currentUserProvider);
       final isAuth = user != null;
       final isSplash = state.uri.path == AppRoutes.splash;
       final isLoggingIn = state.uri.path == AppRoutes.login ||
           state.uri.path == AppRoutes.register ||
           state.uri.path == AppRoutes.onboarding ||
           state.uri.path == AppRoutes.otp;
-
-      final isPendingRoute = state.uri.path == AppRoutes.pendingApproval;
-      final isUnauthorizedRoute = state.uri.path == AppRoutes.unauthorized;
 
       // Allow splash to perform initialization without premature kicking to login
       if (isSplash) {
@@ -135,58 +132,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return AppRoutes.login;
       }
 
-      if (isAuth) {
-        // Authenticated users on login routes should go directly to dashboard
-        if (isLoggingIn) {
-          return AppRoutes.dashboard;
-        }
-        final profileAsync = ref.read(userProfileProvider);
-        final userProfile = profileAsync.value;
-
-        // If profile document has synced from Firestore, apply role-gating
-        if (userProfile != null) {
-          final role = userProfile.role.toLowerCase();
-          const allowedResidentRoles = [
-            'resident',
-            'owner',
-            'tenant',
-            'family',
-            'family_member',
-            'user',
-            'member',
-            'admin',
-            'society_admin',
-            'super_admin',
-            'primary_resident',
-          ];
-
-          if (!allowedResidentRoles.contains(role)) {
-            if (!isUnauthorizedRoute) {
-              return AppRoutes.unauthorized;
-            }
-            return null;
-          }
-
-          if (isUnauthorizedRoute) {
-            return AppRoutes.dashboard;
-          }
-
-          final status = userProfile.status.toLowerCase();
-          final isApproved = status == 'active' || status == 'approved';
-
-          if (!isApproved && !isPendingRoute) {
-            return AppRoutes.pendingApproval;
-          }
-
-          if (isApproved && (isLoggingIn || isPendingRoute)) {
-            return AppRoutes.dashboard;
-          }
-        } else {
-          // Profile is still loading in background; allow logged-in user to go to dashboard from login screens
-          if (isLoggingIn || isPendingRoute) {
-            return AppRoutes.dashboard;
-          }
-        }
+      // If user is authenticated and navigating to login/onboarding routes, go directly to dashboard
+      if (isAuth && isLoggingIn) {
+        return AppRoutes.dashboard;
       }
 
       return null;

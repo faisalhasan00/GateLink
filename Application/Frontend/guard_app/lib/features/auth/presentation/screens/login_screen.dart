@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/providers/auth_providers.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
@@ -45,7 +46,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         _emailController.text.trim(),
         _passwordController.text,
       );
-      if (mounted) context.go('/guard/dashboard');
+      if (mounted) context.go(AppRoutes.guardDashboard);
     } on FirebaseAuthException catch (e) {
       _showError(e.message ?? 'Login failed. Please verify your credentials.');
     } catch (e) {

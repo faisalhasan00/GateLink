@@ -41,31 +41,25 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   Future<void> _resolveAuthAndNavigate() async {
-    // 1. Ensure minimum animation brand duration of 1.0s
-    final animationFuture = Future.delayed(const Duration(milliseconds: 1000));
+    // 1. Ensure minimum brand splash animation (600ms)
+    final minSplashDelay = Future.delayed(const Duration(milliseconds: 600));
 
-    // 2. Check current user or wait for Firebase Auth to restore session from disk
+    // 2. Check current user or wait for Firebase Auth disk session hydration
     User? user = FirebaseAuth.instance.currentUser;
-    final authService = ref.read(authServiceProvider);
-    final hasCachedSession = await authService.hasCachedSession();
 
     if (user == null) {
       try {
-        // If an active session was previously saved, allow up to 3s for token hydration
-        final timeoutDuration = hasCachedSession
-            ? const Duration(milliseconds: 3000)
-            : const Duration(milliseconds: 1500);
-
+        // Wait for Firebase to finish reading saved session credentials from local storage
         user = await FirebaseAuth.instance
             .authStateChanges()
-            .firstWhere((u) => u != null)
-            .timeout(timeoutDuration, onTimeout: () => FirebaseAuth.instance.currentUser);
+            .first
+            .timeout(const Duration(seconds: 4), onTimeout: () => FirebaseAuth.instance.currentUser);
       } catch (_) {
         user = FirebaseAuth.instance.currentUser;
       }
     }
 
-    await animationFuture;
+    await minSplashDelay;
     if (!mounted) return;
 
     if (user != null) {
