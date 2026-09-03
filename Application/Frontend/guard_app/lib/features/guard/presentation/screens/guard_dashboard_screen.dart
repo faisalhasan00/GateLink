@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/widgets.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/providers/language_provider.dart';
@@ -362,15 +363,25 @@ class _GuardDashboardScreenState extends ConsumerState<GuardDashboardScreen> {
     final gateName = profile?['gateName'] ?? 'Gate 1 — Main Entry';
 
     return visitorsAsync.when(
-      loading: () => const Scaffold(
+      loading: () => Scaffold(
         backgroundColor: AppColors.background,
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+        body: SafeArea(
+          child: ListView(
+            padding: const EdgeInsets.all(AppSpacing.md),
             children: [
-              CircularProgressIndicator(color: Color(0xFF1E3A8A)),
-              SizedBox(height: 12),
-              Text('Connecting to Gate Terminal...', style: TextStyle(color: Color(0xFF64748B), fontSize: 13)),
+              AppSkeleton.card(height: 120),
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                children: [
+                  Expanded(child: AppSkeleton.card(height: 72)),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(child: AppSkeleton.card(height: 72)),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
+              AppSkeleton.gateEntryCard(),
+              AppSkeleton.gateEntryCard(),
+              AppSkeleton.gateEntryCard(),
             ],
           ),
         ),
