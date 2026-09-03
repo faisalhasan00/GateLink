@@ -6,6 +6,7 @@ import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/widgets.dart';
 
 class RecentNoticesList extends ConsumerWidget {
   const RecentNoticesList({super.key});
@@ -85,7 +86,12 @@ class RecentNoticesList extends ConsumerWidget {
           }).toList(),
         );
       },
-      loading: () => const _SkeletonCardList(),
+      loading: () => Column(
+        children: [
+          AppSkeleton.listItem(avatarSize: 40, height: 68, hasTrailing: false),
+          AppSkeleton.listItem(avatarSize: 40, height: 68, hasTrailing: false),
+        ],
+      ),
       error: (e, st) =>
           const _EmptyStateSmall(message: 'Unable to load notices'),
     );
@@ -111,21 +117,6 @@ class _EmptyStateSmall extends StatelessWidget {
                 color: AppColors.textSecondary,
                 fontSize: 13,
                 fontWeight: FontWeight.w500)),
-      ),
-    );
-  }
-}
-
-class _SkeletonCardList extends StatelessWidget {
-  const _SkeletonCardList();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 60,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
     );
   }

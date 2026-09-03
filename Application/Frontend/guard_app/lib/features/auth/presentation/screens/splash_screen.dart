@@ -41,7 +41,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   Future<void> _resolveAuthAndNavigate() async {
-    // 1. Ensure minimum brand splash animation (600ms)
+    // 1. Minimum brand splash animation (600ms) for smooth UX
     final minSplashDelay = Future.delayed(const Duration(milliseconds: 600));
 
     // 2. Check current user or wait for Firebase Auth disk session hydration
@@ -50,11 +50,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     if (user == null) {
       try {
         // Wait for Firebase to finish reading saved session credentials from local storage
+        // Note: authStateChanges() initially emits the synchronous snapshot (null on cold start).
+        // We use firstWhere to wait for the first non-null User emitted by the session hydrator.
         user = await FirebaseAuth.instance
             .authStateChanges()
-            .first
-            .timeout(const Duration(seconds: 4), onTimeout: () => FirebaseAuth.instance.currentUser);
+            .firstWhere((u) => u != null)
+            .timeout(const Duration(milliseconds: 1500));
       } catch (_) {
+        // Fallback to latest currentUser instance if timeout reached
         user = FirebaseAuth.instance.currentUser;
       }
     }
@@ -62,7 +65,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     await minSplashDelay;
     if (!mounted) return;
 
-    if (user != null) {
+    final resolvedUser = user ?? FirebaseAuth.instance.currentUser;
+
+    if (resolvedUser != null) {
       context.go(AppRoutes.guardDashboard);
     } else {
       context.go(AppRoutes.login);

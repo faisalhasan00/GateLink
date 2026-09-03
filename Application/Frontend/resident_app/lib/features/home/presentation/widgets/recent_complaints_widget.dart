@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/widgets.dart';
 import '../../../complaint/providers/complaint_providers.dart';
 
 class RecentComplaintsWidget extends ConsumerWidget {
@@ -77,7 +78,7 @@ class RecentComplaintsWidget extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const _SkeletonCard(),
+      loading: () => AppSkeleton.listItem(avatarSize: 44, height: 72),
       error: (e, st) => const SizedBox.shrink(),
     );
   }
@@ -101,21 +102,6 @@ class _EmptyStateSmall extends StatelessWidget {
           message,
           style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
         ),
-      ),
-    );
-  }
-}
-
-class _SkeletonCard extends StatelessWidget {
-  const _SkeletonCard();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 60,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
       ),
     );
   }
