@@ -1,15 +1,30 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FlutterSecureStorage _storage = const FlutterSecureStorage();
+
+  static const String _kSessionKey = 'gatelink_resident_has_session';
+  static const String _kUidKey = 'gatelink_resident_uid';
 
   // ── Current User ────────────────────────────────────────────────────────────
   User? get currentUser => _auth.currentUser;
   Stream<User?> get authStateChanges => _auth.authStateChanges();
+
+  /// Check whether an active session was previously established
+  Future<bool> hasCachedSession() async {
+    try {
+      final val = await _storage.read(key: _kSessionKey);
+      return val == 'true';
+    } catch (_) {
+      return false;
+    }
+  }
 
   // ── EMAIL + PASSWORD ─────────────────────────────────────────────────────────
 
@@ -39,6 +54,8 @@ class AuthService {
         final data = userDoc.data() ?? {};
         final status = (data['status'] as String?)?.toLowerCase();
         if (status == 'deleted' || status == 'suspended') {
+          await _storage.delete(key: _kSessionKey);
+          await _storage.delete(key: _kUidKey);
           await _auth.signOut();
           throw FirebaseAuthException(
             code: 'user-disabled',
@@ -60,9 +77,18 @@ class AuthService {
         };
         await _db.doc('users/$uid').set(data, SetOptions(merge: true));
       }
+
+      try {
+        await _storage.write(key: _kSessionKey, value: 'true');
+        await _storage.write(key: _kUidKey, value: uid);
+      } catch (_) {}
     } catch (e) {
       if (e is FirebaseAuthException) rethrow;
       // Do not block authentication if Firestore sync is deferred
+      try {
+        await _storage.write(key: _kSessionKey, value: 'true');
+        await _storage.write(key: _kUidKey, value: uid);
+      } catch (_) {}
     }
 
     return cred;
@@ -203,6 +229,11 @@ class AuthService {
       'createdAt': DateTime.now().toIso8601String(),
     });
 
+    try {
+      await _storage.write(key: _kSessionKey, value: 'true');
+      await _storage.write(key: _kUidKey, value: credential.user!.uid);
+    } catch (_) {}
+
     return credential;
   }
 
@@ -226,6 +257,8 @@ class AuthService {
         final data = userDoc.data() ?? {};
         final status = (data['status'] as String?)?.toLowerCase();
         if (status == 'deleted' || status == 'suspended' || status == 'inactive') {
+          await _storage.delete(key: _kSessionKey);
+          await _storage.delete(key: _kUidKey);
           await _auth.signOut();
           await _googleSignIn.signOut();
           throw FirebaseAuthException(
@@ -234,6 +267,10 @@ class AuthService {
           );
         }
       }
+      try {
+        await _storage.write(key: _kSessionKey, value: 'true');
+        await _storage.write(key: _kUidKey, value: userCred.user!.uid);
+      } catch (_) {}
     }
     return userCred;
   }
@@ -241,6 +278,10 @@ class AuthService {
   // ── SIGN OUT ─────────────────────────────────────────────────────────────────
 
   Future<void> signOut() async {
+    try {
+      await _storage.delete(key: _kSessionKey);
+      await _storage.delete(key: _kUidKey);
+    } catch (_) {}
     await _googleSignIn.signOut();
     await _auth.signOut();
   }
