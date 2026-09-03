@@ -34,81 +34,19 @@ class _InteriorsFurnitureSectionState extends State<InteriorsFurnitureSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader(),
-        const SizedBox(height: AppSpacing.sm),
-
-        // Hero Interior Banner
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(AppSpacing.md),
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF581C87), Color(0xFF7E22CE)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF7E22CE).withValues(alpha: 0.25),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Text(
-                  'MULTI-VENDOR INTERIOR HUB • RESIDENT DISCOUNTS',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 9,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                'Explore Top Interior Studios & Freelancers',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-              const SizedBox(height: 4),
-              const Text(
-                'Browse verified interior studios, freelance architects, and factory-direct modular makers. Inspect past flat transformations and get free site quotes.',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 11,
-                  height: 1.4,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: AppSpacing.md),
-
         // Sub-filter tabs for Interior Vendors
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
           child: Row(
             children: [
-              _buildTypeFilterChip('All Vendors (${sampleInteriorVendors.length})', null),
+              _buildTypeFilterChip(
+                  'All Vendors (${sampleInteriorVendors.length})', null),
               const SizedBox(width: 6),
               _buildTypeFilterChip('🏢 Interior Studios', VendorType.studio),
               const SizedBox(width: 6),
-              _buildTypeFilterChip('🎨 Freelance Architects', VendorType.freelancer),
+              _buildTypeFilterChip(
+                  '🎨 Freelancers', VendorType.freelancer),
               const SizedBox(width: 6),
               _buildTypeFilterChip('🏭 Factory Direct', VendorType.contractor),
             ],
@@ -163,40 +101,6 @@ class _InteriorsFurnitureSectionState extends State<InteriorsFurnitureSection> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildSectionHeader() {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-          decoration: BoxDecoration(
-            color: const Color(0xFF9333EA).withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: const Text(
-            'MULTI-VENDOR',
-            style: TextStyle(
-              fontSize: 9,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF9333EA),
-              letterSpacing: 0.4,
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        const Expanded(
-          child: Text(
-            'Interior Studios & Freelancers',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF0F172A),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
