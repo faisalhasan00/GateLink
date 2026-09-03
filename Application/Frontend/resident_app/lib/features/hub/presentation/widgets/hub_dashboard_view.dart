@@ -20,7 +20,8 @@ class HubDashboardView extends StatefulWidget {
 }
 
 class _HubDashboardViewState extends State<HubDashboardView> {
-  HubCategory _selectedCategory = HubCategory.all;
+  // Always default to Bazaar as requested
+  HubCategory _selectedCategory = HubCategory.bazaar;
   String _searchQuery = '';
   final TextEditingController _searchController = TextEditingController();
 
@@ -506,27 +507,15 @@ class _HubDashboardViewState extends State<HubDashboardView> {
         ),
         const SizedBox(height: AppSpacing.md),
 
-        // 2. Filter Category Pills micro-component
+        // 2. Segmented Button Bar (Bazaar by default)
         HubCategoryPills(
           selectedCategory: _selectedCategory,
           onSelectCategory: (cat) => setState(() => _selectedCategory = cat),
         ),
         const SizedBox(height: AppSpacing.lg),
 
-        // 3. Feature 1: Home Interiors & Designer Furniture
-        if (_selectedCategory == HubCategory.all ||
-            _selectedCategory == HubCategory.interiors) ...[
-          InteriorsFurnitureSection(
-            onSelectCategory: () =>
-                setState(() => _selectedCategory = HubCategory.interiors),
-            onBookConsultation: _showConsultationDialog,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-        ],
-
-        // 4. Feature 2: Resident Bazaar (Buy & Sell)
-        if (_selectedCategory == HubCategory.all ||
-            _selectedCategory == HubCategory.bazaar) ...[
+        // 3. Render Active Selected Category
+        if (_selectedCategory == HubCategory.bazaar) ...[
           ResidentBazaarSection(
             onPostAd: _showPostAdDialog,
             onChatWithResident: (flat) {
@@ -540,22 +529,21 @@ class _HubDashboardViewState extends State<HubDashboardView> {
             },
           ),
           const SizedBox(height: AppSpacing.lg),
-        ],
-
-        // 5. Feature 3: Verified Domestic Staff
-        if (_selectedCategory == HubCategory.all ||
-            _selectedCategory == HubCategory.maids) ...[
+        ] else if (_selectedCategory == HubCategory.interiors) ...[
+          InteriorsFurnitureSection(
+            onSelectCategory: () =>
+                setState(() => _selectedCategory = HubCategory.interiors),
+            onBookConsultation: _showConsultationDialog,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ] else if (_selectedCategory == HubCategory.maids) ...[
           DomesticStaffSection(
             onSelectCategory: () =>
                 setState(() => _selectedCategory = HubCategory.maids),
             onHireStaff: _showHireStaffDialog,
           ),
           const SizedBox(height: AppSpacing.lg),
-        ],
-
-        // 6. Feature 4: Doorstep Certified Repairs & Services
-        if (_selectedCategory == HubCategory.all ||
-            _selectedCategory == HubCategory.services) ...[
+        ] else if (_selectedCategory == HubCategory.services) ...[
           HomeServicesSection(
             onSelectCategory: () =>
                 setState(() => _selectedCategory = HubCategory.services),
@@ -564,7 +552,7 @@ class _HubDashboardViewState extends State<HubDashboardView> {
           const SizedBox(height: AppSpacing.lg),
         ],
 
-        // 7. Back to Society Gate
+        // 4. Back to Society Gate
         Center(
           child: TextButton.icon(
             onPressed: widget.onSwitchToGate,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_spacing.dart';
 
 enum HubCategory {
-  all,
-  interiors,
   bazaar,
+  interiors,
   maids,
   services,
 }
@@ -20,61 +20,96 @@ class HubCategoryPills extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      child: Row(
-        children: [
-          _buildPill('All Hub', HubCategory.all, Icons.grid_view_rounded),
-          _buildPill('🛋️ Interiors & Furniture', HubCategory.interiors, Icons.chair_rounded),
-          _buildPill('🏷️ Bazaar (Buy & Sell)', HubCategory.bazaar, Icons.sell_outlined),
-          _buildPill('🧹 Maids & Staff', HubCategory.maids, Icons.badge_outlined),
-          _buildPill('🔧 Home Repairs', HubCategory.services, Icons.build_outlined),
-        ],
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color(0xFFF1F5F9),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        physics: const BouncingScrollPhysics(),
+        child: Row(
+          children: [
+            _buildSegmentButton(
+              label: 'Bazaar (Buy & Sell)',
+              category: HubCategory.bazaar,
+              icon: Icons.sell_outlined,
+              activeColor: const Color(0xFF16A34A),
+            ),
+            const SizedBox(width: 4),
+            _buildSegmentButton(
+              label: 'Interiors & Furniture',
+              category: HubCategory.interiors,
+              icon: Icons.chair_outlined,
+              activeColor: const Color(0xFF9333EA),
+            ),
+            const SizedBox(width: 4),
+            _buildSegmentButton(
+              label: 'Maids & Staff',
+              category: HubCategory.maids,
+              icon: Icons.badge_outlined,
+              activeColor: const Color(0xFF0284C7),
+            ),
+            const SizedBox(width: 4),
+            _buildSegmentButton(
+              label: 'Home Repairs',
+              category: HubCategory.services,
+              icon: Icons.build_outlined,
+              activeColor: const Color(0xFFD97706),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildPill(String label, HubCategory category, IconData icon) {
+  Widget _buildSegmentButton({
+    required String label,
+    required HubCategory category,
+    required IconData icon,
+    required Color activeColor,
+  }) {
     final isSelected = selectedCategory == category;
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: InkWell(
-        onTap: () => onSelectCategory(category),
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF1E3A8A) : Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: isSelected ? const Color(0xFF1E3A8A) : const Color(0xFFCBD5E1),
+    return GestureDetector(
+      onTap: () => onSelectCategory(category),
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 4,
+                    offset: const Offset(0, 1),
+                  ),
+                ]
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 15,
+              color: isSelected ? activeColor : const Color(0xFF64748B),
             ),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: const Color(0xFF1E3A8A).withValues(alpha: 0.2),
-                      blurRadius: 6,
-                      offset: const Offset(0, 2),
-                    ),
-                  ]
-                : null,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(icon, size: 14, color: isSelected ? Colors.white : const Color(0xFF475569)),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                  color: isSelected ? Colors.white : const Color(0xFF334155),
-                ),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                color: isSelected ? const Color(0xFF0F172A) : const Color(0xFF64748B),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
