@@ -17,7 +17,7 @@ import '../widgets/recent_complaints_widget.dart';
 import '../widgets/recent_notices_list.dart';
 import '../widgets/society_info_card.dart';
 import '../widgets/mode_switcher_toggle.dart';
-import '../widgets/community_hub_coming_soon_view.dart';
+import '../../../hub/presentation/widgets/hub_dashboard_view.dart';
 
 final appHomeModeProvider =
     StateProvider<AppHomeMode>((ref) => AppHomeMode.societyGate);
@@ -65,7 +65,7 @@ class DashboardScreen extends ConsumerWidget {
 
                   // Mode 2: Community Hub (Classifieds, Maids, Services Showcase)
                   if (currentMode == AppHomeMode.communityHub) ...[
-                    CommunityHubComingSoonView(
+                    HubDashboardView(
                       onSwitchToGate: () => ref
                           .read(appHomeModeProvider.notifier)
                           .state = AppHomeMode.societyGate,

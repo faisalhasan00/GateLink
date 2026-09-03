@@ -141,7 +141,20 @@ class _CommunityHubComingSoonViewState
         ),
         const SizedBox(height: AppSpacing.sm),
 
-        // Feature 1: Resident Buy & Sell Classifieds
+        // Feature 1: Home Interiors & Designer Furniture
+        const _HubFeatureCard(
+          icon: Icons.chair_rounded,
+          iconBg: Color(0xFFFAF5FF),
+          iconColor: Color(0xFF9333EA),
+          title: 'Home Interiors & Designer Furniture',
+          subtitle:
+              'Curated living room sets, modular kitchens, luxury wardrobes, space-saving smart furniture, and free design consultations.',
+          badge: 'INTERIORS & FURNITURE',
+          badgeColor: Color(0xFF9333EA),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+
+        // Feature 2: Resident Buy & Sell Classifieds
         const _HubFeatureCard(
           icon: Icons.sell_outlined,
           iconBg: Color(0xFFF0FDF4),
@@ -154,7 +167,7 @@ class _CommunityHubComingSoonViewState
         ),
         const SizedBox(height: AppSpacing.sm),
 
-        // Feature 2: Hire Verified Domestic Staff
+        // Feature 3: Hire Verified Domestic Staff
         const _HubFeatureCard(
           icon: Icons.badge_outlined,
           iconBg: Color(0xFFF0F9FF),
@@ -167,7 +180,7 @@ class _CommunityHubComingSoonViewState
         ),
         const SizedBox(height: AppSpacing.sm),
 
-        // Feature 3: Doorstep Beauticians & Home Services
+        // Feature 4: Doorstep Beauticians & Home Services
         const _HubFeatureCard(
           icon: Icons.auto_awesome_outlined,
           iconBg: Color(0xFFFEF3C7),
