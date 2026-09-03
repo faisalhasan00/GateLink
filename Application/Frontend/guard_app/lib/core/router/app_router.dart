@@ -93,15 +93,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     refreshListenable: notifier,
     errorBuilder: (context, state) => const GuardDashboardScreen(),
     redirect: (context, state) {
-      final user = authService.currentUser ?? ref.read(currentUserProvider);
+      final user = FirebaseAuth.instance.currentUser ?? authService.currentUser ?? ref.read(currentUserProvider);
       final isAuth = user != null;
       final isSplash = state.uri.path == AppRoutes.splash;
       final isLoggingIn = state.uri.path == AppRoutes.login || 
                           state.uri.path == AppRoutes.onboarding ||
                           state.uri.path == AppRoutes.otp;
-
-      final isPendingRoute = state.uri.path == AppRoutes.pendingApproval;
-      final isUnauthorizedRoute = state.uri.path == AppRoutes.unauthorized;
 
       // Allow splash to render without kicking out to login prematurely
       if (isSplash) {
@@ -116,56 +113,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
-      // Authenticated user checks
-      final profileAsync = ref.read(userProfileProvider);
-      final userProfile = profileAsync.value;
-
-      // If profile document has synced from Firestore, apply role-gating
-      if (userProfile != null) {
-        final role = (userProfile['role'] as String? ?? 'guard').toLowerCase();
-        const allowedGuardRoles = [
-          'guard',
-          'security',
-          'security_guard',
-          'staff',
-          'gatekeeper',
-          'guard_leader',
-          'admin',
-          'society_admin',
-          'super_admin',
-        ];
-
-        // Non-guard accounts: allow login page if they explicitly navigated there to switch
-        if (!allowedGuardRoles.contains(role)) {
-          if (isLoggingIn) {
-            return null;
-          }
-          if (!isUnauthorizedRoute) {
-            return AppRoutes.unauthorized;
-          }
-          return null;
-        }
-
-        // Valid guard accounts:
-        if (isUnauthorizedRoute) {
-          return AppRoutes.guardDashboard;
-        }
-
-        final status = (userProfile['status'] as String? ?? 'active').toLowerCase();
-        final isApproved = status == 'active' || status == 'approved';
-
-        if (!isApproved && !isPendingRoute) {
-          return AppRoutes.pendingApproval;
-        }
-
-        if (isApproved && (isLoggingIn || isPendingRoute)) {
-          return AppRoutes.guardDashboard;
-        }
-      } else {
-        // Profile is still loading in background
-        if (isLoggingIn || isPendingRoute) {
-          return AppRoutes.guardDashboard;
-        }
+      // If user is authenticated and on login screens, go directly to guard dashboard
+      if (isAuth && isLoggingIn) {
+        return AppRoutes.guardDashboard;
       }
 
       return null;

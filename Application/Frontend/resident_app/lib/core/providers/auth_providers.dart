@@ -24,16 +24,10 @@ final currentUserProvider = Provider<User?>((ref) {
 
 /// Directly fetches the user profile using UserRepository with authoritative deletion auto-signout
 final userProfileProvider = FutureProvider<UserProfileModel?>((ref) async {
-  final user = ref.watch(currentUserProvider);
+  final user = ref.watch(currentUserProvider) ?? FirebaseAuth.instance.currentUser;
   if (user == null) return null;
   final repository = ref.watch(userRepositoryProvider);
   var profile = await repository.getUserProfile(user.uid);
-
-  // If user was explicitly suspended or deleted in database, sign out
-  if (profile != null && (profile.status == 'deleted' || profile.status == 'suspended')) {
-    await ref.read(authServiceProvider).signOut();
-    return null;
-  }
 
   // If profile document hasn't synced yet, provide fallback from Firebase Auth session
   profile ??= UserProfileModel(

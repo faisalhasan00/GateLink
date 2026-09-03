@@ -26,6 +26,11 @@ scratch/
 *.aab
 *.apk
 *.zip
+PlayStore_Submission_Kit/**/*.aab
+PlayStore_Submission_Kit/*.zip
+*.mp4
+*.mov
+Social Media Post/videos/
 
 # Flutter & Android build caches
 .dart_tool/
