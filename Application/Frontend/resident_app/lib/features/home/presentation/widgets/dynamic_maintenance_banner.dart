@@ -4,6 +4,7 @@ import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/widgets.dart';
 import '../../../maintenance/presentation/screens/pay_maintenance_screen.dart';
 
 class DynamicMaintenanceBanner extends ConsumerWidget {
@@ -363,23 +364,8 @@ class DynamicMaintenanceBanner extends ConsumerWidget {
           ),
         );
       },
-      loading: () => const _SkeletonBanner(),
+      loading: () => AppSkeleton.maintenanceBanner(),
       error: (err, stack) => const SizedBox.shrink(),
-    );
-  }
-}
-
-class _SkeletonBanner extends StatelessWidget {
-  const _SkeletonBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 84,
-      decoration: BoxDecoration(
-        color: Colors.grey.shade200,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-      ),
     );
   }
 }
