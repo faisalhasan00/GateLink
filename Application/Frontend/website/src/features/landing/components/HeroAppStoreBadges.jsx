@@ -14,10 +14,7 @@ export default function HeroAppStoreBadges({ isDark }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <a
-          href="https://apps.apple.com"
-          target="_blank"
-          rel="noreferrer"
+        <div
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -26,7 +23,6 @@ export default function HeroAppStoreBadges({ isDark }) {
             borderRadius: '8px',
             background: isDark ? '#020617' : '#0F172A',
             color: '#FFFFFF',
-            textDecoration: 'none',
             border: '1px solid rgba(255, 255, 255, 0.1)',
             fontSize: '12px',
             fontWeight: 700
@@ -34,12 +30,12 @@ export default function HeroAppStoreBadges({ isDark }) {
         >
           <Apple size={16} />
           <span>App Store</span>
-        </a>
+          <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: '#F59E0B', color: '#000000', fontWeight: 800, marginLeft: '2px' }}>
+            Coming Soon
+          </span>
+        </div>
 
-        <a
-          href="https://play.google.com/store/apps"
-          target="_blank"
-          rel="noreferrer"
+        <div
           style={{
             display: 'inline-flex',
             alignItems: 'center',
@@ -48,7 +44,6 @@ export default function HeroAppStoreBadges({ isDark }) {
             borderRadius: '8px',
             background: isDark ? '#020617' : '#0F172A',
             color: '#FFFFFF',
-            textDecoration: 'none',
             border: '1px solid rgba(255, 255, 255, 0.1)',
             fontSize: '12px',
             fontWeight: 700
@@ -56,7 +51,10 @@ export default function HeroAppStoreBadges({ isDark }) {
         >
           <Play size={15} color="#0EA5E9" fill="#0EA5E9" />
           <span>Google Play</span>
-        </a>
+          <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: '#F59E0B', color: '#000000', fontWeight: 800, marginLeft: '2px' }}>
+            Coming Soon
+          </span>
+        </div>
 
         <a
           href={getSocietyAdminUrl()}

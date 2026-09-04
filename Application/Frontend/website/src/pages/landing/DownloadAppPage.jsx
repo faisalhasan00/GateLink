@@ -47,8 +47,8 @@ export default function DownloadAppPage() {
                 gap: '6px',
                 padding: '6px 14px',
                 borderRadius: '999px',
-                background: isDark ? 'rgba(14, 165, 233, 0.15)' : '#EFF6FF',
-                color: isDark ? '#38BDF8' : '#1E3A8A',
+                background: isDark ? 'rgba(245, 158, 11, 0.15)' : '#FEF3C7',
+                color: isDark ? '#FBBF24' : '#D97706',
                 fontSize: '12px',
                 fontWeight: 800,
                 letterSpacing: '1px',
@@ -56,7 +56,7 @@ export default function DownloadAppPage() {
                 marginBottom: '16px'
               }}
             >
-              <Smartphone size={14} /> NATIVE iOS & ANDROID MOBILE APPS
+              <Smartphone size={14} /> NATIVE iOS & ANDROID MOBILE APPS — COMING SOON
             </div>
 
             <h1
@@ -69,7 +69,7 @@ export default function DownloadAppPage() {
                 lineHeight: 1.15
               }}
             >
-              Download GateLink Apps
+              GateLink Mobile Apps — Launching Soon
             </h1>
 
             <p
@@ -81,7 +81,7 @@ export default function DownloadAppPage() {
                 lineHeight: 1.6
               }}
             >
-              Get instant visitor approvals, pay maintenance online with GST receipts, and protect your gated community on your smartphone.
+              Our native iOS and Android apps for residents and gate security guards are coming soon! In the meantime, access all society management features via our Web Portal.
             </p>
 
             {/* App Selection Tabs */}

@@ -106,16 +106,18 @@ export default function FooterSection() {
 
           {/* Col 5: App Download Badges */}
           <div>
-            <h4 style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 800, marginBottom: '14px', letterSpacing: '0.5px' }}>GET MOBILE APPS</h4>
+            <h4 style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: 800, marginBottom: '14px', letterSpacing: '0.5px' }}>MOBILE APPS</h4>
             <p style={{ fontSize: '12px', color: '#94A3B8', marginBottom: '14px', lineHeight: 1.5 }}>
-              Install GateLink Resident App and Guard App on your mobile devices.
+              Native iOS Resident App and Android Guard App are coming soon.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <Link to="/download" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '8px 14px', borderRadius: '4px', background: '#1E293B', color: 'white', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.1)', fontSize: '12px', fontWeight: 700 }}>
-                <Apple size={16} /> iOS Resident App
+              <Link to="/download" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', padding: '8px 14px', borderRadius: '4px', background: '#1E293B', color: 'white', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.1)', fontSize: '12px', fontWeight: 700 }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Apple size={16} /> iOS Resident</span>
+                <span style={{ fontSize: '10px', background: '#F59E0B', color: '#000000', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>Soon</span>
               </Link>
-              <Link to="/download" style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', padding: '8px 14px', borderRadius: '4px', background: '#1E293B', color: 'white', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.1)', fontSize: '12px', fontWeight: 700 }}>
-                <Play size={16} color="#0EA5E9" /> Android Guard & Resident
+              <Link to="/download" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', padding: '8px 14px', borderRadius: '4px', background: '#1E293B', color: 'white', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.1)', fontSize: '12px', fontWeight: 700 }}>
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}><Play size={16} color="#0EA5E9" /> Android Guard</span>
+                <span style={{ fontSize: '10px', background: '#F59E0B', color: '#000000', padding: '2px 6px', borderRadius: '4px', fontWeight: 800 }}>Soon</span>
               </Link>
             </div>
           </div>

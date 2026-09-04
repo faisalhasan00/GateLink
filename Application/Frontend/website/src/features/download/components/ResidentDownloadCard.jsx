@@ -61,10 +61,7 @@ export default function ResidentDownloadCard({ isDark, onOpenDemo }) {
 
           {/* Download Store Buttons */}
           <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
-            <a
-              href="https://apps.apple.com"
-              target="_blank"
-              rel="noreferrer"
+            <div
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -73,22 +70,18 @@ export default function ResidentDownloadCard({ isDark, onOpenDemo }) {
                 borderRadius: '12px',
                 background: '#0F172A',
                 color: '#FFFFFF',
-                textDecoration: 'none',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
               }}
             >
               <Apple size={28} />
               <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: '10px', color: '#94A3B8', textTransform: 'uppercase' }}>Download on the</div>
-                <div style={{ fontSize: '15px', fontWeight: 800 }}>App Store</div>
+                <div style={{ fontSize: '10px', color: '#94A3B8', textTransform: 'uppercase' }}>App Store</div>
+                <div style={{ fontSize: '14px', fontWeight: 800, color: '#F59E0B' }}>Coming Soon</div>
               </div>
-            </a>
+            </div>
 
-            <a
-              href="https://play.google.com/store/apps"
-              target="_blank"
-              rel="noreferrer"
+            <div
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -97,17 +90,16 @@ export default function ResidentDownloadCard({ isDark, onOpenDemo }) {
                 borderRadius: '12px',
                 background: '#0F172A',
                 color: '#FFFFFF',
-                textDecoration: 'none',
                 border: '1px solid rgba(255, 255, 255, 0.15)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
               }}
             >
               <Play size={26} color="#0EA5E9" fill="#0EA5E9" />
               <div style={{ textAlign: 'left' }}>
-                <div style={{ fontSize: '10px', color: '#94A3B8', textTransform: 'uppercase' }}>Get it on</div>
-                <div style={{ fontSize: '15px', fontWeight: 800 }}>Google Play</div>
+                <div style={{ fontSize: '10px', color: '#94A3B8', textTransform: 'uppercase' }}>Google Play</div>
+                <div style={{ fontSize: '14px', fontWeight: 800, color: '#F59E0B' }}>Coming Soon</div>
               </div>
-            </a>
+            </div>
           </div>
         </div>
 
@@ -141,10 +133,10 @@ export default function ResidentDownloadCard({ isDark, onOpenDemo }) {
               <QrCode size={150} color="#0F172A" />
             </div>
             <div style={{ fontSize: '13px', fontWeight: 800, color: isDark ? '#FFFFFF' : '#1E293B', marginBottom: '4px' }}>
-              Scan to Install on Phone
+              Mobile Apps Launching Soon
             </div>
             <div style={{ fontSize: '11px', color: isDark ? '#94A3B8' : '#64748B' }}>
-              Supports iOS 15+ & Android 10+
+              Coming Soon for iOS & Android
             </div>
           </div>
         </div>
