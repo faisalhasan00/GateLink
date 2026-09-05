@@ -33,9 +33,29 @@ export default function Visitors() {
     return () => unsubscribe();
   }, [societyId]);
 
-  const formatTime = (isoString) => {
-    if (!isoString) return '-';
-    return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const formatTime = (timeVal) => {
+    if (!timeVal) return '-';
+    try {
+      let d;
+      if (typeof timeVal === 'object' && timeVal.seconds) {
+        d = new Date(timeVal.seconds * 1000);
+      } else {
+        d = new Date(timeVal);
+      }
+      if (isNaN(d.getTime())) return '-';
+      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return '-';
+    }
+  };
+
+  const safeStr = (val, fallback = '-') => {
+    if (val === null || val === undefined) return fallback;
+    if (typeof val === 'object') {
+      if (val.seconds) return new Date(val.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      return fallback;
+    }
+    return String(val);
   };
 
   if (loading) return <div style={{ padding: '20px' }}>Loading visitor logs...</div>;
@@ -76,14 +96,14 @@ export default function Visitors() {
               ) : (
                 visitors.map((v) => (
                   <tr key={v.id}>
-                    <td><strong>{v.name}</strong></td>
-                    <td>{v.type}</td>
-                    <td>{v.hostFlat}</td>
+                    <td><strong>{safeStr(v.name, 'Visitor')}</strong></td>
+                    <td>{safeStr(v.type, 'Guest')}</td>
+                    <td>{safeStr(v.hostFlat, 'N/A')}</td>
                     <td>{formatTime(v.entryTime)}</td>
                     <td>{formatTime(v.exitTime)}</td>
                     <td>
                       <span className={`badge ${v.status === 'inside' ? 'success' : 'primary'}`}>
-                        {v.status}
+                        {safeStr(v.status, 'inside')}
                       </span>
                     </td>
                   </tr>

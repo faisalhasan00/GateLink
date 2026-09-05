@@ -48,33 +48,44 @@ export default function PendingVisitorApprovals({
             </tr>
           </thead>
           <tbody>
-            {pendingVisitors.slice(0, 5).map((v) => (
-              <tr key={v.id}>
-                <td><strong>{v.name}</strong></td>
-                <td><span className="badge warning">{v.type || 'Guest'}</span></td>
-                <td><strong>{v.hostFlat}</strong></td>
-                <td>{v.hostResidentName || 'Resident'}</td>
-                <td><code>{v.vehicleNumber || 'Pedestrian'}</code></td>
-                <td>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      className="btn btn-primary"
-                      style={{ padding: '4px 10px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}
-                      onClick={() => onApprove(v.id)}
-                    >
-                      <CheckCircle size={14} /> Allow Entry
-                    </button>
-                    <button
-                      className="btn btn-outline"
-                      style={{ padding: '4px 10px', fontSize: '12px', color: 'var(--danger)', borderColor: 'var(--danger)' }}
-                      onClick={() => onDeny(v.id)}
-                    >
-                      Deny
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+            {pendingVisitors.slice(0, 5).map((v) => {
+              const safeText = (val, fallback = '') => {
+                if (val === null || val === undefined) return fallback;
+                if (typeof val === 'object') {
+                  if (val.seconds) return new Date(val.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                  return fallback;
+                }
+                return String(val);
+              };
+
+              return (
+                <tr key={v.id}>
+                  <td><strong>{safeText(v.name, 'Visitor')}</strong></td>
+                  <td><span className="badge warning">{safeText(v.type, 'Guest')}</span></td>
+                  <td><strong>{safeText(v.hostFlat, 'N/A')}</strong></td>
+                  <td>{safeText(v.hostResidentName, 'Resident')}</td>
+                  <td><code>{safeText(v.vehicleNumber, 'Pedestrian')}</code></td>
+                  <td>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        className="btn btn-primary"
+                        style={{ padding: '4px 10px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        onClick={() => onApprove(v.id)}
+                      >
+                        <CheckCircle size={14} /> Allow Entry
+                      </button>
+                      <button
+                        className="btn btn-outline"
+                        style={{ padding: '4px 10px', fontSize: '12px', color: 'var(--danger)', borderColor: 'var(--danger)' }}
+                        onClick={() => onDeny(v.id)}
+                      >
+                        Deny
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

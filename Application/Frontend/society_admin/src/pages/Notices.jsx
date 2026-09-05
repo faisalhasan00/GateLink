@@ -119,8 +119,15 @@ export default function Notices() {
                   let dateStr = '';
                   if (n.createdAt) {
                     try {
-                      const dt = new Date(n.createdAt);
-                      dateStr = dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                      let dt;
+                      if (typeof n.createdAt === 'object' && n.createdAt.seconds) {
+                        dt = new Date(n.createdAt.seconds * 1000);
+                      } else {
+                        dt = new Date(n.createdAt);
+                      }
+                      if (!isNaN(dt.getTime())) {
+                        dateStr = dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                      }
                     } catch (_) {}
                   }
 
