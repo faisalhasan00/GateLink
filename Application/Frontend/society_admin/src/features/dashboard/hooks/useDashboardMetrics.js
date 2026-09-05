@@ -90,14 +90,27 @@ export function useDashboardMetrics() {
           visitorsDenied: denied
         }));
 
-        const activityList = docs.slice(0, 15).map((v) => ({
-          id: v.id,
-          type: v.status === 'inside' ? 'Visitor Checked In' : v.status === 'pending' ? 'Visitor Approval Requested' : 'Visitor Activity',
-          description: `${v.name || 'Guest'} (${v.type || 'Visitor'}) for Flat ${v.hostFlat || 'N/A'}`,
-          user: v.hostResidentName || 'Resident',
-          time: v.entryTime || v.createdDate || 'Recent',
-          badgeColor: v.status === 'inside' ? 'var(--success)' : v.status === 'pending' ? 'var(--warning)' : 'var(--primary)'
-        }));
+        const activityList = docs.slice(0, 15).map((v) => {
+          let timeStr = 'Recent';
+          if (v.entryTime) {
+            if (typeof v.entryTime === 'object' && v.entryTime.seconds) {
+              timeStr = new Date(v.entryTime.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            } else if (typeof v.entryTime === 'string') {
+              timeStr = v.entryTime;
+            }
+          } else if (v.createdDate) {
+            timeStr = String(v.createdDate);
+          }
+
+          return {
+            id: v.id,
+            type: v.status === 'inside' ? 'Visitor Checked In' : v.status === 'pending' ? 'Visitor Approval Requested' : 'Visitor Activity',
+            description: `${typeof v.name === 'string' ? v.name : 'Guest'} (${typeof v.type === 'string' ? v.type : 'Visitor'}) for Flat ${typeof v.hostFlat === 'string' ? v.hostFlat : 'N/A'}`,
+            user: typeof v.hostResidentName === 'string' ? v.hostResidentName : 'Resident',
+            time: timeStr,
+            badgeColor: v.status === 'inside' ? 'var(--success)' : v.status === 'pending' ? 'var(--warning)' : 'var(--primary)'
+          };
+        });
         setRecentActivities(activityList);
         setLoading(false);
       },
