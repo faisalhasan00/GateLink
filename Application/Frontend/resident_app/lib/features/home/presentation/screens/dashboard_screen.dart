@@ -72,21 +72,11 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                   ] else ...[
                     // Mode 1: Core Society Gate & Community
-                    // Maintenance Alert Banner / All Dues Paid
+                    // Dynamic Maintenance Due Banner
                     const DynamicMaintenanceBanner(),
                     const SizedBox(height: AppSpacing.lg),
 
-                    // Quick Actions Grid
-                    const _SectionTitle(title: 'Quick Actions'),
-                    const SizedBox(height: AppSpacing.sm),
-                    const QuickActionsGrid(),
-                    const SizedBox(height: AppSpacing.lg),
-
-                    // Advertisement Banner (Dynamic Firestore Only)
-                    const AdsBannerSection(),
-                    const SizedBox(height: AppSpacing.lg),
-
-                    // Pending Visitors
+                    // Pending Visitors Approvals
                     _SectionTitle(
                       title: 'Pending Visitor Approvals',
                       action: _ViewAllButton(
@@ -95,6 +85,16 @@ class DashboardScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     const PendingVisitorsList(),
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // Quick Actions Section
+                    const _SectionTitle(title: 'Quick Actions'),
+                    const SizedBox(height: AppSpacing.sm),
+                    const QuickActionsGrid(),
+                    const SizedBox(height: AppSpacing.lg),
+
+                    // Advertisement Banner (Dynamic Firestore Only)
+                    const AdsBannerSection(),
                     const SizedBox(height: AppSpacing.lg),
 
                     // Recent Complaints Summary

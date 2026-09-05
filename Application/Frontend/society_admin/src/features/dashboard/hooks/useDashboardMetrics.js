@@ -90,12 +90,30 @@ export function useDashboardMetrics() {
           visitorsDenied: denied
         }));
 
+        const formatActivityTime = (rawTime) => {
+          if (!rawTime) return 'Recent';
+          try {
+            if (typeof rawTime === 'object' && rawTime.seconds) {
+              return new Date(rawTime.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            if (typeof rawTime === 'string') {
+              if (rawTime.includes('T')) {
+                return new Date(rawTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              }
+              return rawTime;
+            }
+            return 'Recent';
+          } catch {
+            return 'Recent';
+          }
+        };
+
         const activityList = docs.slice(0, 15).map((v) => ({
           id: v.id,
           type: v.status === 'inside' ? 'Visitor Checked In' : v.status === 'pending' ? 'Visitor Approval Requested' : 'Visitor Activity',
           description: `${v.name || 'Guest'} (${v.type || 'Visitor'}) for Flat ${v.hostFlat || 'N/A'}`,
           user: v.hostResidentName || 'Resident',
-          time: v.entryTime || v.createdDate || 'Recent',
+          time: formatActivityTime(v.entryTime || v.createdAt || v.createdDate),
           badgeColor: v.status === 'inside' ? 'var(--success)' : v.status === 'pending' ? 'var(--warning)' : 'var(--primary)'
         }));
         setRecentActivities(activityList);

@@ -86,6 +86,13 @@ class VisitorModel {
   }
 
   factory VisitorModel.fromMap(String docId, Map<String, dynamic> map) {
+    String? parseString(dynamic val) {
+      if (val is String) return val;
+      if (val is Timestamp) return val.toDate().toIso8601String();
+      if (val != null) return val.toString();
+      return null;
+    }
+
     final pType = map['passType'] as String? ?? 'one_time';
     return VisitorModel(
       id: docId,
@@ -93,38 +100,38 @@ class VisitorModel {
       phone: map['phone'] as String? ?? 'N/A',
       type: map['type'] as String? ?? map['purpose'] as String? ?? 'Guest',
       hostFlat: map['hostFlat'] as String? ?? 'N/A',
-      hostResidentName: map['hostResidentName'] as String?,
-      hostResidentUid: map['hostResidentUid'] as String?,
-      invitedBy: map['invitedBy'] as String?,
-      passCode: map['passCode'] as String?,
-      qrCode: map['qrCode'] as String?,
-      status: VisitorStatus.fromString(map['status'] as String?),
+      hostResidentName: parseString(map['hostResidentName']),
+      hostResidentUid: parseString(map['hostResidentUid']),
+      invitedBy: parseString(map['invitedBy']),
+      passCode: parseString(map['passCode']),
+      qrCode: parseString(map['qrCode']),
+      status: VisitorStatus.fromString(parseString(map['status'])),
       passType: pType,
-      validFrom: map['validFrom'] as String?,
-      validUntil: map['validUntil'] as String?,
+      validFrom: parseString(map['validFrom']),
+      validUntil: parseString(map['validUntil']),
       entryCount: (map['entryCount'] as num?)?.toInt() ?? 0,
       maxEntries: (map['maxEntries'] as num?)?.toInt() ?? (pType == 'multi_day' ? -1 : 1),
-      vehicleNumber: map['vehicleNumber'] as String?,
-      vehicleType: map['vehicleType'] as String?,
-      company: map['company'] as String?,
-      gender: map['gender'] as String?,
-      photoUrl: map['photoUrl'] as String?,
-      notes: map['notes'] as String?,
-      guardUid: map['guardUid'] as String?,
-      gateName: map['gateName'] as String?,
-      expectedDate: map['expectedDate'] as String?,
-      expectedTime: map['expectedTime'] as String?,
-      entryTime: map['entryTime'] as String?,
-      exitTime: map['exitTime'] as String?,
-      createdDate: map['createdDate'] as String? ?? map['createdAt'] as String?,
-      createdAt: map['createdAt'] as String?,
-      approvedAt: map['approvedAt'] as String?,
-      approvedBy: map['approvedBy'] as String?,
-      rejectedAt: map['rejectedAt'] as String?,
-      rejectedBy: map['rejectedBy'] as String?,
-      rejectionReason: map['rejectionReason'] as String?,
+      vehicleNumber: parseString(map['vehicleNumber']),
+      vehicleType: parseString(map['vehicleType']),
+      company: parseString(map['company']),
+      gender: parseString(map['gender']),
+      photoUrl: parseString(map['photoUrl']),
+      notes: parseString(map['notes']),
+      guardUid: parseString(map['guardUid']),
+      gateName: parseString(map['gateName']),
+      expectedDate: parseString(map['expectedDate']),
+      expectedTime: parseString(map['expectedTime']),
+      entryTime: parseString(map['entryTime']),
+      exitTime: parseString(map['exitTime']),
+      createdDate: parseString(map['createdDate']) ?? parseString(map['createdAt']),
+      createdAt: parseString(map['createdAt']),
+      approvedAt: parseString(map['approvedAt']),
+      approvedBy: parseString(map['approvedBy']),
+      rejectedAt: parseString(map['rejectedAt']),
+      rejectedBy: parseString(map['rejectedBy']),
+      rejectionReason: parseString(map['rejectionReason']),
       durationMinutes: map['durationMinutes'] as int?,
-      durationString: map['durationString'] as String?,
+      durationString: parseString(map['durationString']),
     );
   }
 

@@ -49,47 +49,62 @@ class AuthService {
 
     // Check root users doc first
     try {
-      final userDoc = await _db.doc('users/$uid').get();
-      if (userDoc.exists) {
-        final data = userDoc.data() ?? {};
-        final status = (data['status'] as String?)?.toLowerCase();
-        if (status == 'deleted' || status == 'suspended') {
-          await _storage.delete(key: _kSessionKey);
-          await _storage.delete(key: _kUidKey);
-          await _auth.signOut();
-          throw FirebaseAuthException(
-            code: 'user-disabled',
-            message: 'Your account is suspended. Please contact your society admin.',
-          );
+      var userDoc = await _db.doc('users/$uid').get();
+      Map<String, dynamic>? data = userDoc.data();
+
+      // If root users/$uid is not found, attempt recovery from society users collection
+      if (!userDoc.exists || data == null) {
+        final email = cred.user!.email?.trim().toLowerCase() ?? '';
+        if (email.isNotEmpty) {
+          final snap = await _db
+              .collectionGroup('users')
+              .where('email', isEqualTo: email)
+              .limit(1)
+              .get();
+          if (snap.docs.isNotEmpty) {
+            final foundDoc = snap.docs.first;
+            data = Map<String, dynamic>.from(foundDoc.data());
+            data['uid'] = uid;
+            data['id'] = uid;
+            try {
+              await _db.doc('users/$uid').set(data, SetOptions(merge: true));
+            } catch (_) {}
+          }
         }
-      } else {
-        // Initialize user mapping document cleanly without mock strings
-        final data = {
-          'uid': uid,
-          'email': cleanEmail,
-          'name': cred.user!.displayName ?? 'Resident',
-          'role': 'resident',
-          'societyId': '',
-          'societyName': '',
-          'flatNumber': '',
-          'status': 'active',
-          'createdAt': DateTime.now().toIso8601String(),
-        };
-        await _db.doc('users/$uid').set(data, SetOptions(merge: true));
       }
 
-      try {
-        await _storage.write(key: _kSessionKey, value: 'true');
-        await _storage.write(key: _kUidKey, value: uid);
-      } catch (_) {}
+      if (data == null) {
+        await _storage.delete(key: _kSessionKey);
+        await _storage.delete(key: _kUidKey);
+        await _auth.signOut();
+        throw FirebaseAuthException(
+          code: 'user-not-found',
+          message: 'Account not found or has been deleted by society admin. Please contact your society admin.',
+        );
+      }
+
+      final status = (data['status'] as String?)?.toLowerCase();
+      if (status == 'deleted' || status == 'suspended' || status == 'deactivated') {
+        await _storage.delete(key: _kSessionKey);
+        await _storage.delete(key: _kUidKey);
+        await _auth.signOut();
+        throw FirebaseAuthException(
+          code: 'user-disabled',
+          message: 'Your account is suspended or deleted. Please contact your society admin.',
+        );
+      }
     } catch (e) {
       if (e is FirebaseAuthException) rethrow;
-      // Do not block authentication if Firestore sync is deferred
-      try {
-        await _storage.write(key: _kSessionKey, value: 'true');
-        await _storage.write(key: _kUidKey, value: uid);
-      } catch (_) {}
+      throw FirebaseAuthException(
+        code: 'user-not-found',
+        message: 'Account verification failed. Please contact your society admin.',
+      );
     }
+
+    try {
+      await _storage.write(key: _kSessionKey, value: 'true');
+      await _storage.write(key: _kUidKey, value: uid);
+    } catch (_) {}
 
     return cred;
   }

@@ -35,7 +35,14 @@ export default function Visitors() {
 
   const formatTime = (isoString) => {
     if (!isoString) return '-';
-    return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    try {
+      if (typeof isoString === 'object' && isoString.seconds) {
+        return new Date(isoString.seconds * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+      return new Date(isoString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return '-';
+    }
   };
 
   if (loading) return <div style={{ padding: '20px' }}>Loading visitor logs...</div>;

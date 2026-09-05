@@ -14,6 +14,7 @@ import 'firebase_options.dart';
 import 'core/router/app_router.dart';
 import 'core/theme/app_theme.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/doorbell_call_service.dart';
 import 'core/providers/firebase_providers.dart';
 
 /// Background FCM handler — must be top-level
@@ -25,6 +26,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     }
     await NotificationService.init();
+    await DoorbellCallService.init();
 
     final data = message.data;
     final type = data['type'] as String? ?? '';
@@ -35,15 +37,24 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
       final visitorName = data['visitorName'] as String? ?? 'Visitor';
       final visitorType = data['visitorType'] as String? ?? 'Guest';
       final flatNumber = data['hostFlat'] as String? ?? '';
-      final visitorId = data['visitorId'] as String?;
-      final societyId = data['societyId'] as String?;
+      final visitorId = data['visitorId'] as String? ?? '';
+      final societyId = data['societyId'] as String? ?? '';
+      final company = data['company'] as String? ?? '';
+      final vehicleNumber = data['vehicleNumber'] as String? ?? '';
+      final gateName = data['gateName'] as String? ?? '';
+      final photoUrl = data['photoUrl'] as String? ?? '';
 
+      // Trigger Heads-up Rich Interactive Notification card with 1-tap direct background actions (Allow Entry, Leave at Gate, Deny)
       await NotificationService.showVisitorAlert(
         visitorName: visitorName,
         visitorType: visitorType,
         flatNumber: flatNumber,
         visitorId: visitorId,
         societyId: societyId,
+        company: company,
+        vehicleNumber: vehicleNumber,
+        gateName: gateName,
+        photoUrl: photoUrl,
       );
     } else if (type == 'sos' || type == 'emergency') {
       final residentName = data['residentName'] as String? ?? 'Resident';
@@ -67,7 +78,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 }
 
 /// Saves the device FCM token to Firestore so Cloud Functions can reach this device.
-Future<void> saveFcmToken() async {
+Future<void> saveFcmToken([String? explicitSocietyId]) async {
   final user = FirebaseAuth.instance.currentUser;
   if (user == null) {
     debugPrint('saveFcmToken: No user logged in');
@@ -80,12 +91,24 @@ Future<void> saveFcmToken() async {
       return;
     }
     debugPrint('saveFcmToken: Fresh token generated => ${token.substring(0, 15)}...');
-    final userDoc = await FirebaseFirestore.instance
+
+    // 1. Always save directly to root user mapping doc
+    await FirebaseFirestore.instance
         .collection('users')
         .doc(user.uid)
-        .get();
-    final societyId =
-        (userDoc.data()?['societyId'] as String?)?.trim() ?? '';
+        .set({'fcmToken': token}, SetOptions(merge: true));
+    debugPrint('FCM token saved to users/${user.uid}');
+
+    // 2. Resolve societyId
+    String societyId = (explicitSocietyId ?? '').trim();
+    if (societyId.isEmpty) {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      societyId = (userDoc.data()?['societyId'] as String?)?.trim() ?? '';
+    }
+
     if (societyId.isNotEmpty) {
       await FirebaseFirestore.instance
           .collection('societies/$societyId/users')
@@ -93,12 +116,6 @@ Future<void> saveFcmToken() async {
           .set({'fcmToken': token}, SetOptions(merge: true));
       debugPrint('FCM token saved for society $societyId');
     }
-    // Also save directly to user mapping doc
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid)
-        .set({'fcmToken': token}, SetOptions(merge: true));
-    debugPrint('FCM token saved to users/${user.uid}');
   } catch (e) {
     debugPrint('Error saving FCM token: $e');
   }
@@ -180,11 +197,12 @@ void main() async {
     debugPrint('Firebase/Crashlytics init error: $e');
   }
 
-  // Initialize local notifications safely
+  // Initialize local notifications and Doorbell CallKit engine safely
   try {
     await NotificationService.init();
+    await DoorbellCallService.init();
   } catch (e) {
-    debugPrint('NotificationService init error: $e');
+    debugPrint('Notification/Doorbell service init error: $e');
   }
 
   // Register background FCM handler
@@ -247,6 +265,10 @@ void main() async {
             flatNumber: data['hostFlat'] as String? ?? '',
             visitorId: data['visitorId'] as String?,
             societyId: data['societyId'] as String?,
+            company: data['company'] as String?,
+            vehicleNumber: data['vehicleNumber'] as String?,
+            gateName: data['gateName'] as String?,
+            photoUrl: data['photoUrl'] as String?,
           );
         } else if (type == 'sos' || type == 'emergency') {
           await NotificationService.showSosAlert(

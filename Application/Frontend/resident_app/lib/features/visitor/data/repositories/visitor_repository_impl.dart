@@ -50,13 +50,22 @@ class VisitorRepositoryImpl implements VisitorRepository {
               return true;
             }
 
-            // 2. Normalized Flat match
+            // 2. Normalized Flat match (bidirectional substring check)
             final vFlat = normalize(v.hostFlat);
-            if (cleanFlat.isNotEmpty &&
-                (vFlat == cleanFlat ||
-                 vFlat == cleanTowerFlat ||
-                 (cleanFlat.length >= 2 && vFlat.endsWith(cleanFlat)) ||
-                 (vFlat.length >= 2 && cleanFlat.endsWith(vFlat)))) {
+            if (cleanFlat.isNotEmpty && vFlat.isNotEmpty) {
+              if (vFlat == cleanFlat ||
+                  vFlat == cleanTowerFlat ||
+                  vFlat.contains(cleanFlat) ||
+                  cleanFlat.contains(vFlat) ||
+                  (cleanTowerFlat.isNotEmpty && (vFlat.contains(cleanTowerFlat) || cleanTowerFlat.contains(vFlat)))) {
+                return true;
+              }
+            }
+
+            // 3. Fallback match if both flat numbers match raw digits
+            final vDigits = v.hostFlat.replaceAll(RegExp(r'[^0-9]'), '');
+            final userDigits = flatNumber.replaceAll(RegExp(r'[^0-9]'), '');
+            if (vDigits.isNotEmpty && userDigits.isNotEmpty && vDigits == userDigits) {
               return true;
             }
 
@@ -105,13 +114,22 @@ class VisitorRepositoryImpl implements VisitorRepository {
               return true;
             }
 
-            // 2. Normalized Flat match
+            // 2. Normalized Flat match (bidirectional substring check)
             final vFlat = normalize(v.hostFlat);
-            if (cleanFlat.isNotEmpty &&
-                (vFlat == cleanFlat ||
-                 vFlat == cleanTowerFlat ||
-                 (cleanFlat.length >= 2 && vFlat.endsWith(cleanFlat)) ||
-                 (vFlat.length >= 2 && cleanFlat.endsWith(vFlat)))) {
+            if (cleanFlat.isNotEmpty && vFlat.isNotEmpty) {
+              if (vFlat == cleanFlat ||
+                  vFlat == cleanTowerFlat ||
+                  vFlat.contains(cleanFlat) ||
+                  cleanFlat.contains(vFlat) ||
+                  (cleanTowerFlat.isNotEmpty && (vFlat.contains(cleanTowerFlat) || cleanTowerFlat.contains(vFlat)))) {
+                return true;
+              }
+            }
+
+            // 3. Fallback match if both flat numbers match raw digits
+            final vDigits = v.hostFlat.replaceAll(RegExp(r'[^0-9]'), '');
+            final userDigits = flatNumber.replaceAll(RegExp(r'[^0-9]'), '');
+            if (vDigits.isNotEmpty && userDigits.isNotEmpty && vDigits == userDigits) {
               return true;
             }
 

@@ -1,134 +1,37 @@
-import 'dart:convert';
-import 'dart:io';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import '../../firebase_options.dart';
+import 'notifications/doorbell_sound_service.dart';
+import 'notifications/notification_action_handler.dart';
+import 'notifications/notification_channel_manager.dart';
+import 'notifications/local_notification_engine.dart';
 
-/// Top-level background notification response handler (for action buttons when app is backgrounded or closed).
-@pragma('vm:entry-point')
-Future<void> notificationBackgroundActionHandler(NotificationResponse response) async {
-  debugPrint('Notification background action received: ${response.actionId} with payload: ${response.payload}');
+// Re-export micro-services so callers can import cleanly
+export 'notifications/doorbell_sound_service.dart';
+export 'notifications/notification_action_handler.dart';
+export 'notifications/notification_channel_manager.dart';
+export 'notifications/local_notification_engine.dart';
 
-  if (response.payload == null || response.payload!.isEmpty) return;
-
-  try {
-    if (Firebase.apps.isEmpty) {
-      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-    }
-
-    final data = jsonDecode(response.payload!) as Map<String, dynamic>;
-    final societyId = data['societyId'] as String? ?? '';
-    final visitorId = data['visitorId'] as String? ?? '';
-
-    if (societyId.isEmpty || visitorId.isEmpty) return;
-
-    final actionId = response.actionId;
-    final nowIso = DateTime.now().toIso8601String();
-
-    if (actionId == NotificationService.actionApprove) {
-      await FirebaseFirestore.instance
-          .doc('societies/$societyId/visitors/$visitorId')
-          .update({
-        'status': 'approved',
-        'approvedAt': nowIso,
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-      debugPrint('Visitor $visitorId approved via background notification action');
-    } else if (actionId == NotificationService.actionReject) {
-      await FirebaseFirestore.instance
-          .doc('societies/$societyId/visitors/$visitorId')
-          .update({
-        'status': 'rejected',
-        'rejectedAt': nowIso,
-        'rejectionReason': 'Denied via quick notification action',
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-      debugPrint('Visitor $visitorId rejected via background notification action');
-    }
-  } catch (e) {
-    debugPrint('Error processing background notification action: $e');
-  }
-}
-
-/// Production-grade Local & Heads-up Notification Engine.
-/// Configures high-importance Android channels with custom Resident Bell sound, vibration, and
-/// interactive Action Buttons (Approve & Reject) for instant delivery.
+/// Facade coordinating Android Channels, Sound Engine, and Notification Dispatch.
 class NotificationService {
   NotificationService._();
   static final _plugin = FlutterLocalNotificationsPlugin();
   static bool _initialized = false;
 
-  // v3 Channel IDs enforce distinct custom doorbell tone on Android devices
-  static const String channelGateId = 'gatelink_resident_doorbell_v3';
-  static const String channelEmergencyId = 'gatelink_resident_emergency_v3';
-  static const String channelUpdatesId = 'gatelink_resident_updates_v3';
+  // Action Key Shortcuts
+  static const String actionAllow = NotificationActionKeys.allow;
+  static const String actionLeaveAtGate = NotificationActionKeys.leaveAtGate;
+  static const String actionDeny = NotificationActionKeys.deny;
+  static const String actionApprove = NotificationActionKeys.allow;
+  static const String actionReject = NotificationActionKeys.deny;
 
-  static const String actionApprove = 'action_approve';
-  static const String actionReject = 'action_reject';
-
-  static const RawResourceAndroidNotificationSound _residentBellSound =
-      RawResourceAndroidNotificationSound('resident_bell');
-
+  /// Initializes the local notification plugin and configures all Android channels.
   static Future<void> init() async {
     if (_initialized) return;
 
-    // 1. Android Notification Channels (High Priority, Custom Doorbell Ringtone)
-    const gateChannel = AndroidNotificationChannel(
-      channelGateId,
-      '🚪 Gate & Visitor Doorbell',
-      description: 'Immediate alerts with custom GateLink doorbell chime when visitors arrive.',
-      importance: Importance.max,
-      playSound: true,
-      sound: _residentBellSound,
-      audioAttributesUsage: AudioAttributesUsage.notificationRingtone,
-      enableVibration: true,
-      showBadge: true,
-    );
+    // 1. Configure Android Channels via ChannelManager
+    await NotificationChannelManager.setupChannels(_plugin);
 
-    const emergencyChannel = AndroidNotificationChannel(
-      channelEmergencyId,
-      '🚨 Emergency SOS Alerts',
-      description: 'High-priority emergency alerts and safety broadcasts.',
-      importance: Importance.max,
-      playSound: true,
-      sound: _residentBellSound,
-      audioAttributesUsage: AudioAttributesUsage.alarm,
-      enableVibration: true,
-      showBadge: true,
-    );
-
-    const updatesChannel = AndroidNotificationChannel(
-      channelUpdatesId,
-      '📢 Society Notices & Bills',
-      description: 'Announcements, maintenance invoices, and society notices.',
-      importance: Importance.high,
-      playSound: true,
-      sound: _residentBellSound,
-      audioAttributesUsage: AudioAttributesUsage.notification,
-      showBadge: true,
-    );
-
-    final androidPlugin = _plugin.resolvePlatformSpecificImplementation<
-        AndroidFlutterLocalNotificationsPlugin>();
-
-    if (androidPlugin != null) {
-      // Delete old default channels so they don't conflict
-      await androidPlugin.deleteNotificationChannel('gate_security_channel');
-      await androidPlugin.deleteNotificationChannel('gate_security_channel_v2');
-
-      await androidPlugin.createNotificationChannel(gateChannel);
-      await androidPlugin.createNotificationChannel(emergencyChannel);
-      await androidPlugin.createNotificationChannel(updatesChannel);
-
-      // Request notification permissions for Android 13+ (API 33+)
-      if (Platform.isAndroid) {
-        await androidPlugin.requestNotificationsPermission();
-      }
-    }
-
-    // 2. Initialization Settings
+    // 2. Configure Plugin Initialization Settings
     const initSettings = InitializationSettings(
       android: AndroidInitializationSettings('@mipmap/ic_launcher'),
     );
@@ -136,7 +39,7 @@ class NotificationService {
     await _plugin.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) async {
-        debugPrint('Notification foreground action: ${response.actionId} with payload: ${response.payload}');
+        debugPrint('NotificationService foreground response: ${response.actionId}');
         if (response.actionId != null && response.actionId!.isNotEmpty) {
           await notificationBackgroundActionHandler(response);
         }
@@ -145,151 +48,73 @@ class NotificationService {
     );
 
     _initialized = true;
-    debugPrint('NotificationService initialized successfully with gatelink_resident_doorbell_v3 custom sound');
+    debugPrint('NotificationService initialized successfully with micro-service architecture.');
   }
 
-  /// Trigger a heads-up gate arrival notification with 2 action buttons: Approve and Reject
+  /// Plays custom GateLink doorbell chime.
+  static Future<void> playDoorbellChime({bool loop = false}) async {
+    await DoorbellSoundService.instance.playDoorbellChime(loop: loop);
+  }
+
+  /// Stops audio chime playback.
+  static Future<void> stopAudio() async {
+    await DoorbellSoundService.instance.stop();
+  }
+
+  /// Trigger interactive Doorbell & Delivery Action Card.
   static Future<void> showVisitorAlert({
     required String visitorName,
     required String visitorType,
     required String flatNumber,
     String? visitorId,
     String? societyId,
+    String? company,
+    String? vehicleNumber,
+    String? gateName,
+    String? photoUrl,
   }) async {
     await init();
-
-    final payloadData = jsonEncode({
-      'visitorId': visitorId ?? '',
-      'societyId': societyId ?? '',
-      'visitorName': visitorName,
-      'flatNumber': flatNumber,
-    });
-
-    final notifId = visitorId != null && visitorId.isNotEmpty
-        ? visitorId.hashCode.remainder(100000)
-        : DateTime.now().millisecondsSinceEpoch.remainder(100000);
-
-    await _plugin.show(
-      notifId,
-      '🚪 Visitor at Gate — Flat $flatNumber',
-      '$visitorName ($visitorType) is waiting for your entry approval.',
-      NotificationDetails(
-        android: AndroidNotificationDetails(
-          channelGateId,
-          '🚪 Gate & Visitor Doorbell',
-          channelDescription: 'Visitor arrival alerts with custom doorbell chime and quick action buttons',
-          importance: Importance.max,
-          priority: Priority.max,
-          playSound: true,
-          sound: _residentBellSound,
-          audioAttributesUsage: AudioAttributesUsage.notificationRingtone,
-          enableVibration: true,
-          icon: '@mipmap/ic_launcher',
-          styleInformation: BigTextStyleInformation(
-            '$visitorName ($visitorType) is at the security gate for Flat $flatNumber. Please approve or deny entry.',
-            contentTitle: '🚪 Visitor Approval — Flat $flatNumber',
-            summaryText: 'Gate Request',
-          ),
-          actions: const <AndroidNotificationAction>[
-            AndroidNotificationAction(
-              actionApprove,
-              'Approve ✅',
-              showsUserInterface: true,
-              cancelNotification: true,
-            ),
-            AndroidNotificationAction(
-              actionReject,
-              'Reject ❌',
-              showsUserInterface: true,
-              cancelNotification: true,
-            ),
-          ],
-        ),
-      ),
-      payload: payloadData,
+    await LocalNotificationEngine.showVisitorAlert(
+      _plugin,
+      visitorName: visitorName,
+      visitorType: visitorType,
+      flatNumber: flatNumber,
+      visitorId: visitorId,
+      societyId: societyId,
+      company: company,
+      vehicleNumber: vehicleNumber,
+      gateName: gateName,
+      photoUrl: photoUrl,
     );
   }
 
-  /// Trigger an Emergency SOS broadcast notification
+  /// Trigger an Emergency SOS broadcast alert.
   static Future<void> showSosAlert({
     required String residentName,
     required String flatNumber,
     required String alertType,
   }) async {
     await init();
-    await _plugin.show(
-      DateTime.now().millisecondsSinceEpoch.remainder(100000),
-      '🚨 EMERGENCY SOS ALERT: Flat $flatNumber',
-      '$residentName triggered an urgent $alertType alert.',
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          channelEmergencyId,
-          '🚨 Emergency SOS Alerts',
-          channelDescription: 'Critical life-safety alerts',
-          importance: Importance.max,
-          priority: Priority.max,
-          playSound: true,
-          sound: _residentBellSound,
-          audioAttributesUsage: AudioAttributesUsage.alarm,
-          enableVibration: true,
-          icon: '@mipmap/ic_launcher',
-          styleInformation: BigTextStyleInformation(''),
-        ),
-      ),
+    await LocalNotificationEngine.showSosAlert(
+      _plugin,
+      residentName: residentName,
+      flatNumber: flatNumber,
+      alertType: alertType,
     );
   }
 
-  /// Trigger a society notice or announcement notification
+  /// Trigger a standard society notice / bill alert.
   static Future<void> showNoticeAlert({
     required String title,
     required String body,
+    String? payload,
   }) async {
     await init();
-    await _plugin.show(
-      DateTime.now().millisecondsSinceEpoch.remainder(100000),
-      '📢 $title',
-      body,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          channelUpdatesId,
-          '📢 Society Notices & Bills',
-          channelDescription: 'Updates and broadcasts from management',
-          importance: Importance.high,
-          priority: Priority.high,
-          playSound: true,
-          sound: _residentBellSound,
-          audioAttributesUsage: AudioAttributesUsage.notification,
-          icon: '@mipmap/ic_launcher',
-          styleInformation: BigTextStyleInformation(''),
-        ),
-      ),
-    );
-  }
-
-  /// Trigger a bill confirmation or due reminder notification
-  static Future<void> showBillAlert({
-    required String title,
-    required String body,
-  }) async {
-    await init();
-    await _plugin.show(
-      DateTime.now().millisecondsSinceEpoch.remainder(100000),
-      '💳 $title',
-      body,
-      const NotificationDetails(
-        android: AndroidNotificationDetails(
-          channelUpdatesId,
-          '📢 Society Notices & Bills',
-          channelDescription: 'Maintenance and payment receipts',
-          importance: Importance.high,
-          priority: Priority.high,
-          playSound: true,
-          sound: _residentBellSound,
-          audioAttributesUsage: AudioAttributesUsage.notification,
-          icon: '@mipmap/ic_launcher',
-          styleInformation: BigTextStyleInformation(''),
-        ),
-      ),
+    await LocalNotificationEngine.showNoticeAlert(
+      _plugin,
+      title: title,
+      body: body,
+      payload: payload,
     );
   }
 }

@@ -8,8 +8,10 @@ import {
   query, 
   where 
 } from 'firebase/firestore';
+import { initializeApp, deleteApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth';
 import { httpsCallable } from 'firebase/functions';
-import { db, functions } from '../../firebase';
+import { db, functions, firebaseConfig } from '../../firebase';
 
 export const residentService = {
   subscribeResidents(societyId, callback, onError) {
@@ -21,45 +23,25 @@ export const residentService = {
     const emitMerged = () => {
       const map = new Map();
       subcollectionData.forEach(item => {
-        const key = item.uid || item.id;
-        if (key) map.set(key, { id: key, ...item });
+        if (item.id) map.set(item.id, item);
       });
-
       globalUsersData.forEach(item => {
-        const key = item.uid || item.id;
-        if (key) {
-          const existing = map.get(key) || {};
-          map.set(key, { ...existing, id: key, ...item });
-        }
+        if (item.id) map.set(item.id, { ...(map.get(item.id) || {}), ...item });
       });
-
-      const mergedList = Array.from(map.values()).filter(u => u.role !== 'super_admin');
-      mergedList.sort((a, b) => {
-        const timeA = new Date(a.createdAt || a.createdDate || a.updatedAt || 0).getTime();
-        const timeB = new Date(b.createdAt || b.createdDate || b.updatedAt || 0).getTime();
-        return timeB - timeA;
-      });
-
-      callback(mergedList);
+      callback(Array.from(map.values()));
     };
 
-    const unsub1 = onSnapshot(collection(db, `societies/${societyId}/users`), (snap) => {
+    const q1 = query(collection(db, `societies/${societyId}/users`));
+    const unsub1 = onSnapshot(q1, (snap) => {
       subcollectionData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       emitMerged();
     }, onError);
 
-    let unsub2 = () => {};
-    try {
-      const qGlobal = query(collection(db, 'users'), where('societyId', '==', societyId));
-      unsub2 = onSnapshot(qGlobal, (snap) => {
-        globalUsersData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        emitMerged();
-      }, (err) => {
-        console.warn('Global users query notice:', err);
-      });
-    } catch (e) {
-      console.warn('Could not attach global users listener:', e);
-    }
+    const q2 = query(collection(db, 'users'), where('societyId', '==', societyId));
+    const unsub2 = onSnapshot(q2, (snap) => {
+      globalUsersData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      emitMerged();
+    }, onError);
 
     return () => {
       unsub1();
@@ -69,26 +51,101 @@ export const residentService = {
 
   async addResident(societyId, residentData) {
     if (!societyId) throw new Error('Society ID is required');
+    const email = (residentData.email || '').trim().toLowerCase();
+    const password = (residentData.password || '').trim();
+    const name = (residentData.name || 'Resident').trim();
+    const phone = (residentData.phone || '').trim();
+    const flatNumber = (residentData.flatNumber || '').trim();
+    const role = residentData.role || 'resident';
+    const ownershipType = residentData.ownershipType || 'Owner';
+
+    // 1. Primary: Provision user account via server-side Cloud Function (Admin SDK)
+    try {
+      const createStaffCallable = httpsCallable(functions, 'createStaffUser');
+      const res = await createStaffCallable({
+        societyId,
+        email,
+        password,
+        name,
+        phone,
+        flatNumber,
+        ownershipType,
+        role,
+        department: 'Resident',
+      });
+      if (res?.data?.success && res.data.uid) {
+        return res.data.uid;
+      }
+    } catch (callableErr) {
+      console.warn('createStaffUser Cloud Function call failed, trying secondaryAuth fallback:', callableErr);
+    }
+
+    // 2. Fallback: Secondary client-side Firebase Auth instance
+    let userUid = null;
+
+    if (email && password) {
+      const secondaryAppName = `ResidentSecondaryApp_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+      let secondaryApp = null;
+      try {
+        secondaryApp = initializeApp(firebaseConfig, secondaryAppName);
+        const secondaryAuth = getAuth(secondaryApp);
+        try {
+          const userCredential = await createUserWithEmailAndPassword(secondaryAuth, email, password);
+          userUid = userCredential.user.uid;
+        } catch (createErr) {
+          if (createErr.code === 'auth/email-already-in-use') {
+            try {
+              const signInCred = await signInWithEmailAndPassword(secondaryAuth, email, password);
+              userUid = signInCred.user.uid;
+            } catch (signInErr) {
+              throw new Error(`An account with email "${email}" already exists in Firebase Auth with a different password. Please delete the old account or use its existing credentials.`);
+            }
+          } else {
+            throw createErr;
+          }
+        }
+        await signOut(secondaryAuth);
+      } catch (authErr) {
+        console.warn('Secondary auth creation error:', authErr);
+        throw new Error(`Failed to create resident login account: ${authErr.message}`);
+      } finally {
+        if (secondaryApp) {
+          try {
+            await deleteApp(secondaryApp);
+          } catch (_) {}
+        }
+      }
+    }
+
+    if (!userUid) {
+      throw new Error('Could not authenticate or create resident user. Please check email and password.');
+    }
+
+    const uid = userUid;
     const timestamp = new Date().toISOString();
-    const docRef = doc(collection(db, `societies/${societyId}/users`));
     const payload = {
       ...residentData,
-      id: docRef.id,
-      uid: docRef.id,
+      id: uid,
+      uid: uid,
       societyId: societyId,
-      role: residentData.role || 'resident',
+      name: name,
+      email: email,
+      phone: phone,
+      flatNumber: flatNumber,
+      ownershipType: ownershipType,
+      role: role,
       status: 'active',
       createdAt: timestamp,
       updatedAt: timestamp,
     };
 
-    await setDoc(docRef, payload);
+    await setDoc(doc(db, `societies/${societyId}/users`, uid), payload, { merge: true });
     try {
-      await setDoc(doc(db, 'users', docRef.id), payload, { merge: true });
+      await setDoc(doc(db, 'users', uid), payload, { merge: true });
     } catch (e) {
       console.warn('Could not sync to global users collection:', e);
     }
-    return docRef.id;
+    return uid;
   },
 
   async updateResidentStatus(societyId, userId, status) {
@@ -111,11 +168,17 @@ export const residentService = {
   async deleteResident(societyId, userId) {
     if (!societyId || !userId) throw new Error('Society ID and User ID are required');
     try {
-      await deleteDoc(doc(db, `societies/${societyId}/users`, userId));
-    } catch (e) {}
-    try {
-      await deleteDoc(doc(db, 'users', userId));
-    } catch (e) {}
+      const deleteUserCallable = httpsCallable(functions, 'adminDeleteUser');
+      await deleteUserCallable({ societyId, userId });
+    } catch (e) {
+      console.warn('Could not delete via adminDeleteUser Cloud Function, falling back to direct Firestore delete:', e);
+      try {
+        await deleteDoc(doc(db, `societies/${societyId}/users`, userId));
+      } catch (_) {}
+      try {
+        await deleteDoc(doc(db, 'users', userId));
+      } catch (_) {}
+    }
   },
 
   subscribeHelpers(societyId, callback, onError) {

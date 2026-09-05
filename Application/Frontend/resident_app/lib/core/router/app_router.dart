@@ -39,6 +39,7 @@ import '../../features/guard/presentation/screens/quick_entry_screen.dart';
 import '../../features/guard/presentation/screens/vehicle_log_screen.dart';
 import '../../features/referral/presentation/screens/referral_screen.dart';
 import '../../features/helper/presentation/screens/domestic_helper_screen.dart';
+import '../../features/visitor/presentation/screens/doorbell_action_overlay_screen.dart';
 
 import '../../features/auth/presentation/screens/unauthorized_access_screen.dart';
 
@@ -51,6 +52,7 @@ class AppRoutes {
   static const String register = '/register';
   static const String pendingApproval = '/pending-approval';
   static const String unauthorized = '/unauthorized';
+  static const String doorbellAlert = '/doorbell-alert';
   static const String home = '/home';
   static const String dashboard = '/home/dashboard';
   static const String notifications = '/home/notifications';
@@ -102,6 +104,8 @@ class RouterNotifier extends ChangeNotifier {
   }
 }
 
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final routerNotifierProvider = Provider<RouterNotifier>((ref) {
   return RouterNotifier(ref);
 });
@@ -111,6 +115,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final authService = ref.watch(authServiceProvider);
 
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: AppRoutes.splash,
     refreshListenable: notifier,
     redirect: (context, state) {
@@ -225,6 +230,23 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.pendingApproval,
         builder: (context, state) => const PendingApprovalScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.doorbellAlert,
+        builder: (context, state) {
+          final extra = (state.extra as Map<String, dynamic>?) ?? {};
+          return DoorbellActionOverlayScreen(
+            visitorId: extra['visitorId'] as String? ?? '',
+            societyId: extra['societyId'] as String? ?? '',
+            visitorName: extra['visitorName'] as String? ?? 'Visitor',
+            visitorType: extra['visitorType'] as String? ?? 'Delivery',
+            flatNumber: extra['flatNumber'] as String? ?? '',
+            company: extra['company'] as String?,
+            vehicleNumber: extra['vehicleNumber'] as String?,
+            gateName: extra['gateName'] as String?,
+            photoUrl: extra['photoUrl'] as String?,
+          );
+        },
       ),
       ShellRoute(
         builder: (context, state, child) => HomeShell(child: child),

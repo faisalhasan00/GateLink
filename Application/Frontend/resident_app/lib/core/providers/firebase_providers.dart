@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/firestore_service.dart';
 import '../services/notification_service.dart';
+import '../router/app_router.dart';
 import 'auth_providers.dart';
 import '../../features/visitor/providers/visitor_providers.dart';
+import '../../features/visitor/presentation/widgets/gate_entry_approval_dialog.dart';
 import '../../features/maintenance/providers/maintenance_providers.dart';
 import '../../features/visitor/domain/models/visitor_model.dart';
 import '../../features/maintenance/domain/models/maintenance_bill_model.dart';
@@ -107,6 +109,41 @@ final visitorNotificationWatcherProvider = StreamProvider<int>((ref) async* {
           visitorId: visitor.id,
           societyId: profile.societyId,
         );
+
+        final ctx = rootNavigatorKey.currentContext;
+        if (ctx != null) {
+          GateEntryApprovalDialog.show(
+            context: ctx,
+            title: "You've got a ${visitor.type} at the main gate",
+            visitorName: visitor.name,
+            providerName: visitor.company ?? visitor.type,
+            gateName: visitor.gateName ?? 'Main Gate',
+            entryType: visitor.type.toLowerCase().contains('delivery')
+                ? GateEntryType.delivery
+                : visitor.type.toLowerCase().contains('cab')
+                    ? GateEntryType.cab
+                    : visitor.type.toLowerCase().contains('service')
+                        ? GateEntryType.service
+                        : GateEntryType.visitor,
+            onAllow: () {
+              visitorRepo.updateVisitorApproval(
+                visitorId: visitor.id,
+                status: 'approved',
+                residentUid: profile.uid,
+              );
+            },
+            onLeaveAtGate: () {
+              visitorRepo.updateVisitorStatus(visitor.id, 'leave_at_gate');
+            },
+            onDeny: () {
+              visitorRepo.updateVisitorApproval(
+                visitorId: visitor.id,
+                status: 'rejected',
+                residentUid: profile.uid,
+              );
+            },
+          );
+        }
       }
     }
     yield visitors.length;

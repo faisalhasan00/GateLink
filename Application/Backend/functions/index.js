@@ -11,6 +11,7 @@ try {
 const {
   notifyResidentOnVisitorArrival,
   notifyGuardOnVisitorDecision,
+  testVisitorArrivalHttp,
 } = require("./visitors/visitor_notifications");
 
 const {
@@ -24,7 +25,7 @@ const {
 } = require("./helpers/helper_notifications");
 
 // 2. Super Admin Authorization & Staff Provisioning
-const { setSuperAdminRole, createStaffUser } = require("./admin/super_admin");
+const { setSuperAdminRole, createStaffUser, adminDeleteUser } = require("./admin/super_admin");
 
 // 3. Payment Gateway & Webhook Handlers
 const {
@@ -71,6 +72,7 @@ module.exports = {
   // Visitor Management
   notifyResidentOnVisitorArrival,
   notifyGuardOnVisitorDecision,
+  testVisitorArrivalHttp,
   generateVisitorPasscode,
   validateVisitorPasscode,
 
@@ -80,6 +82,7 @@ module.exports = {
   // Admin & Staff Management
   setSuperAdminRole,
   createStaffUser,
+  adminDeleteUser,
 
   // Account Deletion & Self-Service Privacy Workflows
   requestAccountDeletion,

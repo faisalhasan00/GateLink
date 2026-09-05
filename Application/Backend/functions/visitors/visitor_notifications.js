@@ -1,6 +1,30 @@
 const { onDocumentCreated, onDocumentUpdated } = require("firebase-functions/v2/firestore");
+const { onRequest } = require("firebase-functions/v2/https");
 const logger = require("firebase-functions/logger");
 const { db, messaging, FieldValue } = require("../config/firebase");
+
+const testVisitorArrivalHttp = onRequest({ cors: true }, async (req, res) => {
+  const societyId = req.query.societyId || (req.body && req.body.societyId) || "SOC-KSR543";
+  const hostFlat = req.query.hostFlat || (req.body && req.body.hostFlat) || "201";
+  const hostResidentUid = req.query.hostResidentUid || (req.body && req.body.hostResidentUid) || "6NwDHQgtfpMVKcWjWfzqTzYjBuq2";
+  const name = req.query.name || (req.body && req.body.name) || "Live Test Delivery";
+
+  const nowIso = new Date().toISOString();
+  const docRef = await db.collection(`societies/${societyId}/visitors`).add({
+    name: name,
+    type: "Delivery",
+    company: "Zomato",
+    hostFlat: hostFlat,
+    hostResidentUid: hostResidentUid,
+    status: "pending",
+    gateName: "Gate 1 — Main Entry",
+    createdAt: nowIso,
+    updatedAt: nowIso,
+  });
+
+  logger.info("Created test visitor via HTTP", { visitorId: docRef.id, societyId, hostFlat, hostResidentUid });
+  res.json({ success: true, visitorId: docRef.id, societyId, hostFlat, hostResidentUid });
+});
 
 /**
  * Triggers when a new visitor document is created in Firestore.
@@ -31,6 +55,20 @@ const notifyResidentOnVisitorArrival = onDocumentCreated(
       visitorType,
     });
 
+    function normalizeFlat(s) {
+      if (!s) return "";
+      return s
+        .toLowerCase()
+        .replace(/block/g, "")
+        .replace(/tower/g, "")
+        .replace(/flat/g, "")
+        .replace(/unit/g, "")
+        .replace(/apt/g, "")
+        .replace(/apartment/g, "")
+        .replace(/[^a-z0-9]/g, "");
+    }
+
+    const cleanHostFlat = normalizeFlat(hostFlat);
     const hostResidentUid = visitor.hostResidentUid;
     const residentDocs = [];
 
@@ -49,24 +87,33 @@ const notifyResidentOnVisitorArrival = onDocumentCreated(
       } catch (_) {}
     }
 
-    // 2. Query by flat number fallback
-    if (residentDocs.length === 0 && hostFlat) {
-      const q1 = await db
-        .collection(`societies/${societyId}/users`)
-        .where("flatNumber", "==", hostFlat)
-        .get();
-      q1.docs.forEach(d => {
-        if (!residentDocs.some(r => r.id === d.id)) residentDocs.push({ id: d.id, ...d.data() });
-      });
+    // 2. Query all residents in society matching hostFlat with normalized matching
+    if (cleanHostFlat) {
+      try {
+        const subUsers = await db.collection(`societies/${societyId}/users`).get();
+        subUsers.docs.forEach(doc => {
+          const data = doc.data();
+          const userFlat = normalizeFlat(data.flatNumber);
+          if (userFlat && (userFlat === cleanHostFlat || userFlat.includes(cleanHostFlat) || cleanHostFlat.includes(userFlat))) {
+            if (!residentDocs.some(r => r.id === doc.id)) {
+              residentDocs.push({ id: doc.id, ...data });
+            }
+          }
+        });
+      } catch (_) {}
 
-      const q2 = await db
-        .collection("users")
-        .where("societyId", "==", societyId)
-        .where("flatNumber", "==", hostFlat)
-        .get();
-      q2.docs.forEach(d => {
-        if (!residentDocs.some(r => r.id === d.id)) residentDocs.push({ id: d.id, ...d.data() });
-      });
+      try {
+        const rootUsers = await db.collection("users").where("societyId", "==", societyId).get();
+        rootUsers.docs.forEach(doc => {
+          const data = doc.data();
+          const userFlat = normalizeFlat(data.flatNumber);
+          if (userFlat && (userFlat === cleanHostFlat || userFlat.includes(cleanHostFlat) || cleanHostFlat.includes(userFlat))) {
+            if (!residentDocs.some(r => r.id === doc.id)) {
+              residentDocs.push({ id: doc.id, ...data });
+            }
+          }
+        });
+      } catch (_) {}
     }
 
     if (residentDocs.length === 0) {
@@ -100,11 +147,7 @@ const notifyResidentOnVisitorArrival = onDocumentCreated(
       promises.push(
         db.collection(`societies/${societyId}/users/${residentId}/notifications`).add(notifData)
       );
-      promises.push(
-        db.collection(`users/${residentId}/notifications`).add(notifData)
-      );
-
-      // 2. Dispatch FCM Push Notification with Custom Resident Bell Sound
+      // 2. Dispatch High-Priority Push Notification for Doorbell Alert
       if (fcmToken) {
         const message = {
           token: fcmToken,
@@ -114,17 +157,24 @@ const notifyResidentOnVisitorArrival = onDocumentCreated(
           },
           data: {
             type: "visitor_pending",
+            title: `🚪 Visitor at Gate — Flat ${hostFlat}`,
+            body: `${visitorName} (${visitorType}) is waiting for your entry approval.`,
             visitorId: visitorId,
             societyId: societyId,
             hostFlat: hostFlat,
             visitorName: visitorName,
             visitorType: visitorType,
+            company: visitor.company || visitor.deliveryCompany || visitor.vendor || "",
+            vehicleNumber: visitor.vehicleNumber || visitor.vehicleNo || visitor.plateNumber || "",
+            gateName: visitor.gateName || "Main Gate",
+            photoUrl: visitor.photoUrl || visitor.imageUrl || visitor.avatar || "",
+            createdAt: visitor.createdAt || new Date().toISOString(),
             click_action: "FLUTTER_NOTIFICATION_CLICK",
           },
           android: {
             priority: "high",
             notification: {
-              channelId: "gatelink_resident_doorbell_v3",
+              channelId: "gatelink_resident_doorbell_v5",
               priority: "max",
               sound: "resident_bell",
               defaultSound: false,
@@ -251,4 +301,5 @@ const notifyGuardOnVisitorDecision = onDocumentUpdated(
 module.exports = {
   notifyResidentOnVisitorArrival,
   notifyGuardOnVisitorDecision,
+  testVisitorArrivalHttp,
 };

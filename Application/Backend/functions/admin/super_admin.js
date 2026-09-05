@@ -3,7 +3,7 @@ const logger = require("firebase-functions/logger");
 const { db, auth, FieldValue } = require("../config/firebase");
 const { verifyActiveCallableUser, verifySocietyAdmin } = require("../config/auth_middleware");
 
-const ALLOWED_STAFF_ROLES = ["guard", "security", "staff", "manager"];
+const ALLOWED_STAFF_ROLES = ["guard", "security", "staff", "manager", "resident", "owner", "tenant"];
 
 /**
  * SEC-P0: Server-Side Super Admin Custom Claim Assignment
@@ -113,22 +113,22 @@ const createStaffUser = onCall(
       }
     }
 
-    // Update password and display name for existing staff user
+    // Update password and display name for existing user
     await auth.updateUser(userRecord.uid, {
       password: password.trim(),
-      displayName: name ? name.trim() : "Security Guard",
+      displayName: name ? name.trim() : (cleanRole === "resident" || cleanRole === "owner" || cleanRole === "tenant" ? "Resident" : "Security Guard"),
     });
   } catch (err) {
     if (err.code === "auth/user-not-found") {
       userRecord = await auth.createUser({
         email: cleanEmail,
         password: password.trim(),
-        displayName: name ? name.trim() : "Security Guard",
+        displayName: name ? name.trim() : (cleanRole === "resident" || cleanRole === "owner" || cleanRole === "tenant" ? "Resident" : "Security Guard"),
       });
     } else if (err instanceof HttpsError) {
       throw err;
     } else {
-      logger.error("Error creating staff auth record", { error: err.message });
+      logger.error("Error creating auth record", { error: err.message });
       throw new HttpsError("internal", err.message);
     }
   }
@@ -139,13 +139,15 @@ const createStaffUser = onCall(
   // 4. Sanitize and write user payload atomically
   const userPayload = {
     uid,
-    name: name ? name.trim() : "Security Guard",
+    name: name ? name.trim() : (cleanRole === "resident" || cleanRole === "owner" || cleanRole === "tenant" ? "Resident" : "Staff User"),
     email: cleanEmail,
     phone: phone ? phone.trim() : "",
-    department: department ? department.trim() : "Security & Gate",
+    department: department ? department.trim() : (cleanRole === "resident" || cleanRole === "owner" || cleanRole === "tenant" ? "Resident" : "Security & Gate"),
     role: cleanRole,
     status: "active",
     societyId,
+    flatNumber: request.data.flatNumber ? request.data.flatNumber.trim() : "",
+    ownershipType: request.data.ownershipType || "Owner",
     createdAt: timestamp,
     updatedAt: timestamp,
   };
@@ -166,7 +168,31 @@ const createStaffUser = onCall(
   return { success: true, uid };
 });
 
+const adminDeleteUser = onCall(
+  { cors: true, enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
+  async (request) => {
+    const { societyId, userId } = request.data || {};
+    if (!societyId || !userId) {
+      throw new HttpsError("invalid-argument", "societyId and userId are required.");
+    }
+
+    try {
+      await auth.deleteUser(userId);
+    } catch (e) {
+      logger.warn("Auth user delete note", { userId, error: e.message });
+    }
+
+    const batch = db.batch();
+    batch.delete(db.doc(`users/${userId}`));
+    batch.delete(db.doc(`societies/${societyId}/users/${userId}`));
+    await batch.commit();
+
+    return { success: true, message: `Successfully deleted user ${userId}` };
+  }
+);
+
 module.exports = {
   setSuperAdminRole,
   createStaffUser,
+  adminDeleteUser,
 };
