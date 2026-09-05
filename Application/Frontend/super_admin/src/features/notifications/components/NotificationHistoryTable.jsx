@@ -81,7 +81,17 @@ export default function NotificationHistoryTable({ history, loading }) {
                     </div>
                   </td>
                   <td style={{ padding: '14px 16px', color: 'var(--text-secondary, #64748B)', fontSize: '12px' }}>
-                    {item.createdAt ? new Date(item.createdAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }) : 'Just now'}
+                    {(() => {
+                      if (!item.createdAt) return 'Just now';
+                      try {
+                        const d = typeof item.createdAt === 'object' && item.createdAt.seconds
+                          ? new Date(item.createdAt.seconds * 1000)
+                          : new Date(item.createdAt);
+                        return isNaN(d.getTime()) ? 'Just now' : d.toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' });
+                      } catch {
+                        return 'Just now';
+                      }
+                    })()}
                   </td>
                 </tr>
               ))}

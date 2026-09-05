@@ -19,11 +19,9 @@ test.md
 *.aab
 *.apk
 *.zip
-PlayStore_Submission_Kit/**/*.aab
-PlayStore_Submission_Kit/*.zip
-*.mp4
-*.mov
-Social Media Post/videos/
+PlayStore_Submission_Kit/
+"Social Media Post/"
+Social Media Post/
 
 # Flutter & Android build caches
 .dart_tool/
