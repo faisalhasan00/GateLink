@@ -72,7 +72,12 @@ export default function NotificationMenu() {
   const formatTime = (timeStr) => {
     if (!timeStr) return 'Just now';
     try {
-      const d = new Date(timeStr);
+      let d;
+      if (typeof timeStr === 'object' && timeStr.seconds) {
+        d = new Date(timeStr.seconds * 1000);
+      } else {
+        d = new Date(timeStr);
+      }
       if (isNaN(d.getTime())) return 'Just now';
       const diffMs = Date.now() - d.getTime();
       const diffMins = Math.floor(diffMs / 60000);
