@@ -123,6 +123,11 @@ export const maintenanceService = {
     });
   },
 
+  async deleteMaintenanceBill(societyId, billId) {
+    if (!societyId || !billId) throw new Error('Society ID and Bill ID are required');
+    await deleteDoc(doc(db, `societies/${societyId}/maintenance_bills`, billId));
+  },
+
   async markBillPaid(societyId, billId, paymentData = {}) {
     if (!societyId || !billId) throw new Error('Society ID and Bill ID are required');
     await updateDoc(doc(db, `societies/${societyId}/maintenance_bills`, billId), {

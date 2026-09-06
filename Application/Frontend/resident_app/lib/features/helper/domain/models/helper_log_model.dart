@@ -1,3 +1,5 @@
+import '../../../../core/utils/timestamp_utils.dart';
+
 class HelperLogModel {
   final String id;
   final String helperId;
@@ -31,7 +33,7 @@ class HelperLogModel {
       guardName: map['guardName'] as String? ?? 'Main Gate',
       action: map['action'] as String? ?? 'ENTRY',
       gateName: map['gateName'] as String? ?? 'Gate 1',
-      timestamp: map['timestamp'] as String? ?? '',
+      timestamp: TimestampUtils.parseToString(map['timestamp'] ?? map['createdAt']),
       flatNumber: map['flatNumber'] as String? ?? '',
     );
   }

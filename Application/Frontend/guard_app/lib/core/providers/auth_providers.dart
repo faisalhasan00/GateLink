@@ -16,7 +16,13 @@ final authStateProvider = StreamProvider<User?>((ref) {
 
 /// Convenience provider: currently logged-in user (or null)
 final currentUserProvider = Provider<User?>((ref) {
-  return ref.watch(authStateProvider).value;
+  final streamUser = ref.watch(authStateProvider).asData?.value;
+  return streamUser ?? FirebaseAuth.instance.currentUser ?? ref.watch(authServiceProvider).currentUser;
+});
+
+/// Checks whether an active guard session is cached on disk
+final hasActiveSessionProvider = FutureProvider<bool>((ref) async {
+  return await ref.watch(authServiceProvider).hasCachedSession();
 });
 
 // ── USER PROFILE PROVIDER (BUG-02 OPTIMIZED DIRECT LOOKUP) ───────────────────────

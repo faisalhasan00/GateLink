@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 @immutable
 class VisitorModel {
@@ -47,6 +48,9 @@ class VisitorModel {
   factory VisitorModel.fromMap(Map<String, dynamic> map, String id) {
     DateTime? parseDate(dynamic val) {
       if (val == null) return null;
+      if (val is Timestamp) return val.toDate();
+      if (val is DateTime) return val;
+      if (val is int) return DateTime.fromMillisecondsSinceEpoch(val);
       if (val is String && val.isNotEmpty) {
         return DateTime.tryParse(val);
       }

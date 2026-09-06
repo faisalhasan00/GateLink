@@ -70,13 +70,12 @@ class AppRoutes {
   static const String inviteVisitor = '/guard/quick-entry';
 }
 
-/// Notifier that bridges Riverpod auth & user profile streams to GoRouter.refreshListenable
+/// Notifier that bridges Riverpod auth state to GoRouter.refreshListenable
 class RouterNotifier extends ChangeNotifier {
   final Ref _ref;
 
   RouterNotifier(this._ref) {
     _ref.listen<User?>(currentUserProvider, (_, __) => notifyListeners());
-    _ref.listen<AsyncValue<Map<String, dynamic>?>>(userProfileProvider, (_, __) => notifyListeners());
   }
 }
 
@@ -94,18 +93,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     errorBuilder: (context, state) => const GuardDashboardScreen(),
     redirect: (context, state) {
       final user = FirebaseAuth.instance.currentUser ?? authService.currentUser ?? ref.read(currentUserProvider);
-      final isAuth = user != null;
+      final hasCached = authService.hasCachedSessionSync();
+      final isAuth = user != null || hasCached;
       final isSplash = state.uri.path == AppRoutes.splash;
       final isLoggingIn = state.uri.path == AppRoutes.login || 
                           state.uri.path == AppRoutes.onboarding ||
                           state.uri.path == AppRoutes.otp;
 
-      // Allow splash to render without kicking out to login prematurely
+      // Allow splash to render and resolve session without kicking out to login prematurely
       if (isSplash) {
         return null;
       }
 
-      // If user is unauthenticated and attempting to access protected screens
+      // If user is truly unauthenticated and attempting to access protected screens
       if (!isAuth) {
         if (!isLoggingIn) {
           return AppRoutes.login;
@@ -113,7 +113,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         return null;
       }
 
-      // If user is authenticated and on login screens, go directly to guard dashboard
+      // If user is authenticated and on login screens, navigate directly to guard dashboard
       if (isAuth && isLoggingIn) {
         return AppRoutes.guardDashboard;
       }

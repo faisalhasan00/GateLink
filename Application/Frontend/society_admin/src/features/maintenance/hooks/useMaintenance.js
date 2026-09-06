@@ -15,6 +15,11 @@ export function useMaintenance() {
   const [statusFilter, setStatusFilter] = useState('All');
   const [methodFilter, setMethodFilter] = useState('All');
 
+  const getCurrentMonthYear = () => {
+    const d = new Date();
+    return d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  };
+
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [paymentModalBill, setPaymentModalBill] = useState(null);
@@ -23,7 +28,7 @@ export function useMaintenance() {
   const [selectedResidentUid, setSelectedResidentUid] = useState('');
   const [formData, setFormData] = useState({
     title: 'Monthly Maintenance & Society Facilities',
-    month: 'March 2026',
+    month: getCurrentMonthYear(),
     dueDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     maintenanceCharge: 3500,
     parkingCharge: 500,
@@ -67,6 +72,15 @@ export function useMaintenance() {
     };
   }, [societyId]);
 
+  // Filter residents so only genuine residents (with real flat numbers and not staff/guards) are billed
+  const validBillingResidents = residents.filter((r) => {
+    const role = (r.role || '').toLowerCase();
+    const flat = (r.flatNumber || r.flatNo || '').trim();
+    if (!flat || flat === 'N/A') return false;
+    if (['guard', 'security', 'staff', 'manager', 'admin', 'super_admin'].includes(role)) return false;
+    return true;
+  });
+
   const calculateTotal = (data) => {
     const m = Number(data.maintenanceCharge) || 0;
     const p = Number(data.parkingCharge) || 0;
@@ -82,32 +96,83 @@ export function useMaintenance() {
 
     try {
       const totalAmount = calculateTotal(formData);
-      const resObj = residents.find((r) => r.id === selectedResidentUid || r.uid === selectedResidentUid);
-      const invoiceNo = `INV/2026-27/${Math.floor(1000 + Math.random() * 9000)}`;
 
-      await societyAdminService.createMaintenanceBill(societyId, {
-        billNumber: invoiceNo,
-        invoiceNumber: invoiceNo,
-        title: formData.title,
-        month: formData.month,
-        dueDate: formData.dueDate,
-        maintenanceCharge: Number(formData.maintenanceCharge),
-        parkingCharge: Number(formData.parkingCharge),
-        waterCharge: Number(formData.waterCharge),
-        sinkingFund: Number(formData.sinkingFund),
-        penaltyFee: Number(formData.penaltyFee),
-        amount: totalAmount,
-        residentUid: selectedResidentUid || 'ALL',
-        residentName: resObj?.name || 'Resident',
-        flatNumber: resObj?.flatNumber || 'N/A',
-      });
+      if (billingScope === 'all') {
+        if (validBillingResidents.length === 0) {
+          alert('No valid residential flats found to generate bills for.');
+          setIsSubmitting(false);
+          return;
+        }
 
-      alert(`Successfully generated maintenance bill #${invoiceNo}.`);
+        let createdCount = 0;
+        for (const res of validBillingResidents) {
+          const invoiceNo = `INV/2026-27/${Math.floor(1000 + Math.random() * 9000)}`;
+          await societyAdminService.createMaintenanceBill(societyId, {
+            billNumber: invoiceNo,
+            invoiceNumber: invoiceNo,
+            title: formData.title,
+            month: formData.month,
+            dueDate: formData.dueDate,
+            maintenanceCharge: Number(formData.maintenanceCharge),
+            parkingCharge: Number(formData.parkingCharge),
+            waterCharge: Number(formData.waterCharge),
+            sinkingFund: Number(formData.sinkingFund),
+            penaltyFee: Number(formData.penaltyFee || 0),
+            amount: totalAmount,
+            residentUid: res.id || res.uid,
+            residentName: res.name || res.fullName || 'Resident',
+            flatNumber: res.flatNumber || res.flatNo || 'N/A',
+          });
+          createdCount++;
+        }
+
+        alert(`Successfully generated maintenance bills for ${createdCount} flat(s).`);
+      } else {
+        const resObj = validBillingResidents.find((r) => r.id === selectedResidentUid || r.uid === selectedResidentUid);
+        if (!resObj || !resObj.flatNumber || resObj.flatNumber === 'N/A') {
+          alert('Please select a valid resident with an assigned flat number.');
+          setIsSubmitting(false);
+          return;
+        }
+        const invoiceNo = `INV/2026-27/${Math.floor(1000 + Math.random() * 9000)}`;
+
+        await societyAdminService.createMaintenanceBill(societyId, {
+          billNumber: invoiceNo,
+          invoiceNumber: invoiceNo,
+          title: formData.title,
+          month: formData.month,
+          dueDate: formData.dueDate,
+          maintenanceCharge: Number(formData.maintenanceCharge),
+          parkingCharge: Number(formData.parkingCharge),
+          waterCharge: Number(formData.waterCharge),
+          sinkingFund: Number(formData.sinkingFund),
+          penaltyFee: Number(formData.penaltyFee || 0),
+          amount: totalAmount,
+          residentUid: selectedResidentUid,
+          residentName: resObj.name || resObj.fullName || 'Resident',
+          flatNumber: resObj.flatNumber || resObj.flatNo,
+        });
+
+        alert(`Successfully generated maintenance bill #${invoiceNo} for Flat ${resObj.flatNumber || resObj.flatNo}.`);
+      }
+
       setIsSubmitting(false);
       setIsGenerateModalOpen(false);
     } catch (e) {
       setIsSubmitting(false);
       alert('Error generating bill: ' + e.message);
+    }
+  };
+
+  const handleDeleteBill = async (bill) => {
+    if (!window.confirm(`Are you sure you want to permanently delete / void bill #${bill.billNumber || bill.id} (Flat: ${bill.flatNumber || 'N/A'})?`)) {
+      return;
+    }
+    try {
+      await societyAdminService.deleteMaintenanceBill(societyId, bill.id);
+      alert('Maintenance bill deleted successfully.');
+    } catch (e) {
+      alert('Error deleting bill: ' + e.message);
     }
   };
 
@@ -203,9 +268,11 @@ export function useMaintenance() {
     isSubmitting,
     calculateTotal,
     handleGenerateBills,
+    handleDeleteBill,
     handleSettlePayment,
     handleApproveVerification,
     handleRejectVerification,
+    validBillingResidents,
     filteredBills,
     totalGeneratedAmount,
     totalCollectedAmount,

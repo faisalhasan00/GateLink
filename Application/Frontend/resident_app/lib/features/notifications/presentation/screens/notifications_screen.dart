@@ -203,11 +203,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
                     String timeStr = 'Just now';
                     if (notification.createdAt.isNotEmpty) {
-                      try {
-                        final dt = DateTime.parse(notification.createdAt);
+                      final dt = DateTime.tryParse(notification.createdAt);
+                      if (dt != null) {
+                        final local = dt.toLocal();
                         timeStr =
-                            '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
-                      } catch (_) {}
+                            '${local.day}/${local.month}/${local.year} ${local.hour}:${local.minute.toString().padLeft(2, '0')}';
+                      }
                     }
 
                     return Dismissible(

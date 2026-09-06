@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:societysphere/features/notifications/domain/models/notification_model.dart';
 
@@ -35,6 +36,23 @@ void main() {
       expect(model.type, 'info');
       expect(model.read, false);
       expect(model.createdAt, '');
+    });
+
+    test('NotificationModel handles Firestore Timestamp objects safely', () {
+      final timestamp = Timestamp.fromDate(DateTime.utc(2026, 9, 6, 14, 30));
+      final map = {
+        'title': 'Doorbell Ring',
+        'body': 'Delivery person is at the gate.',
+        'type': 'visitor',
+        'read': false,
+        'createdAt': timestamp,
+        'societyId': 'SOC-001',
+      };
+
+      final model = NotificationModel.fromMap(map, 'notif-103');
+
+      expect(model.id, 'notif-103');
+      expect(model.createdAt, DateTime.utc(2026, 9, 6, 14, 30).toIso8601String());
     });
 
     test('NotificationModel converts toMap correctly', () {

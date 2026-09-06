@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Filter, ShieldCheck, CheckCircle, XCircle, FileText, Plus } from 'lucide-react';
+import { Search, Filter, ShieldCheck, CheckCircle, XCircle, FileText, Plus, Trash2 } from 'lucide-react';
 import Button from '../../../components/ui/Button';
 
 export default function MaintenanceTable({
@@ -15,7 +15,8 @@ export default function MaintenanceTable({
   onApproveVerification,
   onRejectVerification,
   onSelectInvoice,
-  onOpenPaymentModal
+  onOpenPaymentModal,
+  onDeleteBill
 }) {
   return (
     <div className="card">
@@ -210,6 +211,16 @@ export default function MaintenanceTable({
                             onClick={() => onOpenPaymentModal(bill)}
                           >
                             Record Pay
+                          </button>
+                        )}
+                        {onDeleteBill && (
+                          <button
+                            className="btn btn-outline"
+                            style={{ padding: '4px 8px', fontSize: '11px', color: 'var(--danger)', borderColor: 'var(--danger)' }}
+                            onClick={() => onDeleteBill(bill)}
+                            title="Delete / Void Bill"
+                          >
+                            <Trash2 size={12} />
                           </button>
                         )}
                       </div>

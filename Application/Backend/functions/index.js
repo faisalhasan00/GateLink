@@ -24,7 +24,7 @@ const {
 } = require("./helpers/helper_notifications");
 
 // 2. Super Admin Authorization & Staff Provisioning
-const { setSuperAdminRole, createStaffUser } = require("./admin/super_admin");
+const { setSuperAdminRole, createStaffUser, createResidentUser } = require("./admin/super_admin");
 
 // 3. Payment Gateway & Webhook Handlers
 const {
@@ -80,6 +80,7 @@ module.exports = {
   // Admin & Staff Management
   setSuperAdminRole,
   createStaffUser,
+  createResidentUser,
 
   // Account Deletion & Self-Service Privacy Workflows
   requestAccountDeletion,

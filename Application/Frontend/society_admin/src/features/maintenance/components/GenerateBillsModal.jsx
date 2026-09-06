@@ -57,7 +57,7 @@ export default function GenerateBillsModal({
 
           {billingScope === 'single' && (
             <div className="form-group">
-              <label>Select Resident / Flat *</label>
+              <label>Select Resident Flat *</label>
               <select
                 required
                 value={selectedResidentUid}
@@ -66,7 +66,7 @@ export default function GenerateBillsModal({
                 <option value="">-- Choose Flat --</option>
                 {residents.map((r) => (
                   <option key={r.id || r.uid} value={r.id || r.uid}>
-                    {r.flatNumber || 'Flat N/A'} - {r.name || r.email}
+                    Flat {r.flatNumber || r.flatNo} — {r.name || r.fullName || r.email}
                   </option>
                 ))}
               </select>
