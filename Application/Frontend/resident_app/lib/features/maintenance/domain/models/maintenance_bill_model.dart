@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/utils/timestamp_utils.dart';
 import 'payment_status.dart';
 
 class MaintenanceBillModel {
@@ -87,9 +88,9 @@ class MaintenanceBillModel {
       transactionId: map['transactionId'] as String?,
       paymentMethod: map['paymentMethod'] as String?,
       utrNumber: map['utrNumber'] as String?,
-      createdAt: map['createdAt'] as String?,
-      paidAt: map['paidAt'] as String?,
-      submittedAt: map['submittedAt'] as String?,
+      createdAt: TimestampUtils.parseToNullableString(map['createdAt']),
+      paidAt: TimestampUtils.parseToNullableString(map['paidAt']),
+      submittedAt: TimestampUtils.parseToNullableString(map['submittedAt']),
     );
   }
 

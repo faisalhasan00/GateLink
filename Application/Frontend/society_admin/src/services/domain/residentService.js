@@ -69,6 +69,32 @@ export const residentService = {
 
   async addResident(societyId, residentData) {
     if (!societyId) throw new Error('Society ID is required');
+    const email = (residentData.email || '').trim().toLowerCase();
+    const password = (residentData.password || '').trim();
+    const name = residentData.name || residentData.fullName || 'Resident';
+
+    try {
+      const createResidentCallable = httpsCallable(functions, 'createResidentUser');
+      const res = await createResidentCallable({
+        societyId,
+        email,
+        password,
+        name,
+        flatNumber: residentData.flatNumber || residentData.flatNo || '',
+        wing: residentData.wing || '',
+        phone: residentData.phone || residentData.mobileNumber || '',
+        userType: residentData.userType || residentData.ownershipType || 'owner',
+        ownershipType: residentData.ownershipType || 'Owner',
+      });
+
+      if (res?.data?.success && res.data.uid) {
+        return res.data.uid;
+      }
+    } catch (funcErr) {
+      console.warn('Cloud function createResidentUser fallback to Firestore:', funcErr);
+    }
+
+    // Direct Firestore fallback
     const timestamp = new Date().toISOString();
     const docRef = doc(collection(db, `societies/${societyId}/users`));
     const payload = {

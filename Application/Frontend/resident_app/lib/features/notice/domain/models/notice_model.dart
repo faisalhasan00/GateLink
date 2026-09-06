@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/utils/timestamp_utils.dart';
 
 class NoticeModel {
   final String id;
@@ -29,9 +30,9 @@ class NoticeModel {
       title: map['title'] as String? ?? 'Notice',
       description: map['description'] as String? ?? '',
       category: map['category'] as String? ?? 'General',
-      date: map['date'] as String? ?? '',
+      date: TimestampUtils.parseToString(map['date']),
       isNew: map['isNew'] as bool? ?? false,
-      createdAt: map['createdAt'] as String? ?? '',
+      createdAt: TimestampUtils.parseToString(map['createdAt']),
       author: map['author'] as String? ?? 'Society Management',
       authorRole: map['authorRole'] as String? ?? 'Admin',
     );

@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/utils/timestamp_utils.dart';
 
 class PaymentReceiptModel {
   final String id;
@@ -35,8 +36,10 @@ class PaymentReceiptModel {
   }
 
   factory PaymentReceiptModel.fromMap(String docId, Map<String, dynamic> map) {
-    final paidTime =
-        map['paidAt'] as String? ?? map['createdAt'] as String? ?? '';
+    final paidTime = TimestampUtils.parseToString(
+        map['paidAt'] ?? map['createdAt']);
+    final createdTime = TimestampUtils.parseToString(
+        map['createdAt'] ?? map['paidAt']);
     return PaymentReceiptModel(
       id: docId,
       billId: map['billId'] as String? ?? '',
@@ -49,7 +52,7 @@ class PaymentReceiptModel {
       billingPeriod: map['billingPeriod'] as String? ?? 'Monthly Maintenance',
       status: map['status'] as String? ?? 'success',
       paidAt: paidTime,
-      createdAt: map['createdAt'] as String? ?? paidTime,
+      createdAt: createdTime.isNotEmpty ? createdTime : paidTime,
     );
   }
 

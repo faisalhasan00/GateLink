@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/utils/timestamp_utils.dart';
 import 'visitor_status.dart';
 
 class VisitorModel {
@@ -100,8 +101,8 @@ class VisitorModel {
       qrCode: map['qrCode'] as String?,
       status: VisitorStatus.fromString(map['status'] as String?),
       passType: pType,
-      validFrom: map['validFrom'] as String?,
-      validUntil: map['validUntil'] as String?,
+      validFrom: TimestampUtils.parseToNullableString(map['validFrom']),
+      validUntil: TimestampUtils.parseToNullableString(map['validUntil']),
       entryCount: (map['entryCount'] as num?)?.toInt() ?? 0,
       maxEntries: (map['maxEntries'] as num?)?.toInt() ?? (pType == 'multi_day' ? -1 : 1),
       vehicleNumber: map['vehicleNumber'] as String?,
@@ -112,15 +113,15 @@ class VisitorModel {
       notes: map['notes'] as String?,
       guardUid: map['guardUid'] as String?,
       gateName: map['gateName'] as String?,
-      expectedDate: map['expectedDate'] as String?,
-      expectedTime: map['expectedTime'] as String?,
-      entryTime: map['entryTime'] as String?,
-      exitTime: map['exitTime'] as String?,
-      createdDate: map['createdDate'] as String? ?? map['createdAt'] as String?,
-      createdAt: map['createdAt'] as String?,
-      approvedAt: map['approvedAt'] as String?,
+      expectedDate: TimestampUtils.parseToNullableString(map['expectedDate']),
+      expectedTime: TimestampUtils.parseToNullableString(map['expectedTime']),
+      entryTime: TimestampUtils.parseToNullableString(map['entryTime']),
+      exitTime: TimestampUtils.parseToNullableString(map['exitTime']),
+      createdDate: TimestampUtils.parseToNullableString(map['createdDate']) ?? TimestampUtils.parseToNullableString(map['createdAt']),
+      createdAt: TimestampUtils.parseToNullableString(map['createdAt']),
+      approvedAt: TimestampUtils.parseToNullableString(map['approvedAt']),
       approvedBy: map['approvedBy'] as String?,
-      rejectedAt: map['rejectedAt'] as String?,
+      rejectedAt: TimestampUtils.parseToNullableString(map['rejectedAt']),
       rejectedBy: map['rejectedBy'] as String?,
       rejectionReason: map['rejectionReason'] as String?,
       durationMinutes: map['durationMinutes'] as int?,

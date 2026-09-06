@@ -44,20 +44,28 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     // 1. Minimum brand splash animation (600ms) for smooth UX
     final minSplashDelay = Future.delayed(const Duration(milliseconds: 600));
 
-    // 2. Check current user or wait for Firebase Auth disk session hydration
+    // 2. Check current user and persistent session cache
     User? user = FirebaseAuth.instance.currentUser;
+    final authService = ref.read(authServiceProvider);
+    final hasCached = await authService.hasCachedSession();
 
-    if (user == null) {
+    if (user == null && hasCached) {
+      // If we have a cached guard session, give Firebase Auth ample time to hydrate from disk
       try {
-        // Wait for Firebase to finish reading saved session credentials from local storage
-        // Note: authStateChanges() initially emits the synchronous snapshot (null on cold start).
-        // We use firstWhere to wait for the first non-null User emitted by the session hydrator.
+        user = await FirebaseAuth.instance
+            .authStateChanges()
+            .firstWhere((u) => u != null)
+            .timeout(const Duration(milliseconds: 3500));
+      } catch (_) {
+        user = FirebaseAuth.instance.currentUser;
+      }
+    } else if (user == null) {
+      try {
         user = await FirebaseAuth.instance
             .authStateChanges()
             .firstWhere((u) => u != null)
             .timeout(const Duration(milliseconds: 1500));
       } catch (_) {
-        // Fallback to latest currentUser instance if timeout reached
         user = FirebaseAuth.instance.currentUser;
       }
     }
@@ -67,7 +75,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
 
     final resolvedUser = user ?? FirebaseAuth.instance.currentUser;
 
-    if (resolvedUser != null) {
+    // Persist session if user resolved
+    if (resolvedUser != null || hasCached) {
       context.go(AppRoutes.guardDashboard);
     } else {
       context.go(AppRoutes.login);

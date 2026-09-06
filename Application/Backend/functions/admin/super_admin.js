@@ -166,7 +166,143 @@ const createStaffUser = onCall(
   return { success: true, uid };
 });
 
+/**
+ * SEC-P0 & P1: Safe Server-Side Resident User Provisioning
+ * Creates Firebase Auth account + Firestore user documents.
+ * Ensures resident can immediately log in with provided email & password.
+ */
+const createResidentUser = onCall(
+  { cors: true, enforceAppCheck: process.env.ENFORCE_APP_CHECK === "true" },
+  async (request) => {
+    const {
+      societyId,
+      email,
+      password,
+      name,
+      flatNumber,
+      flatNo,
+      wing,
+      phone,
+      mobileNumber,
+      userType,
+      ownershipType,
+    } = request.data || {};
+
+    if (!societyId || !email || !password) {
+      throw new HttpsError("invalid-argument", "societyId, email, and password are required.");
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = (name || "Resident").trim();
+    const cleanFlat = (flatNumber || flatNo || "").toString().trim().toUpperCase();
+    const cleanPhone = (phone || mobileNumber || "").toString().trim();
+    const cleanUserType = (userType || ownershipType || "owner").toString().toLowerCase();
+
+    // Extract wing if not explicitly given
+    let resolvedWing = (wing || "").toString().trim().toUpperCase();
+    if (!resolvedWing && cleanFlat.includes("-")) {
+      resolvedWing = cleanFlat.split("-")[0].trim();
+    } else if (!resolvedWing && cleanFlat.length > 0 && /^[A-Z]/i.test(cleanFlat)) {
+      resolvedWing = cleanFlat.substring(0, 1).toUpperCase();
+    }
+
+    // 1. Existing User Tenant Isolation Check
+    let userRecord;
+    try {
+      userRecord = await auth.getUserByEmail(cleanEmail);
+
+      const existingUserDoc = await db.doc(`users/${userRecord.uid}`).get();
+      if (existingUserDoc.exists) {
+        const existingData = existingUserDoc.data() || {};
+        if (existingData.societyId && existingData.societyId !== societyId) {
+          logger.warn("Attempt to reassign existing user from another society", {
+            uid: userRecord.uid,
+            existingSocietyId: existingData.societyId,
+            targetSocietyId: societyId,
+            callerUid: request.auth?.uid,
+          });
+          throw new HttpsError(
+            "already-exists",
+            "A user with this email already belongs to a different society."
+          );
+        }
+
+        if (
+          existingData.role === "super_admin" ||
+          existingData.role === "admin" ||
+          existingData.role === "society_admin"
+        ) {
+          throw new HttpsError(
+            "permission-denied",
+            "Cannot overwrite an administrative account as resident."
+          );
+        }
+      }
+
+      // Update password and display name for existing user
+      await auth.updateUser(userRecord.uid, {
+        password: password.trim(),
+        displayName: cleanName,
+      });
+    } catch (err) {
+      if (err.code === "auth/user-not-found") {
+        userRecord = await auth.createUser({
+          email: cleanEmail,
+          password: password.trim(),
+          displayName: cleanName,
+        });
+      } else if (err instanceof HttpsError) {
+        throw err;
+      } else {
+        logger.error("Error creating resident auth record", { error: err.message });
+        throw new HttpsError("internal", err.message);
+      }
+    }
+
+    const uid = userRecord.uid;
+    const timestamp = FieldValue.serverTimestamp();
+    const isoTimestamp = new Date().toISOString();
+
+    // 2. Sanitize and write user payload atomically
+    const userPayload = {
+      uid,
+      id: uid,
+      name: cleanName,
+      fullName: cleanName,
+      email: cleanEmail,
+      phone: cleanPhone,
+      mobileNumber: cleanPhone,
+      flatNumber: cleanFlat,
+      flatNo: cleanFlat,
+      wing: resolvedWing,
+      role: "resident",
+      userType: cleanUserType,
+      ownershipType: cleanUserType === "owner" ? "Owner" : "Tenant",
+      status: "active",
+      societyId,
+      society_id: societyId,
+      createdAt: isoTimestamp,
+      updatedAt: isoTimestamp,
+    };
+
+    const batch = db.batch();
+    batch.set(db.doc(`users/${uid}`), userPayload, { merge: true });
+    batch.set(db.doc(`societies/${societyId}/users/${uid}`), userPayload, { merge: true });
+    await batch.commit();
+
+    logger.info("Successfully provisioned resident account", {
+      uid,
+      email: cleanEmail,
+      societyId,
+      callerUid: request.auth?.uid,
+    });
+
+    return { success: true, uid };
+  }
+);
+
 module.exports = {
   setSuperAdminRole,
   createStaffUser,
+  createResidentUser,
 };

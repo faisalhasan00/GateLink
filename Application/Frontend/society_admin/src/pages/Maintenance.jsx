@@ -39,9 +39,11 @@ export default function Maintenance() {
     isSubmitting,
     calculateTotal,
     handleGenerateBills,
+    handleDeleteBill,
     handleSettlePayment,
     handleApproveVerification,
     handleRejectVerification,
+    validBillingResidents,
     filteredBills,
     totalGeneratedAmount,
     totalCollectedAmount,
@@ -150,6 +152,7 @@ export default function Maintenance() {
           onRejectVerification={handleRejectVerification}
           onSelectInvoice={setSelectedInvoice}
           onOpenPaymentModal={setPaymentModalBill}
+          onDeleteBill={handleDeleteBill}
         />
       ) : activeTab === 'automation' ? (
         <AutoBillingConfigCard
@@ -168,7 +171,7 @@ export default function Maintenance() {
         setBillingScope={setBillingScope}
         selectedResidentUid={selectedResidentUid}
         setSelectedResidentUid={setSelectedResidentUid}
-        residents={residents}
+        residents={validBillingResidents || residents}
         formData={formData}
         setFormData={setFormData}
         calculateTotal={calculateTotal}

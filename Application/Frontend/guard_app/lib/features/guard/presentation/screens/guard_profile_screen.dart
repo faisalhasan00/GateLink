@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/providers/auth_providers.dart';
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 
@@ -35,9 +36,34 @@ class GuardProfileScreen extends ConsumerWidget {
             icon: const Icon(Icons.logout_rounded, color: Colors.white),
             tooltip: 'Log Out',
             onPressed: () async {
-              await FirebaseAuth.instance.signOut();
-              if (context.mounted) {
-                context.go('/login');
+              final confirm = await showDialog<bool>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Log Out of Guard Terminal?'),
+                  content: const Text(
+                    'Are you sure you want to end your session and log out? You will need to enter your credentials to log back in.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx, false),
+                      child: const Text('Cancel'),
+                    ),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.error,
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: () => Navigator.pop(ctx, true),
+                      child: const Text('Log Out'),
+                    ),
+                  ],
+                ),
+              );
+              if (confirm == true) {
+                await ref.read(authServiceProvider).signOut();
+                if (context.mounted) {
+                  context.go(AppRoutes.login);
+                }
               }
             },
           ),

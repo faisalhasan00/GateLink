@@ -37,6 +37,7 @@ export const societyAdminService = {
     maintenanceService.updateSocietyBankDetails(societyId, bankData, complaintService.logAuditAction),
   subscribeMaintenanceBills: maintenanceService.subscribeMaintenanceBills,
   createMaintenanceBill: maintenanceService.createMaintenanceBill,
+  deleteMaintenanceBill: maintenanceService.deleteMaintenanceBill,
   updateBillStatus: maintenanceService.updateBillStatus,
   markBillPaid: maintenanceService.markBillPaid,
   getBillingConfig: maintenanceService.getBillingConfig,

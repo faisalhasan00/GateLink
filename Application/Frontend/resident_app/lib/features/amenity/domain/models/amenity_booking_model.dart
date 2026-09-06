@@ -1,3 +1,5 @@
+import '../../../../core/utils/timestamp_utils.dart';
+
 class AmenityBookingModel {
   final String id;
   final String amenityId;
@@ -53,14 +55,14 @@ class AmenityBookingModel {
           'Unknown User',
       flatNumber: map['flatNumber'] as String? ?? '',
       phone: map['phone'] as String? ?? '',
-      date: map['date'] as String? ?? map['bookingDate'] as String? ?? '',
+      date: TimestampUtils.parseToString(map['date'] ?? map['bookingDate']),
       timeSlot: map['timeSlot'] as String? ?? '',
       guests: (map['guests'] as num?)?.toInt() ?? 1,
       specialNotes: map['specialNotes'] as String? ?? '',
       status: map['status'] as String? ?? 'approved',
       approvalPolicy: map['approvalPolicy'] as String? ?? 'auto',
       societyId: map['societyId'] as String? ?? 'SOC-001',
-      createdAt: map['createdAt'] as String? ?? '',
+      createdAt: TimestampUtils.parseToString(map['createdAt']),
     );
   }
 

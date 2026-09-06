@@ -1,3 +1,5 @@
+import '../../../../core/utils/timestamp_utils.dart';
+
 class NotificationModel {
   final String id;
   final String title;
@@ -21,12 +23,12 @@ class NotificationModel {
       Map<String, dynamic> map, String documentId) {
     return NotificationModel(
       id: documentId,
-      title: map['title'] as String? ?? 'Notification',
-      body: map['body'] as String? ?? '',
-      type: map['type'] as String? ?? 'info',
-      read: map['read'] as bool? ?? false,
-      createdAt: map['createdAt'] as String? ?? '',
-      societyId: map['societyId'] as String? ?? 'SOC-001',
+      title: map['title']?.toString() ?? 'Notification',
+      body: map['body']?.toString() ?? '',
+      type: map['type']?.toString() ?? 'info',
+      read: map['read'] == true,
+      createdAt: TimestampUtils.parseToString(map['createdAt']),
+      societyId: map['societyId']?.toString() ?? 'SOC-001',
     );
   }
 

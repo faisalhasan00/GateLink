@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../../../core/utils/timestamp_utils.dart';
 
 class ComplaintModel {
   final String id;
@@ -65,8 +66,8 @@ class ComplaintModel {
       assignedTo: map['assignedTo'] as String?,
       rating: map['rating'] is int ? map['rating'] as int : (map['rating'] is num ? (map['rating'] as num).toInt() : null),
       ratingFeedback: map['ratingFeedback'] as String?,
-      createdAt: map['createdAt'] as String? ?? '',
-      updatedAt: map['updatedAt'] as String? ?? '',
+      createdAt: TimestampUtils.parseToString(map['createdAt']),
+      updatedAt: TimestampUtils.parseToString(map['updatedAt']),
     );
   }
 

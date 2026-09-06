@@ -112,9 +112,34 @@ class ProfileScreen extends ConsumerWidget {
                   titleColor: AppColors.error,
                   iconColor: AppColors.error,
                   onTap: () async {
-                    await ref.read(authServiceProvider).signOut();
-                    if (context.mounted) {
-                      context.go(AppRoutes.login);
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text('Log Out of Guard Terminal?'),
+                        content: const Text(
+                          'Are you sure you want to end your session and log out? You will need to enter your credentials to log back in.',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: const Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.error,
+                              foregroundColor: Colors.white,
+                            ),
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: const Text('Log Out'),
+                          ),
+                        ],
+                      ),
+                    );
+                    if (confirm == true) {
+                      await ref.read(authServiceProvider).signOut();
+                      if (context.mounted) {
+                        context.go(AppRoutes.login);
+                      }
                     }
                   },
                 ),
