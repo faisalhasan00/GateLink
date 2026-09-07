@@ -6,7 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  GoogleSignIn get _googleSignIn => GoogleSignIn();
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
   static const String _kSessionKey = 'gatelink_resident_has_session';
