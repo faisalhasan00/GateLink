@@ -71,7 +71,7 @@ class DoorbellCallService {
 
   /// Initialize CallKit event listeners
   static Future<void> init() async {
-    if (_initialized) return;
+    if (_initialized || kIsWeb) return;
 
     try {
       await FlutterCallkitIncoming.requestFullIntentPermission();
