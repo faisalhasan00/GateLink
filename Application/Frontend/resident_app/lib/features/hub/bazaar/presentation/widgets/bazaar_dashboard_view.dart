@@ -65,47 +65,70 @@ class _BazaarDashboardViewState extends State<BazaarDashboardView> {
       children: [
         // Top Action: Post Ad Banner
         Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: const Color(0xFFF0FDF4),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: const Color(0xFFBBF7D0)),
           ),
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: const BoxDecoration(
-                  color: Color(0xFFDCFCE7),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.sell_rounded, color: Color(0xFF15803D), size: 24),
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFDCFCE7),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.sell_rounded, color: Color(0xFF15803D), size: 20),
+                  ),
+                  const SizedBox(width: 10),
+                  const Expanded(
+                    child: Text(
+                      'Declutter & Earn Fast',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF14532D),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
-                    Text('Declutter & Earn Fast', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: Color(0xFF14532D))),
-                    Text('Sell to verified neighbors with zero packing/shipping.', style: TextStyle(fontSize: 11, color: Color(0xFF166534))),
-                  ],
+              const SizedBox(height: 8),
+              const Text(
+                'Sell or giveaway unused items to verified neighbors with zero packing or shipping hassle.',
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.35,
+                  color: Color(0xFF166534),
                 ),
               ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    backgroundColor: Colors.transparent,
-                    builder: (_) => const PostBazaarAdSheet(),
-                  );
-                },
-                icon: const Icon(Icons.add_circle_outline_rounded, size: 16, color: Colors.white),
-                label: const Text('Post Ad', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF16A34A),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                height: 38,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (_) => const PostBazaarAdSheet(),
+                    );
+                  },
+                  icon: const Icon(Icons.add_circle_outline_rounded, size: 16, color: Colors.white),
+                  label: const Text(
+                    'Post an Ad for Neighbors',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF16A34A),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
                 ),
               ),
             ],
