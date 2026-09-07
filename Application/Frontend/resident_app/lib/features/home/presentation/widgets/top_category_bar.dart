@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_colors.dart';
 
 enum ResidentHomeCategory {
   society,
@@ -19,50 +21,59 @@ class TopCategoryBar extends StatelessWidget {
     required this.onCategoryChanged,
   });
 
-  static const List<_SwiggyCategoryMeta> _categories = [
-    _SwiggyCategoryMeta(
+  static const List<_CategoryBrandMeta> _categories = [
+    _CategoryBrandMeta(
       category: ResidentHomeCategory.society,
       label: 'Society',
-      emoji: '🏛️',
       icon: Icons.apartment_rounded,
+      activeGradient: [Color(0xFF0EA5E9), Color(0xFF1E3A8A)], // Sky to Navy
+      glowColor: Color(0xFF38BDF8),
     ),
-    _SwiggyCategoryMeta(
+    _CategoryBrandMeta(
       category: ResidentHomeCategory.maidsSalon,
       label: 'Maids',
-      emoji: '✨',
       icon: Icons.auto_awesome_rounded,
+      activeGradient: [Color(0xFFF59E0B), Color(0xFFD97706)], // Amber to Warm Orange
+      glowColor: Color(0xFFFBBF24),
     ),
-    _SwiggyCategoryMeta(
+    _CategoryBrandMeta(
       category: ResidentHomeCategory.services,
       label: 'Services',
-      emoji: '🔧',
       icon: Icons.handyman_rounded,
+      activeGradient: [Color(0xFF0284C7), Color(0xFF1E3A8A)], // Sky to Deep Navy
+      glowColor: Color(0xFF0EA5E9),
     ),
-    _SwiggyCategoryMeta(
+    _CategoryBrandMeta(
       category: ResidentHomeCategory.interiors,
       label: 'Interiors',
-      emoji: '🛋️',
-      icon: Icons.weekend_rounded,
+      icon: Icons.chair_rounded,
+      activeGradient: [Color(0xFF8B5CF6), Color(0xFF6D28D9)], // Purple to Indigo
+      glowColor: Color(0xFFA78BFA),
     ),
-    _SwiggyCategoryMeta(
+    _CategoryBrandMeta(
       category: ResidentHomeCategory.bazaar,
       label: 'Bazaar',
-      emoji: '🛍️',
       icon: Icons.storefront_rounded,
+      activeGradient: [Color(0xFF10B981), Color(0xFF059669)], // Emerald
+      glowColor: Color(0xFF34D399),
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 86,
+      height: 84,
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF070D1F), // Swiggy-style deep midnight navy base
-        borderRadius: BorderRadius.circular(20),
+        color: const Color(0xFF0F172A), // GateLink Deep Navy Slate base
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: const Color(0xFF1E293B),
+          width: 1.2,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.35),
+            color: const Color(0xFF0F172A).withValues(alpha: 0.4),
             blurRadius: 16,
             offset: const Offset(0, 6),
           ),
@@ -73,7 +84,7 @@ class TopCategoryBar extends StatelessWidget {
         children: _categories.map((item) {
           final isSelected = item.category == selectedCategory;
           return Expanded(
-            child: _SwiggyTabItem(
+            child: _SwiggyBrandTabItem(
               item: item,
               isSelected: isSelected,
               onTap: () {
@@ -88,12 +99,12 @@ class TopCategoryBar extends StatelessWidget {
   }
 }
 
-class _SwiggyTabItem extends StatelessWidget {
-  final _SwiggyCategoryMeta item;
+class _SwiggyBrandTabItem extends StatelessWidget {
+  final _CategoryBrandMeta item;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _SwiggyTabItem({
+  const _SwiggyBrandTabItem({
     required this.item,
     required this.isSelected,
     required this.onTap,
@@ -105,83 +116,83 @@ class _SwiggyTabItem extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 240),
+        duration: const Duration(milliseconds: 220),
         curve: Curves.easeInOutCubic,
-        margin: const EdgeInsets.symmetric(horizontal: 2.5),
+        margin: const EdgeInsets.symmetric(horizontal: 2),
         decoration: isSelected
             ? BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [
-                    Color(0xFF1E3A8A), // Top active navy highlight
-                    Color(0xFF0F172A), // Deep smooth fade
+                    Color(0xFF1E3A8A), // GateLink Primary Navy
+                    Color(0xFF172554), // Deep Navy
                   ],
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),
                 borderRadius: const BorderRadius.vertical(
-                  top: Radius.circular(16),
-                  bottom: Radius.circular(12),
+                  top: Radius.circular(14),
+                  bottom: Radius.circular(10),
                 ),
                 border: Border(
-                  top: const BorderSide(
-                    color: Color(0xFF60A5FA), // Glowing top curve border
+                  top: BorderSide(
+                    color: item.glowColor, // Glowing Category Accent Top Border
                     width: 2.2,
                   ),
                   left: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.15),
+                    color: Colors.white.withValues(alpha: 0.12),
                     width: 1,
                   ),
                   right: BorderSide(
-                    color: Colors.white.withValues(alpha: 0.15),
+                    color: Colors.white.withValues(alpha: 0.12),
                     width: 1,
                   ),
                   bottom: BorderSide.none,
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0xFF3B82F6).withValues(alpha: 0.35),
+                    color: item.glowColor.withValues(alpha: 0.28),
                     blurRadius: 12,
                     offset: const Offset(0, -2),
                   ),
                 ],
               )
             : BoxDecoration(
-                color: const Color(0xFF131C35).withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(12),
+                color: const Color(0xFF1E293B).withValues(alpha: 0.45),
+                borderRadius: BorderRadius.circular(10),
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.04),
+                  color: Colors.white.withValues(alpha: 0.03),
                   width: 1,
                 ),
               ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Top 3D / Rich Visual Icon
+            // Crisp Vector Icon Capsule
             AnimatedScale(
-              scale: isSelected ? 1.15 : 0.95,
+              scale: isSelected ? 1.12 : 0.94,
               duration: const Duration(milliseconds: 200),
               curve: Curves.easeOutBack,
               child: Container(
-                width: 38,
-                height: 38,
+                width: 36,
+                height: 36,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: isSelected
-                      ? const RadialGradient(
-                          colors: [Color(0xFF38BDF8), Color(0xFF1D4ED8)],
+                      ? RadialGradient(
+                          colors: item.activeGradient,
                           center: Alignment.topLeft,
                           radius: 0.9,
                         )
                       : RadialGradient(
                           colors: [
-                            const Color(0xFF334155).withValues(alpha: 0.8),
+                            const Color(0xFF334155).withValues(alpha: 0.7),
                             const Color(0xFF1E293B).withValues(alpha: 0.9),
                           ],
                         ),
                   boxShadow: isSelected
                       ? [
                           BoxShadow(
-                            color: const Color(0xFF38BDF8).withValues(alpha: 0.4),
+                            color: item.glowColor.withValues(alpha: 0.35),
                             blurRadius: 8,
                             offset: const Offset(0, 2),
                           ),
@@ -189,30 +200,26 @@ class _SwiggyTabItem extends StatelessWidget {
                       : null,
                 ),
                 child: Center(
-                  child: Text(
-                    item.emoji,
-                    style: TextStyle(
-                      fontSize: isSelected ? 20 : 17,
-                    ),
+                  child: Icon(
+                    item.icon,
+                    size: isSelected ? 19 : 17,
+                    color: isSelected ? Colors.white : const Color(0xFFCBD5E1),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 5),
+            const SizedBox(height: 4.5),
 
-            // Category Label
-            AnimatedDefaultTextStyle(
-              duration: const Duration(milliseconds: 200),
-              style: TextStyle(
+            // GateLink Manrope Brand Typography
+            Text(
+              item.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.manrope(
                 fontSize: isSelected ? 11.5 : 10.5,
                 fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
                 color: isSelected ? Colors.white : const Color(0xFF94A3B8),
                 letterSpacing: 0.1,
-              ),
-              child: Text(
-                item.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -222,16 +229,18 @@ class _SwiggyTabItem extends StatelessWidget {
   }
 }
 
-class _SwiggyCategoryMeta {
+class _CategoryBrandMeta {
   final ResidentHomeCategory category;
   final String label;
-  final String emoji;
   final IconData icon;
+  final List<Color> activeGradient;
+  final Color glowColor;
 
-  const _SwiggyCategoryMeta({
+  const _CategoryBrandMeta({
     required this.category,
     required this.label,
-    required this.emoji,
     required this.icon,
+    required this.activeGradient,
+    required this.glowColor,
   });
 }
