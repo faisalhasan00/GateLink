@@ -9,7 +9,7 @@ enum ResidentHomeCategory {
   bazaar,
 }
 
-class TopCategoryBar extends StatefulWidget {
+class TopCategoryBar extends StatelessWidget {
   final ResidentHomeCategory selectedCategory;
   final ValueChanged<ResidentHomeCategory> onCategoryChanged;
 
@@ -19,192 +19,219 @@ class TopCategoryBar extends StatefulWidget {
     required this.onCategoryChanged,
   });
 
-  @override
-  State<TopCategoryBar> createState() => _TopCategoryBarState();
-}
-
-class _TopCategoryBarState extends State<TopCategoryBar> {
-  late final ScrollController _scrollController;
-
-  static const List<_CategoryMeta> _categories = [
-    _CategoryMeta(
+  static const List<_SwiggyCategoryMeta> _categories = [
+    _SwiggyCategoryMeta(
       category: ResidentHomeCategory.society,
       label: 'Society',
+      emoji: '🏛️',
       icon: Icons.apartment_rounded,
-      badge: null,
     ),
-    _CategoryMeta(
+    _SwiggyCategoryMeta(
       category: ResidentHomeCategory.maidsSalon,
-      label: 'Maids & Salon',
+      label: 'Maids',
+      emoji: '✨',
       icon: Icons.auto_awesome_rounded,
-      badge: 'Popular',
     ),
-    _CategoryMeta(
+    _SwiggyCategoryMeta(
       category: ResidentHomeCategory.services,
       label: 'Services',
+      emoji: '🔧',
       icon: Icons.handyman_rounded,
-      badge: null,
     ),
-    _CategoryMeta(
+    _SwiggyCategoryMeta(
       category: ResidentHomeCategory.interiors,
       label: 'Interiors',
+      emoji: '🛋️',
       icon: Icons.weekend_rounded,
-      badge: 'Studio',
     ),
-    _CategoryMeta(
+    _SwiggyCategoryMeta(
       category: ResidentHomeCategory.bazaar,
       label: 'Bazaar',
+      emoji: '🛍️',
       icon: Icons.storefront_rounded,
-      badge: 'Market',
     ),
   ];
 
   @override
-  void initState() {
-    super.initState();
-    _scrollController = ScrollController();
+  Widget build(BuildContext context) {
+    return Container(
+      height: 86,
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFF070D1F), // Swiggy-style deep midnight navy base
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.35),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: _categories.map((item) {
+          final isSelected = item.category == selectedCategory;
+          return Expanded(
+            child: _SwiggyTabItem(
+              item: item,
+              isSelected: isSelected,
+              onTap: () {
+                HapticFeedback.lightImpact();
+                onCategoryChanged(item.category);
+              },
+            ),
+          );
+        }).toList(),
+      ),
+    );
   }
+}
 
-  @override
-  void didUpdateWidget(TopCategoryBar oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedCategory != widget.selectedCategory) {
-      _scrollToSelectedCategory();
-    }
-  }
+class _SwiggyTabItem extends StatelessWidget {
+  final _SwiggyCategoryMeta item;
+  final bool isSelected;
+  final VoidCallback onTap;
 
-  void _scrollToSelectedCategory() {
-    final index = _categories.indexWhere((c) => c.category == widget.selectedCategory);
-    if (index >= 0 && _scrollController.hasClients) {
-      const approxItemWidth = 110.0;
-      final targetOffset = (index * approxItemWidth) - 40;
-      _scrollController.animateTo(
-        targetOffset.clamp(0.0, _scrollController.position.maxScrollExtent),
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeInOutCubic,
-      );
-    }
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
+  const _SwiggyTabItem({
+    required this.item,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 48,
-      margin: const EdgeInsets.only(bottom: 6),
-      child: ScrollConfiguration(
-        behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-        child: ListView.separated(
-          controller: _scrollController,
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
-          itemCount: _categories.length,
-          separatorBuilder: (_, __) => const SizedBox(width: 8),
-          itemBuilder: (context, index) {
-            final item = _categories[index];
-            final isSelected = item.category == widget.selectedCategory;
-
-            return GestureDetector(
-              onTap: () {
-                HapticFeedback.lightImpact();
-                widget.onCategoryChanged(item.category);
-              },
-              child: AnimatedScale(
-                scale: isSelected ? 1.02 : 1.0,
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOutCubic,
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 220),
-                  curve: Curves.easeInOutCubic,
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFF1E3A8A) : Colors.white,
-                    borderRadius: BorderRadius.circular(999),
-                    border: Border.all(
-                      color: isSelected ? const Color(0xFF1E3A8A) : const Color(0xFFE2E8F0),
-                      width: isSelected ? 1.5 : 1.0,
-                    ),
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: const Color(0xFF1E3A8A).withValues(alpha: 0.22),
-                              blurRadius: 10,
-                              offset: const Offset(0, 3),
-                            ),
-                          ]
-                        : [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.02),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 240),
+        curve: Curves.easeInOutCubic,
+        margin: const EdgeInsets.symmetric(horizontal: 2.5),
+        decoration: isSelected
+            ? BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF1E3A8A), // Top active navy highlight
+                    Color(0xFF0F172A), // Deep smooth fade
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(16),
+                  bottom: Radius.circular(12),
+                ),
+                border: Border(
+                  top: const BorderSide(
+                    color: Color(0xFF60A5FA), // Glowing top curve border
+                    width: 2.2,
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        item.icon,
-                        size: 16,
-                        color: isSelected ? Colors.white : const Color(0xFF64748B),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        item.label,
-                        style: TextStyle(
-                          fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                          color: isSelected ? Colors.white : const Color(0xFF1E293B),
-                          fontSize: 12.5,
+                  left: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    width: 1,
+                  ),
+                  right: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.15),
+                    width: 1,
+                  ),
+                  bottom: BorderSide.none,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF3B82F6).withValues(alpha: 0.35),
+                    blurRadius: 12,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              )
+            : BoxDecoration(
+                color: const Color(0xFF131C35).withValues(alpha: 0.6),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.04),
+                  width: 1,
+                ),
+              ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Top 3D / Rich Visual Icon
+            AnimatedScale(
+              scale: isSelected ? 1.15 : 0.95,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOutBack,
+              child: Container(
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: isSelected
+                      ? const RadialGradient(
+                          colors: [Color(0xFF38BDF8), Color(0xFF1D4ED8)],
+                          center: Alignment.topLeft,
+                          radius: 0.9,
+                        )
+                      : RadialGradient(
+                          colors: [
+                            const Color(0xFF334155).withValues(alpha: 0.8),
+                            const Color(0xFF1E293B).withValues(alpha: 0.9),
+                          ],
                         ),
-                      ),
-                      if (item.badge != null) ...[
-                        const SizedBox(width: 5),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? Colors.white.withValues(alpha: 0.25)
-                                : const Color(0xFFE0F2FE),
-                            borderRadius: BorderRadius.circular(999),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: const Color(0xFF38BDF8).withValues(alpha: 0.4),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
                           ),
-                          child: Text(
-                            item.badge!,
-                            style: TextStyle(
-                              fontSize: 9.5,
-                              fontWeight: FontWeight.w800,
-                              color: isSelected ? Colors.white : const Color(0xFF0369A1),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ],
+                        ]
+                      : null,
+                ),
+                child: Center(
+                  child: Text(
+                    item.emoji,
+                    style: TextStyle(
+                      fontSize: isSelected ? 20 : 17,
+                    ),
                   ),
                 ),
               ),
-            );
-          },
+            ),
+            const SizedBox(height: 5),
+
+            // Category Label
+            AnimatedDefaultTextStyle(
+              duration: const Duration(milliseconds: 200),
+              style: TextStyle(
+                fontSize: isSelected ? 11.5 : 10.5,
+                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                letterSpacing: 0.1,
+              ),
+              child: Text(
+                item.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _CategoryMeta {
+class _SwiggyCategoryMeta {
   final ResidentHomeCategory category;
   final String label;
+  final String emoji;
   final IconData icon;
-  final String? badge;
 
-  const _CategoryMeta({
+  const _SwiggyCategoryMeta({
     required this.category,
     required this.label,
+    required this.emoji,
     required this.icon,
-    this.badge,
   });
 }
