@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -6,7 +5,6 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/firebase_providers.dart';
-import '../../../../core/services/firestore_service.dart';
 import '../../../visitor/providers/visitor_providers.dart';
 
 class QrScannerScreen extends ConsumerStatefulWidget {
@@ -53,8 +51,7 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
   /// Processes QR code scan with duplicate prevention, expiry check, and validation
   Future<void> _processQrCode(String code) async {
     try {
-      final firestoreService = ref.read(firestoreServiceProvider) ??
-          FirestoreService(societyId: 'SOC-001');
+      final firestoreService = ref.read(firestoreServiceProvider);
       final result = await firestoreService.validateAndProcessQrScan(code);
 
       if (!mounted) return;
@@ -125,6 +122,12 @@ class _QrScannerScreenState extends ConsumerState<QrScannerScreen> {
       headerSub = 'This pass has already been used for entry.';
       primaryColor = AppColors.error;
       statusIcon = Icons.cancel_rounded;
+      HapticFeedback.heavyImpact();
+    } else if (isDenied) {
+      headerTitle = 'ENTRY DENIED ❌';
+      headerSub = 'Resident has denied entry for this visitor.';
+      primaryColor = AppColors.error;
+      statusIcon = Icons.block_rounded;
       HapticFeedback.heavyImpact();
     } else if (isExpired) {
       headerTitle = 'QR CODE EXPIRED ❌';

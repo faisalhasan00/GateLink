@@ -15,6 +15,7 @@ import '../widgets/offline_payment_card.dart';
 import '../widgets/offline_submitted_bottom_sheet.dart';
 import '../widgets/payment_method_selector.dart';
 import '../widgets/payment_success_bottom_sheet.dart';
+import '../widgets/pay_security_badge.dart';
 
 class PayMaintenanceScreen extends ConsumerStatefulWidget {
   final String? billId;
@@ -63,11 +64,18 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
   double? _effectiveParkingCharge;
   double? _effectiveSinkingFund;
   double? _effectivePenaltyFee;
+  String? _activeOrderId;
 
   @override
   void initState() {
     super.initState();
     _initBillData();
+  }
+
+  @override
+  void dispose() {
+    _utrController.dispose();
+    super.dispose();
   }
 
   Future<void> _initBillData() async {
@@ -97,23 +105,9 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
 
       if (user != null) {
         final repo = ref.read(maintenanceRepositoryProvider);
-        final pendingBill = await repo.getPendingBill(user.uid);
+        var pendingBill = await repo.getPendingBill(user.uid);
 
-        if (pendingBill != null) {
-          setState(() {
-            _effectiveBillId = pendingBill.id;
-            _effectiveAmount = pendingBill.amount;
-            _effectiveMonth = pendingBill.month;
-            _effectiveInvoiceNumber = pendingBill.invoiceNumber;
-            _effectiveDueDate = pendingBill.dueDate;
-            _effectiveMaintCharge = pendingBill.maintenanceCharge;
-            _effectiveWaterCharge = pendingBill.waterCharge;
-            _effectiveParkingCharge = pendingBill.parkingCharge;
-            _effectiveSinkingFund = pendingBill.sinkingFund;
-            _effectivePenaltyFee = pendingBill.penaltyFee;
-          });
-        } else {
-          // Seed initial bill via controller if none found
+        if (pendingBill == null) {
           final userProfile = ref.read(userProfileProvider).value;
           final flatNum = userProfile?['flatNumber'] ?? 'A-101';
           await ref.read(maintenanceControllerProvider.notifier).seedDemoBills(
@@ -121,36 +115,29 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
                 residentUid: user.uid,
                 flatNumber: flatNum,
               );
-          final newlyCreated = await repo.getPendingBill(user.uid);
-          if (newlyCreated != null) {
-            setState(() {
-              _effectiveBillId = newlyCreated.id;
-              _effectiveAmount = newlyCreated.amount;
-              _effectiveMonth = newlyCreated.month;
-              _effectiveInvoiceNumber = newlyCreated.invoiceNumber;
-              _effectiveDueDate = newlyCreated.dueDate;
-              _effectiveMaintCharge = newlyCreated.maintenanceCharge;
-              _effectiveWaterCharge = newlyCreated.waterCharge;
-              _effectiveParkingCharge = newlyCreated.parkingCharge;
-              _effectiveSinkingFund = newlyCreated.sinkingFund;
-              _effectivePenaltyFee = newlyCreated.penaltyFee;
-            });
-          }
+          pendingBill = await repo.getPendingBill(user.uid);
+        }
+
+        if (pendingBill != null) {
+          setState(() {
+            _effectiveBillId = pendingBill?.id;
+            _effectiveAmount = pendingBill?.amount;
+            _effectiveMonth = pendingBill?.month;
+            _effectiveInvoiceNumber = pendingBill?.invoiceNumber;
+            _effectiveDueDate = pendingBill?.dueDate;
+            _effectiveMaintCharge = pendingBill?.maintenanceCharge;
+            _effectiveWaterCharge = pendingBill?.waterCharge;
+            _effectiveParkingCharge = pendingBill?.parkingCharge;
+            _effectiveSinkingFund = pendingBill?.sinkingFund;
+            _effectivePenaltyFee = pendingBill?.penaltyFee;
+          });
         }
       }
     } catch (e) {
-      debugPrint('Error fetching latest bill for pay screen: $e');
+      debugPrint('Error fetching latest bill: $e');
     } finally {
       if (mounted) setState(() => _isLoadingBill = false);
     }
-  }
-
-  String? _activeOrderId;
-
-  @override
-  void dispose() {
-    _utrController.dispose();
-    super.dispose();
   }
 
   Future<void> _payWithCashfree() async {
@@ -165,7 +152,6 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
 
       if (user == null) throw Exception('User not logged in');
 
-      // Call Clean Architecture PaymentController to get official Cashfree session
       final order = await ref
           .read(paymentControllerProvider.notifier)
           .initiateCashfreeOrder(
@@ -181,35 +167,23 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       }
 
       setState(() => _activeOrderId = order.orderId);
+      _listenForPaymentCompletion(activeSocId, targetBillId, invNum, order.amount);
 
-      debugPrint(
-          '[PaymentFlow] Initiating Native Cashfree Checkout for billId: $targetBillId, societyId: $activeSocId, orderId: ${order.orderId}');
-
-      // Start listening for real-time Firestore webhook confirmation
-      _listenForPaymentCompletion(
-          activeSocId, targetBillId, invNum, order.amount);
-
-      // Launch Native Cashfree SDK Checkout
       await CashfreeNativeService().startCheckout(
         orderId: order.orderId,
         paymentSessionId: order.cashfreePaymentSessionId!,
         environment: CFEnvironment.PRODUCTION,
         onSuccess: (orderId) {
-          debugPrint('[PaymentFlow] Native SDK reported success for order: $orderId');
           if (mounted) {
             setState(() => _isProcessing = false);
             _verifyPaymentStatusManually();
           }
         },
         onError: (errorMessage, orderId) {
-          debugPrint('[PaymentFlow] Native SDK reported error/cancel: $errorMessage');
           if (mounted) {
             setState(() => _isProcessing = false);
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(errorMessage),
-                backgroundColor: AppColors.error,
-              ),
+              SnackBar(content: Text(errorMessage), backgroundColor: AppColors.error),
             );
           }
         },
@@ -218,10 +192,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       setState(() => _isProcessing = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Cashfree Payment Error: $e'),
-            backgroundColor: AppColors.error,
-          ),
+          SnackBar(content: Text('Cashfree Error: $e'), backgroundColor: AppColors.error),
         );
       }
     }
@@ -238,10 +209,9 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
         .listen((bills) {
       final bill = bills.where((b) => b.id == billId).firstOrNull;
       if (bill != null && bill.isPaid && mounted) {
-        final txnId =
-            (bill.transactionId != null && bill.transactionId!.isNotEmpty)
-                ? bill.transactionId!
-                : 'CF-PAID-OK';
+        final txnId = (bill.transactionId != null && bill.transactionId!.isNotEmpty)
+            ? bill.transactionId!
+            : 'CF-PAID-OK';
         PaymentSuccessBottomSheet.show(
           context,
           amount: amount,
@@ -255,10 +225,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
   Future<void> _verifyPaymentStatusManually() async {
     if (_activeOrderId == null || _activeOrderId!.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'No active payment session to verify. Please proceed to checkout first.'),
-        ),
+        const SnackBar(content: Text('No active payment session to verify.')),
       );
       return;
     }
@@ -305,27 +272,18 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       setState(() => _isProcessing = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Verification error: $e'),
-            backgroundColor: AppColors.error,
-          ),
+          SnackBar(content: Text('Verification error: $e'), backgroundColor: AppColors.error),
         );
       }
     }
   }
 
-  Future<void> _verifyAndCompletePayment() async {
-    if (_selectedMethod == 0) {
-      await _payWithCashfree();
-      return;
-    }
-
+  Future<void> _submitOfflinePayment() async {
     final utrText = _utrController.text.trim();
     if (utrText.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-              'Please enter UTR / Transaction Reference Number from your receipt.'),
+          content: Text('Please enter UTR / Transaction Reference Number.'),
           backgroundColor: AppColors.error,
         ),
       );
@@ -364,8 +322,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
             final errorMsg = ref.read(paymentControllerProvider).errorMessage ??
                 'Offline payment submission failed.';
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content: Text(errorMsg), backgroundColor: AppColors.error),
+              SnackBar(content: Text(errorMsg), backgroundColor: AppColors.error),
             );
           }
           return;
@@ -384,9 +341,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
       setState(() => _isProcessing = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Submission Error: $e'),
-              backgroundColor: AppColors.error),
+          SnackBar(content: Text('Submission Error: $e'), backgroundColor: AppColors.error),
         );
       }
     }
@@ -397,9 +352,10 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
     if (_isLoadingBill) {
       return Scaffold(
         appBar: AppBar(
-            title: const Text('Pay Maintenance'),
-            backgroundColor: Colors.white,
-            foregroundColor: AppColors.textPrimary),
+          title: const Text('Pay Maintenance'),
+          backgroundColor: Colors.white,
+          foregroundColor: AppColors.textPrimary,
+        ),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -456,7 +412,7 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
               CashfreePaymentCard(
                 totalAmount: totalAmount,
                 isProcessing: _isProcessing,
-                onPayPressed: _verifyAndCompletePayment,
+                onPayPressed: _payWithCashfree,
                 onVerifyPressed: _verifyPaymentStatusManually,
                 activeOrderId: _activeOrderId,
               ),
@@ -466,25 +422,11 @@ class _PayMaintenanceScreenState extends ConsumerState<PayMaintenanceScreen> {
               OfflinePaymentCard(
                 utrController: _utrController,
                 isProcessing: _isProcessing,
-                onSubmitPressed: _verifyAndCompletePayment,
+                onSubmitPressed: _submitOfflinePayment,
               ),
               const SizedBox(height: AppSpacing.xl),
             ],
-            const Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.lock_rounded,
-                      size: 14, color: AppColors.textSecondary),
-                  SizedBox(width: 4),
-                  Text(
-                    'Secured by 256-bit SSL encryption',
-                    style:
-                        TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                  ),
-                ],
-              ),
-            ),
+            const PaySecurityBadge(),
           ],
         ),
       ),

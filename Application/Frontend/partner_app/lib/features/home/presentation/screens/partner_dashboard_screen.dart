@@ -6,13 +6,11 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/partner_auth_provider.dart';
 import '../../../auth/presentation/screens/partner_login_screen.dart';
 import '../widgets/partner_metrics_header.dart';
+import '../widgets/partner_dashboard_quick_actions.dart';
+import '../widgets/partner_dashboard_filter_bar.dart';
+import '../widgets/partner_dashboard_empty_state.dart';
 import '../../../leads/presentation/widgets/partner_lead_stepper_card.dart';
-import '../../../leads/presentation/widgets/submit_lead_modal.dart';
-import '../../../wallet/presentation/screens/payout_audit_ledger_screen.dart';
 import '../../../toolkit/presentation/screens/marketing_toolkit_screen.dart';
-import '../../../profile/presentation/widgets/edit_partner_category_modal.dart';
-import '../../../onboarding/presentation/widgets/onboard_society_modal.dart';
-
 import '../../../../core/widgets/partner_logo.dart';
 import '../../../auth/presentation/screens/registration_audit_log_screen.dart';
 
@@ -118,11 +116,10 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
             if (status == 'won') {
               activeSocieties++;
               final flats = double.tryParse(lead['approxFlats']?.toString() ?? '0') ?? 0;
-              monthlyPassives += (flats * 2); // ₹2 per flat monthly commission
+              monthlyPassives += (flats * 2);
             }
           }
 
-          // Filter leads
           final filteredLeads = leadsList.where((lead) {
             final st = lead['status'] ?? 'new';
             final paySt = lead['payoutStatus'] ?? 'pending';
@@ -138,7 +135,6 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 1. Executive Dynamic Metrics Header Card
                 PartnerMetricsHeader(
                   lifetimeEarnings: lifetimeEarnings,
                   monthlyPassives: monthlyPassives,
@@ -147,208 +143,24 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
                 ),
                 const SizedBox(height: 20),
 
-                // 2. Quick Actions Section
-                Row(
-                  children: [
-                    Expanded(
-                      flex: 6,
-                      child: ElevatedButton.icon(
-                        onPressed: () => OnboardSocietyModal.show(
-                          context,
-                          partnerName: partnerName,
-                          partnerPhone: partnerPhone,
-                          partnerEmail: partnerUser?.email,
-                          partnerUpi: partnerUser?.upiId,
-                        ),
-                        icon: const Icon(Icons.bolt_rounded, size: 18),
-                        label: const Text('⚡ Onboard Society Directly', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w900)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.success,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      flex: 5,
-                      child: ElevatedButton.icon(
-                        onPressed: () => SubmitLeadModal.show(
-                          context,
-                          partnerName: partnerName,
-                          partnerPhone: partnerPhone,
-                          partnerEmail: partnerUser?.email,
-                          partnerUpi: partnerUser?.upiId,
-                        ),
-                        icon: const Icon(Icons.add_business_rounded, size: 16),
-                        label: const Text('Submit Lead', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => EditPartnerCategoryModal.show(context),
-                        icon: const Icon(Icons.manage_accounts_rounded, size: 14, color: AppColors.primary),
-                        label: const Text('Category', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const RegistrationAuditLogScreen()),
-                        ),
-                        icon: const Icon(Icons.verified_user_rounded, size: 14, color: AppColors.primary),
-                        label: const Text('Audit Log', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => PayoutAuditLedgerScreen(
-                              partnerPhone: partnerPhone,
-                              partnerEmail: partnerUser?.email,
-                            ),
-                          ),
-                        ),
-                        icon: const Icon(Icons.receipt_long_rounded, size: 14, color: AppColors.primary),
-                        label: const Text('Ledger', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                        ),
-                      ),
-                    ),
-                  ],
+                PartnerDashboardQuickActions(
+                  partnerName: partnerName,
+                  partnerPhone: partnerPhone,
+                  partnerEmail: partnerUser?.email,
+                  partnerUpi: partnerUser?.upiId,
                 ),
                 const SizedBox(height: 24),
 
-                // 3. Dynamic Lead CRM Stepper Section & Filter Tabs
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Live Lead CRM & Stepper',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(AppRadius.pill),
-                      ),
-                      child: Text(
-                        '${filteredLeads.length} Leads',
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-
-                // Filter Pills Row
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _FilterPill(
-                        label: 'All Leads (${leadsList.length})',
-                        isSelected: _selectedFilter == 'all',
-                        onTap: () => setState(() => _selectedFilter = 'all'),
-                      ),
-                      const SizedBox(width: 8),
-                      _FilterPill(
-                        label: '⏳ In Pipeline',
-                        isSelected: _selectedFilter == 'pending',
-                        onTap: () => setState(() => _selectedFilter = 'pending'),
-                      ),
-                      const SizedBox(width: 8),
-                      _FilterPill(
-                        label: '✓ ₹500 Paid',
-                        isSelected: _selectedFilter == 'paid',
-                        onTap: () => setState(() => _selectedFilter = 'paid'),
-                      ),
-                      const SizedBox(width: 8),
-                      _FilterPill(
-                        label: '⚡ Active (2% Mo)',
-                        isSelected: _selectedFilter == 'active',
-                        onTap: () => setState(() => _selectedFilter = 'active'),
-                      ),
-                    ],
-                  ),
+                PartnerDashboardFilterBar(
+                  totalCount: leadsList.length,
+                  filteredCount: filteredLeads.length,
+                  selectedFilter: _selectedFilter,
+                  onFilterChanged: (f) => setState(() => _selectedFilter = f),
                 ),
                 const SizedBox(height: 16),
 
-                // Live Dynamic Lead List or Production Empty State
                 if (filteredLeads.isEmpty)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
-                      border: Border.all(color: AppColors.border),
-                    ),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(Icons.business_center_outlined, size: 48, color: AppColors.primary),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'No Leads Submitted Yet',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
-                        ),
-                        const SizedBox(height: 6),
-                        const Text(
-                          'Start earning ₹500 instant Cashfree bonus + 2% monthly recurring commissions by submitting your first society lead or onboarding a society directly.',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4),
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton.icon(
-                          onPressed: () => SubmitLeadModal.show(context, partnerName: partnerName, partnerPhone: partnerPhone),
-                          icon: const Icon(Icons.add_business_rounded, size: 18),
-                          label: const Text('Submit First Lead', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                          ),
-                        ),
-                      ],
-                    ),
-                  )
+                  PartnerDashboardEmptyState(partnerName: partnerName, partnerPhone: partnerPhone)
                 else
                   ListView.separated(
                     shrinkWrap: true,
@@ -363,38 +175,6 @@ class _PartnerDashboardScreenState extends ConsumerState<PartnerDashboardScreen>
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-class _FilterPill extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _FilterPill({required this.label, required this.isSelected, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.white,
-          borderRadius: BorderRadius.circular(AppRadius.pill),
-          border: Border.all(color: isSelected ? AppColors.primary : AppColors.border),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: isSelected ? Colors.white : AppColors.textSecondary,
-          ),
-        ),
       ),
     );
   }

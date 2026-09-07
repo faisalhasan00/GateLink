@@ -65,7 +65,7 @@ class _InviteVisitorScreenState extends ConsumerState<InviteVisitorScreen> {
       final user = ref.read(currentUserProvider);
       final profile = ref.read(userProfileProvider).value;
 
-      if (firestoreService == null || user == null) {
+      if (user == null) {
         throw Exception('Not logged in');
       }
 

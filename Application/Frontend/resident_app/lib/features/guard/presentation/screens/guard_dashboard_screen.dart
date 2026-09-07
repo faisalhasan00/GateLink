@@ -11,7 +11,6 @@ import '../../../../core/providers/auth_providers.dart';
 import '../../../visitor/domain/models/visitor_model.dart';
 import '../../../../core/services/firestore_service.dart';
 import '../../../sos/providers/alert_providers.dart';
-import '../../../visitor/providers/visitor_providers.dart';
 import '../widgets/gate_qr_display_dialog.dart';
 import '../widgets/guard_shift_header.dart';
 import '../widgets/guard_quick_actions_grid.dart';

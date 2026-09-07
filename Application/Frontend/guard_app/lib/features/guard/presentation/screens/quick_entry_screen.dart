@@ -115,8 +115,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
       });
       return;
     }
-    final firestoreService = ref.read(firestoreServiceProvider) ??
-        FirestoreService(societyId: societyId);
+    final firestoreService = ref.read(firestoreServiceProvider);
     final res = await firestoreService.validateFlat(formattedFlat);
     if (mounted) {
       setState(() {
@@ -143,8 +142,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
       return;
     }
 
-    final firestoreService = ref.read(firestoreServiceProvider) ??
-        FirestoreService(societyId: societyId);
+    final firestoreService = ref.read(firestoreServiceProvider);
 
     final validation = await firestoreService.validateFlat(targetFlat);
     if (!validation.isValid) {

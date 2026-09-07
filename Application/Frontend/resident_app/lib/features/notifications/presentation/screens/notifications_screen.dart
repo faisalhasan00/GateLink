@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../core/providers/auth_providers.dart';
-import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../providers/notification_providers.dart';
+import '../widgets/notification_actions_menu.dart';
+import '../widgets/notification_category_filter.dart';
+import '../widgets/notification_empty_state.dart';
+import '../widgets/notification_item_card.dart';
 
 class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
@@ -33,134 +34,21 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notification Center'),
-        actions: [
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert_rounded),
-            onSelected: (value) async {
-              final user = ref.read(currentUserProvider);
-              final profile = ref.read(userProfileProvider).value;
-              final activeSocId = profile?.societyId ?? 'SOC-001';
-              if (user == null) return;
-
-              if (value == 'mark_read') {
-                final success = await ref
-                    .read(notificationControllerProvider.notifier)
-                    .markAllNotificationsAsRead(
-                      societyId: activeSocId,
-                      uid: user.uid,
-                    );
-
-                if (success && context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('All notifications marked as read.')),
-                  );
-                }
-              } else if (value == 'clear_all') {
-                final confirm = await showDialog<bool>(
-                  context: context,
-                  builder: (ctx) => AlertDialog(
-                    title: const Text('Clear All Notifications?'),
-                    content: const Text(
-                        'Are you sure you want to clear all notifications? This cannot be undone.'),
-                    actions: [
-                      TextButton(
-                          onPressed: () => Navigator.pop(ctx, false),
-                          child: const Text('Cancel')),
-                      ElevatedButton(
-                        onPressed: () => Navigator.pop(ctx, true),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.error),
-                        child: const Text('Clear All'),
-                      ),
-                    ],
-                  ),
-                );
-
-                if (confirm == true) {
-                  final success = await ref
-                      .read(notificationControllerProvider.notifier)
-                      .clearAllNotifications(
-                        societyId: activeSocId,
-                        uid: user.uid,
-                      );
-
-                  if (success && context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('All notifications cleared.'),
-                          backgroundColor: AppColors.error),
-                    );
-                  }
-                }
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'mark_read',
-                child: Row(
-                  children: [
-                    Icon(Icons.done_all_rounded,
-                        size: 18, color: AppColors.primary),
-                    SizedBox(width: 10),
-                    Text('Mark all as read'),
-                  ],
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'clear_all',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete_sweep_rounded,
-                        size: 18, color: AppColors.error),
-                    SizedBox(width: 10),
-                    Text('Clear all notifications',
-                        style: TextStyle(color: AppColors.error)),
-                  ],
-                ),
-              ),
-            ],
-          ),
+        actions: const [
+          NotificationActionsMenu(),
         ],
       ),
       backgroundColor: AppColors.background,
       body: Column(
         children: [
-          // Filter Bar
-          Container(
-            color: Colors.white,
-            padding: const EdgeInsets.fromLTRB(AppSpacing.pagePadding, 0,
-                AppSpacing.pagePadding, AppSpacing.sm),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: _categories.map((cat) {
-                  final isSelected = _selectedCategory == cat;
-                  return Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(cat),
-                      selected: isSelected,
-                      selectedColor: AppColors.primary,
-                      labelStyle: TextStyle(
-                        color:
-                            isSelected ? Colors.white : AppColors.textSecondary,
-                        fontWeight:
-                            isSelected ? FontWeight.w700 : FontWeight.w500,
-                        fontSize: 12,
-                      ),
-                      onSelected: (selected) {
-                        if (selected) setState(() => _selectedCategory = cat);
-                      },
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
+          NotificationCategoryFilter(
+            categories: _categories,
+            selectedCategory: _selectedCategory,
+            onCategorySelected: (cat) {
+              setState(() => _selectedCategory = cat);
+            },
           ),
           const Divider(height: 0),
-
-          // Notifications List
           Expanded(
             child: notificationsAsync.when(
               data: (notifications) {
@@ -174,21 +62,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                       }).toList();
 
                 if (filtered.isEmpty) {
-                  return const Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.notifications_off_rounded,
-                            size: 56, color: AppColors.textDisabled),
-                        SizedBox(height: AppSpacing.md),
-                        Text(
-                          'No notifications in this category',
-                          style: TextStyle(
-                              color: AppColors.textSecondary, fontSize: 15),
-                        ),
-                      ],
-                    ),
-                  );
+                  return const NotificationEmptyState();
                 }
 
                 return ListView.separated(
@@ -197,200 +71,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                   separatorBuilder: (_, __) =>
                       const SizedBox(height: AppSpacing.md),
                   itemBuilder: (context, index) {
-                    final notification = filtered[index];
-                    final isRead = notification.read;
-                    final type = notification.type;
-
-                    String timeStr = 'Just now';
-                    if (notification.createdAt.isNotEmpty) {
-                      final dt = DateTime.tryParse(notification.createdAt);
-                      if (dt != null) {
-                        final local = dt.toLocal();
-                        timeStr =
-                            '${local.day}/${local.month}/${local.year} ${local.hour}:${local.minute.toString().padLeft(2, '0')}';
-                      }
-                    }
-
-                    return Dismissible(
-                      key: Key(notification.id),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 20),
-                        decoration: BoxDecoration(
-                          color: AppColors.error,
-                          borderRadius: BorderRadius.circular(AppRadius.lg),
-                        ),
-                        child: const Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Text('Delete',
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 13)),
-                            SizedBox(width: 6),
-                            Icon(Icons.delete_outline_rounded,
-                                color: Colors.white),
-                          ],
-                        ),
-                      ),
-                      onDismissed: (_) async {
-                        final user = ref.read(currentUserProvider);
-                        final profile = ref.read(userProfileProvider).value;
-                        final activeSocId = profile?.societyId ?? 'SOC-001';
-                        if (user != null) {
-                          await ref
-                              .read(notificationControllerProvider.notifier)
-                              .deleteNotification(
-                                societyId: activeSocId,
-                                notificationId: notification.id,
-                                uid: user.uid,
-                              );
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text('Notification deleted.')),
-                            );
-                          }
-                        }
-                      },
-                      child: GestureDetector(
-                        onTap: () async {
-                          final user = ref.read(currentUserProvider);
-                          final profile = ref.read(userProfileProvider).value;
-                          final activeSocId = profile?.societyId ?? 'SOC-001';
-
-                          if (user != null && !isRead) {
-                            await ref
-                                .read(notificationControllerProvider.notifier)
-                                .markNotificationAsRead(
-                                  societyId: activeSocId,
-                                  notificationId: notification.id,
-                                  uid: user.uid,
-                                );
-                          }
-
-                          // Deep Link Navigation
-                          if (context.mounted) {
-                            if (type.contains('visitor')) {
-                              context.go(AppRoutes.visitors);
-                            } else if (type.contains('payment') ||
-                                type.contains('bill')) {
-                              context.go(AppRoutes.maintenanceHistory);
-                            } else if (type.contains('complaint')) {
-                              context.go(AppRoutes.complaints);
-                            } else if (type.contains('amenity')) {
-                              context.go(AppRoutes.myBookings);
-                            } else if (type.contains('document')) {
-                              context.go(AppRoutes.documents);
-                            } else if (type.contains('notice')) {
-                              context.go(AppRoutes.notices);
-                            }
-                          }
-                        },
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 200),
-                          padding: const EdgeInsets.all(AppSpacing.md),
-                          decoration: BoxDecoration(
-                            color: isRead
-                                ? Colors.white
-                                : AppColors.primarySurface
-                                    .withValues(alpha: 0.3),
-                            borderRadius: BorderRadius.circular(AppRadius.lg),
-                            border: Border.all(
-                              color: isRead
-                                  ? AppColors.border
-                                  : AppColors.primary.withValues(alpha: 0.4),
-                              width: isRead ? 1 : 1.5,
-                            ),
-                          ),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: _getIconColorForType(type)
-                                      .withValues(alpha: 0.1),
-                                  borderRadius:
-                                      BorderRadius.circular(AppRadius.md),
-                                ),
-                                child: Icon(
-                                  _getIconForType(type),
-                                  color: _getIconColorForType(type),
-                                  size: 20,
-                                ),
-                              ),
-                              const SizedBox(width: AppSpacing.md),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            notification.title,
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: isRead
-                                                  ? FontWeight.w600
-                                                  : FontWeight.w800,
-                                              color: AppColors.textPrimary,
-                                            ),
-                                          ),
-                                        ),
-                                        if (!isRead)
-                                          Container(
-                                            width: 8,
-                                            height: 8,
-                                            decoration: const BoxDecoration(
-                                              color: AppColors.primary,
-                                              shape: BoxShape.circle,
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(notification.body,
-                                        style: const TextStyle(
-                                            fontSize: 13,
-                                            color: AppColors.textSecondary)),
-                                    const SizedBox(height: 6),
-                                    Text(timeStr,
-                                        style: const TextStyle(
-                                            fontSize: 11,
-                                            color: AppColors.textDisabled)),
-                                  ],
-                                ),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.close_rounded,
-                                    size: 18, color: AppColors.textDisabled),
-                                onPressed: () async {
-                                  final user = ref.read(currentUserProvider);
-                                  final profile =
-                                      ref.read(userProfileProvider).value;
-                                  final activeSocId =
-                                      profile?.societyId ?? 'SOC-001';
-                                  if (user != null) {
-                                    await ref
-                                        .read(notificationControllerProvider
-                                            .notifier)
-                                        .deleteNotification(
-                                          societyId: activeSocId,
-                                          notificationId: notification.id,
-                                          uid: user.uid,
-                                        );
-                                  }
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    return NotificationItemCard(
+                      notification: filtered[index],
                     );
                   },
                 );
@@ -402,27 +84,5 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         ],
       ),
     );
-  }
-
-  IconData _getIconForType(String type) {
-    if (type.contains('visitor')) return Icons.person_rounded;
-    if (type.contains('payment') || type.contains('bill'))
-      return Icons.receipt_long_rounded;
-    if (type.contains('complaint')) return Icons.engineering_rounded;
-    if (type.contains('amenity')) return Icons.pool_rounded;
-    if (type.contains('document')) return Icons.insert_drive_file_rounded;
-    if (type.contains('notice')) return Icons.campaign_rounded;
-    return Icons.notifications_rounded;
-  }
-
-  Color _getIconColorForType(String type) {
-    if (type.contains('visitor')) return AppColors.visitor;
-    if (type.contains('payment') || type.contains('bill'))
-      return AppColors.success;
-    if (type.contains('complaint')) return AppColors.complaint;
-    if (type.contains('amenity')) return AppColors.amenity;
-    if (type.contains('document')) return AppColors.info;
-    if (type.contains('notice')) return AppColors.warning;
-    return AppColors.primary;
   }
 }

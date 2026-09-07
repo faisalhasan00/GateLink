@@ -74,7 +74,7 @@ class GuardProfileForm extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   DropdownButtonFormField<String>(
-                    value: selectedGender,
+                    initialValue: selectedGender,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppRadius.md),

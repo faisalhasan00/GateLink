@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'dart:io';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/firebase_providers.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../../../core/services/firestore_service.dart';
-import '../../../../core/services/storage_service.dart';
 import '../../models/gate_entry_model.dart';
 import '../widgets/guard_header_banner.dart';
 import '../widgets/entry_type_selector.dart';
+import '../widgets/quick_entry_flat_picker.dart';
+import '../widgets/quick_entry_visitor_form.dart';
 
 class QuickEntryScreen extends ConsumerStatefulWidget {
   const QuickEntryScreen({super.key});
@@ -32,11 +31,9 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
   final _companyController = TextEditingController();
   final _notesController = TextEditingController();
 
-  String _selectedGender = 'Male';
+  final String _selectedGender = 'Male';
   String _selectedVehicleType = '4-Wheeler';
   String _selectedTower = 'All Blocks / Direct';
-  File? _photoFile;
-  final _picker = ImagePicker();
 
   bool _isValidatingFlat = false;
   FlatValidationResult? _flatValidationResult;
@@ -50,7 +47,6 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
     'Tower 1',
     'Tower 2'
   ];
-  final List<String> _genders = ['Male', 'Female', 'Other'];
   final List<String> _vehicleTypes = [
     '2-Wheeler',
     '4-Wheeler',
@@ -78,13 +74,6 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
     return '$_selectedTower-$clean';
   }
 
-  Future<void> _pickPhoto() async {
-    final picked = await _picker.pickImage(source: ImageSource.camera, imageQuality: 70);
-    if (picked != null) {
-      setState(() => _photoFile = File(picked.path));
-    }
-  }
-
   Future<void> _validateFlatNow(String val) async {
     final formattedFlat = _getFormattedFlatNumber(val);
     if (formattedFlat.isEmpty) {
@@ -93,9 +82,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
     }
 
     setState(() => _isValidatingFlat = true);
-    final profile = ref.read(userProfileProvider).value;
-    final societyId = profile?['societyId'] ?? 'SOC-001';
-    final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: societyId);
+    final firestoreService = ref.read(firestoreServiceProvider);
     final res = await firestoreService.validateFlat(formattedFlat);
     if (mounted) {
       setState(() {
@@ -110,9 +97,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
     if (_isSubmitting) return;
 
     final targetFlat = _getFormattedFlatNumber(_flatController.text);
-    final profile = ref.read(userProfileProvider).value;
-    final societyId = profile?['societyId'] ?? 'SOC-001';
-    final firestoreService = ref.read(firestoreServiceProvider) ?? FirestoreService(societyId: societyId);
+    final firestoreService = ref.read(firestoreServiceProvider);
 
     final validation = await firestoreService.validateFlat(targetFlat);
     if (!validation.isValid) {
@@ -135,14 +120,6 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
     setState(() => _isSubmitting = true);
 
     try {
-      String? photoUrl;
-      if (_photoFile != null) {
-        final storage = ref.read(storageServiceProvider);
-        final uniqueId = DateTime.now().millisecondsSinceEpoch.toString();
-        photoUrl = await storage.uploadComplaintImage(_photoFile!, societyId, 'visitor_$uniqueId');
-        if (photoUrl.isEmpty) photoUrl = null;
-      }
-
       final visitorType = _selectedType == EntryType.guest
           ? 'Guest'
           : _selectedType == EntryType.delivery
@@ -152,7 +129,7 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
                   : 'Daily Help';
 
       final user = FirebaseAuth.instance.currentUser;
-      final profile = ref.read(userProfileProvider).value;
+      final profileData = ref.read(userProfileProvider).value;
 
       await firestoreService.logVisitorEntry(
         name: _nameController.text.trim(),
@@ -163,10 +140,10 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
         vehicleType: _selectedVehicleType,
         company: _companyController.text.trim(),
         gender: _selectedGender,
-        photoUrl: photoUrl,
+        photoUrl: null,
         notes: _notesController.text.trim(),
         guardUid: user?.uid,
-        gateName: profile?['gateName'] ?? 'Gate 1 — Main Entry',
+        gateName: profileData?['gateName'] ?? 'Gate 1 — Main Entry',
       );
 
       if (mounted) {
@@ -199,7 +176,6 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
     _companyController.clear();
     _notesController.clear();
     setState(() {
-      _photoFile = null;
       _flatValidationResult = null;
     });
   }
@@ -227,7 +203,6 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Banner Widget
               GuardHeaderBanner(
                 societyName: societyName,
                 gateName: gateName,
@@ -235,148 +210,42 @@ class _QuickEntryScreenState extends ConsumerState<QuickEntryScreen> {
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Entry Type Selector Tabs Widget
               EntryTypeSelector(
                 selectedType: _selectedType,
                 onTypeSelected: (type) => setState(() => _selectedType = type),
               ),
               const SizedBox(height: AppSpacing.lg),
 
-              // Target Flat & Tower Picker
-              Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: DropdownButtonFormField<String>(
-                      value: _selectedTower,
-                      decoration: const InputDecoration(
-                        labelText: 'Building Block',
-                        contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-                      ),
-                      items: _towers.map((t) => DropdownMenuItem(value: t, child: Text(t, style: const TextStyle(fontSize: 12)))).toList(),
-                      onChanged: (val) {
-                        if (val != null) {
-                          setState(() => _selectedTower = val);
-                          if (_flatController.text.isNotEmpty) _validateFlatNow(_flatController.text);
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    flex: 5,
-                    child: TextFormField(
-                      controller: _flatController,
-                      keyboardType: TextInputType.text,
-                      decoration: InputDecoration(
-                        labelText: 'Flat Number',
-                        hintText: 'e.g. 104',
-                        suffixIcon: _isValidatingFlat
-                            ? const Padding(
-                                padding: EdgeInsets.all(12),
-                                child: SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2)),
-                              )
-                            : null,
-                      ),
-                      onChanged: _validateFlatNow,
-                      validator: (v) => v == null || v.trim().isEmpty ? 'Flat is required' : null,
-                    ),
-                  ),
-                ],
+              QuickEntryFlatPicker(
+                selectedTower: _selectedTower,
+                towers: _towers,
+                flatController: _flatController,
+                isValidatingFlat: _isValidatingFlat,
+                flatValidationResult: _flatValidationResult,
+                onTowerChanged: (val) {
+                  if (val != null) {
+                    setState(() => _selectedTower = val);
+                    if (_flatController.text.isNotEmpty) _validateFlatNow(_flatController.text);
+                  }
+                },
+                onFlatChanged: _validateFlatNow,
               ),
-
-              // Flat Validation Feedback Badge
-              if (_flatValidationResult != null) ...[
-                const SizedBox(height: 6),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: _flatValidationResult!.isValid ? AppColors.successSurface : AppColors.errorSurface,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
-                    border: Border.all(color: _flatValidationResult!.isValid ? AppColors.success : AppColors.error),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        _flatValidationResult!.isValid ? Icons.check_circle_rounded : Icons.error_outline_rounded,
-                        color: _flatValidationResult!.isValid ? AppColors.success : AppColors.error,
-                        size: 16,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          _flatValidationResult!.isValid
-                              ? 'Verified Resident: ${_flatValidationResult!.residentName}'
-                              : _flatValidationResult!.error ?? 'Flat not found in society database',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: _flatValidationResult!.isValid ? AppColors.success : AppColors.error,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
 
               const SizedBox(height: AppSpacing.md),
 
-              // Visitor Name & Phone
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Visitor Full Name',
-                  hintText: 'e.g. Ramesh Kumar',
-                  prefixIcon: Icon(Icons.person_outline_rounded),
-                ),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Visitor name is required' : null,
-              ),
-              const SizedBox(height: AppSpacing.md),
-
-              TextFormField(
-                controller: _phoneController,
-                keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(
-                  labelText: 'Visitor Mobile Number',
-                  hintText: 'e.g. 9876543210',
-                  prefixIcon: Icon(Icons.phone_outlined),
-                ),
-                validator: (v) => v == null || v.trim().length < 10 ? 'Enter valid 10-digit phone' : null,
-              ),
-              const SizedBox(height: AppSpacing.md),
-
-              // Vehicle Details
-              Row(
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: DropdownButtonFormField<String>(
-                      value: _selectedVehicleType,
-                      decoration: const InputDecoration(labelText: 'Vehicle Type'),
-                      items: _vehicleTypes.map((v) => DropdownMenuItem(value: v, child: Text(v, style: const TextStyle(fontSize: 12)))).toList(),
-                      onChanged: (val) {
-                        if (val != null) setState(() => _selectedVehicleType = val);
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    flex: 5,
-                    child: TextFormField(
-                      controller: _vehicleController,
-                      decoration: const InputDecoration(
-                        labelText: 'Vehicle Number',
-                        hintText: 'e.g. TS09AB1234',
-                      ),
-                    ),
-                  ),
-                ],
+              QuickEntryVisitorForm(
+                nameController: _nameController,
+                phoneController: _phoneController,
+                vehicleController: _vehicleController,
+                selectedVehicleType: _selectedVehicleType,
+                vehicleTypes: _vehicleTypes,
+                onVehicleTypeChanged: (val) {
+                  if (val != null) setState(() => _selectedVehicleType = val);
+                },
               ),
 
               const SizedBox(height: AppSpacing.xl),
 
-              // Submit Button
               SizedBox(
                 width: double.infinity,
                 height: 52,

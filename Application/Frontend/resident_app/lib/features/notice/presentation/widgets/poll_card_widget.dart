@@ -6,6 +6,10 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/providers/auth_providers.dart';
 import '../../domain/models/poll_model.dart';
 import '../controllers/poll_controller.dart';
+import 'poll_card_footer.dart';
+import 'poll_card_header.dart';
+import 'poll_interactive_voting.dart';
+import 'poll_results_visualizer.dart';
 
 class PollCardWidget extends ConsumerStatefulWidget {
   final PollModel poll;
@@ -60,7 +64,6 @@ class _PollCardWidgetState extends ConsumerState<PollCardWidget> {
     }
 
     final societyId = profile.societyId;
-
     final controller = ref.read(pollControllerProvider.notifier);
     final success = await controller.castVote(
       societyId: societyId,
@@ -82,7 +85,8 @@ class _PollCardWidgetState extends ConsumerState<PollCardWidget> {
         ),
       );
     } else {
-      final errorMsg = ref.read(pollControllerProvider).errorMessage ?? 'Failed to submit vote.';
+      final errorMsg =
+          ref.read(pollControllerProvider).errorMessage ?? 'Failed to submit vote.';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(errorMsg),
@@ -96,7 +100,8 @@ class _PollCardWidgetState extends ConsumerState<PollCardWidget> {
   Widget build(BuildContext context) {
     final poll = widget.poll;
     final voteState = ref.watch(pollControllerProvider);
-    final isThisPollSubmitting = voteState.isSubmitting && voteState.votingPollId == poll.id;
+    final isThisPollSubmitting =
+        voteState.isSubmitting && voteState.votingPollId == poll.id;
     final profile = ref.watch(userProfileProvider).value;
     final userRole = profile?.role ?? 'resident';
     final canVote = poll.canUserVote(userRole);
@@ -136,286 +141,28 @@ class _PollCardWidgetState extends ConsumerState<PollCardWidget> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Top Badges Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                // Category Chip
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: catColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    poll.category.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w800,
-                      color: catColor,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                ),
-
-                // Status / Expiry Badge
-                Row(
-                  children: [
-                    if (poll.isOwnerOnly) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        margin: const EdgeInsets.only(right: 6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFEF3C7),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: const Row(
-                          children: [
-                            Icon(Icons.lock_outline_rounded, size: 12, color: Color(0xFFB45309)),
-                            SizedBox(width: 3),
-                            Text(
-                              'OWNER ONLY',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFFB45309),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: poll.isActive ? const Color(0xFFECFDF5) : const Color(0xFFF1F5F9),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        poll.isActive ? '🟢 ACTIVE' : '⚪ CLOSED',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w800,
-                          color: poll.isActive ? const Color(0xFF059669) : const Color(0xFF64748B),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+            PollCardHeader(
+              poll: poll,
+              categoryColor: catColor,
             ),
-            const SizedBox(height: AppSpacing.sm),
-
-            // Poll Title
-            Text(
-              poll.title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF0F172A),
-                height: 1.3,
-              ),
-            ),
-            if (poll.description.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                poll.description,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF64748B),
-                  height: 1.4,
-                ),
-              ),
-            ],
             const SizedBox(height: AppSpacing.md),
-
-            // Options Section
-            if (showResults) ...[
-              // Results Visualizer Mode
-              ...poll.options.map((opt) {
-                final percentage = poll.totalVotes > 0
-                    ? ((opt.voteCount / poll.totalVotes) * 100).round()
-                    : 0;
-                final isUserVote = poll.userVotedOptionId == opt.id;
-
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: isUserVote ? const Color(0xFFEFF6FF) : const Color(0xFFF8FAFC),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: isUserVote ? const Color(0xFF3B82F6) : const Color(0xFFE2E8F0),
-                      width: isUserVote ? 1.5 : 1,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Row(
-                              children: [
-                                if (isUserVote)
-                                  const Padding(
-                                    padding: EdgeInsets.only(right: 6),
-                                    child: Icon(Icons.check_circle_rounded,
-                                        size: 16, color: Color(0xFF2563EB)),
-                                  ),
-                                Expanded(
-                                  child: Text(
-                                    opt.text,
-                                    style: TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: isUserVote ? FontWeight.w800 : FontWeight.w600,
-                                      color: isUserVote ? const Color(0xFF1D4ED8) : const Color(0xFF1E293B),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Text(
-                            '$percentage% (${opt.voteCount})',
-                            style: TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w800,
-                              color: isUserVote ? const Color(0xFF1D4ED8) : const Color(0xFF475569),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(6),
-                        child: LinearProgressIndicator(
-                          value: poll.totalVotes > 0 ? opt.voteCount / poll.totalVotes : 0.0,
-                          backgroundColor: const Color(0xFFE2E8F0),
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            isUserVote ? const Color(0xFF2563EB) : const Color(0xFF94A3B8),
-                          ),
-                          minHeight: 8,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }),
-            ] else ...[
-              // Interactive Radio Voting Mode
-              ...poll.options.map((opt) {
-                final isSelected = _selectedOptionId == opt.id;
-
-                return GestureDetector(
-                  onTap: () {
-                    if (canVote) {
-                      setState(() => _selectedOptionId = opt.id);
-                    }
-                  },
-                  child: Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xFFEFF6FF) : Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isSelected ? const Color(0xFF1E3A8A) : const Color(0xFFCBD5E1),
-                        width: isSelected ? 2 : 1,
-                      ),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
-                          color: isSelected ? const Color(0xFF1E3A8A) : const Color(0xFF94A3B8),
-                          size: 20,
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            opt.text,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                              color: isSelected ? const Color(0xFF1E3A8A) : const Color(0xFF1E293B),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }),
-            ],
-
-            const SizedBox(height: AppSpacing.sm),
-
-            // Bottom Footer Row (Vote Button or Voted Info)
-            if (!showResults && canVote) ...[
-              SizedBox(
-                width: double.infinity,
-                height: 44,
-                child: ElevatedButton(
-                  onPressed: isThisPollSubmitting ? null : _handleVote,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1E3A8A),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  child: isThisPollSubmitting
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                        )
-                      : const Text(
-                          'Cast Vote',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
-                        ),
-                ),
+            if (showResults)
+              PollResultsVisualizer(poll: poll)
+            else
+              PollInteractiveVoting(
+                poll: poll,
+                selectedOptionId: _selectedOptionId,
+                canVote: canVote,
+                onOptionSelected: (optId) =>
+                    setState(() => _selectedOptionId = optId),
               ),
-              const SizedBox(height: 8),
-            ] else if (!showResults && !canVote) ...[
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFEF2F2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.info_outline_rounded, size: 16, color: Color(0xFFDC2626)),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        poll.isOwnerOnly
-                            ? 'Voting is restricted to verified Flat Owners.'
-                            : 'You cannot participate in this poll.',
-                        style: const TextStyle(fontSize: 12, color: Color(0xFF991B1B), fontWeight: FontWeight.w600),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
-
-            // Vote Metadata Footer
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${poll.totalVotes} Vote${poll.totalVotes == 1 ? '' : 's'} cast • ${poll.votingRule == 'one_per_flat' ? '1 vote/flat' : '1 vote/resident'}',
-                  style: const TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
-                ),
-                if (expiryText.isNotEmpty)
-                  Text(
-                    expiryText,
-                    style: const TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.w500),
-                  ),
-              ],
+            PollCardFooter(
+              poll: poll,
+              showResults: showResults,
+              canVote: canVote,
+              isSubmitting: isThisPollSubmitting,
+              expiryText: expiryText,
+              onVote: _handleVote,
             ),
           ],
         ),

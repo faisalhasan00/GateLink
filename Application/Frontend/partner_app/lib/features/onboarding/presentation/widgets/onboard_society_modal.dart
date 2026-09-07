@@ -1,8 +1,9 @@
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
+import 'onboard_society_success_dialog.dart';
+import 'onboard_society_form_fields.dart';
 
 class OnboardSocietyModal extends StatefulWidget {
   final String partnerName;
@@ -48,7 +49,6 @@ class _OnboardSocietyModalState extends State<OnboardSocietyModal> {
   final _addressController = TextEditingController();
   final _cityController = TextEditingController();
   final _flatsController = TextEditingController();
-  final _blocksController = TextEditingController();
   
   final _adminNameController = TextEditingController();
   final _adminPhoneController = TextEditingController();
@@ -63,7 +63,6 @@ class _OnboardSocietyModalState extends State<OnboardSocietyModal> {
     _addressController.dispose();
     _cityController.dispose();
     _flatsController.dispose();
-    _blocksController.dispose();
     _adminNameController.dispose();
     _adminPhoneController.dispose();
     _adminEmailController.dispose();
@@ -79,7 +78,7 @@ class _OnboardSocietyModalState extends State<OnboardSocietyModal> {
       final address = _addressController.text.trim();
       final city = _cityController.text.trim();
       final flats = int.tryParse(_flatsController.text.trim()) ?? 150;
-      final blocks = int.tryParse(_blocksController.text.trim()) ?? 3;
+      const blocks = 3;
 
       final adminName = _adminNameController.text.trim();
       final adminPhone = _adminPhoneController.text.trim();
@@ -140,61 +139,14 @@ class _OnboardSocietyModalState extends State<OnboardSocietyModal> {
         Navigator.pop(context);
 
         // Show Onboarding Success Sheet
-        showDialog(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            title: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(color: AppColors.successLight, shape: BoxShape.circle),
-                  child: const Icon(Icons.verified_rounded, color: AppColors.success, size: 24),
-                ),
-                const SizedBox(width: 10),
-                const Expanded(
-                  child: Text('Society Onboarded!', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900)),
-                ),
-              ],
-            ),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$societyName ($flats Flats) is live on GateLink!',
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                ),
-                const SizedBox(height: 10),
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('✓ ₹500 Cash Disbursed Instant Payout', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.success)),
-                      Text('Bank UTR: $utrNumber', style: const TextStyle(fontSize: 10, fontFamily: 'monospace', color: AppColors.textSecondary)),
-                      const SizedBox(height: 6),
-                      Text('⚡ + ₹$monthlyPassive /month recurring income started!', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.primary)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 12),
-                const Text('RWA Admin Credentials:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textSecondary)),
-                Text('Admin Portal: app.gatelink.in\nMobile: $adminPhone\nSociety Code: $societyId', style: const TextStyle(fontSize: 11, color: AppColors.textPrimary)),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx),
-                child: const Text('Done & Close', style: TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
+        OnboardSocietySuccessDialog.show(
+          context,
+          societyName: societyName,
+          flats: flats,
+          utrNumber: utrNumber,
+          monthlyPassive: monthlyPassive,
+          adminPhone: adminPhone,
+          societyId: societyId,
         );
       }
     } catch (err) {
@@ -275,109 +227,16 @@ class _OnboardSocietyModalState extends State<OnboardSocietyModal> {
               ),
               const SizedBox(height: 20),
 
-              const Text('1. Society Details', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
-              const SizedBox(height: 10),
-
-              TextFormField(
-                controller: _societyNameController,
-                decoration: InputDecoration(
-                  labelText: 'Society / Apartment Name *',
-                  hintText: 'e.g. Sunshine Heights Co-op Housing',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                  prefixIcon: const Icon(Icons.domain_rounded, color: AppColors.primary),
-                ),
-                validator: (val) => val == null || val.trim().isEmpty ? 'Enter society name' : null,
+              OnboardSocietyFormFields(
+                societyNameController: _societyNameController,
+                addressController: _addressController,
+                cityController: _cityController,
+                flatsController: _flatsController,
+                adminNameController: _adminNameController,
+                adminPhoneController: _adminPhoneController,
+                adminEmailController: _adminEmailController,
               ),
-              const SizedBox(height: 12),
 
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _cityController,
-                      decoration: InputDecoration(
-                        labelText: 'City *',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                        prefixIcon: const Icon(Icons.location_city_rounded, color: AppColors.primary),
-                      ),
-                      validator: (val) => val == null || val.trim().isEmpty ? 'Enter city' : null,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _flatsController,
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(
-                        labelText: 'Total Flats *',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                        prefixIcon: const Icon(Icons.apartment_rounded, color: AppColors.primary),
-                      ),
-                      validator: (val) => val == null || val.trim().isEmpty ? 'Enter flats' : null,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              TextFormField(
-                controller: _addressController,
-                decoration: InputDecoration(
-                  labelText: 'Full Address *',
-                  hintText: 'e.g. Road No 12, Banjara Hills',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                  prefixIcon: const Icon(Icons.map_rounded, color: AppColors.primary),
-                ),
-                validator: (val) => val == null || val.trim().isEmpty ? 'Enter address' : null,
-              ),
-              const SizedBox(height: 20),
-
-              const Text('2. RWA Secretary / Admin Details', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
-              const SizedBox(height: 10),
-
-              TextFormField(
-                controller: _adminNameController,
-                decoration: InputDecoration(
-                  labelText: 'Secretary / Admin Name *',
-                  hintText: 'e.g. Subhash Chandra',
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                  prefixIcon: const Icon(Icons.person_rounded, color: AppColors.primary),
-                ),
-                validator: (val) => val == null || val.trim().isEmpty ? 'Enter admin name' : null,
-              ),
-              const SizedBox(height: 12),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: TextFormField(
-                      controller: _adminPhoneController,
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        labelText: 'Admin Mobile *',
-                        prefixText: '+91 ',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                        prefixIcon: const Icon(Icons.phone_rounded, color: AppColors.primary),
-                      ),
-                      validator: (val) => val == null || val.trim().length < 10 ? 'Enter phone' : null,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: TextFormField(
-                      controller: _adminEmailController,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: 'Admin Email *',
-                        hintText: 'admin@society.in',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppRadius.md)),
-                        prefixIcon: const Icon(Icons.email_rounded, color: AppColors.primary),
-                      ),
-                      validator: (val) => val == null || !val.contains('@') ? 'Enter email' : null,
-                    ),
-                  ),
-                ],
-              ),
               const SizedBox(height: 24),
 
               SizedBox(

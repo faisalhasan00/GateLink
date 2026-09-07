@@ -5,7 +5,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../domain/models/amenity_booking_model.dart';
 import '../../providers/amenity_providers.dart';
-import '../controllers/amenity_controller.dart';
 
 class MyBookingsScreen extends ConsumerWidget {
   const MyBookingsScreen({super.key});
@@ -34,14 +33,14 @@ class MyBookingsScreen extends ConsumerWidget {
       body: myBookingsAsync.when(
         data: (bookings) {
           if (bookings.isEmpty) {
-            return Center(
+            return const Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.event_busy_rounded,
+                  Icon(Icons.event_busy_rounded,
                       size: 56, color: AppColors.textDisabled),
-                  const SizedBox(height: AppSpacing.md),
-                  const Text('No bookings found',
+                  SizedBox(height: AppSpacing.md),
+                  Text('No bookings found',
                       style: TextStyle(color: AppColors.textSecondary)),
                 ],
               ),

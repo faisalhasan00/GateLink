@@ -25,57 +25,37 @@ import {
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
-const INITIAL_SEED_ARTICLES = [
-  {
-    title: 'Top 5 Security Measures Every Indian Housing Society Must Implement in 2026',
-    slug: 'top-5-security-measures-every-indian-housing-society-must-implement-in-2026',
-    categoryName: 'Security',
-    authorName: 'Mohammed Faisal Hasan',
-    date: 'July 24, 2026',
-    readTime: '5 min read',
-    excerpt: 'From 1-tap QR gate passes to emergency SOS siren alerts, discover how modern apartment complexes are eliminating gate queues and unauthorized entries.',
-    content: '<p>Security in gated communities has evolved drastically beyond manual paper registers. Today, apartment complexes rely on digital OTP gate passes, biometric helper check-ins, and instant resident phone notifications to maintain a fortress-level gate perimeter.</p><h2>1. Digital QR & OTP Visitor Approvals</h2><p>Manual register logs are slow, error-prone, and unreadable. Digital visitor entry sends instant push notifications to resident mobile phones for one-tap approval.</p><h2>2. Emergency SOS Panic Sirens</h2><p>In emergencies, residents need an immediate panic button that alerts security guards and committee members simultaneously.</p>',
-    coverImage: 'https://images.unsplash.com/photo-1558002038-1055907df827?w=1200&auto=format&fit=crop&q=80',
-    tags: ['Gate Security', 'QR Passes', 'Resident Safety'],
-    status: 'Published'
-  },
-  {
-    title: 'How Automated Maintenance Invoicing & Online Gateway Boosts Collection to 98%+',
-    slug: 'how-automated-maintenance-invoicing-online-gateway-boosts-collection-to-98',
-    categoryName: 'Finance',
-    authorName: 'Priya Sharma',
-    date: 'July 18, 2026',
-    readTime: '6 min read',
-    excerpt: 'Say goodbye to manual WhatsApp payment chasers. Learn how automated monthly invoicing and auto-reconciliation streamline society treasury ledgers.',
-    content: '<p>Managing society maintenance payments manually on Excel causes delayed payments and ledger errors. By deploying automated payment gateway links with instant GST PDF receipts, housing societies achieve over 98% timely monthly collections.</p>',
-    coverImage: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?w=1200&auto=format&fit=crop&q=80',
-    tags: ['Online Billing', 'Maintenance Billing', 'Tally ERP'],
-    status: 'Published'
-  },
-  {
-    title: 'The Ultimate Guide to RWA Bylaw Compliance & Digital Audit Vaults',
-    slug: 'the-ultimate-guide-to-rwa-bylaw-compliance-digital-audit-vaults',
-    categoryName: 'Governance',
-    authorName: 'Anand Verma',
-    date: 'July 12, 2026',
-    readTime: '8 min read',
-    excerpt: 'Ensure your management committee stays 100% compliant with local state society registrar regulations using cloud audit logs and RBAC matrix controls.',
-    content: '<p>Role-Based Access Control (RBAC) ensures that treasurers, presidents, and secretaries only modify records within their authorized scope, maintaining zero audit friction during annual general body meetings.</p>',
-    coverImage: 'https://images.unsplash.com/photo-1450133064473-71024230f91b?w=1200&auto=format&fit=crop&q=80',
-    tags: ['Bylaws', 'RBAC', 'Legal Audit'],
-    status: 'Published'
+function formatDisplayDate(article) {
+  if (!article) return 'Recent';
+  if (article.publishedAt?.toDate) {
+    return article.publishedAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
   }
-];
+  if (article.publishedAt) {
+    const d = new Date(article.publishedAt);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+  }
+  if (article.createdAt?.toDate) {
+    return article.createdAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+  if (article.createdAt) {
+    const d = new Date(article.createdAt);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+  }
+  return article.date || 'Recent';
+}
 
 export default function ArticleDetailPage() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const { slug } = useParams();
 
-  const seedArticle = INITIAL_SEED_ARTICLES.find(a => a.slug === slug);
-  const [article, setArticle] = useState(seedArticle || null);
+  const [article, setArticle] = useState(null);
   const [relatedArticles, setRelatedArticles] = useState([]);
-  const [loading, setLoading] = useState(!seedArticle);
+  const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [isDemoModalOpen, setIsDemoModalOpen] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
@@ -103,8 +83,9 @@ export default function ArticleDetailPage() {
 
       const docData = { id: snap.docs[0].id, ...snap.docs[0].data() };
       
-      // Enforce public read status check
-      if (docData.status !== 'Published') {
+      // Enforce public read status check (case-insensitive)
+      const st = (docData.status || '').toLowerCase().trim();
+      if (st !== 'published' && st !== 'active') {
         setNotFound(true);
         setLoading(false);
         return;
@@ -112,18 +93,18 @@ export default function ArticleDetailPage() {
 
       setArticle(docData);
 
-      // Fetch related articles in same category
-      if (docData.categoryId || docData.categoryName) {
-        const relQ = query(
-          collection(db, 'articles'),
-          where('status', '==', 'Published'),
-          limit(4)
-        );
-        const relSnap = await getDocs(relQ);
+      // Fetch related articles
+      try {
+        const relSnap = await getDocs(collection(db, 'articles'));
         const relDocs = relSnap.docs
           .map(d => ({ id: d.id, ...d.data() }))
-          .filter(d => d.slug !== slug);
+          .filter(d => {
+            const relSt = (d.status || '').toLowerCase().trim();
+            return (relSt === 'published' || relSt === 'active') && d.slug !== slug;
+          });
         setRelatedArticles(relDocs.slice(0, 3));
+      } catch (e) {
+        console.warn('Related articles fetch note:', e);
       }
     } catch (err) {
       console.error('Error fetching article detail:', err);
@@ -166,27 +147,25 @@ export default function ArticleDetailPage() {
         "url": "https://gatelink.in/logo.png"
       }
     },
-    "datePublished": article.publishedAt?.toDate ? article.publishedAt.toDate().toISOString() : new Date().toISOString(),
-    "dateModified": article.updatedAt?.toDate ? article.updatedAt.toDate().toISOString() : new Date().toISOString(),
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://gatelink.in/blog/${article.slug}`
+      "@id": article.canonicalUrl || `https://gatelink.in/blog/${article.slug}`
     }
   };
 
   return (
     <div style={{ backgroundColor: isDark ? '#0F172A' : '#F8FAFC', minHeight: '100vh', color: isDark ? '#F8FAFC' : '#0F172A', fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <SeoHead
+      <SeoHead 
         title={`${article.seoTitle || article.title} | GateLink Blog`}
         description={article.seoDescription || article.excerpt}
         canonicalUrl={article.canonicalUrl || `https://gatelink.in/blog/${article.slug}`}
-        ogImage={article.ogImage || article.coverImage}
+        ogType="article"
         schemaData={schemaData}
       />
 
       <Navbar onOpenDemoModal={() => setIsDemoModalOpen(true)} />
 
-      {/* Article Header & Cover Banner */}
+      {/* Article Header */}
       <header style={{ paddingTop: '140px', paddingBottom: '40px', backgroundColor: isDark ? '#1E293B' : '#0F172A', color: '#FFFFFF', position: 'relative' }}>
         <div style={{ maxWidth: '860px', margin: '0 auto', padding: '0 24px' }}>
           
@@ -224,7 +203,7 @@ export default function ArticleDetailPage() {
                   {article.authorName || 'GateLink Editorial Team'}
                 </div>
                 <div style={{ fontSize: '13px', color: '#94A3B8' }}>
-                  Published on {article.publishedAt?.toDate ? article.publishedAt.toDate().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : 'Recent'}
+                  Published on {formatDisplayDate(article)}
                 </div>
               </div>
             </div>
