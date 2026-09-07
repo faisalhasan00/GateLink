@@ -45,37 +45,100 @@ class DashboardScreen extends ConsumerWidget {
           ),
           slivers: [
             const DashboardAppBar(),
-            SliverPadding(
-              padding: const EdgeInsets.all(AppSpacing.pagePadding),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  // Sticky / Top 5-Category Navigation Bar: Society, Maids & Salon, Services, Interiors, Bazaar
-                  TopCategoryBar(
+
+            // Swiggy-Style Sticky Top Category Header
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _StickyCategoryHeaderDelegate(
+                child: Container(
+                  color: AppColors.background,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.pagePadding,
+                    vertical: 8,
+                  ),
+                  child: TopCategoryBar(
                     selectedCategory: selectedCategory,
                     onCategoryChanged: (cat) {
                       ref.read(residentHomeCategoryProvider.notifier).state = cat;
                     },
                   ),
-                  const SizedBox(height: AppSpacing.sm),
+                ),
+              ),
+            ),
 
-                  // Dynamic Section Rendering based on Selected Category
-                  if (selectedCategory == ResidentHomeCategory.society) ...[
-                    const SocietyDashboardContent(),
-                  ] else if (selectedCategory == ResidentHomeCategory.maidsSalon) ...[
-                    const MaidsSalonDashboardView(),
-                  ] else if (selectedCategory == ResidentHomeCategory.services) ...[
-                    const ServicesDashboardView(),
-                  ] else if (selectedCategory == ResidentHomeCategory.interiors) ...[
-                    const InteriorsDashboardView(),
-                  ] else if (selectedCategory == ResidentHomeCategory.bazaar) ...[
-                    const BazaarDashboardView(),
-                  ],
-                ]),
+            // Category Content with Swiggy-Style Smooth Transition
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.pagePadding,
+                4,
+                AppSpacing.pagePadding,
+                AppSpacing.pagePadding,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 250),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(0.0, 0.02),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: KeyedSubtree(
+                    key: ValueKey<ResidentHomeCategory>(selectedCategory),
+                    child: _buildCategoryView(selectedCategory),
+                  ),
+                ),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildCategoryView(ResidentHomeCategory category) {
+    switch (category) {
+      case ResidentHomeCategory.society:
+        return const SocietyDashboardContent();
+      case ResidentHomeCategory.maidsSalon:
+        return const MaidsSalonDashboardView();
+      case ResidentHomeCategory.services:
+        return const ServicesDashboardView();
+      case ResidentHomeCategory.interiors:
+        return const InteriorsDashboardView();
+      case ResidentHomeCategory.bazaar:
+        return const BazaarDashboardView();
+    }
+  }
+}
+
+class _StickyCategoryHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final Widget child;
+
+  _StickyCategoryHeaderDelegate({required this.child});
+
+  @override
+  double get minExtent => 62.0;
+
+  @override
+  double get maxExtent => 62.0;
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return child;
+  }
+
+  @override
+  bool shouldRebuild(covariant _StickyCategoryHeaderDelegate oldDelegate) {
+    return true;
   }
 }
