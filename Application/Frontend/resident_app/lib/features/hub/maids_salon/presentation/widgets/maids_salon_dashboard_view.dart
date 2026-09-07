@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:societysphere/core/theme/app_colors.dart';
-import 'maids_directory_section.dart';
+import 'maid_services_catalog_section.dart';
 import 'salon_beautician_section.dart';
 
 class MaidsSalonDashboardView extends StatefulWidget {
@@ -11,14 +10,14 @@ class MaidsSalonDashboardView extends StatefulWidget {
 }
 
 class _MaidsSalonDashboardViewState extends State<MaidsSalonDashboardView> {
-  int _tabIndex = 0; // 0 = Maids & Daily Help, 1 = Doorstep Salon
+  int _tabIndex = 0; // 0 = Housekeeping & Chores, 1 = Doorstep Salon
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Sub-segmented toggle: Daily Helpers vs Doorstep Salon
+        // Sub-segmented toggle: Housekeeping & Chores vs Doorstep Salon
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
@@ -44,15 +43,15 @@ class _MaidsSalonDashboardViewState extends State<MaidsSalonDashboardView> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.cleaning_services_rounded,
+                          Icons.auto_awesome_rounded,
                           size: 16,
                           color: _tabIndex == 0 ? const Color(0xFF1E3A8A) : const Color(0xFF64748B),
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Daily Helpers & Maids',
+                          'Housekeeping & Chores',
                           style: TextStyle(
-                            fontSize: 12.5,
+                            fontSize: 12,
                             fontWeight: _tabIndex == 0 ? FontWeight.w800 : FontWeight.w600,
                             color: _tabIndex == 0 ? const Color(0xFF1E3A8A) : const Color(0xFF64748B),
                           ),
@@ -85,9 +84,9 @@ class _MaidsSalonDashboardViewState extends State<MaidsSalonDashboardView> {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'Salon & Beautician',
+                          'Salon & Grooming',
                           style: TextStyle(
-                            fontSize: 12.5,
+                            fontSize: 12,
                             fontWeight: _tabIndex == 1 ? FontWeight.w800 : FontWeight.w600,
                             color: _tabIndex == 1 ? const Color(0xFF0EA5E9) : const Color(0xFF64748B),
                           ),
@@ -104,7 +103,7 @@ class _MaidsSalonDashboardViewState extends State<MaidsSalonDashboardView> {
 
         // Display Active Sub Tab
         if (_tabIndex == 0)
-          const MaidsDirectorySection()
+          const MaidServicesCatalogSection()
         else
           const SalonBeauticianSection(),
 
