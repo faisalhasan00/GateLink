@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../providers/auth_providers.dart';
-import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
@@ -88,22 +87,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final authService = ref.watch(authServiceProvider);
 
   return GoRouter(
-    initialLocation: AppRoutes.splash,
+    initialLocation: AppRoutes.guardDashboard,
     refreshListenable: notifier,
     errorBuilder: (context, state) => const GuardDashboardScreen(),
     redirect: (context, state) {
       final user = FirebaseAuth.instance.currentUser ?? authService.currentUser ?? ref.read(currentUserProvider);
       final hasCached = authService.hasCachedSessionSync();
       final isAuth = user != null || hasCached;
-      final isSplash = state.uri.path == AppRoutes.splash;
       final isLoggingIn = state.uri.path == AppRoutes.login || 
                           state.uri.path == AppRoutes.onboarding ||
                           state.uri.path == AppRoutes.otp;
-
-      // Allow splash to render and resolve session without kicking out to login prematurely
-      if (isSplash) {
-        return null;
-      }
 
       // If user is truly unauthenticated and attempting to access protected screens
       if (!isAuth) {
@@ -122,6 +115,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     },
     debugLogDiagnostics: true,
     routes: [
+      GoRoute(
+        path: '/',
+        redirect: (context, state) => AppRoutes.guardDashboard,
+      ),
       GoRoute(
         path: AppRoutes.unauthorized,
         builder: (context, state) => const UnauthorizedAccessScreen(),
@@ -173,10 +170,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
 
       // Auth & Onboarding Routes
-      GoRoute(
-        path: AppRoutes.splash,
-        builder: (context, state) => const SplashScreen(),
-      ),
       GoRoute(
         path: AppRoutes.onboarding,
         builder: (context, state) => const OnboardingScreen(),

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../models/user_profile_model.dart';
 import '../providers/auth_providers.dart';
-import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/presentation/screens/otp_screen.dart';
@@ -111,21 +110,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   final authService = ref.watch(authServiceProvider);
 
   return GoRouter(
-    initialLocation: AppRoutes.splash,
+    initialLocation: AppRoutes.dashboard,
     refreshListenable: notifier,
     redirect: (context, state) {
       final user = FirebaseAuth.instance.currentUser ?? authService.currentUser ?? ref.read(currentUserProvider);
       final isAuth = user != null;
-      final isSplash = state.uri.path == AppRoutes.splash;
       final isLoggingIn = state.uri.path == AppRoutes.login ||
           state.uri.path == AppRoutes.register ||
           state.uri.path == AppRoutes.onboarding ||
           state.uri.path == AppRoutes.otp;
-
-      // Allow splash to perform initialization without premature kicking to login
-      if (isSplash) {
-        return null;
-      }
 
       // If user is unauthenticated and attempting to access protected screens
       if (!isAuth && !isLoggingIn) {
@@ -142,6 +135,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     errorBuilder: (context, state) => const DashboardScreen(),
     debugLogDiagnostics: true,
     routes: [
+      GoRoute(
+        path: '/',
+        redirect: (context, state) => AppRoutes.dashboard,
+      ),
       GoRoute(
         path: AppRoutes.unauthorized,
         builder: (context, state) => const UnauthorizedAccessScreen(),
@@ -198,10 +195,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/visitors/:id',
         redirect: (context, state) => '/home/visitors/${state.pathParameters['id']}',
-      ),
-      GoRoute(
-        path: AppRoutes.splash,
-        builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(
         path: AppRoutes.onboarding,
