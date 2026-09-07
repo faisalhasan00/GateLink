@@ -200,16 +200,20 @@ class _VisitorLogCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      visitor.name,
-                      style: const TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
+                    Expanded(
+                      child: Text(
+                        visitor.name,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 8),
                     AppBadge(
                       label: visitor.status == 'inside' ? 'INSIDE' : 'EXITED',
                       variant: visitor.status == 'inside' ? BadgeVariant.success : BadgeVariant.neutral,
@@ -220,6 +224,8 @@ class _VisitorLogCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   'Visiting Flat ${visitor.flatNo} • ${visitor.purpose}',
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                 ),
                 if (visitor.vehicleNumber != null && visitor.vehicleNumber!.isNotEmpty) ...[
@@ -228,31 +234,45 @@ class _VisitorLogCard extends StatelessWidget {
                     children: [
                       const Icon(Icons.directions_car_outlined, size: 14, color: AppColors.textMuted),
                       const SizedBox(width: 4),
-                      Text(
-                        visitor.vehicleNumber!,
-                        style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                      Expanded(
+                        child: Text(
+                          visitor.vehicleNumber!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                        ),
                       ),
                     ],
                   ),
                 ],
                 const SizedBox(height: 6),
-                Row(
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 4,
                   children: [
-                    const Icon(Icons.login, size: 13, color: AppColors.successEmerald),
-                    const SizedBox(width: 4),
-                    Text(
-                      'In: $inTimeStr',
-                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.login, size: 13, color: AppColors.successEmerald),
+                        const SizedBox(width: 4),
+                        Text(
+                          'In: $inTimeStr',
+                          style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                        ),
+                      ],
                     ),
-                    if (outTimeStr != null) ...[
-                      const SizedBox(width: 12),
-                      const Icon(Icons.logout, size: 13, color: AppColors.dangerCrimson),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Out: $outTimeStr',
-                        style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                    if (outTimeStr != null)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.logout, size: 13, color: AppColors.dangerCrimson),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Out: $outTimeStr',
+                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          ),
+                        ],
                       ),
-                    ],
                   ],
                 ),
               ],

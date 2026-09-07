@@ -392,6 +392,28 @@ service cloud.firestore {
         allow read: if isAuthenticated() && belongsToSociety(societyId);
         allow create, update, delete: if isSocietyAdmin(societyId);
       }
+
+      // Patrol Checkpoints (Night Patrol Route Monitoring)
+      match /patrol_checkpoints/{checkpointId} {
+        allow read: if isAuthenticated() && (belongsToSociety(societyId) || isSuperAdmin());
+        allow create, delete: if isSocietyAdmin(societyId) || isSuperAdmin();
+        allow update: if isSocietyAdmin(societyId) || isSuperAdmin() || isGuard(societyId);
+      }
+
+      // Patrol Scan Logs (Live Guard Checkpoint Scans)
+      match /patrol_logs/{logId} {
+        allow read: if isAuthenticated() && (belongsToSociety(societyId) || isSuperAdmin());
+        allow create: if isAuthenticated() && belongsToSociety(societyId) && (isGuard(societyId) || isSocietyAdmin(societyId) || isSuperAdmin());
+        allow update, delete: if isSocietyAdmin(societyId) || isSuperAdmin();
+      }
+
+      // Patrol Incidents (Security Breaches, Hazards & Observations)
+      match /patrol_incidents/{incidentId} {
+        allow read: if isAuthenticated() && (belongsToSociety(societyId) || isSuperAdmin());
+        allow create: if isAuthenticated() && belongsToSociety(societyId) && (isGuard(societyId) || isSocietyAdmin(societyId) || isSuperAdmin());
+        allow update: if isAuthenticated() && (isSocietyAdmin(societyId) || isSuperAdmin() || isGuard(societyId));
+        allow delete: if isSocietyAdmin(societyId) || isSuperAdmin();
+      }
     }
 
     // Account Deletion Requests (Self-Service Deletion Queue & Audit - SEC-P0)
