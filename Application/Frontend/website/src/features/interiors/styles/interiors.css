@@ -955,10 +955,10 @@
 .interiors-trust-strip-section {
   position: relative;
   background: linear-gradient(135deg, #00838f 0%, #0891b2 50%, #0d9488 100%);
-  padding: 1.5rem 1.25rem 1.25rem;
-  margin-top: -36px; /* Sits cleanly halfway overlapping the hero section */
+  padding: 1.15rem 1.25rem 1.15rem;
+  margin-top: -30px; /* Sits cleanly halfway overlapping the hero section */
   z-index: 20;
-  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 12px 28px -5px rgba(0, 0, 0, 0.3);
 }
@@ -978,13 +978,13 @@
   align-items: center;
   text-align: center;
   position: relative;
-  padding-top: 34px; /* Sleek spacing so text sits cleanly below the compact badge */
+  padding-top: 30px; /* Perfectly aligned below the 56px circle badge */
 }
 
 /* Elevated White Circular Icon Badge (Intersecting Top Edge & Hero Section) */
 .interiors-trust-circle-badge {
   position: absolute;
-  top: -28px; /* Sits half on the hero and half on the teal strip */
+  top: -28px; /* Sits exactly half (50%) on the hero and half (50%) on the teal strip */
   left: 50%;
   transform: translateX(-50%);
   width: 56px;
@@ -1016,19 +1016,11 @@
   color: #ffffff;
   font-size: 0.95rem;
   font-weight: 700;
-  margin: 0.35rem 0 0.15rem;
+  margin: 0;
+  white-space: nowrap;
   letter-spacing: -0.01em;
   font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-}
-
-.interiors-trust-item-desc {
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.74rem;
-  font-weight: 500;
-  margin: 0;
-  line-height: 1.35;
-  max-width: 175px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
 @media (max-width: 1024px) {
