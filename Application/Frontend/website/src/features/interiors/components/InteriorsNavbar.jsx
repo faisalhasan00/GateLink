@@ -12,25 +12,6 @@ export default function InteriorsNavbar({ onOpenConsultation }) {
           <span className="interiors-logo-sub">Interiors</span>
         </Link>
 
-        {/* Links */}
-        <ul className="interiors-nav-links">
-          <li>
-            <a href="#estimator" className="interiors-nav-link">Cost Calculator</a>
-          </li>
-          <li>
-            <a href="#lookbook" className="interiors-nav-link">Design Lookbook</a>
-          </li>
-          <li>
-            <a href="#why-us" className="interiors-nav-link">Society Advantage</a>
-          </li>
-          <li>
-            <a href="#process" className="interiors-nav-link">How It Works</a>
-          </li>
-          <li>
-            <a href="#faq" className="interiors-nav-link">FAQs</a>
-          </li>
-        </ul>
-
         {/* Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <a
