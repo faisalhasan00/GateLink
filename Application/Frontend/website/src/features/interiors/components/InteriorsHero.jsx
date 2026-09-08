@@ -18,33 +18,21 @@ export default function InteriorsHero({ onOpenConsultation, onScrollToEstimator 
     {
       id: 1,
       image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=2000&q=85',
-      titleHighlight: 'Your Hyderabad Home.',
-      titleSub: 'Designed, Managed, Delivered.',
-      subtitle: 'End-to-end luxury interiors without running around. Custom crafted for your society flat.',
       tag: 'Master Suite & Study Lounge'
     },
     {
       id: 2,
       image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=85',
-      titleHighlight: 'Your Bengaluru Home.',
-      titleSub: 'Designed, Managed, Delivered.',
-      subtitle: '45-Day handover guarantee with flat 10-year warranty & pre-approved society gate passes.',
       tag: 'Contemporary Living & Foyer'
     },
     {
       id: 3,
       image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=2000&q=85',
-      titleHighlight: 'Your Mumbai Home.',
-      titleSub: 'Designed, Managed, Delivered.',
-      subtitle: 'Zero noise violations, RWA compliant working hours, and 146 meticulous quality checks.',
       tag: 'Modular Quartz Island Kitchen'
     },
     {
       id: 4,
       image: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=2000&q=85',
-      titleHighlight: 'Your Pune & NCR Home.',
-      titleSub: 'Designed, Managed, Delivered.',
-      subtitle: 'Senior architect 3D design consultation + complete turnkey execution at factory pricing.',
       tag: 'Minimalist Architectural Lounge'
     }
   ];
@@ -101,22 +89,16 @@ export default function InteriorsHero({ onOpenConsultation, onScrollToEstimator 
       {/* Hero Content Layer */}
       <div className="interiors-hero-content-container">
         <div className="interiors-hero-text-block">
-          
-          {/* Top Trust Pill */}
-          <div className="interiors-hero-pill-badge">
-            <Sparkles size={14} className="interiors-pill-icon" />
-            <span>GateLink Verified Society Interiors</span>
-          </div>
 
-          {/* Main Headline (Exact Layout as Reference) */}
+          {/* Main Headline (Exact Match with Reference Image) */}
           <h1 className="interiors-cinematic-title">
-            <span className="interiors-title-line-1">{current.titleHighlight}</span>
-            <span className="interiors-title-line-2">{current.titleSub}</span>
+            <span className="interiors-title-line-1">Your Hyderabad Home.</span>
+            <span className="interiors-title-line-2">Designed, Managed, Delivered.</span>
           </h1>
 
-          {/* Subtitle */}
+          {/* Subtitle (Exact Match with Reference Image) */}
           <p className="interiors-cinematic-subtitle">
-            {current.subtitle}
+            End-to-end interiors without running around.
           </p>
 
           {/* Action CTA Group */}
