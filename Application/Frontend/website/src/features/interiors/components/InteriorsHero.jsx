@@ -1,39 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Sparkles, 
-  ShieldCheck, 
-  Clock, 
-  ArrowRight, 
-  CheckCircle2, 
   ChevronLeft, 
   ChevronRight,
-  Calculator,
   MessageCircle,
-  Building2,
-  Calendar
+  ArrowRight
 } from 'lucide-react';
 
 export default function InteriorsHero({ onOpenConsultation, onScrollToEstimator }) {
   const slides = [
     {
       id: 1,
+      image: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=2000&q=85',
+      tag: 'Heritage Luxury Dining & Lounge'
+    },
+    {
+      id: 2,
       image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=2000&q=85',
       tag: 'Master Suite & Study Lounge'
     },
     {
-      id: 2,
+      id: 3,
       image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=85',
       tag: 'Contemporary Living & Foyer'
     },
     {
-      id: 3,
+      id: 4,
       image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=2000&q=85',
       tag: 'Modular Quartz Island Kitchen'
-    },
-    {
-      id: 4,
-      image: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=2000&q=85',
-      tag: 'Minimalist Architectural Lounge'
     }
   ];
 
@@ -86,44 +79,27 @@ export default function InteriorsHero({ onOpenConsultation, onScrollToEstimator 
       <div className="interiors-hero-overlay-dark" />
       <div className="interiors-hero-overlay-bottom" />
 
-      {/* Hero Content Layer */}
+      {/* Hero Content Layer (Matching Exact Reference Layout with Centered Translucent Card) */}
       <div className="interiors-hero-content-container">
-        <div className="interiors-hero-text-block">
-
-          {/* Main Headline (Exact Match with Reference Image) */}
+        <div className="interiors-hero-card">
+          {/* Main Headline */}
           <h1 className="interiors-cinematic-title">
-            <span className="interiors-title-line-1">Your Hyderabad Home.</span>
-            <span className="interiors-title-line-2">Designed, Managed, Delivered.</span>
+            Best Interior Designers In Hyderabad
           </h1>
 
-          {/* Subtitle (Exact Match with Reference Image) */}
+          {/* Subtitle */}
           <p className="interiors-cinematic-subtitle">
-            End-to-end interiors without running around.
+            Dream Homes At Dream Budgets & 15,000 Happy Customers
           </p>
 
-          {/* Action CTA Group */}
+          {/* Action CTA Button */}
           <div className="interiors-hero-actions-row">
-            {/* Primary CTA with FREE badge */}
             <button
               type="button"
-              className="interiors-hero-btn-book"
-              onClick={() => onOpenConsultation && onOpenConsultation()}
+              className="interiors-hero-btn-teal"
+              onClick={() => onOpenConsultation && onOpenConsultation({ city: 'Hyderabad' })}
             >
-              <span className="interiors-btn-free-ribbon">FREE</span>
-              <span className="interiors-btn-book-text">Book 3D Design Session</span>
-              <span className="interiors-btn-arrow-circle">
-                <ArrowRight size={18} />
-              </span>
-            </button>
-
-            {/* Secondary Cost Estimator CTA */}
-            <button
-              type="button"
-              className="interiors-hero-btn-cost"
-              onClick={onScrollToEstimator}
-            >
-              <Calculator size={18} />
-              <span>Instant Cost Calculator</span>
+              <span>Book Free Consultation</span>
             </button>
           </div>
         </div>
@@ -172,7 +148,7 @@ export default function InteriorsHero({ onOpenConsultation, onScrollToEstimator 
 
       {/* Floating WhatsApp Quick Action Button */}
       <a
-        href="https://wa.me/919121863117?text=Hi%20GateLink%20Interiors,%20I%20want%20to%20book%20a%20free%203D%20design%20consultation"
+        href="https://wa.me/919121863117?text=Hi%20GateLink%20Interiors,%20I%20want%20to%20book%20a%20free%20interior%20consultation%20in%20Hyderabad"
         target="_blank"
         rel="noopener noreferrer"
         className="interiors-floating-whatsapp"
