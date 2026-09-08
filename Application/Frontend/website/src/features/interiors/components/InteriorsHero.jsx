@@ -1,176 +1,224 @@
-import React, { useState } from 'react';
-import { Sparkles, ShieldCheck, Clock, Calculator, ArrowRight, CheckCircle2, Home } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Sparkles, 
+  ShieldCheck, 
+  Clock, 
+  ArrowRight, 
+  CheckCircle2, 
+  ChevronLeft, 
+  ChevronRight,
+  Calculator,
+  MessageCircle,
+  Building2,
+  Calendar
+} from 'lucide-react';
 
 export default function InteriorsHero({ onOpenConsultation, onScrollToEstimator }) {
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    society: '',
-    bhk: '2 BHK',
-  });
-  const [submitted, setSubmitted] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!formData.phone || formData.phone.length < 10) return;
-    setSubmitted(true);
-    if (onOpenConsultation) {
-      onOpenConsultation(formData);
+  const slides = [
+    {
+      id: 1,
+      image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=2000&q=85',
+      titleHighlight: 'Your Hyderabad Home.',
+      titleSub: 'Designed, Managed, Delivered.',
+      subtitle: 'End-to-end luxury interiors without running around. Custom crafted for your society flat.',
+      tag: 'Master Suite & Study Lounge'
+    },
+    {
+      id: 2,
+      image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=85',
+      titleHighlight: 'Your Bengaluru Home.',
+      titleSub: 'Designed, Managed, Delivered.',
+      subtitle: '45-Day handover guarantee with flat 10-year warranty & pre-approved society gate passes.',
+      tag: 'Contemporary Living & Foyer'
+    },
+    {
+      id: 3,
+      image: 'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=2000&q=85',
+      titleHighlight: 'Your Mumbai Home.',
+      titleSub: 'Designed, Managed, Delivered.',
+      subtitle: 'Zero noise violations, RWA compliant working hours, and 146 meticulous quality checks.',
+      tag: 'Modular Quartz Island Kitchen'
+    },
+    {
+      id: 4,
+      image: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=2000&q=85',
+      titleHighlight: 'Your Pune & NCR Home.',
+      titleSub: 'Designed, Managed, Delivered.',
+      subtitle: 'Senior architect 3D design consultation + complete turnkey execution at factory pricing.',
+      tag: 'Minimalist Architectural Lounge'
     }
+  ];
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const timerRef = useRef(null);
+
+  // Auto-scroll slideshow timer (5 seconds per slide)
+  useEffect(() => {
+    if (!isPaused) {
+      timerRef.current = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % slides.length);
+      }, 5000);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isPaused, slides.length]);
+
+  const handleNext = () => {
+    setCurrentSlide((prev) => (prev + 1) % slides.length);
   };
 
+  const handlePrev = () => {
+    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const current = slides[currentSlide];
+
   return (
-    <section className="interiors-hero">
-      <div className="interiors-hero-grid">
-        {/* Left Column: Headline & Value Prop */}
-        <div>
-          <div className="interiors-badge">
-            <Sparkles size={14} />
-            <span>GateLink Verified Home Interiors</span>
+    <section 
+      className="interiors-cinematic-hero"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+    >
+      {/* Background Image Carousel with Smooth Crossfade */}
+      <div className="interiors-hero-slider-track">
+        {slides.map((slide, idx) => (
+          <div
+            key={slide.id}
+            className={`interiors-hero-slide ${idx === currentSlide ? 'active' : ''}`}
+            style={{
+              backgroundImage: `url(${slide.image})`
+            }}
+          />
+        ))}
+      </div>
+
+      {/* Cinematic Gradient Overlays */}
+      <div className="interiors-hero-overlay-dark" />
+      <div className="interiors-hero-overlay-bottom" />
+
+      {/* Hero Content Layer */}
+      <div className="interiors-hero-content-container">
+        <div className="interiors-hero-text-block">
+          
+          {/* Top Trust Pill */}
+          <div className="interiors-hero-pill-badge">
+            <Sparkles size={14} className="interiors-pill-icon" />
+            <span>GateLink Verified Society Interiors</span>
           </div>
 
-          <h1 className="interiors-hero-title">
-            Designer Home Interiors for{' '}
-            <span className="interiors-hero-highlight">Gated Communities</span>
+          {/* Main Headline (Exact Layout as Reference) */}
+          <h1 className="interiors-cinematic-title">
+            <span className="interiors-title-line-1">{current.titleHighlight}</span>
+            <span className="interiors-title-line-2">{current.titleSub}</span>
           </h1>
 
-          <p className="interiors-hero-subtitle">
-            Experience bespoke, stress-free interior transformations. Tailored for society apartments with pre-cleared gate passes, 45-day move-in guarantee, and flat 10-year warranty.
+          {/* Subtitle */}
+          <p className="interiors-cinematic-subtitle">
+            {current.subtitle}
           </p>
 
-          <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap' }}>
+          {/* Action CTA Group */}
+          <div className="interiors-hero-actions-row">
+            {/* Primary CTA with FREE badge */}
             <button
+              type="button"
+              className="interiors-hero-btn-book"
+              onClick={() => onOpenConsultation && onOpenConsultation()}
+            >
+              <span className="interiors-btn-free-ribbon">FREE</span>
+              <span className="interiors-btn-book-text">Book 3D Design Session</span>
+              <span className="interiors-btn-arrow-circle">
+                <ArrowRight size={18} />
+              </span>
+            </button>
+
+            {/* Secondary Cost Estimator CTA */}
+            <button
+              type="button"
+              className="interiors-hero-btn-cost"
               onClick={onScrollToEstimator}
-              className="interiors-btn-primary"
-              style={{ fontSize: '1rem', padding: '14px 26px' }}
             >
               <Calculator size={18} />
-              <span>Calculate Your Cost</span>
-            </button>
-
-            <button
-              onClick={() => onOpenConsultation && onOpenConsultation()}
-              className="interiors-btn-secondary"
-              style={{ fontSize: '1rem', padding: '14px 26px' }}
-            >
-              <span>Book Free 3D Design</span>
-              <ArrowRight size={18} />
+              <span>Instant Cost Calculator</span>
             </button>
           </div>
 
-          {/* Guarantees Row */}
-          <div className="interiors-guarantee-row">
-            <div className="interiors-guarantee-item">
-              <ShieldCheck size={18} color="#059669" />
-              <span>10-Year Warranty</span>
+          {/* Trust Factors Row */}
+          <div className="interiors-hero-trust-matrix">
+            <div className="interiors-trust-pill">
+              <ShieldCheck size={16} style={{ color: '#10B981' }} />
+              <span>Flat 10-Yr Warranty</span>
             </div>
-            <div className="interiors-guarantee-item">
-              <Clock size={18} color="#D97706" />
-              <span>45-Day Handover Guarantee</span>
+            <div className="interiors-trust-pill">
+              <Clock size={16} style={{ color: '#F59E0B' }} />
+              <span>45-Day Move-In Guarantee</span>
             </div>
-            <div className="interiors-guarantee-item">
-              <CheckCircle2 size={18} color="#E25B38" />
-              <span>146 Quality Checks</span>
+            <div className="interiors-trust-pill">
+              <Building2 size={16} style={{ color: '#38BDF8' }} />
+              <span>Pre-Cleared Gate Passes</span>
             </div>
-          </div>
-        </div>
-
-        {/* Right Column: Hero Consultation Card */}
-        <div>
-          <div className="interiors-hero-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
-              <div>
-                <h3 style={{ fontSize: '1.3rem', fontWeight: '800', margin: '0 0 4px', color: '#1C1917' }}>
-                  Get Free 3D Design
-                </h3>
-                <p style={{ margin: 0, fontSize: '0.88rem', color: '#78716C' }}>
-                  Consult with senior architect + instant budget quote
-                </p>
-              </div>
-              <span className="interiors-badge-gold" style={{ fontSize: '0.78rem' }}>
-                100% Free
-              </span>
-            </div>
-
-            <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#44403C' }}>
-                  Full Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Rahul Sharma"
-                  className="modal-input"
-                  style={{ marginBottom: '12px' }}
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div style={{ marginBottom: '12px' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#44403C' }}>
-                  Mobile Number (for WhatsApp Estimate)
-                </label>
-                <input
-                  type="tel"
-                  placeholder="10-digit mobile number"
-                  className="modal-input"
-                  style={{ marginBottom: '12px' }}
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  required
-                />
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
-                <div>
-                  <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#44403C' }}>
-                    Apartment Type
-                  </label>
-                  <select
-                    className="modal-input"
-                    style={{ marginBottom: 0, padding: '11px 12px' }}
-                    value={formData.bhk}
-                    onChange={(e) => setFormData({ ...formData, bhk: e.target.value })}
-                  >
-                    <option value="1 BHK">1 BHK</option>
-                    <option value="2 BHK">2 BHK</option>
-                    <option value="3 BHK">3 BHK</option>
-                    <option value="4 BHK / Villa">4 BHK / Villa</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#44403C' }}>
-                    Society / City
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Prestige Lake"
-                    className="modal-input"
-                    style={{ marginBottom: 0 }}
-                    value={formData.society}
-                    onChange={(e) => setFormData({ ...formData, society: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="interiors-btn-primary"
-                style={{ width: '100%', padding: '14px', fontSize: '1rem' }}
-              >
-                <Sparkles size={18} />
-                <span>Book Free Design Session</span>
-              </button>
-
-              <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#A8A29E', marginTop: '12px', marginBottom: 0 }}>
-                🔒 Zero spam. We never share your contact details.
-              </p>
-            </form>
           </div>
         </div>
       </div>
+
+      {/* Carousel Controls & Indicators (Bottom Right) */}
+      <div className="interiors-hero-controls-bar">
+        {/* Slide Counter & Tag */}
+        <div className="interiors-slide-info-tag">
+          <span className="interiors-slide-tag-text">{current.tag}</span>
+        </div>
+
+        {/* Dots Navigation */}
+        <div className="interiors-slider-dots">
+          {slides.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              className={`interiors-slider-dot ${idx === currentSlide ? 'active' : ''}`}
+              onClick={() => setCurrentSlide(idx)}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Prev / Next Arrows */}
+        <div className="interiors-slider-arrow-group">
+          <button
+            type="button"
+            className="interiors-arrow-btn"
+            onClick={handlePrev}
+            aria-label="Previous slide"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            type="button"
+            className="interiors-arrow-btn"
+            onClick={handleNext}
+            aria-label="Next slide"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </div>
+      </div>
+
+      {/* Floating WhatsApp Quick Action Button */}
+      <a
+        href="https://wa.me/919121863117?text=Hi%20GateLink%20Interiors,%20I%20want%20to%20book%20a%20free%203D%20design%20consultation"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="interiors-floating-whatsapp"
+        aria-label="Chat with Senior Architect on WhatsApp"
+      >
+        <div className="interiors-whatsapp-bubble">
+          <span>Talk to Architect</span>
+        </div>
+        <div className="interiors-whatsapp-icon-wrapper">
+          <MessageCircle size={28} />
+        </div>
+      </a>
     </section>
   );
 }
