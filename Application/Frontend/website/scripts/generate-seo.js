@@ -509,6 +509,26 @@ const SEO_ROUTES = [
       "description": "Police verified daily maids, home cooks, deep cleaning, and salon services with pre-cleared society gate passes."
     }
   },
+  {
+    path: 'services',
+    title: 'GateLink Home Services & Repairs — Electrician, Plumber & AC Repair',
+    description: 'Book certified society-approved electricians, plumbers, AC technicians, and carpenters. Standard rate card, 30-day rework warranty, and 15-min emergency response.',
+    canonicalUrl: 'https://gatelink.in/services',
+    ogImage: 'https://gatelink.in/logo.png',
+    schemaData: {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "GateLink Home Services & Repairs",
+      "serviceType": "Society Home Repairs & Maintenance",
+      "provider": {
+        "@type": "Organization",
+        "name": "GateLink Technologies Private Limited",
+        "url": "https://gatelink.in"
+      },
+      "areaServed": "IN",
+      "description": "On-demand certified electricians, plumbers, appliance technicians, and carpenters for gated communities with fixed rate card and 30-day warranty."
+    }
+  },
   // Published Blog Articles
   {
     path: 'blog/top-5-security-measures-every-indian-housing-society-must-implement-in-2026',
