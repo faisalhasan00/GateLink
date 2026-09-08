@@ -469,6 +469,46 @@ const SEO_ROUTES = [
     canonicalUrl: 'https://gatelink.in/cookies',
     ogImage: 'https://gatelink.in/logo.png'
   },
+  {
+    path: 'interiors',
+    title: 'GateLink Interiors — Luxury Home Interiors for Gated Communities',
+    description: 'Designer home interiors engineered exclusively for gated community apartments. Flat 10-year warranty, 45-day move-in guarantee, and pre-cleared society gate passes.',
+    canonicalUrl: 'https://gatelink.in/interiors',
+    ogImage: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
+    schemaData: {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "GateLink Interiors",
+      "serviceType": "Home Interior Design & Modular Kitchens",
+      "provider": {
+        "@type": "Organization",
+        "name": "GateLink Technologies Private Limited",
+        "url": "https://gatelink.in"
+      },
+      "areaServed": "IN",
+      "description": "Luxury home interior design, modular kitchens, wardrobes, and false ceiling for apartments in gated communities."
+    }
+  },
+  {
+    path: 'maids',
+    title: 'GateLink Maids — Verified House Help, Cooking & Cleaning in 15 Mins',
+    description: 'Book police-verified house help, daily maids, home cooks, and deep cleaning for gated societies. 15-minute gate arrival, 30-min backup replacement, zero brokerage.',
+    canonicalUrl: 'https://gatelink.in/maids',
+    ogImage: 'https://gatelink.in/logo.png',
+    schemaData: {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "GateLink Maids & Home Care",
+      "serviceType": "On-Demand House Help & Cleaning",
+      "provider": {
+        "@type": "Organization",
+        "name": "GateLink Technologies Private Limited",
+        "url": "https://gatelink.in"
+      },
+      "areaServed": "IN",
+      "description": "Police verified daily maids, home cooks, deep cleaning, and salon services with pre-cleared society gate passes."
+    }
+  },
   // Published Blog Articles
   {
     path: 'blog/top-5-security-measures-every-indian-housing-society-must-implement-in-2026',

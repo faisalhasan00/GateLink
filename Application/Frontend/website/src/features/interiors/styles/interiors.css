@@ -1,0 +1,624 @@
+/* GateLink Interiors — Luxury Design Tokens & Styling */
+
+:root {
+  --gl-interiors-primary: #E25B38;
+  --gl-interiors-primary-hover: #C84624;
+  --gl-interiors-primary-tint: rgba(226, 91, 56, 0.08);
+  --gl-interiors-primary-glow: rgba(226, 91, 56, 0.25);
+  --gl-interiors-gold: #D97706;
+  --gl-interiors-gold-surface: #FEF3C7;
+  --gl-interiors-dark: #0F172A;
+  --gl-interiors-charcoal: #1E293B;
+  --gl-interiors-cream: #FAF7F2;
+  --gl-interiors-cream-light: #FDFBF7;
+  --gl-interiors-border: #E8E2D9;
+  --gl-interiors-text-main: #1C1917;
+  --gl-interiors-text-muted: #64748B;
+  --gl-interiors-emerald: #059669;
+  --gl-interiors-radius: 20px;
+}
+
+/* Base Container */
+.interiors-page {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--gl-interiors-text-main);
+  background-color: var(--gl-interiors-cream-light);
+  overflow-x: hidden;
+  position: relative;
+}
+
+.interiors-page h1,
+.interiors-page h2,
+.interiors-page h3,
+.interiors-page h4 {
+  font-family: 'Plus Jakarta Sans', 'Manrope', -apple-system, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* Badge Pill */
+.interiors-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background-color: var(--gl-interiors-primary-tint);
+  color: var(--gl-interiors-primary);
+  border: 1px solid rgba(226, 91, 56, 0.2);
+}
+
+.interiors-badge-gold {
+  background-color: var(--gl-interiors-gold-surface);
+  color: #B45309;
+  border: 1px solid rgba(217, 119, 6, 0.25);
+}
+
+/* Sticky Navbar */
+.interiors-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(253, 251, 247, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--gl-interiors-border);
+  transition: all 0.3s ease;
+}
+
+.interiors-nav-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.interiors-nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+}
+
+.interiors-logo-text {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--gl-interiors-dark);
+}
+
+.interiors-logo-sub {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--gl-interiors-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--gl-interiors-primary-tint);
+  padding: 2px 8px;
+  border-radius: 6px;
+}
+
+.interiors-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.interiors-nav-link {
+  color: #44403C;
+  font-weight: 500;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+
+.interiors-nav-link:hover {
+  color: var(--gl-interiors-primary);
+}
+
+.interiors-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #E25B38 0%, #C84624 100%);
+  color: #FFFFFF;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px var(--gl-interiors-primary-glow);
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.interiors-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(226, 91, 56, 0.35);
+}
+
+.interiors-btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #FFFFFF;
+  color: var(--gl-interiors-dark);
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: 1px solid var(--gl-interiors-border);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-decoration: none;
+}
+
+.interiors-btn-secondary:hover {
+  background: #F5EFE6;
+  border-color: #D6CCC2;
+  transform: translateY(-2px);
+}
+
+/* Hero Section */
+.interiors-hero {
+  position: relative;
+  padding: 50px 24px 70px;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.interiors-hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.interiors-hero-title {
+  font-size: 3.25rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--gl-interiors-dark);
+  margin: 16px 0 20px;
+}
+
+.interiors-hero-highlight {
+  background: linear-gradient(135deg, #E25B38 0%, #D97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.interiors-hero-subtitle {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  color: #57534E;
+  margin-bottom: 28px;
+  max-width: 540px;
+}
+
+.interiors-guarantee-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 32px;
+}
+
+.interiors-guarantee-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #44403C;
+  background: #FFFFFF;
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--gl-interiors-border);
+}
+
+.interiors-hero-card {
+  background: #FFFFFF;
+  border-radius: 24px;
+  border: 1px solid var(--gl-interiors-border);
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08);
+  padding: 28px;
+  position: relative;
+}
+
+/* Interactive Price Estimator */
+.interiors-estimator-section {
+  padding: 80px 24px;
+  background: #FFFFFF;
+  border-top: 1px solid var(--gl-interiors-border);
+  border-bottom: 1px solid var(--gl-interiors-border);
+}
+
+.interiors-section-header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 48px;
+}
+
+.interiors-section-title {
+  font-size: 2.35rem;
+  font-weight: 800;
+  color: var(--gl-interiors-dark);
+  margin-top: 12px;
+}
+
+.interiors-section-subtitle {
+  font-size: 1.05rem;
+  color: var(--gl-interiors-text-muted);
+  line-height: 1.6;
+}
+
+.estimator-card {
+  max-width: 980px;
+  margin: 0 auto;
+  background: var(--gl-interiors-cream);
+  border-radius: 24px;
+  border: 1px solid var(--gl-interiors-border);
+  box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.06);
+  padding: 36px;
+}
+
+.estimator-step-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gl-interiors-primary);
+  margin-bottom: 8px;
+}
+
+.estimator-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+}
+
+.estimator-option-btn {
+  background: #FFFFFF;
+  border: 1.5px solid var(--gl-interiors-border);
+  border-radius: 14px;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #292524;
+}
+
+.estimator-option-btn:hover {
+  border-color: #C84624;
+  background: #FFFBF9;
+}
+
+.estimator-option-btn.active {
+  background: #FFF7ED;
+  border-color: var(--gl-interiors-primary);
+  color: var(--gl-interiors-primary);
+  box-shadow: 0 0 0 2px var(--gl-interiors-primary-tint);
+}
+
+.estimator-result-box {
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 100%);
+  border-radius: 18px;
+  padding: 28px 32px;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.estimator-price-val {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #FBBF24;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+/* Lookbook Gallery */
+.interiors-lookbook-section {
+  padding: 90px 24px;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.lookbook-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 36px;
+}
+
+.lookbook-tab-btn {
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border: 1px solid var(--gl-interiors-border);
+  background: #FFFFFF;
+  color: #44403C;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lookbook-tab-btn.active {
+  background: var(--gl-interiors-primary);
+  color: #FFFFFF;
+  border-color: var(--gl-interiors-primary);
+  box-shadow: 0 4px 12px var(--gl-interiors-primary-glow);
+}
+
+.lookbook-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 24px;
+}
+
+.lookbook-card {
+  background: #FFFFFF;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--gl-interiors-border);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.lookbook-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px -8px rgba(15, 23, 42, 0.1);
+}
+
+.lookbook-img-wrapper {
+  position: relative;
+  height: 230px;
+  overflow: hidden;
+}
+
+.lookbook-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.lookbook-card:hover .lookbook-img {
+  transform: scale(1.05);
+}
+
+.lookbook-theme-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(15, 23, 42, 0.75);
+  backdrop-filter: blur(8px);
+  color: #FFFFFF;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.lookbook-body {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.lookbook-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--gl-interiors-dark);
+  margin: 0 0 6px;
+}
+
+.lookbook-desc {
+  font-size: 0.88rem;
+  color: var(--gl-interiors-text-muted);
+  line-height: 1.5;
+  margin-bottom: 14px;
+  flex: 1;
+}
+
+.lookbook-features-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.lookbook-feature-chip {
+  font-size: 0.75rem;
+  background: var(--gl-interiors-cream);
+  color: #57534E;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Why GateLink Advantage Cards */
+.interiors-why-section {
+  padding: 80px 24px;
+  background: #FFFFFF;
+  border-top: 1px solid var(--gl-interiors-border);
+}
+
+.why-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.why-card {
+  background: var(--gl-interiors-cream-light);
+  border: 1px solid var(--gl-interiors-border);
+  border-radius: 20px;
+  padding: 28px;
+  transition: all 0.3s ease;
+}
+
+.why-card:hover {
+  border-color: #E25B38;
+  box-shadow: 0 12px 24px -6px rgba(226, 91, 56, 0.1);
+  transform: translateY(-2px);
+}
+
+.why-icon-box {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  background: #FFF2ED;
+  color: var(--gl-interiors-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+/* Process Steps */
+.interiors-process-section {
+  padding: 90px 24px;
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.process-steps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  position: relative;
+}
+
+.process-card {
+  background: #FFFFFF;
+  border-radius: 18px;
+  border: 1px solid var(--gl-interiors-border);
+  padding: 24px;
+  position: relative;
+}
+
+.process-step-num {
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: rgba(226, 91, 56, 0.15);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  margin-bottom: 10px;
+}
+
+/* Consultation Modal */
+.interiors-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.interiors-modal-card {
+  background: #FFFFFF;
+  border-radius: 24px;
+  max-width: 520px;
+  width: 100%;
+  padding: 32px;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--gl-interiors-border);
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-input {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid #D6D3D1;
+  font-size: 0.95rem;
+  font-family: inherit;
+  margin-top: 6px;
+  margin-bottom: 16px;
+  box-sizing: border-box;
+}
+
+.modal-input:focus {
+  outline: none;
+  border-color: var(--gl-interiors-primary);
+  box-shadow: 0 0 0 3px var(--gl-interiors-primary-tint);
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 960px) {
+  .interiors-hero-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .interiors-hero-title {
+    font-size: 2.5rem;
+  }
+  .process-steps-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .interiors-nav-links {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .interiors-hero {
+    padding: 30px 16px 50px;
+  }
+  .interiors-hero-title {
+    font-size: 2.1rem;
+  }
+  .process-steps-grid {
+    grid-template-columns: 1fr;
+  }
+  .lookbook-grid {
+    grid-template-columns: 1fr;
+  }
+  .estimator-card {
+    padding: 20px 16px;
+  }
+  .estimator-result-box {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

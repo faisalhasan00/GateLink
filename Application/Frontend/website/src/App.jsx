@@ -30,6 +30,8 @@ const DataProcessingPage = lazy(() => import('./pages/landing/DataProcessingPage
 const GrievancePolicyPage = lazy(() => import('./pages/landing/GrievancePolicyPage'))
 const PartnersPage = lazy(() => import('./pages/landing/PartnersPage'))
 const GateSelfEntryPage = lazy(() => import('./pages/gate/GateSelfEntryPage'))
+const InteriorsPage = lazy(() => import('./pages/interiors/InteriorsPage'))
+const MaidsLandingPage = lazy(() => import('./pages/maids/MaidsLandingPage'))
 
 // Dedicated Product SEO Landing Pages
 const SocietyManagementLanding = lazy(() => import('./pages/landing/SocietyManagementLanding'))
@@ -62,6 +64,11 @@ export default function App() {
             <Route path="/partners" element={<PartnersPage />} />
             <Route path="/refer" element={<Navigate to="/partners" replace />} />
             <Route path="/gate" element={<GateSelfEntryPage />} />
+            <Route path="/interiors" element={<InteriorsPage />} />
+            <Route path="/interior" element={<Navigate to="/interiors" replace />} />
+            <Route path="/maids" element={<MaidsLandingPage />} />
+            <Route path="/maid" element={<Navigate to="/maids" replace />} />
+            <Route path="/maid-services" element={<Navigate to="/maids" replace />} />
 
             {/* Dedicated High-Value Feature SEO Landing Pages */}
             <Route path="/society-management-software" element={<SocietyManagementLanding />} />
