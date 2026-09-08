@@ -978,12 +978,15 @@
   align-items: center;
   text-align: center;
   position: relative;
+  padding-top: 52px; /* Generous spacing so text sits cleanly below the circle badge */
 }
 
 /* Elevated White Circular Icon Badge (Intersecting Top Edge & Hero Section) */
 .interiors-trust-circle-badge {
   position: absolute;
   top: -46px; /* Sits half on the hero and half on the teal strip */
+  left: 50%;
+  transform: translateX(-50%);
   width: 82px;
   height: 82px;
   border-radius: 50%;
@@ -998,7 +1001,7 @@
 }
 
 .interiors-trust-strip-item:hover .interiors-trust-circle-badge {
-  transform: translateY(-4px) scale(1.06);
+  transform: translateX(-50%) translateY(-4px) scale(1.06);
   box-shadow: 0 14px 28px -4px rgba(0, 0, 0, 0.25);
 }
 
