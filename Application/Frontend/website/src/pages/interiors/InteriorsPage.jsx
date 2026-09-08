@@ -7,6 +7,7 @@ import InteriorsHero from '../../features/interiors/components/InteriorsHero';
 import InteriorsTrustStrip from '../../features/interiors/components/InteriorsTrustStrip';
 import InteriorsPriceEstimator from '../../features/interiors/components/InteriorsPriceEstimator';
 import InteriorsLookbook from '../../features/interiors/components/InteriorsLookbook';
+import InteriorsCityBanner from '../../features/interiors/components/InteriorsCityBanner';
 import InteriorsWhyGateLink from '../../features/interiors/components/InteriorsWhyGateLink';
 import InteriorsProcess from '../../features/interiors/components/InteriorsProcess';
 import InteriorsTransformations from '../../features/interiors/components/InteriorsTransformations';
@@ -56,6 +57,9 @@ export default function InteriorsPage() {
 
         {/* Curated Lookbook */}
         <InteriorsLookbook onOpenConsultation={handleOpenConsultation} />
+
+        {/* Hyderabad City Mid-Page Banner (Matching Reference Screenshot) */}
+        <InteriorsCityBanner onOpenConsultation={handleOpenConsultation} />
 
         {/* Why GateLink Advantage */}
         <InteriorsWhyGateLink onOpenConsultation={handleOpenConsultation} />
