@@ -14,8 +14,6 @@ import InteriorsHyderabadReviews from '../../features/interiors/components/Inter
 import InteriorsComparisonTable from '../../features/interiors/components/InteriorsComparisonTable';
 import InteriorsHappyCustomersShowcase from '../../features/interiors/components/InteriorsHappyCustomersShowcase';
 import InteriorsSolutionsCatalog from '../../features/interiors/components/InteriorsSolutionsCatalog';
-import InteriorsCityBanner from '../../features/interiors/components/InteriorsCityBanner';
-import InteriorsProcess from '../../features/interiors/components/InteriorsProcess';
 import InteriorsFaq from '../../features/interiors/components/InteriorsFaq';
 import InteriorsConsultationModal from '../../features/interiors/components/InteriorsConsultationModal';
 
@@ -83,12 +81,6 @@ export default function InteriorsPage() {
           onOpenConsultation={handleOpenConsultation}
           onScrollToEstimator={handleScrollToEstimator}
         />
-
-        {/* Hyderabad City Mid-Page Banner (Matching Reference Screenshot) */}
-        <InteriorsCityBanner onOpenConsultation={handleOpenConsultation} />
-
-        {/* 4-Step Process */}
-        <InteriorsProcess onOpenConsultation={handleOpenConsultation} />
 
         {/* FAQs */}
         <InteriorsFaq />
