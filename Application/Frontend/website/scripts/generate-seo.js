@@ -529,6 +529,24 @@ const SEO_ROUTES = [
       "description": "On-demand certified electricians, plumbers, appliance technicians, and carpenters for gated communities with fixed rate card and 30-day warranty."
     }
   },
+  {
+    path: 'bazaar',
+    title: 'GateLink Bazaar — Hyper-Local Society Marketplace | Zero Commission',
+    description: 'Buy, sell, and trade pre-loved furniture, electronics, kids cycles, and home bakes with verified neighbors inside your society gate. 0% commission, 100% KYC verified.',
+    canonicalUrl: 'https://gatelink.in/bazaar',
+    ogImage: 'https://gatelink.in/logo.png',
+    schemaData: {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "GateLink Bazaar",
+      "description": "Hyper-local peer-to-peer marketplace for gated communities and housing societies in India.",
+      "publisher": {
+        "@type": "Organization",
+        "name": "GateLink Technologies Private Limited",
+        "url": "https://gatelink.in"
+      }
+    }
+  },
   // Published Blog Articles
   {
     path: 'blog/top-5-security-measures-every-indian-housing-society-must-implement-in-2026',
