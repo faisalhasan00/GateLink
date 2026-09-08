@@ -126,22 +126,6 @@ export default function InteriorsHero({ onOpenConsultation, onScrollToEstimator 
               <span>Instant Cost Calculator</span>
             </button>
           </div>
-
-          {/* Trust Factors Row */}
-          <div className="interiors-hero-trust-matrix">
-            <div className="interiors-trust-pill">
-              <ShieldCheck size={16} style={{ color: '#10B981' }} />
-              <span>Flat 10-Yr Warranty</span>
-            </div>
-            <div className="interiors-trust-pill">
-              <Clock size={16} style={{ color: '#F59E0B' }} />
-              <span>45-Day Move-In Guarantee</span>
-            </div>
-            <div className="interiors-trust-pill">
-              <Building2 size={16} style={{ color: '#38BDF8' }} />
-              <span>Pre-Cleared Gate Passes</span>
-            </div>
-          </div>
         </div>
       </div>
 

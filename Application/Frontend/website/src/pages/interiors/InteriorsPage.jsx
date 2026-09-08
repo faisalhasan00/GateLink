@@ -4,6 +4,7 @@ import { Sparkles, PhoneCall, Mail, MapPin, ArrowRight, ShieldCheck } from 'luci
 
 import InteriorsNavbar from '../../features/interiors/components/InteriorsNavbar';
 import InteriorsHero from '../../features/interiors/components/InteriorsHero';
+import InteriorsTrustStrip from '../../features/interiors/components/InteriorsTrustStrip';
 import InteriorsPriceEstimator from '../../features/interiors/components/InteriorsPriceEstimator';
 import InteriorsLookbook from '../../features/interiors/components/InteriorsLookbook';
 import InteriorsWhyGateLink from '../../features/interiors/components/InteriorsWhyGateLink';
@@ -46,6 +47,9 @@ export default function InteriorsPage() {
           onOpenConsultation={handleOpenConsultation}
           onScrollToEstimator={handleScrollToEstimator}
         />
+
+        {/* Elevated Trust Highlights Ribbon Strip (Matching Reference) */}
+        <InteriorsTrustStrip />
 
         {/* Interactive 3-Step Price Estimator */}
         <InteriorsPriceEstimator onOpenConsultation={handleOpenConsultation} />

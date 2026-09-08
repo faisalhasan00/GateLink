@@ -946,11 +946,117 @@
   .lookbook-grid {
     grid-template-columns: 1fr;
   }
-  .estimator-card {
-    padding: 20px 16px;
-  }
-  .estimator-result-box {
-    flex-direction: column;
-    align-items: flex-start;
+}
+
+/* ==========================================================================
+   GateLink Interiors — Elevated Trust Highlights Strip (Matching Reference)
+   ========================================================================== */
+
+.interiors-trust-strip-section {
+  position: relative;
+  background: linear-gradient(135deg, #00838f 0%, #0891b2 50%, #0d9488 100%);
+  padding: 3.25rem 1.5rem 2.25rem;
+  margin-top: 2.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 25px -5px rgba(8, 145, 178, 0.25);
+}
+
+.interiors-trust-strip-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
+  position: relative;
+}
+
+.interiors-trust-strip-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+}
+
+/* Elevated White Circular Icon Badge (Intersecting the Top Edge) */
+.interiors-trust-circle-badge {
+  position: absolute;
+  top: -5.75rem; /* Intersects cleanly across the top */
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 10px 25px -4px rgba(0, 0, 0, 0.18), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 4px solid #ffffff;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  z-index: 20;
+}
+
+.interiors-trust-strip-item:hover .interiors-trust-circle-badge {
+  transform: translateY(-4px) scale(1.06);
+  box-shadow: 0 14px 28px -4px rgba(0, 0, 0, 0.25);
+}
+
+.interiors-trust-circle-icon {
+  color: #0891b2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.interiors-trust-item-title {
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0.5rem 0 0.25rem;
+  letter-spacing: -0.01em;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+}
+
+.interiors-trust-item-desc {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin: 0;
+  line-height: 1.4;
+  max-width: 190px;
+}
+
+@media (max-width: 1024px) {
+  .interiors-trust-strip-container {
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 4.5rem;
   }
 }
+
+@media (max-width: 640px) {
+  .interiors-trust-strip-section {
+    padding: 3rem 1rem 2rem;
+    margin-top: 3.5rem;
+  }
+  .interiors-trust-strip-container {
+    grid-template-columns: repeat(2, 1fr);
+    row-gap: 4.5rem;
+  }
+  .interiors-trust-circle-badge {
+    width: 68px;
+    height: 68px;
+    top: -5rem;
+  }
+  .interiors-trust-circle-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+  .interiors-trust-item-title {
+    font-size: 0.98rem;
+  }
+  .interiors-trust-item-desc {
+    font-size: 0.72rem;
+  }
+}
+
