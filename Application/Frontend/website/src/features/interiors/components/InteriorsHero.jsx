@@ -3,7 +3,8 @@ import {
   ChevronLeft, 
   ChevronRight,
   MessageCircle,
-  ArrowRight
+  ArrowRight,
+  Calculator
 } from 'lucide-react';
 
 export default function InteriorsHero({ onOpenConsultation, onScrollToEstimator }) {
@@ -15,13 +16,13 @@ export default function InteriorsHero({ onOpenConsultation, onScrollToEstimator 
     },
     {
       id: 2,
-      image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=2000&q=85',
-      tag: 'Master Suite & Study Lounge'
+      image: 'https://images.unsplash.com/photo-1600585154526-990dced4db0d?auto=format&fit=crop&w=2000&q=85',
+      tag: 'Contemporary Living & Foyer'
     },
     {
       id: 3,
-      image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=2000&q=85',
-      tag: 'Contemporary Living & Foyer'
+      image: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?auto=format&fit=crop&w=2000&q=85',
+      tag: 'Master Suite & Study Lounge'
     },
     {
       id: 4,
@@ -79,20 +80,21 @@ export default function InteriorsHero({ onOpenConsultation, onScrollToEstimator 
       <div className="interiors-hero-overlay-dark" />
       <div className="interiors-hero-overlay-bottom" />
 
-      {/* Hero Content Layer (Matching Exact Reference Layout with Centered Translucent Card) */}
+      {/* Hero Content Layer (Matching Exact Reference Layout) */}
       <div className="interiors-hero-content-container">
-        <div className="interiors-hero-card">
-          {/* Main Headline */}
+        <div className="interiors-hero-text-block interiors-hero-centered-layout">
+
+          {/* Main Headline (Exact Match with Reference Image) */}
           <h1 className="interiors-cinematic-title">
             Best Interior Designers In Hyderabad
           </h1>
 
-          {/* Subtitle */}
+          {/* Subtitle (Exact Match with Reference Image) */}
           <p className="interiors-cinematic-subtitle">
             Dream Homes At Dream Budgets & 15,000 Happy Customers
           </p>
 
-          {/* Action CTA Button */}
+          {/* Action CTA Group (2 Buttons: Primary Consultation + Instant Cost Calculator) */}
           <div className="interiors-hero-actions-row">
             <button
               type="button"
@@ -100,6 +102,15 @@ export default function InteriorsHero({ onOpenConsultation, onScrollToEstimator 
               onClick={() => onOpenConsultation && onOpenConsultation({ city: 'Hyderabad' })}
             >
               <span>Book Free Consultation</span>
+            </button>
+
+            <button
+              type="button"
+              className="interiors-hero-btn-cost"
+              onClick={onScrollToEstimator}
+            >
+              <Calculator size={19} />
+              <span>Instant Cost Calculator</span>
             </button>
           </div>
         </div>

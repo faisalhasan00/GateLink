@@ -174,12 +174,9 @@
 
 .interiors-cinematic-hero {
   position: relative;
-  min-height: 480px;
-  height: 60vh;
-  max-height: 580px;
+  min-height: 82vh;
   display: flex;
   align-items: center;
-  justify-content: center;
   overflow: hidden;
   background-color: #0f172a;
 }
@@ -197,7 +194,7 @@
   background-size: cover;
   background-position: center center;
   opacity: 0;
-  transform: scale(1.02);
+  transform: scale(1.04);
   transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 6s ease-out;
   will-change: opacity, transform;
 }
@@ -207,12 +204,13 @@
   transform: scale(1);
 }
 
-/* Subtle Layered Depth Gradient Overlays */
+/* Cinematic Scrim Overlays — Balanced full-frame backdrop for photography */
 .interiors-hero-overlay-dark {
   position: absolute;
   inset: 0;
   z-index: 2;
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(10, 15, 29, 0.45);
+  backdrop-filter: blur(0.5px);
   pointer-events: none;
 }
 
@@ -221,9 +219,10 @@
   inset: 0;
   z-index: 2;
   background: linear-gradient(
-    0deg, 
-    rgba(0, 0, 0, 0.4) 0%, 
-    transparent 45%
+    180deg, 
+    rgba(10, 15, 29, 0.25) 0%, 
+    rgba(10, 15, 29, 0.35) 50%, 
+    rgba(10, 15, 29, 0.65) 100%
   );
   pointer-events: none;
 }
@@ -232,52 +231,48 @@
 .interiors-hero-content-container {
   position: relative;
   z-index: 10;
-  max-width: 1200px;
+  max-width: 1280px;
   width: 100%;
   margin: 0 auto;
-  padding: 2rem 1.5rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  padding: 6rem 2rem 7rem;
 }
 
-/* Centered Translucent Dark Card (Matching Reference Design) */
-.interiors-hero-card {
-  background: rgba(0, 0, 0, 0.44);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
-  padding: 2.2rem 2.8rem 2.4rem;
-  border-radius: 4px;
-  max-width: 660px;
-  width: 100%;
+.interiors-hero-text-block {
+  max-width: 860px;
+}
+
+/* Centered Layout Matching Reference */
+.interiors-hero-centered-layout {
+  max-width: 920px;
   margin: 0 auto;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-/* Display Headline */
+/* Display Headline (Exact Match with Reference Image) */
 .interiors-cinematic-title {
-  font-size: 2.15rem;
-  line-height: 1.25;
+  font-size: 3.2rem;
+  line-height: 1.22;
   font-weight: 800;
   color: #ffffff;
-  margin: 0 0 0.75rem;
+  margin: 0 0 1rem;
   letter-spacing: -0.02em;
-  font-family: 'Manrope', 'Plus Jakarta Sans', -apple-system, sans-serif;
+  text-shadow: 0 3px 16px rgba(0, 0, 0, 0.7);
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
 }
 
-/* Subtitle */
+/* Subtitle (Exact Match with Reference Image) */
 .interiors-cinematic-subtitle {
-  font-size: 1.05rem;
-  line-height: 1.45;
+  font-size: 1.25rem;
+  line-height: 1.5;
   color: #ffffff;
-  margin: 0 0 1.65rem;
-  max-width: 580px;
-  font-weight: 500;
-  opacity: 0.95;
+  margin: 0 0 2.2rem;
+  max-width: 800px;
+  font-weight: 600;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+  letter-spacing: -0.01em;
 }
 
 /* Actions Row */
@@ -285,32 +280,34 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  gap: 1.25rem;
+  margin-bottom: 0.5rem;
 }
 
-/* Teal CTA Button (Exact Match with Reference) */
+/* Teal CTA Button (Exact Match with Reference Image) */
 .interiors-hero-btn-teal {
-  background: #00838f;
-  background: linear-gradient(135deg, #00838f 0%, #0891b2 100%);
+  background-color: #1392a6;
+  background: linear-gradient(180deg, #169db3 0%, #10879a 100%);
   color: #ffffff;
-  padding: 0.85rem 2.4rem;
-  border-radius: 4px;
-  font-size: 1.05rem;
+  padding: 1rem 2.8rem;
+  border-radius: 6px;
+  font-size: 1.15rem;
   font-weight: 700;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 131, 143, 0.35);
-  transition: all 0.25s ease;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: -0.01em;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  letter-spacing: -0.01em;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
 }
 
 .interiors-hero-btn-teal:hover {
-  background: #006978;
+  background: #0e7a8c;
   transform: translateY(-2px);
-  box-shadow: 0 8px 22px rgba(0, 131, 143, 0.5);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
 }
 
 .interiors-btn-free-ribbon {
@@ -347,27 +344,33 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Secondary Button */
+/* Secondary Button (Instant Cost Calculator) */
 .interiors-hero-btn-cost {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  background: rgba(255, 255, 255, 0.12);
+  justify-content: center;
+  gap: 0.65rem;
+  background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
-  padding: 0.95rem 1.6rem;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  padding: 1rem 2rem;
+  border-radius: 6px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  border: 1px solid rgba(255, 255, 255, 0.35);
   cursor: pointer;
-  backdrop-filter: blur(12px);
-  transition: all 0.2s ease;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: -0.01em;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
 }
 
 .interiors-hero-btn-cost:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.6);
   transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35);
 }
 
 /* Trust Badges Matrix */
