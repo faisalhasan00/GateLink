@@ -546,6 +546,1452 @@
   }
 }
 
+/* ==========================================================================
+   Trust Strip Highlights Section (Elevated Circular Badges)
+   ========================================================================== */
+.interiors-trust-strip-section {
+  position: relative;
+  z-index: 20;
+  margin-top: -30px;
+  background: linear-gradient(135deg, #00838f 0%, #0891b2 50%, #0d9488 100%);
+  padding: 2.4rem 1.5rem 1.6rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.interiors-trust-strip-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.interiors-trust-strip-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  flex: 1 1 180px;
+  max-width: 220px;
+}
+
+.interiors-trust-circle-badge {
+  position: absolute;
+  top: -62px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18), 0 0 0 4px rgba(255, 255, 255, 0.25);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.interiors-trust-strip-item:hover .interiors-trust-circle-badge {
+  transform: translateX(-50%) translateY(-2px) scale(1.06);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 0 0 5px rgba(255, 255, 255, 0.4);
+}
+
+.interiors-trust-circle-icon {
+  color: #0891b2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.interiors-trust-item-title {
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.01em;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* ==========================================================================
+   GateLink Interiors — Modular Kitchen Showcase Section (Hyderabad Focus)
+   ========================================================================== */
+.interiors-kitchen-showcase-section {
+  padding: 5rem 1.5rem 5.5rem;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.interiors-kitchen-showcase-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.interiors-kitchen-header {
+  text-align: center;
+  max-width: 820px;
+  margin: 0 auto 3.2rem;
+}
+
+.interiors-kitchen-overline {
+  font-size: 1.08rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.55rem;
+  letter-spacing: -0.01em;
+  font-family: 'Plus Jakarta Sans', 'Manrope', sans-serif;
+}
+
+.interiors-kitchen-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-kitchen-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.interiors-kitchen-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interiors-kitchen-card:hover {
+  transform: translateY(-6px);
+}
+
+.interiors-kitchen-image-wrapper {
+  width: 100%;
+  aspect-ratio: 4 / 3.8;
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -8px rgba(15, 23, 42, 0.12);
+  background-color: #e2e8f0;
+  transition: box-shadow 0.3s ease;
+}
+
+.interiors-kitchen-card:hover .interiors-kitchen-image-wrapper {
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.2);
+}
+
+.interiors-kitchen-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interiors-kitchen-card:hover .interiors-kitchen-image {
+  transform: scale(1.05);
+}
+
+.interiors-kitchen-caption {
+  font-size: 0.98rem;
+  font-weight: 500;
+  color: #1e293b;
+  margin: 1.1rem 0 0;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  font-family: 'Inter', sans-serif;
+}
+
+.interiors-kitchen-cta-row {
+  margin-top: 3.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.interiors-kitchen-btn-teal {
+  background-color: #1392a6;
+  background: linear-gradient(180deg, #169db3 0%, #10879a 100%);
+  color: #ffffff;
+  padding: 1.05rem 2.8rem;
+  border-radius: 4px;
+  font-size: 1.12rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-kitchen-btn-teal:hover {
+  background: #0e7a8c;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 1024px) {
+  .interiors-kitchen-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .interiors-kitchen-showcase-section {
+    padding: 3.5rem 1rem 4rem;
+  }
+  .interiors-kitchen-title {
+    font-size: 1.45rem;
+  }
+  .interiors-kitchen-overline {
+    font-size: 0.95rem;
+  }
+  .interiors-kitchen-grid {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+  .interiors-kitchen-image-wrapper {
+    border-radius: 24px;
+  }
+  .interiors-kitchen-btn-teal {
+    width: 100%;
+    padding: 0.95rem 1.5rem;
+    font-size: 1.05rem;
+  }
+}
+
+/* ==========================================================================
+   GateLink Interiors — Bedroom Interiors Showcase Section (Hyderabad Focus)
+   ========================================================================== */
+.interiors-bedroom-showcase-section {
+  padding: 5rem 1.5rem 5.5rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.interiors-bedroom-showcase-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.interiors-bedroom-header {
+  text-align: center;
+  max-width: 860px;
+  margin: 0 auto 3.2rem;
+}
+
+.interiors-bedroom-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-bedroom-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.interiors-bedroom-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interiors-bedroom-card:hover {
+  transform: translateY(-6px);
+}
+
+.interiors-bedroom-image-wrapper {
+  width: 100%;
+  aspect-ratio: 4 / 3.8;
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -8px rgba(15, 23, 42, 0.12);
+  background-color: #e2e8f0;
+  transition: box-shadow 0.3s ease;
+}
+
+.interiors-bedroom-card:hover .interiors-bedroom-image-wrapper {
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.2);
+}
+
+.interiors-bedroom-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interiors-bedroom-card:hover .interiors-bedroom-image {
+  transform: scale(1.05);
+}
+
+.interiors-bedroom-caption {
+  font-size: 0.98rem;
+  font-weight: 500;
+  color: #1e293b;
+  margin: 1.1rem 0 0;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  font-family: 'Inter', sans-serif;
+}
+
+.interiors-bedroom-cta-row {
+  margin-top: 3.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.interiors-bedroom-btn-teal {
+  background-color: #1392a6;
+  background: linear-gradient(180deg, #169db3 0%, #10879a 100%);
+  color: #ffffff;
+  padding: 1.05rem 2.8rem;
+  border-radius: 4px;
+  font-size: 1.12rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-bedroom-btn-teal:hover {
+  background: #0e7a8c;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 1024px) {
+  .interiors-bedroom-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .interiors-bedroom-showcase-section {
+    padding: 3.5rem 1rem 4rem;
+  }
+  .interiors-bedroom-title {
+    font-size: 1.45rem;
+  }
+  .interiors-bedroom-grid {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+  .interiors-bedroom-image-wrapper {
+    border-radius: 24px;
+  }
+  .interiors-bedroom-btn-teal {
+    width: 100%;
+    padding: 0.95rem 1.5rem;
+    font-size: 1.05rem;
+  }
+}
+
+/* ==========================================================================
+   GateLink Interiors — Living Room Interiors Showcase Section (Hyderabad Focus)
+   ========================================================================== */
+.interiors-living-showcase-section {
+  padding: 5rem 1.5rem 5.5rem;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.interiors-living-showcase-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.interiors-living-header {
+  text-align: center;
+  max-width: 860px;
+  margin: 0 auto 3.2rem;
+}
+
+.interiors-living-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-living-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.interiors-living-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interiors-living-card:hover {
+  transform: translateY(-6px);
+}
+
+.interiors-living-image-wrapper {
+  width: 100%;
+  aspect-ratio: 4 / 3.8;
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -8px rgba(15, 23, 42, 0.12);
+  background-color: #e2e8f0;
+  transition: box-shadow 0.3s ease;
+}
+
+.interiors-living-card:hover .interiors-living-image-wrapper {
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.2);
+}
+
+.interiors-living-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interiors-living-card:hover .interiors-living-image {
+  transform: scale(1.05);
+}
+
+.interiors-living-caption {
+  font-size: 0.98rem;
+  font-weight: 500;
+  color: #1e293b;
+  margin: 1.1rem 0 0;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  font-family: 'Inter', sans-serif;
+}
+
+.interiors-living-cta-row {
+  margin-top: 3.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.interiors-living-btn-teal {
+  background-color: #1392a6;
+  background: linear-gradient(180deg, #169db3 0%, #10879a 100%);
+  color: #ffffff;
+  padding: 1.05rem 2.8rem;
+  border-radius: 4px;
+  font-size: 1.12rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-living-btn-teal:hover {
+  background: #0e7a8c;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 1024px) {
+  .interiors-living-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .interiors-living-showcase-section {
+    padding: 3.5rem 1rem 4rem;
+  }
+  .interiors-living-title {
+    font-size: 1.45rem;
+  }
+  .interiors-living-grid {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+  .interiors-living-image-wrapper {
+    border-radius: 24px;
+  }
+  .interiors-living-btn-teal {
+    width: 100%;
+    padding: 0.95rem 1.5rem;
+    font-size: 1.05rem;
+  }
+}
+
+/* ==========================================================================
+   GateLink Interiors — Space-Saving Designs Showcase Section (Hyderabad Focus)
+   ========================================================================== */
+.interiors-spacesaving-showcase-section {
+  padding: 5rem 1.5rem 5.5rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.interiors-spacesaving-showcase-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.interiors-spacesaving-header {
+  text-align: center;
+  max-width: 860px;
+  margin: 0 auto 3.2rem;
+}
+
+.interiors-spacesaving-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-spacesaving-carousel-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.interiors-spacesaving-nav-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  z-index: 5;
+}
+
+.interiors-spacesaving-nav-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+  transform: scale(1.06);
+}
+
+.interiors-spacesaving-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  flex: 1;
+}
+
+.interiors-spacesaving-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interiors-spacesaving-card:hover {
+  transform: translateY(-6px);
+}
+
+.interiors-spacesaving-image-wrapper {
+  width: 100%;
+  aspect-ratio: 4 / 3.8;
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -8px rgba(15, 23, 42, 0.12);
+  background-color: #e2e8f0;
+  transition: box-shadow 0.3s ease;
+}
+
+.interiors-spacesaving-card:hover .interiors-spacesaving-image-wrapper {
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.2);
+}
+
+.interiors-spacesaving-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interiors-spacesaving-card:hover .interiors-spacesaving-image {
+  transform: scale(1.05);
+}
+
+.interiors-spacesaving-caption {
+  font-size: 0.98rem;
+  font-weight: 500;
+  color: #1e293b;
+  margin: 1.1rem 0 0;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  font-family: 'Inter', sans-serif;
+}
+
+.interiors-spacesaving-cta-row {
+  margin-top: 3.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.interiors-spacesaving-btn-teal {
+  background-color: #1392a6;
+  background: linear-gradient(180deg, #169db3 0%, #10879a 100%);
+  color: #ffffff;
+  padding: 1.05rem 2.8rem;
+  border-radius: 4px;
+  font-size: 1.12rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-spacesaving-btn-teal:hover {
+  background: #0e7a8c;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+}
+
+@media (max-width: 1024px) {
+  .interiors-spacesaving-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .interiors-spacesaving-showcase-section {
+    padding: 3.5rem 1rem 4rem;
+  }
+  .interiors-spacesaving-title {
+    font-size: 1.45rem;
+  }
+  .interiors-spacesaving-grid {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+  .interiors-spacesaving-nav-btn {
+    display: none;
+  }
+  .interiors-spacesaving-image-wrapper {
+    border-radius: 24px;
+  }
+  .interiors-spacesaving-btn-teal {
+    width: 100%;
+    padding: 0.95rem 1.5rem;
+    font-size: 1.05rem;
+  }
+}
+
+/* ==========================================================================
+   GateLink Interiors — Latest Projects Showcase Section (Hyderabad Focus)
+   ========================================================================== */
+.interiors-projects-showcase-section {
+  padding: 5rem 1.5rem 5.5rem;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.interiors-projects-showcase-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.interiors-projects-header {
+  text-align: center;
+  max-width: 860px;
+  margin: 0 auto 3.2rem;
+}
+
+.interiors-projects-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-projects-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.interiors-projects-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interiors-projects-card:hover {
+  transform: translateY(-6px);
+}
+
+.interiors-projects-image-wrapper {
+  width: 100%;
+  aspect-ratio: 4 / 3.8;
+  border-radius: 32px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -8px rgba(15, 23, 42, 0.12);
+  background-color: #e2e8f0;
+  transition: box-shadow 0.3s ease;
+}
+
+.interiors-projects-card:hover .interiors-projects-image-wrapper {
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.2);
+}
+
+.interiors-projects-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interiors-projects-card:hover .interiors-projects-image {
+  transform: scale(1.05);
+}
+
+.interiors-projects-caption {
+  font-size: 0.98rem;
+  font-weight: 500;
+  color: #1e293b;
+  margin: 1.1rem 0 0;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  font-family: 'Inter', sans-serif;
+}
+
+.interiors-projects-cta-row {
+  margin-top: 3.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.interiors-projects-link-teal {
+  background: transparent;
+  color: #0e8a9d;
+  font-size: 1.12rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  padding: 0.6rem 1.2rem;
+  transition: all 0.2s ease;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  text-decoration: none;
+}
+
+.interiors-projects-link-teal:hover {
+  color: #006978;
+  transform: translateY(-2px);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (max-width: 1024px) {
+  .interiors-projects-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .interiors-projects-showcase-section {
+    padding: 3.5rem 1rem 4rem;
+  }
+  .interiors-projects-title {
+    font-size: 1.45rem;
+  }
+  .interiors-projects-grid {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+  .interiors-projects-image-wrapper {
+    border-radius: 24px;
+  }
+}
+
+/* ==========================================================================
+   GateLink Interiors — Customer Reviews & Google Trust Card (Hyderabad)
+   ========================================================================== */
+.interiors-reviews-showcase-section {
+  padding: 5.5rem 1.5rem 6rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.interiors-reviews-showcase-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.interiors-reviews-header {
+  text-align: center;
+  max-width: 860px;
+  margin: 0 auto 2.8rem;
+}
+
+.interiors-reviews-title {
+  font-size: 1.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-highlight-city {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.interiors-highlight-brand {
+  color: #d97706;
+  font-weight: 800;
+}
+
+/* Top Google Trust & Stats Card */
+.interiors-reviews-stats-card {
+  max-width: 780px;
+  margin: 0 auto 3.5rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 24px;
+  padding: 1.5rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  box-shadow: 0 10px 30px -8px rgba(15, 23, 42, 0.08);
+}
+
+.interiors-reviews-google-block {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.interiors-google-logo-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.interiors-google-score-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.2rem;
+}
+
+.interiors-google-score {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+  font-family: 'Manrope', sans-serif;
+}
+
+.interiors-google-stars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.interiors-google-review-count {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.interiors-verified-check {
+  color: #16a34a;
+}
+
+.interiors-stats-divider {
+  width: 1px;
+  height: 48px;
+  background-color: #e2e8f0;
+}
+
+.interiors-stat-metric-block {
+  text-align: center;
+}
+
+.interiors-stat-number {
+  font-size: 1.65rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.1;
+  font-family: 'Manrope', sans-serif;
+}
+
+.interiors-stat-plus {
+  color: #0891b2;
+  font-weight: 800;
+}
+
+.interiors-stat-label {
+  font-size: 0.82rem;
+  color: #64748b;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* Reviews Cards Carousel */
+.interiors-reviews-carousel-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.interiors-reviews-nav-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  z-index: 5;
+}
+
+.interiors-reviews-nav-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+  transform: scale(1.06);
+}
+
+.interiors-reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.75rem;
+  flex: 1;
+}
+
+.interiors-review-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  padding: 1.75rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  min-height: 230px;
+}
+
+.interiors-review-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px -8px rgba(15, 23, 42, 0.1);
+  background: #ffffff;
+}
+
+.interiors-review-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.interiors-review-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #334155;
+  font-weight: 700;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.interiors-review-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.interiors-review-author-name {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.interiors-review-stars-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.interiors-review-time-stamp {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.interiors-review-text {
+  font-size: 0.88rem;
+  color: #334155;
+  line-height: 1.55;
+  margin: 0 0 1.25rem;
+  flex: 1;
+}
+
+.interiors-review-readmore-btn {
+  background: transparent;
+  border: none;
+  color: #0891b2;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  transition: color 0.2s ease;
+}
+
+.interiors-review-readmore-btn:hover {
+  color: #006978;
+  text-decoration: underline;
+}
+
+@media (max-width: 1024px) {
+  .interiors-reviews-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .interiors-reviews-stats-card {
+    flex-direction: column;
+    padding: 1.5rem;
+    gap: 1.25rem;
+  }
+  .interiors-stats-divider {
+    width: 100%;
+    height: 1px;
+  }
+  .interiors-reviews-grid {
+    grid-template-columns: 1fr;
+  }
+  .interiors-reviews-nav-btn {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   GateLink Interiors — Why Choose Comparison Table (Hyderabad)
+   ========================================================================== */
+.interiors-comparison-section {
+  padding: 5.5rem 1.5rem 6rem;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.interiors-comparison-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.interiors-comparison-header {
+  text-align: center;
+  max-width: 860px;
+  margin: 0 auto 3.5rem;
+}
+
+.interiors-comparison-title {
+  font-size: 1.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-comparison-table-wrapper {
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -8px rgba(15, 23, 42, 0.08);
+  border: 1px solid #e2e8f0;
+  overflow-x: auto;
+}
+
+.interiors-comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  min-width: 760px;
+}
+
+.interiors-comparison-table thead tr {
+  background-color: #0e8a9d;
+  background: linear-gradient(135deg, #00838f 0%, #0e8a9d 100%);
+}
+
+.interiors-comparison-table th {
+  padding: 1.25rem 1.75rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-comparison-table th.th-feature {
+  width: 26%;
+}
+
+.interiors-comparison-table th.th-gatelink {
+  width: 37%;
+}
+
+.interiors-comparison-table th.th-local {
+  width: 37%;
+}
+
+.interiors-comparison-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease;
+}
+
+.interiors-comparison-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.interiors-comparison-table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.interiors-comparison-table td {
+  padding: 1.35rem 1.75rem;
+  vertical-align: middle;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.interiors-comparison-table td.td-feature {
+  font-weight: 700;
+  color: #0f172a;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-comparison-table td.td-gatelink {
+  font-weight: 500;
+  color: #1e293b;
+  background-color: rgba(240, 253, 250, 0.6);
+  border-left: 1px solid #f1f5f9;
+  border-right: 1px solid #f1f5f9;
+}
+
+.interiors-comparison-table td.td-local {
+  font-weight: 400;
+  color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .interiors-comparison-section {
+    padding: 3.5rem 1rem 4rem;
+  }
+  .interiors-comparison-title {
+    font-size: 1.45rem;
+  }
+  .interiors-comparison-table th,
+  .interiors-comparison-table td {
+    padding: 1rem 1.25rem;
+    font-size: 0.88rem;
+  }
+}
+
+/* ==========================================================================
+   GateLink Interiors — Happy Customers Showcase Section (Hyderabad)
+   ========================================================================== */
+.interiors-happy-customers-section {
+  padding: 5.5rem 1.5rem 6rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.interiors-happy-customers-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.interiors-happy-customers-header {
+  text-align: center;
+  max-width: 920px;
+  margin: 0 auto 3.5rem;
+}
+
+.interiors-happy-customers-title {
+  font-size: 1.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-happy-customers-carousel-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.interiors-happy-customers-nav-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #475569;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+  z-index: 5;
+}
+
+.interiors-happy-customers-nav-btn:hover {
+  background: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
+  transform: scale(1.06);
+}
+
+.interiors-happy-customers-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  flex: 1;
+}
+
+.interiors-happy-customer-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 24px -6px rgba(15, 23, 42, 0.06);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.interiors-happy-customer-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.14);
+}
+
+.interiors-happy-customer-image-box {
+  width: 100%;
+  aspect-ratio: 16 / 11;
+  overflow: hidden;
+  background-color: #e2e8f0;
+}
+
+.interiors-happy-customer-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.interiors-happy-customer-card:hover .interiors-happy-customer-image {
+  transform: scale(1.05);
+}
+
+.interiors-happy-customer-quote-box {
+  padding: 1.5rem 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.interiors-happy-quote-icon {
+  color: #64748b;
+  margin-bottom: 0.75rem;
+  opacity: 0.7;
+}
+
+.interiors-happy-customer-quote-text {
+  font-size: 0.88rem;
+  color: #334155;
+  line-height: 1.55;
+  margin: 0 0 1.25rem;
+  font-style: normal;
+}
+
+.interiors-happy-customer-author {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-happy-customers-cta-row {
+  margin-top: 3.2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.interiors-happy-customers-link-teal {
+  background: transparent;
+  color: #0e8a9d;
+  font-size: 1.12rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  padding: 0.6rem 1.2rem;
+  transition: all 0.2s ease;
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  text-decoration: none;
+}
+
+.interiors-happy-customers-link-teal:hover {
+  color: #006978;
+  transform: translateY(-2px);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+@media (max-width: 1024px) {
+  .interiors-happy-customers-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .interiors-happy-customers-section {
+    padding: 3.5rem 1rem 4rem;
+  }
+  .interiors-happy-customers-title {
+    font-size: 1.45rem;
+  }
+  .interiors-happy-customers-grid {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+  .interiors-happy-customers-nav-btn {
+    display: none;
+  }
+}
+
 /* Interactive Price Estimator */
 .interiors-estimator-section {
   padding: 80px 24px;
@@ -1137,3 +2583,294 @@
     font-size: 1.05rem;
   }
 }
+
+/* ==========================================================================
+   GateLink Interiors — Solutions Catalog Section (Matching Reference)
+   ========================================================================== */
+
+.interiors-catalog-section {
+  padding: 5.5rem 1.5rem 5rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.interiors-catalog-container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.interiors-catalog-header {
+  text-align: center;
+  max-width: 860px;
+  margin: 0 auto 3.5rem;
+}
+
+.interiors-catalog-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  column-gap: 2.5rem;
+  row-gap: 3rem;
+  margin-bottom: 3.5rem;
+}
+
+.interiors-catalog-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  cursor: pointer;
+  outline: none;
+  transition: transform 0.25s ease;
+}
+
+.interiors-catalog-card:hover {
+  transform: translateY(-3px);
+}
+
+.interiors-catalog-icon-box {
+  width: 72px;
+  height: 72px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.interiors-catalog-icon-box svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.interiors-catalog-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.interiors-catalog-item-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  line-height: 1.3;
+}
+
+.interiors-catalog-item-desc {
+  font-size: 0.86rem;
+  color: #475569;
+  line-height: 1.5;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.interiors-catalog-cta-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 3.5rem;
+}
+
+.interiors-catalog-btn-teal {
+  background-color: #1392a6;
+  background: linear-gradient(180deg, #169db3 0%, #10879a 100%);
+  color: #ffffff;
+  padding: 0.95rem 2.6rem;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(255, 255, 255, 0.15) inset;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-catalog-btn-teal:hover {
+  background: #0e7a8c;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.32);
+}
+
+.interiors-catalog-subfooter {
+  text-align: center;
+  max-width: 960px;
+  margin: 0 auto;
+  padding-top: 1rem;
+}
+
+.interiors-catalog-subfooter-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+@media (max-width: 1024px) {
+  .interiors-catalog-grid {
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: 2rem;
+    row-gap: 2.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .interiors-catalog-section {
+    padding: 3.5rem 1rem 3.5rem;
+  }
+  .interiors-catalog-title,
+  .interiors-catalog-subfooter-title {
+    font-size: 1.4rem;
+  }
+  .interiors-catalog-grid {
+    grid-template-columns: 1fr;
+    row-gap: 2rem;
+  }
+  .interiors-catalog-btn-teal {
+    width: 100%;
+    padding: 0.95rem 1.5rem;
+  }
+}
+
+/* ==========================================================================
+   GateLink Interiors — FAQs Section (Matching Reference Screenshot)
+   ========================================================================== */
+
+.interiors-faq-section {
+  padding: 5.5rem 1.5rem 6.5rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.interiors-faq-container {
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.interiors-faq-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.interiors-faq-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+  letter-spacing: -0.025em;
+  line-height: 1.3;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.interiors-faq-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.interiors-faq-item {
+  border-bottom: 1px solid #e2e8f0;
+  transition: background-color 0.2s ease;
+}
+
+.interiors-faq-item:first-child {
+  border-top: 1px solid #e2e8f0;
+}
+
+.interiors-faq-question-btn {
+  width: 100%;
+  padding: 1.25rem 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.2s ease;
+}
+
+.interiors-faq-question-text {
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.45;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.interiors-faq-question-btn:hover .interiors-faq-question-text {
+  color: #0891b2;
+}
+
+.interiors-faq-chevron-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #475569;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), color 0.2s ease;
+}
+
+.interiors-faq-chevron-box.rotated {
+  transform: rotate(180deg);
+  color: #0891b2;
+}
+
+.interiors-faq-answer-wrapper {
+  padding: 0 0.5rem 1.4rem;
+  animation: faqFadeIn 0.25s ease-out;
+}
+
+@keyframes faqFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.interiors-faq-answer {
+  font-size: 0.94rem;
+  color: #475569;
+  line-height: 1.65;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+@media (max-width: 768px) {
+  .interiors-faq-section {
+    padding: 3.5rem 1rem 4rem;
+  }
+  .interiors-faq-title {
+    font-size: 1.45rem;
+  }
+  .interiors-faq-question-btn {
+    padding: 1.1rem 0;
+  }
+  .interiors-faq-question-text {
+    font-size: 0.95rem;
+  }
+}
+
+

@@ -5,12 +5,18 @@ import { Sparkles, PhoneCall, Mail, MapPin, ArrowRight, ShieldCheck } from 'luci
 import InteriorsNavbar from '../../features/interiors/components/InteriorsNavbar';
 import InteriorsHero from '../../features/interiors/components/InteriorsHero';
 import InteriorsTrustStrip from '../../features/interiors/components/InteriorsTrustStrip';
-import InteriorsPriceEstimator from '../../features/interiors/components/InteriorsPriceEstimator';
+import InteriorsModularKitchenShowcase from '../../features/interiors/components/InteriorsModularKitchenShowcase';
+import InteriorsBedroomShowcase from '../../features/interiors/components/InteriorsBedroomShowcase';
+import InteriorsLivingRoomShowcase from '../../features/interiors/components/InteriorsLivingRoomShowcase';
+import InteriorsSpaceSavingShowcase from '../../features/interiors/components/InteriorsSpaceSavingShowcase';
+import InteriorsProjectsShowcase from '../../features/interiors/components/InteriorsProjectsShowcase';
+import InteriorsHyderabadReviews from '../../features/interiors/components/InteriorsHyderabadReviews';
+import InteriorsComparisonTable from '../../features/interiors/components/InteriorsComparisonTable';
+import InteriorsHappyCustomersShowcase from '../../features/interiors/components/InteriorsHappyCustomersShowcase';
+import InteriorsSolutionsCatalog from '../../features/interiors/components/InteriorsSolutionsCatalog';
 import InteriorsLookbook from '../../features/interiors/components/InteriorsLookbook';
 import InteriorsCityBanner from '../../features/interiors/components/InteriorsCityBanner';
-import InteriorsWhyGateLink from '../../features/interiors/components/InteriorsWhyGateLink';
 import InteriorsProcess from '../../features/interiors/components/InteriorsProcess';
-import InteriorsTransformations from '../../features/interiors/components/InteriorsTransformations';
 import InteriorsFaq from '../../features/interiors/components/InteriorsFaq';
 import InteriorsConsultationModal from '../../features/interiors/components/InteriorsConsultationModal';
 
@@ -31,10 +37,7 @@ export default function InteriorsPage() {
   };
 
   const handleScrollToEstimator = () => {
-    const el = document.getElementById('estimator');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+    handleOpenConsultation({ topic: 'Instant Cost Estimate' });
   };
 
   return (
@@ -52,8 +55,35 @@ export default function InteriorsPage() {
         {/* Elevated Trust Highlights Ribbon Strip (Matching Reference) */}
         <InteriorsTrustStrip />
 
-        {/* Interactive 3-Step Price Estimator */}
-        <InteriorsPriceEstimator onOpenConsultation={handleOpenConsultation} />
+        {/* Smart Modular Kitchen Designs Showcase (Matching Reference Screenshot) */}
+        <InteriorsModularKitchenShowcase onOpenConsultation={handleOpenConsultation} />
+
+        {/* Bedroom Interiors Showcase (Matching Reference Screenshot) */}
+        <InteriorsBedroomShowcase onOpenConsultation={handleOpenConsultation} />
+
+        {/* Living Room Interiors Showcase (Matching Reference Screenshot) */}
+        <InteriorsLivingRoomShowcase onOpenConsultation={handleOpenConsultation} />
+
+        {/* Space-Saving Designs Showcase (Matching Reference Screenshot) */}
+        <InteriorsSpaceSavingShowcase onOpenConsultation={handleOpenConsultation} />
+
+        {/* Latest Home Interior Projects In Hyderabad (Matching Reference Screenshot) */}
+        <InteriorsProjectsShowcase onOpenConsultation={handleOpenConsultation} />
+
+        {/* Customer Reviews & Google Trust Card (Matching Reference Screenshot) */}
+        <InteriorsHyderabadReviews onOpenConsultation={handleOpenConsultation} />
+
+        {/* Why Choose Our Interior Designers Comparison Table (Matching Reference Screenshot) */}
+        <InteriorsComparisonTable />
+
+        {/* Happy Customers Testimonial Showcase (Matching Reference Screenshot) */}
+        <InteriorsHappyCustomersShowcase onOpenConsultation={handleOpenConsultation} />
+
+        {/* Solutions Catalog & Outline Grid (Matching Reference Screenshot) */}
+        <InteriorsSolutionsCatalog
+          onOpenConsultation={handleOpenConsultation}
+          onScrollToEstimator={handleScrollToEstimator}
+        />
 
         {/* Curated Lookbook */}
         <InteriorsLookbook onOpenConsultation={handleOpenConsultation} />
@@ -61,14 +91,8 @@ export default function InteriorsPage() {
         {/* Hyderabad City Mid-Page Banner (Matching Reference Screenshot) */}
         <InteriorsCityBanner onOpenConsultation={handleOpenConsultation} />
 
-        {/* Why GateLink Advantage */}
-        <InteriorsWhyGateLink onOpenConsultation={handleOpenConsultation} />
-
         {/* 4-Step Process */}
         <InteriorsProcess onOpenConsultation={handleOpenConsultation} />
-
-        {/* Transformations & Reviews */}
-        <InteriorsTransformations />
 
         {/* FAQs */}
         <InteriorsFaq />
