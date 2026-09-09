@@ -4,41 +4,34 @@ import { Link } from 'react-router-dom';
 export default function MaidsHero() {
   return (
     <section className="maids-cinematic-hero-section">
-      {/* Top Banner Content Area */}
-      <div className="maids-cinematic-hero-container">
-        {/* Main Heading */}
-        <h1 className="maids-cinematic-title">
-          Get House Help in <span className="maids-cinematic-pink-highlight">10 min</span>
-        </h1>
+      {/* Full-Bleed Background Container */}
+      <div className="maids-cinematic-hero-bg">
+        {/* Subtle Top Gradient for crystal clear text readability */}
+        <div className="maids-cinematic-top-gradient" />
 
-        {/* CTA Button */}
-        <div className="maids-cinematic-cta-wrapper">
-          <Link
-            to="/download"
-            className="maids-cinematic-btn-pink"
-          >
-            <span>Download Now</span>
-          </Link>
+        {/* Hero Top Content Layer (Headline + Button) */}
+        <div className="maids-cinematic-hero-content">
+          <h1 className="maids-cinematic-title">
+            Get House Help in <span className="maids-cinematic-pink-highlight">10 min</span>
+          </h1>
+
+          <div className="maids-cinematic-cta-wrapper">
+            <Link
+              to="/download"
+              className="maids-cinematic-btn-pink"
+            >
+              <span>Download Now</span>
+            </Link>
+          </div>
         </div>
 
-        {/* Team Image Visual */}
-        <div className="maids-cinematic-image-wrapper">
-          <img 
-            src="/maids_hero_banner.jpg" 
-            alt="GateLink Verified House Help and Salon Professionals" 
-            className="maids-cinematic-team-img"
-          />
-          <div className="maids-cinematic-top-fade" />
-          <div className="maids-cinematic-bottom-fade" />
-        </div>
-      </div>
-
-      {/* Bottom Purple Ribbon Banner (Matching Reference) */}
-      <div className="maids-cinematic-bottom-ribbon">
-        <div className="maids-cinematic-ribbon-container">
-          <p className="maids-cinematic-ribbon-text">
-            We’ve landed the <span className="maids-cinematic-ribbon-highlight">BIGGEST</span> job ever!
-          </p>
+        {/* Bottom Purple Ribbon Banner (Directly on Bottom Edge) */}
+        <div className="maids-cinematic-bottom-ribbon">
+          <div className="maids-cinematic-ribbon-container">
+            <p className="maids-cinematic-ribbon-text">
+              We’ve landed the <span className="maids-cinematic-ribbon-highlight">BIGGEST</span> job ever!
+            </p>
+          </div>
         </div>
       </div>
     </section>
