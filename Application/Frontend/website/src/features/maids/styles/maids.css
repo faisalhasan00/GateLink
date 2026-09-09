@@ -167,71 +167,167 @@
   transform: translateY(-2px);
 }
 
-/* Hero Section */
-.maids-hero {
+/* Cinematic Hero Section (Exact Match to Reference Screenshot) */
+.maids-cinematic-hero-section {
   position: relative;
-  padding: 50px 24px 70px;
-  max-width: 1240px;
+  width: 100%;
+  background-color: #12030b;
+  background: radial-gradient(circle at 50% 15%, #240516 0%, #12030b 70%, #080105 100%);
+  overflow: hidden;
+  padding-top: 3.5rem;
+}
+
+.maids-cinematic-hero-container {
+  max-width: 1320px;
   margin: 0 auto;
-}
-
-.maids-hero-grid {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 48px;
-  align-items: center;
-}
-
-.maids-hero-title {
-  font-size: 3.25rem;
-  font-weight: 800;
-  line-height: 1.15;
-  color: var(--gl-maids-dark);
-  margin: 16px 0 20px;
-}
-
-.maids-hero-highlight {
-  background: linear-gradient(135deg, #D97706 0%, #EA580C 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.maids-hero-subtitle {
-  font-size: 1.15rem;
-  line-height: 1.6;
-  color: #57534E;
-  margin-bottom: 28px;
-  max-width: 540px;
-}
-
-.maids-guarantee-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-top: 32px;
-}
-
-.maids-guarantee-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #44403C;
-  background: #FFFFFF;
-  padding: 8px 14px;
-  border-radius: 10px;
-  border: 1px solid var(--gl-maids-border);
-}
-
-.maids-hero-card {
-  background: #FFFFFF;
-  border-radius: 24px;
-  border: 1px solid var(--gl-maids-border);
-  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08);
-  padding: 28px;
+  text-align: center;
   position: relative;
+  padding: 0 1rem;
 }
+
+.maids-cinematic-title {
+  font-size: 3.6rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 1.5rem;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.maids-cinematic-pink-highlight {
+  color: #ff007a;
+  font-weight: 800;
+  display: inline-block;
+  text-shadow: 0 0 30px rgba(255, 0, 122, 0.65);
+}
+
+.maids-cinematic-cta-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2.5rem;
+}
+
+.maids-cinematic-btn-pink {
+  background-color: #ff007a;
+  background: linear-gradient(135deg, #ff1493 0%, #ff007a 50%, #e6006c 100%);
+  color: #ffffff;
+  padding: 0.85rem 2.6rem;
+  border-radius: 999px;
+  font-size: 1.08rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(255, 0, 122, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.25) inset;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: -0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.maids-cinematic-btn-pink:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 12px 32px rgba(255, 0, 122, 0.75);
+}
+
+/* Team Image Banner */
+.maids-cinematic-image-wrapper {
+  position: relative;
+  max-width: 1140px;
+  margin: 0 auto;
+  border-radius: 20px 20px 0 0;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.maids-cinematic-team-img {
+  width: 100%;
+  max-height: 480px;
+  object-fit: cover;
+  object-position: center 20%;
+  display: block;
+}
+
+.maids-cinematic-top-fade {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 90px;
+  background: linear-gradient(180deg, #12030b 0%, rgba(18, 3, 11, 0) 100%);
+  pointer-events: none;
+}
+
+.maids-cinematic-bottom-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(0deg, rgba(18, 3, 11, 0.6) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+/* Bottom Purple Ribbon Banner (Exact Reference Match) */
+.maids-cinematic-bottom-ribbon {
+  width: 100%;
+  background: linear-gradient(90deg, #2b0b4f 0%, #4338ca 30%, #581c87 50%, #4338ca 70%, #2b0b4f 100%);
+  padding: 1.1rem 1.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 10;
+}
+
+.maids-cinematic-ribbon-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.maids-cinematic-ribbon-text {
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.01em;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.maids-cinematic-ribbon-highlight {
+  color: #ff007a;
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 20px rgba(255, 0, 122, 0.6);
+}
+
+@media (max-width: 768px) {
+  .maids-cinematic-hero-section {
+    padding-top: 2.5rem;
+  }
+  .maids-cinematic-title {
+    font-size: 2.35rem;
+  }
+  .maids-cinematic-btn-pink {
+    padding: 0.75rem 2rem;
+    font-size: 0.98rem;
+  }
+  .maids-cinematic-team-img {
+    max-height: 280px;
+  }
+  .maids-cinematic-ribbon-text {
+    font-size: 1.1rem;
+  }
+}
+
+
 
 /* Service Catalog Section */
 .maids-services-section {
