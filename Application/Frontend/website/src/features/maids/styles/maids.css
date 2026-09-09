@@ -178,16 +178,16 @@
 .maids-cinematic-hero-bg {
   position: relative;
   width: 100%;
-  min-height: 600px;
+  min-height: 660px;
   background-image: url('/maids_hero_banner.jpg');
   background-size: cover;
-  background-position: center 25%;
+  background-position: center 20%;
   background-repeat: no-repeat;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding-top: 4.5rem;
+  padding-top: 4rem;
 }
 
 .maids-cinematic-top-gradient {
@@ -196,7 +196,7 @@
   left: 0;
   right: 0;
   height: 280px;
-  background: linear-gradient(180deg, rgba(14, 2, 8, 0.94) 0%, rgba(14, 2, 8, 0.75) 45%, rgba(14, 2, 8, 0) 100%);
+  background: linear-gradient(180deg, rgba(14, 2, 8, 0.95) 0%, rgba(14, 2, 8, 0.75) 45%, rgba(14, 2, 8, 0) 100%);
   z-index: 1;
   pointer-events: none;
 }
@@ -214,7 +214,7 @@
   font-size: 3.75rem;
   font-weight: 800;
   color: #ffffff;
-  margin: 0 0 1.75rem;
+  margin: 0 0 1.5rem;
   letter-spacing: -0.03em;
   line-height: 1.1;
   font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
@@ -264,7 +264,7 @@
 .maids-cinematic-bottom-ribbon {
   width: 100%;
   background: linear-gradient(90deg, #2b0b4f 0%, #4338ca 30%, #581c87 50%, #4338ca 70%, #2b0b4f 100%);
-  padding: 1.15rem 1.25rem;
+  padding: 1.25rem 1.25rem;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
   border-top: 1px solid rgba(255, 255, 255, 0.25);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -298,7 +298,7 @@
 
 @media (max-width: 768px) {
   .maids-cinematic-hero-bg {
-    min-height: 480px;
+    min-height: 500px;
     padding-top: 3rem;
   }
   .maids-cinematic-title {
@@ -308,10 +308,15 @@
     padding: 0.75rem 2.2rem;
     font-size: 0.98rem;
   }
+  .maids-cinematic-bottom-ribbon {
+    padding: 1.1rem 1rem;
+  }
   .maids-cinematic-ribbon-text {
     font-size: 1.1rem;
   }
 }
+
+
 
 
 
