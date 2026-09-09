@@ -4,6 +4,7 @@ import { Sparkles, PhoneCall, Mail, MapPin, Zap, ShieldCheck } from 'lucide-reac
 
 import MaidsNavbar from '../../features/maids/components/MaidsNavbar';
 import MaidsHero from '../../features/maids/components/MaidsHero';
+import MaidsExpertsShowcase from '../../features/maids/components/MaidsExpertsShowcase';
 import MaidsServiceCatalog from '../../features/maids/components/MaidsServiceCatalog';
 import MaidsPricingCalculator from '../../features/maids/components/MaidsPricingCalculator';
 import MaidsWhyGateLink from '../../features/maids/components/MaidsWhyGateLink';
@@ -45,6 +46,9 @@ export default function MaidsLandingPage() {
           onOpenBooking={handleOpenBooking}
           onScrollToServices={handleScrollToServices}
         />
+
+        {/* Trained & Verified Home Experts (Matching Reference) */}
+        <MaidsExpertsShowcase onOpenBooking={handleOpenBooking} />
 
         {/* Services Catalog */}
         <MaidsServiceCatalog onOpenBooking={handleOpenBooking} />
