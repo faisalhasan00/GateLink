@@ -1,9 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  ChevronLeft, 
-  ChevronRight,
   MessageCircle,
-  ArrowRight,
   Calculator
 } from 'lucide-react';
 
@@ -46,16 +43,6 @@ export default function InteriorsHero({ onOpenConsultation, onScrollToEstimator 
       if (timerRef.current) clearInterval(timerRef.current);
     };
   }, [isPaused, slides.length]);
-
-  const handleNext = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
-  };
-
-  const handlePrev = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  };
-
-  const current = slides[currentSlide];
 
   return (
     <section 
@@ -113,47 +100,6 @@ export default function InteriorsHero({ onOpenConsultation, onScrollToEstimator 
               <span>Instant Cost Calculator</span>
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* Carousel Controls & Indicators (Bottom Right) */}
-      <div className="interiors-hero-controls-bar">
-        {/* Slide Counter & Tag */}
-        <div className="interiors-slide-info-tag">
-          <span className="interiors-slide-tag-text">{current.tag}</span>
-        </div>
-
-        {/* Dots Navigation */}
-        <div className="interiors-slider-dots">
-          {slides.map((_, idx) => (
-            <button
-              key={idx}
-              type="button"
-              className={`interiors-slider-dot ${idx === currentSlide ? 'active' : ''}`}
-              onClick={() => setCurrentSlide(idx)}
-              aria-label={`Go to slide ${idx + 1}`}
-            />
-          ))}
-        </div>
-
-        {/* Prev / Next Arrows */}
-        <div className="interiors-slider-arrow-group">
-          <button
-            type="button"
-            className="interiors-arrow-btn"
-            onClick={handlePrev}
-            aria-label="Previous slide"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <button
-            type="button"
-            className="interiors-arrow-btn"
-            onClick={handleNext}
-            aria-label="Next slide"
-          >
-            <ChevronRight size={20} />
-          </button>
         </div>
       </div>
 
