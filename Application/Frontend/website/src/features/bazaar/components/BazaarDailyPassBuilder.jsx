@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  Sparkles, Check, Plus, Minus, ArrowRight, ShieldCheck, Sun, 
+  Check, Plus, Minus, ArrowRight, ShieldCheck, Sun, 
   RefreshCw, CalendarCheck, Zap, Scale, Search, X, Info, ChevronRight 
 } from 'lucide-react';
 import { useBazaarCart } from '../context/BazaarCartContext';
@@ -189,12 +189,6 @@ export default function BazaarDailyPassBuilder() {
   return (
     <section id="bazaar-daily-pass" className="qc-pass-builder-section">
       <div className="qc-pass-builder-card">
-        {/* Top Header Badge */}
-        <div className="qc-pass-top-badge">
-          <Sparkles size={14} />
-          <span>SOCIETY EXCLUSIVE • ZERO DELIVERY FEE</span>
-        </div>
-
         <div className="qc-pass-header">
           <div>
             <h3 className="qc-pass-title">

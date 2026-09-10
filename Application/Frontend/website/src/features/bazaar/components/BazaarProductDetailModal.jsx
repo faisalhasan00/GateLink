@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   X, Star, ShieldCheck, Sun, Plus, Minus, Check, MapPin, 
-  Sparkles, Truck, Clock, Info, Heart, PackageCheck, Leaf, 
+  Truck, Clock, Info, Heart, PackageCheck, Leaf, 
   Flame, Droplets, HelpCircle
 } from 'lucide-react';
 import { useBazaarCart } from '../context/BazaarCartContext';
@@ -114,7 +114,7 @@ export default function BazaarProductDetailModal({ product, isOpen, onClose }) {
                 {product.highlights && product.highlights.length > 0 && (
                   <div className="qc-highlights-block">
                     <h4 className="qc-section-heading">
-                      <Sparkles size={14} color="#059669" />
+                      <ShieldCheck size={14} color="#059669" />
                       <span>Key Highlights</span>
                     </h4>
                     <ul className="qc-highlights-list">
