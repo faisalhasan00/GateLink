@@ -1461,6 +1461,228 @@
   }
 }
 
+/* ==========================================================================
+   Minimalist Dark Footer with QR Code & Watermark (Matching Reference)
+   ========================================================================== */
+
+.maids-cinematic-footer {
+  background-color: #222222;
+  color: #F8FAFC;
+  padding: 4.5rem 1.5rem 1.5rem;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.maids-footer-main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.maids-footer-top-grid {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1.2fr;
+  gap: 3.5rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+/* White QR Download Card */
+.maids-footer-qr-card {
+  background: #ffffff;
+  border-radius: 20px;
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  max-width: 300px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.maids-footer-qr-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.maids-footer-qr-top {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.01em;
+}
+
+.maids-footer-qr-brand {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 2px 0 8px;
+  letter-spacing: -0.02em;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.maids-footer-qr-highlight {
+  color: #7C3AED;
+}
+
+.maids-footer-store-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.maids-store-icon-pill {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.maids-footer-qr-box {
+  width: 76px;
+  height: 76px;
+  flex-shrink: 0;
+}
+
+.maids-footer-qr-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Footer Columns */
+.maids-footer-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.maids-footer-col-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94A3B8;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.maids-footer-links-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.maids-footer-link {
+  color: #E2E8F0;
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease, transform 0.2s ease;
+  display: inline-block;
+}
+
+.maids-footer-link:hover {
+  color: #C084FC;
+  transform: translateX(2px);
+}
+
+.maids-footer-contact-block {
+  margin-bottom: 1.15rem;
+}
+
+.maids-footer-contact-val {
+  color: #E2E8F0;
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.maids-footer-contact-val:hover {
+  color: #C084FC;
+}
+
+.maids-footer-address-val {
+  font-size: 0.88rem;
+  color: #CBD5E1;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.maids-footer-socials-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.maids-social-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #7C3AED;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.maids-social-circle:hover {
+  transform: scale(1.12);
+  background: #7C3AED;
+  color: #ffffff;
+}
+
+/* Big Bottom Watermark */
+.maids-footer-watermark-wrapper {
+  width: 100%;
+  text-align: center;
+  line-height: 0.75;
+  pointer-events: none;
+  user-select: none;
+  margin: 1.5rem 0 0.5rem;
+  overflow: hidden;
+}
+
+.maids-footer-watermark-text {
+  font-size: 15vw;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.045);
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.04em;
+  text-transform: lowercase;
+  display: inline-block;
+}
+
+/* Bottom Copyright Bar */
+.maids-footer-copyright-bar {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 1.25rem;
+  text-align: center;
+}
+
+.maids-footer-copyright-text {
+  font-size: 0.82rem;
+  color: #71717A;
+  margin: 0;
+}
+
+@media (max-width: 960px) {
+  .maids-footer-top-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .maids-cinematic-footer {
+    padding: 3.5rem 1.25rem 1.5rem;
+  }
+}
+
+
 
 
 
