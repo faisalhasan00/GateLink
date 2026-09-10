@@ -33,6 +33,7 @@ const GateSelfEntryPage = lazy(() => import('./pages/gate/GateSelfEntryPage'))
 const InteriorsPage = lazy(() => import('./pages/interiors/InteriorsPage'))
 const MaidsLandingPage = lazy(() => import('./pages/maids/MaidsLandingPage'))
 const HouseHelpLandingPage = lazy(() => import('./pages/maids/HouseHelpLandingPage'))
+const HomeCookLandingPage = lazy(() => import('./pages/maids/HomeCookLandingPage'))
 const ServicesLandingPage = lazy(() => import('./pages/services/ServicesLandingPage'))
 const BazaarLandingPage = lazy(() => import('./pages/bazaar/BazaarLandingPage'))
 
@@ -72,6 +73,9 @@ export default function App() {
             <Route path="/maids" element={<MaidsLandingPage />} />
             <Route path="/maids/house-help" element={<HouseHelpLandingPage />} />
             <Route path="/house-help" element={<Navigate to="/maids/house-help" replace />} />
+            <Route path="/maids/home-cook" element={<HomeCookLandingPage />} />
+            <Route path="/home-cook" element={<Navigate to="/maids/home-cook" replace />} />
+            <Route path="/cook" element={<Navigate to="/maids/home-cook" replace />} />
             <Route path="/maid" element={<Navigate to="/maids" replace />} />
             <Route path="/maid-services" element={<Navigate to="/maids" replace />} />
             <Route path="/services" element={<ServicesLandingPage />} />

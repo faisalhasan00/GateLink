@@ -17,7 +17,7 @@ export default function MaidsExpertsShowcase({ onOpenBooking }) {
     {
       id: 'home-cook',
       title: 'Home Cook',
-      path: '/maids/house-help',
+      path: '/maids/home-cook',
       image: '/maids_home_cook_card.jpg',
       badge: null,
       locations: ['Hyderabad']

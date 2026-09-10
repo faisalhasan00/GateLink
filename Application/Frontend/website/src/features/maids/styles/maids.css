@@ -2558,6 +2558,287 @@
   }
 }
 
+/* ==========================================================================
+   Home Cook Feature Styles (One Cook Who Does it All & Kitchen Hygiene)
+   ========================================================================== */
+
+/* Three Cards Modifier for Trust Section */
+.maids-trust-grid.three-cards {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.maids-trust-subtitle {
+  font-size: 1.05rem;
+  color: #64748B;
+  margin: 0.75rem 0 0;
+  font-family: 'Inter', sans-serif;
+}
+
+@media (max-width: 960px) {
+  .maids-trust-grid.three-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* One Cook Who Does it All (Bento Grid) */
+.cook-bento-section {
+  padding: 5rem 1.5rem 5.5rem;
+  background: #ffffff;
+  border-top: 1px solid #F1F5F9;
+}
+
+.cook-bento-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.cook-bento-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.cook-bento-title {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: #18181B;
+  margin: 0;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.cook-bento-title-highlight {
+  color: #7C3AED;
+  font-weight: 800;
+}
+
+.cook-bento-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 1.75rem;
+  min-height: 520px;
+}
+
+.cook-bento-card {
+  position: relative;
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  background: #18181B;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cook-bento-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+}
+
+.cook-bento-card:hover .cook-bento-img {
+  transform: scale(1.05);
+}
+
+.cook-bento-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  display: block;
+}
+
+.cook-bento-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.2) 40%, rgba(0, 0, 0, 0.85) 100%);
+  pointer-events: none;
+}
+
+.cook-bento-card-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 2rem;
+  color: #ffffff;
+  z-index: 2;
+  text-align: left;
+}
+
+.cook-bento-badge {
+  display: inline-block;
+  background: #7C3AED;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 0.75rem;
+}
+
+.cook-bento-card-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 0.5rem;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.cook-bento-card-sub {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.5;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.cook-bento-right-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.cook-bento-card.small-card {
+  flex: 1;
+  min-height: 245px;
+}
+
+.cook-bento-card.small-card .cook-bento-card-title {
+  font-size: 1.3rem;
+}
+
+.cook-bento-card.small-card .cook-bento-card-content {
+  padding: 1.5rem;
+}
+
+/* We Treat Your Kitchen Like Ours (Hygiene Grid) */
+.cook-hygiene-section {
+  padding: 5rem 1.5rem 5.5rem;
+  background: linear-gradient(180deg, #FCFAFF 0%, #FAF5FF 100%);
+  border-top: 1px solid #EDE9FE;
+}
+
+.cook-hygiene-container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.cook-hygiene-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.cook-hygiene-title {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: #18181B;
+  margin: 0;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.cook-hygiene-title-highlight {
+  color: #7C3AED;
+  font-weight: 800;
+}
+
+.cook-hygiene-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+}
+
+.cook-hygiene-card {
+  background: #ffffff;
+  border: 1.5px solid #EDE9FE;
+  border-radius: 22px;
+  overflow: hidden;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.cook-hygiene-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px -4px rgba(124, 58, 237, 0.12);
+  border-color: #DDD6FE;
+}
+
+.cook-hygiene-img-wrapper {
+  width: 100%;
+  aspect-ratio: 1 / 0.85;
+  overflow: hidden;
+  background: #F8FAFC;
+}
+
+.cook-hygiene-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  display: block;
+}
+
+.cook-hygiene-card:hover .cook-hygiene-img {
+  transform: scale(1.06);
+}
+
+.cook-hygiene-card-body {
+  padding: 1.5rem;
+  text-align: left;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.cook-hygiene-card-title {
+  font-size: 1.18rem;
+  font-weight: 700;
+  color: #18181B;
+  margin: 0 0 0.5rem;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.cook-hygiene-card-desc {
+  font-size: 0.9rem;
+  color: #64748B;
+  line-height: 1.5;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+@media (max-width: 1024px) {
+  .cook-bento-grid {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .cook-bento-card.large-card {
+    min-height: 340px;
+  }
+  .cook-hygiene-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .cook-bento-section,
+  .cook-hygiene-section {
+    padding: 3.5rem 1.25rem 4rem;
+  }
+  .cook-bento-title,
+  .cook-hygiene-title {
+    font-size: 1.85rem;
+  }
+  .cook-hygiene-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+
 
 
 

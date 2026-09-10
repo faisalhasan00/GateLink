@@ -530,6 +530,26 @@ const SEO_ROUTES = [
     }
   },
   {
+    path: 'maids/home-cook',
+    title: 'Home Cook in 10 Minutes — Fresh Meals at Home | GateLink',
+    description: 'Book a trained Home Cook on the GateLink app: fresh meals cooked at your home. Dedicated cooking experts, meal preparation, and kitchen cleanup included.',
+    canonicalUrl: 'https://gatelink.in/maids/home-cook',
+    ogImage: 'https://gatelink.in/logo.png',
+    schemaData: {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Home Cook by GateLink",
+      "serviceType": "Domestic Cooking & Meal Preparation",
+      "provider": {
+        "@type": "Organization",
+        "name": "GateLink Technologies Private Limited",
+        "url": "https://gatelink.in"
+      },
+      "areaServed": "IN",
+      "description": "Book verified home cooks online with 10-minute doorstep arrival, meal preparation, and kitchen cleaning."
+    }
+  },
+  {
     path: 'services',
     title: 'GateLink Home Services & Repairs — Electrician, Plumber & AC Repair',
     description: 'Book certified society-approved electricians, plumbers, AC technicians, and carpenters. Standard rate card, 30-day rework warranty, and 15-min emergency response.',
