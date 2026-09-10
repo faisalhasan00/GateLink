@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import MaidsNavbar from '../../features/maids/components/MaidsNavbar';
 import MaidsCategoryHero from '../../features/maids/components/MaidsCategoryHero';
+import MaidsHouseHelpScope from '../../features/maids/components/MaidsHouseHelpScope';
 import MaidsQualityVetting from '../../features/maids/components/MaidsQualityVetting';
 import MaidsServingCities from '../../features/maids/components/MaidsServingCities';
 import MaidsTestimonials from '../../features/maids/components/MaidsTestimonials';
@@ -38,6 +39,9 @@ export default function HouseHelpLandingPage() {
           image="/maids_house_help_hero.jpg"
           onOpenBooking={handleOpenBooking}
         />
+
+        {/* One House Help Expert to do it all (Interactive Scope Checklist) */}
+        <MaidsHouseHelpScope />
 
         {/* Experts Vetted for Quality */}
         <MaidsQualityVetting />
