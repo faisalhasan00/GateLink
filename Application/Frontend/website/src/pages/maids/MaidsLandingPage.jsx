@@ -7,7 +7,6 @@ import MaidsHero from '../../features/maids/components/MaidsHero';
 import MaidsExpertsShowcase from '../../features/maids/components/MaidsExpertsShowcase';
 import MaidsQualityVetting from '../../features/maids/components/MaidsQualityVetting';
 import MaidsServingCities from '../../features/maids/components/MaidsServingCities';
-import MaidsWhyGateLink from '../../features/maids/components/MaidsWhyGateLink';
 import MaidsTestimonials from '../../features/maids/components/MaidsTestimonials';
 import MaidsFaq from '../../features/maids/components/MaidsFaq';
 import MaidsFooter from '../../features/maids/components/MaidsFooter';
@@ -56,9 +55,6 @@ export default function MaidsLandingPage() {
 
         {/* Serving Homes Across Hyderabad (Matching Reference Design) */}
         <MaidsServingCities onOpenBooking={handleOpenBooking} />
-
-        {/* The GateLink Advantage */}
-        <MaidsWhyGateLink onOpenBooking={handleOpenBooking} />
 
         {/* Testimonials */}
         <MaidsTestimonials />
