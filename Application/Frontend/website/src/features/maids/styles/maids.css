@@ -1683,6 +1683,255 @@
   }
 }
 
+/* ==========================================================================
+   Maids Category Page Hero & Guarantee Strip (Matching Reference)
+   ========================================================================== */
+
+.maids-cat-hero-section {
+  padding: 3.5rem 1.5rem 4rem;
+  background: #ffffff;
+  position: relative;
+}
+
+.maids-cat-hero-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.05fr 1.15fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+.maids-cat-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+  font-family: 'Inter', sans-serif;
+}
+
+.maids-cat-bc-link {
+  color: #64748B;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.maids-cat-bc-link:hover {
+  color: #7C3AED;
+}
+
+.maids-cat-bc-separator {
+  color: #CBD5E1;
+}
+
+.maids-cat-bc-current {
+  color: #1E293B;
+  font-weight: 600;
+}
+
+.maids-cat-hero-title {
+  font-size: 3.4rem;
+  font-weight: 800;
+  color: #18181B;
+  line-height: 1.15;
+  margin: 0 0 1.25rem;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.025em;
+}
+
+.maids-cat-hero-title-highlight {
+  color: #7C3AED;
+  font-weight: 800;
+}
+
+.maids-cat-hero-subtitle {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: #64748B;
+  margin: 0 0 2rem;
+  max-width: 480px;
+  font-family: 'Inter', sans-serif;
+}
+
+.maids-cat-cta-wrapper {
+  margin-bottom: 2rem;
+}
+
+.maids-cat-download-btn {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+  color: #ffffff;
+  font-size: 1.05rem;
+  font-weight: 700;
+  padding: 14px 36px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+}
+
+.maids-cat-download-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -5px rgba(124, 58, 237, 0.55);
+  background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+}
+
+.maids-cat-trust-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #FAF5FF;
+  border: 1px solid #EDE9FE;
+  border-radius: 999px;
+  padding: 6px 16px 6px 8px;
+}
+
+.maids-cat-avatars-group {
+  display: flex;
+  align-items: center;
+}
+
+.maids-cat-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  object-fit: cover;
+}
+
+.maids-cat-avatar.overlap {
+  margin-left: -8px;
+}
+
+.maids-cat-trust-text {
+  font-size: 0.85rem;
+  color: #475569;
+  display: flex;
+  gap: 4px;
+}
+
+.maids-cat-trust-count {
+  color: #1E293B;
+  font-weight: 700;
+}
+
+.maids-cat-trust-dot {
+  color: #CBD5E1;
+  font-size: 0.85rem;
+}
+
+.maids-cat-trust-stars-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.maids-cat-stars {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.maids-cat-ratings-label {
+  font-size: 0.85rem;
+  color: #1E293B;
+  font-weight: 700;
+}
+
+.maids-cat-image-wrapper {
+  border-radius: 28px;
+  overflow: hidden;
+  box-shadow: 0 20px 45px -15px rgba(15, 23, 42, 0.12);
+  border: 1px solid #F1F5F9;
+  background: #F8FAFC;
+}
+
+.maids-cat-hero-image {
+  width: 100%;
+  height: auto;
+  max-height: 440px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Dark Bottom Guarantee Strip */
+.maids-cat-strip-section {
+  background-color: #1C1917;
+  padding: 1.75rem 1.5rem;
+  border-top: 1px solid #292524;
+}
+
+.maids-cat-strip-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.maids-cat-strip-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.maids-cat-strip-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(124, 58, 237, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.maids-cat-strip-text {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 960px) {
+  .maids-cat-hero-container {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    text-align: left;
+  }
+  .maids-cat-hero-title {
+    font-size: 2.6rem;
+  }
+  .maids-cat-strip-container {
+    justify-content: flex-start;
+    gap: 1.75rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .maids-cat-hero-section {
+    padding: 2.5rem 1.25rem 3rem;
+  }
+  .maids-cat-hero-title {
+    font-size: 2.15rem;
+  }
+  .maids-cat-strip-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+}
+
+
 
 
 

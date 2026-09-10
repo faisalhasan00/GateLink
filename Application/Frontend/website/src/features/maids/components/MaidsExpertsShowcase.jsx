@@ -1,11 +1,15 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 
 export default function MaidsExpertsShowcase({ onOpenBooking }) {
+  const navigate = useNavigate();
+
   const categories = [
     {
       id: 'house-help',
       title: 'House Help',
+      path: '/maids/house-help',
       image: '/maids_house_help_card.jpg',
       badge: null,
       locations: ['Hyderabad', 'Gachibowli', 'Hitec City', '& more']
@@ -13,6 +17,7 @@ export default function MaidsExpertsShowcase({ onOpenBooking }) {
     {
       id: 'home-cook',
       title: 'Home Cook',
+      path: '/maids/house-help',
       image: '/maids_home_cook_card.jpg',
       badge: null,
       locations: ['Hyderabad']
@@ -20,14 +25,24 @@ export default function MaidsExpertsShowcase({ onOpenBooking }) {
     {
       id: 'home-salon',
       title: 'Home Salon',
+      path: null,
       image: '/maids_home_salon_card.jpg',
       badge: 'Coming Soon',
       locations: ['Hyderabad']
     }
   ];
 
+  const handleCardClick = (cat) => {
+    if (cat.path) {
+      navigate(cat.path);
+      window.scrollTo(0, 0);
+    } else if (onOpenBooking) {
+      onOpenBooking({ category: cat.title });
+    }
+  };
+
   return (
-    <section className="maids-experts-section">
+    <section id="experts" className="maids-experts-section">
       <div className="maids-experts-container">
         {/* Section Headline (Matching Reference) */}
         <div className="maids-experts-header">
@@ -42,12 +57,12 @@ export default function MaidsExpertsShowcase({ onOpenBooking }) {
             <div 
               key={cat.id}
               className="maids-expert-card"
-              onClick={() => onOpenBooking && onOpenBooking({ category: cat.title })}
+              onClick={() => handleCardClick(cat)}
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
-                  onOpenBooking && onOpenBooking({ category: cat.title });
+                  handleCardClick(cat);
                 }
               }}
             >

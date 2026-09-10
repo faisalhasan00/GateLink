@@ -3,7 +3,7 @@ import { Star, Check, ShieldCheck, Award, Sparkles, UserCheck, FileCheck } from 
 
 export default function MaidsQualityVetting() {
   return (
-    <section className="maids-vetted-section">
+    <section id="quality" className="maids-vetted-section">
       <div className="maids-vetted-container">
         {/* Section Headline */}
         <div className="maids-vetted-header">

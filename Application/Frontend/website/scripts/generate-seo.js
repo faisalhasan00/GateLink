@@ -510,6 +510,26 @@ const SEO_ROUTES = [
     }
   },
   {
+    path: 'maids/house-help',
+    title: 'House Help in India — Verified & Trained Daily Helpers | GateLink Maids',
+    description: 'Book House Help online and get a verified Expert at your door in 10 minutes. Verified & trained experts, 15L+ trusted homes, no lock-ins, no hidden fees.',
+    canonicalUrl: 'https://gatelink.in/maids/house-help',
+    ogImage: 'https://gatelink.in/logo.png',
+    schemaData: {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "House Help by GateLink",
+      "serviceType": "Domestic House Help & Cleaning",
+      "provider": {
+        "@type": "Organization",
+        "name": "GateLink Technologies Private Limited",
+        "url": "https://gatelink.in"
+      },
+      "areaServed": "IN",
+      "description": "Book verified house help online with 10-minute doorstep arrival, background verification, and quality guarantee."
+    }
+  },
+  {
     path: 'services',
     title: 'GateLink Home Services & Repairs — Electrician, Plumber & AC Repair',
     description: 'Book certified society-approved electricians, plumbers, AC technicians, and carpenters. Standard rate card, 30-day rework warranty, and 15-min emergency response.',

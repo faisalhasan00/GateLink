@@ -15,13 +15,13 @@ export default function MaidsNavbar({ onOpenBooking }) {
         {/* Links */}
         <ul className="maids-nav-links">
           <li>
-            <a href="#services" className="maids-nav-link">Services</a>
+            <a href="#experts" className="maids-nav-link">Home Experts</a>
           </li>
           <li>
-            <a href="#calculator" className="maids-nav-link">Rates & Calculator</a>
+            <a href="#quality" className="maids-nav-link">Verified Quality</a>
           </li>
           <li>
-            <a href="#why-us" className="maids-nav-link">Verified Safety</a>
+            <a href="#coverage" className="maids-nav-link">Hyderabad Localities</a>
           </li>
           <li>
             <a href="#faq" className="maids-nav-link">FAQs</a>

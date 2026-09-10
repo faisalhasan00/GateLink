@@ -117,7 +117,7 @@ function LocalitySkylineSvg({ type }) {
 
 export default function MaidsServingCities({ onOpenBooking }) {
   return (
-    <section className="maids-cities-section">
+    <section id="coverage" className="maids-cities-section">
       <div className="maids-cities-container">
         {/* Section Headline */}
         <div className="maids-cities-header">
