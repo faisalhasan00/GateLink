@@ -1316,5 +1316,151 @@
   }
 }
 
+/* ==========================================================================
+   Rated 4.8+ by 240,000+ Families (Matching Reference Screenshot)
+   ========================================================================== */
+
+.maids-reviews-section {
+  padding: 5.5rem 0 6rem;
+  background-color: #FCFAFF;
+  background: linear-gradient(180deg, #FCFAFF 0%, #FAF5FF 100%);
+  border-top: 1px solid #EDE9FE;
+  border-bottom: 1px solid #EDE9FE;
+  overflow: hidden;
+}
+
+.maids-reviews-container {
+  width: 100%;
+}
+
+.maids-reviews-header {
+  text-align: center;
+  max-width: 900px;
+  margin: 0 auto 3.5rem;
+  padding: 0 1.5rem;
+}
+
+.maids-reviews-title {
+  font-size: 2.85rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.025em;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  line-height: 1.2;
+}
+
+.maids-reviews-highlight {
+  color: #7C3AED;
+  font-weight: 800;
+}
+
+.maids-reviews-track-wrapper {
+  width: 100%;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 1) 8%, rgba(0, 0, 0, 1) 92%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 1) 8%, rgba(0, 0, 0, 1) 92%, transparent 100%);
+}
+
+.maids-reviews-track {
+  display: flex;
+  gap: 1.5rem;
+  width: max-content;
+}
+
+.maids-reviews-track.track-1 {
+  animation: reviewsMarqueeLeft 45s linear infinite;
+}
+
+.maids-reviews-track.track-2 {
+  animation: reviewsMarqueeRight 48s linear infinite;
+}
+
+.maids-reviews-track:hover {
+  animation-play-state: paused;
+}
+
+@keyframes reviewsMarqueeLeft {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes reviewsMarqueeRight {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+
+.maids-review-card {
+  width: 380px;
+  min-width: 380px;
+  background: #ffffff;
+  border: 1.5px solid #F1E8FD;
+  border-radius: 22px;
+  padding: 1.6rem 1.8rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 18px -4px rgba(124, 58, 237, 0.06);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease, border-color 0.3s ease;
+  user-select: none;
+}
+
+.maids-review-card:hover {
+  transform: translateY(-4px);
+  border-color: #C084FC;
+  box-shadow: 0 14px 30px -6px rgba(124, 58, 237, 0.16);
+}
+
+.maids-review-stars {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 0.9rem;
+}
+
+.maids-review-text {
+  font-size: 0.95rem;
+  color: #334155;
+  line-height: 1.55;
+  margin: 0 0 1.25rem;
+  font-weight: 500;
+}
+
+.maids-review-author-box {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-top: 1px solid #F3E8FF;
+  padding-top: 0.9rem;
+}
+
+.maids-review-author-name {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #1e293b;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.maids-review-author-loc {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+@media (max-width: 768px) {
+  .maids-reviews-section {
+    padding: 3.5rem 0 4rem;
+  }
+  .maids-reviews-title {
+    font-size: 1.85rem;
+  }
+  .maids-review-card {
+    width: 310px;
+    min-width: 310px;
+    padding: 1.3rem 1.4rem;
+  }
+}
+
+
 
 
