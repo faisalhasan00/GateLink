@@ -1,166 +1,157 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { PhoneCall, Mail, MapPin, ShoppingBag, ShieldCheck, Heart } from 'lucide-react';
+import { BazaarCartProvider, useBazaarCart } from '../../features/bazaar/context/BazaarCartContext';
+import BazaarQuickHeader from '../../features/bazaar/components/BazaarQuickHeader';
+import BazaarCategoryCarousel from '../../features/bazaar/components/BazaarCategoryCarousel';
+import BazaarHeroBanner from '../../features/bazaar/components/BazaarHeroBanner';
+import BazaarPromoBanners from '../../features/bazaar/components/BazaarPromoBanners';
+import BazaarVeggieSubscription from '../../features/bazaar/components/BazaarVeggieSubscription';
+import BazaarProductShelf from '../../features/bazaar/components/BazaarProductShelf';
+import BazaarStickyCartBar from '../../features/bazaar/components/BazaarStickyCartBar';
+import BazaarCartDrawer from '../../features/bazaar/components/BazaarCartDrawer';
+import BazaarSocietyFlatModal from '../../features/bazaar/components/BazaarSocietyFlatModal';
+import { BAZAAR_PRODUCTS, BAZAAR_CATEGORIES } from '../../features/bazaar/data/quickCommerceData';
+import '../../features/bazaar/styles/bazaar_quickcommerce.css';
 
-import BazaarNavbar from '../../features/bazaar/components/BazaarNavbar';
-import BazaarHero from '../../features/bazaar/components/BazaarHero';
-import BazaarCategories from '../../features/bazaar/components/BazaarCategories';
-import BazaarLiveFeed from '../../features/bazaar/components/BazaarLiveFeed';
-import BazaarSafetyPillars from '../../features/bazaar/components/BazaarSafetyPillars';
-import BazaarSteps from '../../features/bazaar/components/BazaarSteps';
-import BazaarTestimonials from '../../features/bazaar/components/BazaarTestimonials';
-import BazaarFaq from '../../features/bazaar/components/BazaarFaq';
-import BazaarPostListingModal from '../../features/bazaar/components/BazaarPostListingModal';
-
-import '../../features/bazaar/styles/bazaar.css';
-
-export default function BazaarLandingPage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalInitialData, setModalInitialData] = useState({});
+function BazaarMarketplaceContent() {
+  const { searchQuery, activeCategory } = useBazaarCart();
+  const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
   useEffect(() => {
-    document.title = 'GateLink Bazaar — Hyper-Local Society Marketplace | Zero Commission';
+    document.title = 'GateLink Bazaar — Morning Doorstep Essentials (Milk, Eggs, Honey, Achar & Papad)';
     window.scrollTo(0, 0);
   }, []);
 
-  const handleOpenPostModal = (data = {}) => {
-    setModalInitialData(data);
-    setIsModalOpen(true);
-  };
+  // Filter products by search or active category
+  const filteredProducts = BAZAAR_PRODUCTS.filter((item) => {
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      return (
+        item.name.toLowerCase().includes(q) ||
+        item.category.toLowerCase().includes(q) ||
+        (item.source && item.source.toLowerCase().includes(q)) ||
+        (item.description && item.description.toLowerCase().includes(q))
+      );
+    }
+    if (activeCategory !== 'all') {
+      return item.category === activeCategory;
+    }
+    return true;
+  });
 
-  const handleSelectCategory = (catTitle) => {
-    handleOpenPostModal({ category: catTitle });
-  };
-
-  const handleOpenItem = (item) => {
-    handleOpenPostModal({
-      title: `Inquiry for ${item.title}`,
-      category: item.category,
-    });
-  };
+  // Grouped subsets when browsing 'all'
+  const milkProducts = BAZAAR_PRODUCTS.filter(p => p.category === 'milk-dairy');
+  const eggProducts = BAZAAR_PRODUCTS.filter(p => p.category === 'eggs');
+  const vegProducts = BAZAAR_PRODUCTS.filter(p => p.category === 'vegetables');
+  const acharProducts = BAZAAR_PRODUCTS.filter(p => p.category === 'achar');
+  const papadProducts = BAZAAR_PRODUCTS.filter(p => p.category === 'papad');
+  const honeyProducts = BAZAAR_PRODUCTS.filter(p => p.category === 'honey-ghee');
 
   return (
-    <div className="bazaar-page-wrapper">
-      {/* Navigation */}
-      <BazaarNavbar onOpenPostModal={() => handleOpenPostModal()} />
+    <div className="bazaar-qc-container">
+      {/* Quick Commerce Header */}
+      <BazaarQuickHeader onOpenLocationModal={() => setIsLocationModalOpen(true)} />
 
-      <main>
-        {/* Hero Section */}
-        <BazaarHero 
-          onOpenPostModal={() => handleOpenPostModal()}
-          onSearchSelect={handleSelectCategory}
-        />
+      {/* Category Icons Carousel */}
+      <BazaarCategoryCarousel />
 
-        {/* Categories Grid */}
-        <BazaarCategories onSelectCategory={handleSelectCategory} />
+      {/* Main Shelves & Promos */}
+      <main className="qc-main-content">
+        {!searchQuery && activeCategory === 'all' && (
+          <>
+            {/* Hero Essentials Banner (Screenshot Match) */}
+            <BazaarHeroBanner />
 
-        {/* Live Society Listings Feed */}
-        <BazaarLiveFeed onOpenItemModal={handleOpenItem} />
+            {/* Daily Vegetable Subscription & 7-Day Rotating Menu */}
+            <BazaarVeggieSubscription />
 
-        {/* Trust & Safety Comparison */}
-        <BazaarSafetyPillars />
+            <BazaarPromoBanners />
+          </>
+        )}
 
-        {/* 4-Step Process */}
-        <BazaarSteps />
+        {/* If search query or specific category is selected */}
+        {(searchQuery.trim() || activeCategory !== 'all') ? (
+          <>
+            {activeCategory === 'vegetables' && !searchQuery && (
+              <BazaarVeggieSubscription />
+            )}
+            <BazaarProductShelf
+              title={
+                searchQuery.trim() 
+                  ? `Search Results for "${searchQuery}"` 
+                  : (BAZAAR_CATEGORIES.find(c => c.id === activeCategory)?.name || 'Products')
+              }
+              icon={BAZAAR_CATEGORIES.find(c => c.id === activeCategory)?.icon || '🔍'}
+              count={filteredProducts.length}
+              products={filteredProducts}
+            />
+          </>
+        ) : (
+          /* Default Quick Commerce Bento Shelves */
+          <>
+            <BazaarProductShelf
+              title="Daily Fresh Milk & Dairy"
+              icon="🥛"
+              count={milkProducts.length}
+              products={milkProducts}
+            />
 
-        {/* Resident Testimonials */}
-        <BazaarTestimonials />
+            <BazaarProductShelf
+              title="Farm Fresh Country & Brown Eggs"
+              icon="🥚"
+              count={eggProducts.length}
+              products={eggProducts}
+            />
 
-        {/* FAQ */}
-        <BazaarFaq />
+            <BazaarProductShelf
+              title="Farm Direct Fresh Vegetables"
+              icon="🥦"
+              count={vegProducts.length}
+              products={vegProducts}
+            />
+
+            <BazaarProductShelf
+              title="Dadi's Homemade Achars & Pickles"
+              icon="🌶️"
+              count={acharProducts.length}
+              products={acharProducts}
+            />
+
+            <BazaarProductShelf
+              title="Handcrafted Sun-Dried Papads & Crisps"
+              icon="🍘"
+              count={papadProducts.length}
+              products={papadProducts}
+            />
+
+            <BazaarProductShelf
+              title="100% Pure Raw Honey, Ghee & Cold-Pressed Oils"
+              icon="🍯"
+              count={honeyProducts.length}
+              products={honeyProducts}
+            />
+          </>
+        )}
       </main>
 
-      {/* Post Free Ad Modal */}
-      <BazaarPostListingModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        initialData={modalInitialData}
+      {/* Floating Sticky Cart Bar (Blinkit / Zepto style) */}
+      <BazaarStickyCartBar />
+
+      {/* Slide-over Checkout Drawer */}
+      <BazaarCartDrawer />
+
+      {/* Society / Flat Switcher Modal */}
+      <BazaarSocietyFlatModal 
+        isOpen={isLocationModalOpen} 
+        onClose={() => setIsLocationModalOpen(false)} 
       />
-
-      {/* Footer */}
-      <footer style={{ background: '#0f172a', color: '#94a3b8', padding: '4.5rem 1.5rem 2.5rem', borderTop: '1px solid #1e293b' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '3rem', marginBottom: '3.5rem' }}>
-          {/* Col 1 */}
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.25rem' }}>
-              <div style={{ background: '#ecfdf5', padding: '0.4rem', borderRadius: '8px', color: '#059669', display: 'flex' }}>
-                <ShoppingBag size={22} />
-              </div>
-              <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.025em' }}>
-                GateLink <span style={{ color: '#10b981' }}>Bazaar</span>
-              </span>
-            </div>
-            <p style={{ fontSize: '0.9rem', lineHeight: '1.6', color: '#94a3b8', marginBottom: '1.5rem' }}>
-              The secure hyper-local community marketplace for gated societies. Buy, sell, and trade with verified neighbors inside your gates with 0% commission.
-            </p>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#10b981' }}>
-              <ShieldCheck size={16} />
-              <span>100% Resident KYC Verified</span>
-            </div>
-          </div>
-
-          {/* Col 2 */}
-          <div>
-            <h4 style={{ color: '#ffffff', fontSize: '1rem', fontWeight: 700, marginBottom: '1.25rem' }}>
-              Marketplace Categories
-            </h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.9rem' }}>
-              <li><a href="#categories" style={{ color: '#94a3b8', textDecoration: 'none' }}>Furniture & Home Decor</a></li>
-              <li><a href="#categories" style={{ color: '#94a3b8', textDecoration: 'none' }}>Electronics & Gadgets</a></li>
-              <li><a href="#categories" style={{ color: '#94a3b8', textDecoration: 'none' }}>Kids, Toys & Cycles</a></li>
-              <li><a href="#categories" style={{ color: '#94a3b8', textDecoration: 'none' }}>Home Food & Bakers</a></li>
-              <li><a href="#categories" style={{ color: '#94a3b8', textDecoration: 'none' }}>Books, Plants & Hobbies</a></li>
-              <li><a href="#categories" style={{ color: '#94a3b8', textDecoration: 'none' }}>Parking & Carpool</a></li>
-            </ul>
-          </div>
-
-          {/* Col 3 */}
-          <div>
-            <h4 style={{ color: '#ffffff', fontSize: '1rem', fontWeight: 700, marginBottom: '1.25rem' }}>
-              GateLink Ecosystem
-            </h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.9rem' }}>
-              <li><Link to="/interiors" style={{ color: '#94a3b8', textDecoration: 'none' }}>GateLink Interiors</Link></li>
-              <li><Link to="/maids" style={{ color: '#94a3b8', textDecoration: 'none' }}>GateLink Maids & Home Care</Link></li>
-              <li><Link to="/services" style={{ color: '#94a3b8', textDecoration: 'none' }}>GateLink Home Repairs</Link></li>
-              <li><Link to="/society-management-software" style={{ color: '#94a3b8', textDecoration: 'none' }}>Society Management ERP</Link></li>
-              <li><Link to="/security-management" style={{ color: '#94a3b8', textDecoration: 'none' }}>Gate Security System</Link></li>
-            </ul>
-          </div>
-
-          {/* Col 4 */}
-          <div>
-            <h4 style={{ color: '#ffffff', fontSize: '1rem', fontWeight: 700, marginBottom: '1.25rem' }}>
-              Need Help?
-            </h4>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem', fontSize: '0.9rem' }}>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <PhoneCall size={16} style={{ color: '#10b981' }} />
-                <span>+91 91218 63117</span>
-              </li>
-              <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <Mail size={16} style={{ color: '#10b981' }} />
-                <span>support@gatelink.in</span>
-              </li>
-              <li style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-                <MapPin size={16} style={{ color: '#10b981', flexShrink: 0, marginTop: '2px' }} />
-                <span>Bengaluru, Hyderabad, Mumbai, Pune, Delhi NCR</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div style={{ maxWidth: '1280px', margin: '0 auto', paddingTop: '2rem', borderTop: '1px solid #1e293b', display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', fontSize: '0.85rem' }}>
-          <div>
-            © {new Date().getFullYear()} GateLink Technologies Private Limited. All rights reserved.
-          </div>
-          <div style={{ display: 'flex', gap: '1.5rem' }}>
-            <Link to="/privacy" style={{ color: '#94a3b8', textDecoration: 'none' }}>Privacy Policy</Link>
-            <Link to="/terms" style={{ color: '#94a3b8', textDecoration: 'none' }}>Terms of Service</Link>
-            <Link to="/refund-policy" style={{ color: '#94a3b8', textDecoration: 'none' }}>Trust & Safety</Link>
-          </div>
-        </div>
-      </footer>
     </div>
+  );
+}
+
+export default function BazaarLandingPage() {
+  return (
+    <BazaarCartProvider>
+      <BazaarMarketplaceContent />
+    </BazaarCartProvider>
   );
 }
