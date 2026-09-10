@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
-import { Sparkles, Check, Plus, Minus, ArrowRight, ShieldCheck, Sun, RefreshCw, CalendarCheck, Zap, Scale } from 'lucide-react';
+import { 
+  Sparkles, Check, Plus, Minus, ArrowRight, ShieldCheck, Sun, 
+  RefreshCw, CalendarCheck, Zap, Scale, Search, X, Info, ChevronRight 
+} from 'lucide-react';
 import { useBazaarCart } from '../context/BazaarCartContext';
 import { BAZAAR_PRODUCTS, BAZAAR_CATEGORIES } from '../data/quickCommerceData';
+import BazaarProductDetailModal from './BazaarProductDetailModal';
 
 const PASS_TIERS = [
   {
@@ -71,6 +75,8 @@ export default function BazaarDailyPassBuilder() {
   const { addToCart, setIsCartOpen, selectedSlot } = useBazaarCart();
   const [selectedPass, setSelectedPass] = useState('pass-30');
   const [activeFilter, setActiveFilter] = useState('all');
+  const [passSearch, setPassSearch] = useState('');
+  const [modalProduct, setModalProduct] = useState(null);
 
   // Available in-stock products
   const availableProducts = BAZAAR_PRODUCTS.filter(p => p.inStock !== false);
@@ -118,101 +124,117 @@ export default function BazaarDailyPassBuilder() {
   // Helper to compute unit-adjusted price
   const getItemPrice = (product) => {
     const variants = UNIT_VARIANTS[product.category] || UNIT_VARIANTS['vegetables'];
-    const currentVariantLabel = selectedVariants[product.id];
-    const variantObj = variants.find(v => v.label === currentVariantLabel) || variants[0];
-    return Math.round(product.price * (variantObj?.multiplier || 1));
+    const chosenVariantLabel = selectedVariants[product.id] || variants[0]?.label;
+    const variantObj = variants.find(v => v.label === chosenVariantLabel) || variants[0];
+    const multiplier = variantObj?.multiplier || 1;
+    return Math.round(product.price * multiplier);
   };
 
-  // Filter products for the pass builder
-  const displayedProducts = availableProducts.filter(p => {
-    if (activeFilter === 'all') return true;
-    return p.category === activeFilter;
+  // Filter products by category and search query
+  const filteredProducts = availableProducts.filter(item => {
+    const matchesCategory = activeFilter === 'all' || item.category === activeFilter;
+    const matchesSearch = passSearch.trim() === '' || 
+      item.name.toLowerCase().includes(passSearch.toLowerCase()) ||
+      (item.source && item.source.toLowerCase().includes(passSearch.toLowerCase())) ||
+      (item.description && item.description.toLowerCase().includes(passSearch.toLowerCase()));
+    return matchesCategory && matchesSearch;
   });
 
-  // Calculate daily price
+  const displayedProducts = filteredProducts;
+
+  // Calculate daily basket subtotal
   const rawDailyTotal = availableProducts.reduce((sum, item) => {
     const qty = quantities[item.id] || 0;
     const price = getItemPrice(item);
     return sum + (price * qty);
   }, 0);
 
+  // Apply Pass Discount
   const discountedDailyTotal = Math.round(rawDailyTotal * (1 - activePass.discountPercent / 100));
   const passGrandTotal = discountedDailyTotal * daysCount;
   const originalGrandTotal = rawDailyTotal * daysCount;
   const totalPassSavings = originalGrandTotal - passGrandTotal;
 
-  // Selected item summaries with custom Litres / Kg / Units
+  // Selected items summary string
   const selectedItemsSummary = availableProducts
     .filter(item => (quantities[item.id] || 0) > 0)
-    .map(item => `${item.name} (${selectedVariants[item.id]} × ${quantities[item.id]})`);
+    .map(item => `${item.name} (${selectedVariants[item.id] || item.unit} × ${quantities[item.id]})`);
 
   const handleActivatePass = () => {
     if (rawDailyTotal === 0) return;
 
-    const passCartItem = {
-      id: `pass-${activePass.id}-${Date.now()}`,
-      name: `GateLink Society ${activePass.name}`,
-      category: 'pass',
-      unit: `${activePass.duration} • Custom Morning Basket`,
+    const passItem = {
+      id: `custom-pass-${activePass.id}-${Date.now()}`,
+      name: `${activePass.name} (${activePass.duration} Morning Pass)`,
+      category: 'daily-pass',
+      unit: `${daysCount} Days Subscription (${selectedItemsSummary.length} Items Daily)`,
       price: passGrandTotal,
       mrp: originalGrandTotal,
-      discount: `${activePass.discountBadge} (Saved ₹${totalPassSavings})`,
-      deliveryTime: `🌅 Daily ${selectedSlot}`,
-      source: 'Society Priority Doorstep Pass',
+      deliveryTime: `🌅 5 AM - 9 AM Slot (${selectedSlot})`,
       image: 'https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=600&q=80',
-      description: `Includes: ${selectedItemsSummary.join(', ')}. Delivered daily between ${selectedSlot}. Pause, swap or modify anytime.`,
-      quantity: 1
+      description: `Daily Morning Doorstep Delivery for ${activePass.duration}: ${selectedItemsSummary.join(', ')}`,
+      isCustomPass: true,
+      passDetails: {
+        passTier: activePass.name,
+        days: daysCount,
+        discountPercent: activePass.discountPercent,
+        items: selectedItemsSummary
+      }
     };
 
-    addToCart(passCartItem);
+    addToCart(passItem);
     setIsCartOpen(true);
   };
 
   return (
-    <section className="qc-pass-section" id="daily-society-pass">
-      <div className="qc-pass-card">
-        {/* Pass Header */}
-        <div className="qc-pass-header">
-          <div className="qc-pass-badge">
-            <Sparkles size={14} color="#0c831f" />
-            <span>CUSTOMIZABLE SOCIETY MORNING PASS</span>
-          </div>
-          <h2 className="qc-pass-title">
-            Build Your Custom Daily Society Pass
-          </h2>
-          <p className="qc-pass-subtitle">
-            Customize exact <strong>Litres (Milk / Oil), Kilograms (Vegetables / Achar / Ghee), or Quantities</strong>. Get your custom basket delivered fresh at your flat door every morning in your preferred slot with VIP pass discounts.
-          </p>
+    <section id="bazaar-daily-pass" className="qc-pass-builder-section">
+      <div className="qc-pass-builder-card">
+        {/* Top Header Badge */}
+        <div className="qc-pass-top-badge">
+          <Sparkles size={14} />
+          <span>SOCIETY EXCLUSIVE • ZERO DELIVERY FEE</span>
         </div>
 
-        {/* Step 1: Choose Pass Tier */}
+        <div className="qc-pass-header">
+          <div>
+            <h3 className="qc-pass-title">
+              Build Your Daily Society Morning Basket Pass
+            </h3>
+            <p className="qc-pass-subtitle">
+              Choose your morning essentials, customize litres &amp; kilograms, and get farm-fresh deliveries to your flat door every morning between <strong>5:00 AM – 9:00 AM ({selectedSlot})</strong>. Pause or modify anytime.
+            </p>
+          </div>
+        </div>
+
+        {/* Step 1: Select Pass Duration */}
         <div className="qc-pass-step-block">
           <div className="qc-step-label">
-            <span>STEP 1</span> Select Pass Duration:
+            <span className="qc-step-num">1</span>
+            <span>Choose Your Pass Duration &amp; Savings</span>
           </div>
+
           <div className="qc-pass-tiers-grid">
             {PASS_TIERS.map((tier) => {
               const isSelected = selectedPass === tier.id;
               return (
                 <div
                   key={tier.id}
-                  className={`qc-pass-tier-item ${isSelected ? 'selected' : ''}`}
+                  className={`qc-pass-tier-card ${isSelected ? 'selected' : ''}`}
                   onClick={() => setSelectedPass(tier.id)}
                 >
-                  {tier.popular && (
-                    <span className="qc-tier-popular">RECOMMENDED</span>
-                  )}
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <h4 style={{ fontSize: '1.05rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
-                      {tier.name}
-                    </h4>
-                    <span className="qc-tier-discount-tag">{tier.discountBadge}</span>
+                  {tier.popular && <span className="qc-tier-pop-badge">MOST POPULAR</span>}
+                  <div className="qc-tier-header">
+                    <h4 className="qc-tier-name">{tier.name}</h4>
+                    <span className="qc-tier-discount-badge">{tier.discountBadge}</span>
                   </div>
-                  <p style={{ fontSize: '0.8rem', color: '#64748b', margin: '0 0 0.5rem' }}>
-                    {tier.tagline}
-                  </p>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#0c831f' }}>
-                    ✓ Free Morning Doorstep Drop
+                  <div className="qc-tier-duration">{tier.duration} Auto Doorstep Delivery</div>
+                  <p className="qc-tier-tagline">{tier.tagline}</p>
+                  <div className="qc-tier-select-indicator">
+                    {isSelected ? (
+                      <span className="qc-selected-pill"><Check size={14} /> Selected</span>
+                    ) : (
+                      <span className="qc-unselected-pill">Select Pass</span>
+                    )}
                   </div>
                 </div>
               );
@@ -220,36 +242,53 @@ export default function BazaarDailyPassBuilder() {
           </div>
         </div>
 
-        {/* Step 2: Customize Available Products & Litre / Kg Options */}
+        {/* Step 2: Pick Available Products with Litre/Kg Customizer */}
         <div className="qc-pass-step-block">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', marginBottom: '1rem' }}>
-            <div className="qc-step-label" style={{ margin: 0 }}>
-              <span>STEP 2</span> Customize Litres, Kg &amp; Quantity for Available Products:
-            </div>
+          <div className="qc-step-label">
+            <span className="qc-step-num">2</span>
+            <span>Select Available Products &amp; Customize Units (Litres / Kgs)</span>
+          </div>
 
-            {/* Category Filter Pills */}
-            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-              <button
-                type="button"
-                className={`qc-pass-filter-pill ${activeFilter === 'all' ? 'active' : ''}`}
-                onClick={() => setActiveFilter('all')}
-              >
-                All ({availableProducts.length})
-              </button>
-              {BAZAAR_CATEGORIES.filter(c => c.id !== 'all' && c.id !== 'daily-pass').map(cat => (
+          {/* Search bar inside Pass Builder */}
+          <div className="qc-pass-search-bar">
+            <div className="qc-pass-search-input-wrap">
+              <Search size={16} color="#64748b" />
+              <input
+                type="text"
+                value={passSearch}
+                onChange={(e) => setPassSearch(e.target.value)}
+                placeholder="Search products in pass builder (e.g. Gir cow milk, eggs, tomatoes, achar, papad)..."
+                className="qc-pass-search-input"
+              />
+              {passSearch && (
                 <button
-                  key={cat.id}
                   type="button"
-                  className={`qc-pass-filter-pill ${activeFilter === cat.id ? 'active' : ''}`}
-                  onClick={() => setActiveFilter(cat.id)}
+                  className="qc-pass-search-clear"
+                  onClick={() => setPassSearch('')}
+                  aria-label="Clear search"
                 >
-                  <span>{cat.icon}</span>
-                  <span>{cat.name}</span>
+                  <X size={14} />
                 </button>
-              ))}
+              )}
             </div>
           </div>
 
+          {/* Available Category Filters */}
+          <div className="qc-pass-category-chips">
+            {BAZAAR_CATEGORIES.filter(c => c.id !== 'daily-pass').map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                className={`qc-pass-cat-chip ${activeFilter === cat.id ? 'active' : ''}`}
+                onClick={() => setActiveFilter(cat.id)}
+              >
+                <span>{cat.icon}</span>
+                <span>{cat.name}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Available Products Grid with Unit Stepper */}
           <div className="qc-customize-items-grid">
             {displayedProducts.map((item) => {
               const qty = quantities[item.id] || 0;
@@ -260,7 +299,12 @@ export default function BazaarDailyPassBuilder() {
 
               return (
                 <div key={item.id} className={`qc-custom-item-card ${isIncluded ? 'active' : ''}`}>
-                  <div className="qc-pass-item-img-wrap">
+                  <div 
+                    className="qc-pass-item-img-wrap"
+                    onClick={() => setModalProduct(item)}
+                    style={{ cursor: 'pointer' }}
+                    title="Click to view product details"
+                  >
                     <img 
                       src={item.image} 
                       alt={item.name} 
@@ -274,9 +318,36 @@ export default function BazaarDailyPassBuilder() {
                     )}
                   </div>
 
-                  <h4 className="qc-item-name" title={item.name}>
+                  <h4 
+                    className="qc-item-name" 
+                    title={item.name}
+                    onClick={() => setModalProduct(item)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     {item.name}
                   </h4>
+
+                  {/* Description Preview */}
+                  {item.description && (
+                    <p 
+                      className="qc-pass-item-desc"
+                      onClick={() => setModalProduct(item)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      {item.description}
+                    </p>
+                  )}
+
+                  {/* View Details Link */}
+                  <button
+                    type="button"
+                    className="qc-card-detail-link"
+                    style={{ margin: '0 0 8px', padding: 0 }}
+                    onClick={() => setModalProduct(item)}
+                  >
+                    <Info size={12} />
+                    <span>View details &amp; specs</span>
+                  </button>
 
                   {/* Litre / Kg / Unit Variant Selector */}
                   <div className="qc-variant-selector-wrap">
@@ -386,6 +457,13 @@ export default function BazaarDailyPassBuilder() {
           </div>
         </div>
       </div>
+
+      {/* Product Detail Modal for Pass Builder items */}
+      <BazaarProductDetailModal
+        product={modalProduct}
+        isOpen={Boolean(modalProduct)}
+        onClose={() => setModalProduct(null)}
+      />
     </section>
   );
 }

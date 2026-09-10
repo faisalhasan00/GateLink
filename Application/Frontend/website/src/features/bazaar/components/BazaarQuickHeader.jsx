@@ -41,7 +41,7 @@ export default function BazaarQuickHeader({ onOpenLocationModal }) {
           </div>
         </div>
 
-        {/* Big Search Bar */}
+        {/* Big Search Bar with Search Button */}
         <div className="qc-search-wrapper">
           <Search size={18} className="qc-search-icon" />
           <input
@@ -56,6 +56,16 @@ export default function BazaarQuickHeader({ onOpenLocationModal }) {
               <X size={12} />
             </button>
           )}
+          <button 
+            type="button"
+            className="qc-search-action-btn"
+            onClick={() => {
+              const shelf = document.querySelector('.qc-shelf-section');
+              if (shelf) shelf.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            Search
+          </button>
         </div>
 
         {/* Header Actions */}
