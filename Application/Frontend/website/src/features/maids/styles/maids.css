@@ -739,3 +739,153 @@
   }
 }
 
+/* ==========================================================================
+   Serving Homes Across Hyderabad Section (Matching Reference Screenshot)
+   ========================================================================== */
+
+.maids-cities-section {
+  padding: 5rem 1.5rem 5.5rem;
+  background-color: #FCFAFF;
+  background: linear-gradient(180deg, #FAF5FF 0%, #FCFAFF 100%);
+  border-top: 1px solid #EDE9FE;
+  border-bottom: 1px solid #EDE9FE;
+}
+
+.maids-cities-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.maids-cities-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.maids-cities-title {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -0.025em;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  line-height: 1.2;
+}
+
+.maids-cities-title-highlight {
+  color: #7C3AED;
+  font-weight: 800;
+}
+
+.maids-cities-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.35rem;
+}
+
+.maids-city-card {
+  position: relative;
+  background: #ffffff;
+  border: 1.5px solid #F1E8FD;
+  border-radius: 18px;
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 4px 16px -4px rgba(124, 58, 237, 0.06);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  min-height: 90px;
+}
+
+.maids-city-card:hover {
+  transform: translateY(-4px);
+  border-color: #C084FC;
+  box-shadow: 0 14px 28px -6px rgba(124, 58, 237, 0.18);
+}
+
+.maids-city-card-info {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  z-index: 2;
+  position: relative;
+}
+
+.maids-city-name {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.015em;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  transition: color 0.2s ease;
+}
+
+.maids-city-card:hover .maids-city-name {
+  color: #7C3AED;
+}
+
+.maids-city-arrow {
+  color: #64748b;
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+.maids-city-card:hover .maids-city-arrow {
+  transform: translateX(4px);
+  color: #7C3AED;
+}
+
+.maids-city-card-art {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  width: 55%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  pointer-events: none;
+  z-index: 1;
+  mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.9) 35%, rgba(0, 0, 0, 1) 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, rgba(0, 0, 0, 0.9) 35%, rgba(0, 0, 0, 1) 100%);
+}
+
+.maids-city-svg {
+  width: 100%;
+  height: 85px;
+  object-fit: contain;
+  object-position: bottom right;
+  opacity: 0.75;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.maids-city-card:hover .maids-city-svg {
+  opacity: 1;
+  transform: scale(1.04);
+}
+
+@media (max-width: 1024px) {
+  .maids-cities-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.15rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .maids-cities-section {
+    padding: 3.5rem 1rem 4rem;
+  }
+  .maids-cities-title {
+    font-size: 1.85rem;
+  }
+  .maids-cities-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .maids-city-card {
+    min-height: 80px;
+    padding: 1rem 1.25rem;
+  }
+}
+
+
