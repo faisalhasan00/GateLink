@@ -32,7 +32,7 @@ export default function MaidsExpertsShowcase({ onOpenBooking }) {
         {/* Section Headline (Matching Reference) */}
         <div className="maids-experts-header">
           <h2 className="maids-experts-title">
-            Trained &amp; Verified <span className="maids-experts-title-pink">Home Experts</span>
+            Trained &amp; Verified <span className="maids-experts-title-purple">Home Experts</span>
           </h2>
         </div>
 

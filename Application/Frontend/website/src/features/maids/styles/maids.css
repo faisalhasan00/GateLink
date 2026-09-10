@@ -1,20 +1,23 @@
-/* GateLink Maids & Home Care — Brand Tokens & Styling */
+/* GateLink Maids & Home Care — Brand Tokens & Styling (Royal Purple Theme) */
 
 :root {
-  --gl-maids-primary: #D97706;
-  --gl-maids-primary-hover: #B45309;
-  --gl-maids-primary-tint: rgba(217, 119, 6, 0.08);
-  --gl-maids-primary-glow: rgba(217, 119, 6, 0.25);
+  --gl-maids-primary: #7C3AED;
+  --gl-maids-primary-hover: #6D28D9;
+  --gl-maids-primary-tint: rgba(124, 58, 237, 0.08);
+  --gl-maids-primary-glow: rgba(124, 58, 237, 0.25);
+  --gl-maids-purple: #7C3AED;
+  --gl-maids-purple-surface: #F3E8FF;
+  --gl-maids-purple-light: #FAF5FF;
   --gl-maids-cyan: #0284C7;
   --gl-maids-cyan-surface: #E0F2FE;
   --gl-maids-emerald: #059669;
   --gl-maids-emerald-surface: #DCFCE7;
   --gl-maids-dark: #0F172A;
-  --gl-maids-cream: #FFFDF9;
-  --gl-maids-cream-surface: #FAFAF9;
-  --gl-maids-border: #E7E5E4;
+  --gl-maids-cream: #FCFAFF;
+  --gl-maids-cream-surface: #F8F5FD;
+  --gl-maids-border: #E9D5FF;
   --gl-maids-text-main: #1C1917;
-  --gl-maids-text-muted: #78716C;
+  --gl-maids-text-muted: #6B7280;
 }
 
 /* Base Container */
@@ -45,7 +48,7 @@
   font-weight: 600;
   background-color: var(--gl-maids-primary-tint);
   color: var(--gl-maids-primary);
-  border: 1px solid rgba(217, 119, 6, 0.2);
+  border: 1px solid rgba(124, 58, 237, 0.2);
 }
 
 .maids-badge-cyan {
@@ -59,7 +62,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255, 253, 249, 0.9);
+  background: rgba(252, 250, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--gl-maids-border);
@@ -91,10 +94,10 @@
 .maids-logo-sub {
   font-size: 0.85rem;
   font-weight: 700;
-  color: #D97706;
+  color: #7C3AED;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  background: #FEF3C7;
+  background: #F3E8FF;
   padding: 2px 8px;
   border-radius: 6px;
 }
@@ -109,7 +112,7 @@
 }
 
 .maids-nav-link {
-  color: #44403C;
+  color: #4B5563;
   font-weight: 500;
   font-size: 0.95rem;
   text-decoration: none;
@@ -126,7 +129,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: linear-gradient(135deg, #D97706 0%, #B45309 100%);
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 50%, #6D28D9 100%);
   color: #FFFFFF;
   padding: 12px 24px;
   border-radius: 12px;
@@ -141,7 +144,7 @@
 
 .maids-btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(217, 119, 6, 0.35);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
 }
 
 .maids-btn-secondary {
@@ -162,8 +165,8 @@
 }
 
 .maids-btn-secondary:hover {
-  background: #F5EFE6;
-  border-color: #D6CCC2;
+  background: #FAF5FF;
+  border-color: #D8B4FE;
   transform: translateY(-2px);
 }
 
@@ -172,7 +175,7 @@
   position: relative;
   width: 100%;
   overflow: hidden;
-  background-color: #12030b;
+  background-color: #120524;
 }
 
 .maids-cinematic-hero-bg {
@@ -196,7 +199,7 @@
   left: 0;
   right: 0;
   height: 280px;
-  background: linear-gradient(180deg, rgba(14, 2, 8, 0.95) 0%, rgba(14, 2, 8, 0.75) 45%, rgba(14, 2, 8, 0) 100%);
+  background: linear-gradient(180deg, rgba(18, 5, 36, 0.95) 0%, rgba(18, 5, 36, 0.75) 45%, rgba(18, 5, 36, 0) 100%);
   z-index: 1;
   pointer-events: none;
 }
@@ -221,11 +224,12 @@
   text-shadow: 0 4px 24px rgba(0, 0, 0, 0.75);
 }
 
+.maids-cinematic-purple-highlight,
 .maids-cinematic-pink-highlight {
-  color: #ff007a;
+  color: #C084FC;
   font-weight: 800;
   display: inline-block;
-  text-shadow: 0 0 30px rgba(255, 0, 122, 0.75);
+  text-shadow: 0 0 30px rgba(192, 132, 252, 0.75);
 }
 
 .maids-cinematic-cta-wrapper {
@@ -235,9 +239,9 @@
   margin-bottom: 2rem;
 }
 
+.maids-cinematic-btn-purple,
 .maids-cinematic-btn-pink {
-  background-color: #ff007a;
-  background: linear-gradient(135deg, #ff1493 0%, #ff007a 50%, #e6006c 100%);
+  background: linear-gradient(135deg, #A855F7 0%, #7C3AED 50%, #6D28D9 100%);
   color: #ffffff;
   padding: 0.9rem 2.8rem;
   border-radius: 999px;
@@ -245,7 +249,7 @@
   font-weight: 700;
   border: none;
   cursor: pointer;
-  box-shadow: 0 8px 25px rgba(255, 0, 122, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
+  box-shadow: 0 8px 25px rgba(124, 58, 237, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.3) inset;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   letter-spacing: -0.01em;
   display: inline-flex;
@@ -255,15 +259,16 @@
   font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
 }
 
+.maids-cinematic-btn-purple:hover,
 .maids-cinematic-btn-pink:hover {
   transform: translateY(-2px) scale(1.04);
-  box-shadow: 0 14px 36px rgba(255, 0, 122, 0.85);
+  box-shadow: 0 14px 36px rgba(124, 58, 237, 0.85);
 }
 
 /* Bottom Purple Ribbon Banner (Directly at Base of Image) */
 .maids-cinematic-bottom-ribbon {
   width: 100%;
-  background: linear-gradient(90deg, #2b0b4f 0%, #4338ca 30%, #581c87 50%, #4338ca 70%, #2b0b4f 100%);
+  background: linear-gradient(90deg, #1e0836 0%, #3b0764 30%, #581c87 50%, #3b0764 70%, #1e0836 100%);
   padding: 1.25rem 1.25rem;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
   border-top: 1px solid rgba(255, 255, 255, 0.25);
@@ -289,11 +294,11 @@
 }
 
 .maids-cinematic-ribbon-highlight {
-  color: #ff007a;
+  color: #E9D5FF;
   font-style: italic;
   font-weight: 900;
   letter-spacing: 0.02em;
-  text-shadow: 0 0 20px rgba(255, 0, 122, 0.6);
+  text-shadow: 0 0 20px rgba(192, 132, 252, 0.8);
 }
 
 @media (max-width: 768px) {
@@ -304,6 +309,7 @@
   .maids-cinematic-title {
     font-size: 2.35rem;
   }
+  .maids-cinematic-btn-purple,
   .maids-cinematic-btn-pink {
     padding: 0.75rem 2.2rem;
     font-size: 0.98rem;
@@ -368,16 +374,16 @@
 
 .service-card:hover {
   transform: translateY(-4px);
-  border-color: #D97706;
-  box-shadow: 0 16px 32px -8px rgba(217, 119, 6, 0.12);
+  border-color: #7C3AED;
+  box-shadow: 0 16px 32px -8px rgba(124, 58, 237, 0.14);
 }
 
 .service-icon-box {
   width: 52px;
   height: 52px;
   border-radius: 14px;
-  background: #FEF3C7;
-  color: #D97706;
+  background: #F3E8FF;
+  color: #7C3AED;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -387,7 +393,7 @@
 .service-price-tag {
   font-size: 1.15rem;
   font-weight: 800;
-  color: #B45309;
+  color: #6D28D9;
   margin: 12px 0 16px;
 }
 
@@ -404,7 +410,7 @@
   background: #FFFFFF;
   border-radius: 24px;
   border: 1px solid var(--gl-maids-border);
-  box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 16px 36px -10px rgba(124, 58, 237, 0.08);
   padding: 36px;
 }
 
@@ -422,21 +428,21 @@
   background: #FFFFFF;
   font-size: 0.95rem;
   font-weight: 600;
-  color: #44403C;
+  color: #4B5563;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
 .calc-pill-btn:hover {
-  border-color: #D97706;
-  background: #FFFDF9;
+  border-color: #7C3AED;
+  background: #FAF5FF;
 }
 
 .calc-pill-btn.active {
-  background: #FEF3C7;
-  border-color: #D97706;
-  color: #B45309;
-  box-shadow: 0 0 0 2px rgba(217, 119, 6, 0.15);
+  background: #F3E8FF;
+  border-color: #7C3AED;
+  color: #6D28D9;
+  box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.15);
 }
 
 /* Why GateLink Maids */
@@ -463,8 +469,8 @@
 }
 
 .why-maid-card:hover {
-  border-color: #D97706;
-  box-shadow: 0 12px 24px -6px rgba(217, 119, 6, 0.1);
+  border-color: #7C3AED;
+  box-shadow: 0 12px 24px -6px rgba(124, 58, 237, 0.12);
   transform: translateY(-2px);
 }
 
@@ -519,9 +525,9 @@
 
 .maids-experts-section {
   padding: 5.5rem 1.5rem 6rem;
-  background-color: #faf5f7;
-  background: linear-gradient(180deg, #fff7fb 0%, #faf5f7 100%);
-  border-bottom: 1px solid #f3e8ee;
+  background-color: #FAF5FF;
+  background: linear-gradient(180deg, #FAF5FF 0%, #F5EEFD 100%);
+  border-bottom: 1px solid #EDE9FE;
 }
 
 .maids-experts-container {
@@ -544,8 +550,9 @@
   line-height: 1.2;
 }
 
+.maids-experts-title-purple,
 .maids-experts-title-pink {
-  color: #ff007a;
+  color: #7C3AED;
   font-weight: 800;
 }
 
@@ -560,7 +567,7 @@
   aspect-ratio: 1 / 1.05;
   border-radius: 28px;
   overflow: hidden;
-  box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.12);
+  box-shadow: 0 12px 32px -8px rgba(124, 58, 237, 0.12);
   cursor: pointer;
   outline: none;
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
@@ -569,7 +576,7 @@
 
 .maids-expert-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 24px 44px -10px rgba(255, 0, 122, 0.22);
+  box-shadow: 0 24px 44px -10px rgba(124, 58, 237, 0.28);
 }
 
 .maids-expert-img {
@@ -644,14 +651,14 @@
 }
 
 .maids-expert-card:hover .maids-expert-arrow-circle {
-  background: #ff007a;
+  background: #7C3AED;
   transform: scale(1.08);
-  border-color: #ff007a;
+  border-color: #7C3AED;
 }
 
 .maids-expert-coming-soon-badge {
   background: #ffffff;
-  color: #ff007a;
+  color: #7C3AED;
   font-size: 0.78rem;
   font-weight: 800;
   padding: 4px 12px;

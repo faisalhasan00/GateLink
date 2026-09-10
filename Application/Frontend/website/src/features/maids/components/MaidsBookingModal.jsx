@@ -82,7 +82,7 @@ export default function MaidsBookingModal({ isOpen, onClose, initialData = {} })
             position: 'absolute',
             top: '20px',
             right: '20px',
-            background: '#F5EFE6',
+            background: '#F3E8FF',
             border: 'none',
             borderRadius: '50%',
             width: '34px',
@@ -91,7 +91,7 @@ export default function MaidsBookingModal({ isOpen, onClose, initialData = {} })
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            color: '#44403C',
+            color: '#6D28D9',
           }}
         >
           <X size={18} />
@@ -156,13 +156,13 @@ export default function MaidsBookingModal({ isOpen, onClose, initialData = {} })
             {initialData.estimatedPrice && (
               <div
                 style={{
-                  background: '#FEF3C7',
-                  border: '1px solid #FDE68A',
+                  background: '#FAF5FF',
+                  border: '1px solid #E9D5FF',
                   borderRadius: '12px',
                   padding: '10px 14px',
                   marginBottom: '16px',
                   fontSize: '0.85rem',
-                  color: '#92400E',
+                  color: '#6D28D9',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',

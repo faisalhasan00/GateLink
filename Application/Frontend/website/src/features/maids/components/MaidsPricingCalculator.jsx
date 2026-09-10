@@ -93,8 +93,8 @@ export default function MaidsPricingCalculator({ onOpenBooking }) {
                 padding: '10px 24px',
                 borderRadius: '999px',
                 border: 'none',
-                background: model === 'monthly' ? '#D97706' : 'transparent',
-                color: model === 'monthly' ? '#FFFFFF' : '#44403C',
+                background: model === 'monthly' ? '#7C3AED' : 'transparent',
+                color: model === 'monthly' ? '#FFFFFF' : '#4B5563',
                 fontWeight: '700',
                 fontSize: '0.92rem',
                 cursor: 'pointer',
@@ -110,8 +110,8 @@ export default function MaidsPricingCalculator({ onOpenBooking }) {
                 padding: '10px 24px',
                 borderRadius: '999px',
                 border: 'none',
-                background: model === 'ondemand' ? '#D97706' : 'transparent',
-                color: model === 'ondemand' ? '#FFFFFF' : '#44403C',
+                background: model === 'ondemand' ? '#7C3AED' : 'transparent',
+                color: model === 'ondemand' ? '#FFFFFF' : '#4B5563',
                 fontWeight: '700',
                 fontSize: '0.92rem',
                 cursor: 'pointer',
@@ -125,7 +125,7 @@ export default function MaidsPricingCalculator({ onOpenBooking }) {
 
         {/* Flat Size */}
         <div style={{ marginBottom: '24px' }}>
-          <label style={{ fontSize: '0.85rem', fontWeight: '700', color: '#78716C', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
+          <label style={{ fontSize: '0.85rem', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
             1. Select Flat Size
           </label>
           <div className="calc-options-row">
@@ -144,7 +144,7 @@ export default function MaidsPricingCalculator({ onOpenBooking }) {
 
         {/* Task Selection */}
         <div style={{ marginBottom: '28px' }}>
-          <label style={{ fontSize: '0.85rem', fontWeight: '700', color: '#78716C', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
+          <label style={{ fontSize: '0.85rem', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: '10px' }}>
             2. Select Daily Tasks Needed
           </label>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
@@ -155,8 +155,8 @@ export default function MaidsPricingCalculator({ onOpenBooking }) {
                   key={task.id}
                   onClick={() => toggleTask(task.id)}
                   style={{
-                    background: isSelected ? '#FFFBEB' : '#FAFAF9',
-                    border: isSelected ? '1.5px solid #D97706' : '1px solid #E7E5E4',
+                    background: isSelected ? '#FAF5FF' : '#FAFAF9',
+                    border: isSelected ? '1.5px solid #7C3AED' : '1px solid #E7E5E4',
                     borderRadius: '14px',
                     padding: '14px 16px',
                     cursor: 'pointer',
@@ -174,7 +174,7 @@ export default function MaidsPricingCalculator({ onOpenBooking }) {
                       width: '20px',
                       height: '20px',
                       borderRadius: '6px',
-                      background: isSelected ? '#D97706' : '#E7E5E4',
+                      background: isSelected ? '#7C3AED' : '#E7E5E4',
                       color: '#FFFFFF',
                       display: 'flex',
                       alignItems: 'center',
@@ -192,7 +192,7 @@ export default function MaidsPricingCalculator({ onOpenBooking }) {
         {/* Result Banner */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
+            background: 'linear-gradient(135deg, #1E0836 0%, #3B0764 100%)',
             borderRadius: '18px',
             padding: '24px 30px',
             color: '#FFFFFF',
@@ -204,10 +204,10 @@ export default function MaidsPricingCalculator({ onOpenBooking }) {
           }}
         >
           <div>
-            <div style={{ fontSize: '0.8rem', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div style={{ fontSize: '0.8rem', color: '#DDD6FE', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               {model === 'monthly' ? 'Recommended Monthly Rate' : 'Estimated Single Visit Cost'}
             </div>
-            <div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#FBBF24', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
+            <div style={{ fontSize: '2.2rem', fontWeight: '800', color: '#C084FC', fontFamily: 'Plus Jakarta Sans, sans-serif' }}>
               ₹{calculatedEstimate.toLocaleString()}
               <span style={{ fontSize: '1rem', color: '#E2E8F0', fontWeight: '500', marginLeft: '6px' }}>
                 {model === 'monthly' ? '/ month' : '/ session'}

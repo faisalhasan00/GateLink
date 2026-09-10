@@ -89,8 +89,8 @@ export default function MaidsTestimonials() {
                 style={{
                   fontSize: '0.75rem',
                   fontWeight: '700',
-                  color: '#B45309',
-                  background: '#FEF3C7',
+                  color: '#6D28D9',
+                  background: '#F3E8FF',
                   padding: '3px 8px',
                   borderRadius: '6px',
                 }}

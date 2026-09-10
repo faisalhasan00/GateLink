@@ -79,7 +79,7 @@ export default function MaidsFaq() {
                 }}
               >
                 <span>{faq.q}</span>
-                {isOpen ? <ChevronUp size={20} color="#D97706" /> : <ChevronDown size={20} color="#78716C" />}
+                {isOpen ? <ChevronUp size={20} color="#7C3AED" /> : <ChevronDown size={20} color="#78716C" />}
               </button>
 
               {isOpen && (

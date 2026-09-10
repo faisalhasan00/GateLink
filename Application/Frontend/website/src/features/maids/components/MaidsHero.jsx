@@ -12,13 +12,13 @@ export default function MaidsHero() {
         {/* Hero Top Content Layer (Headline + Button) */}
         <div className="maids-cinematic-hero-content">
           <h1 className="maids-cinematic-title">
-            Get House Help in <span className="maids-cinematic-pink-highlight">10 min</span>
+            Get House Help in <span className="maids-cinematic-purple-highlight">10 min</span>
           </h1>
 
           <div className="maids-cinematic-cta-wrapper">
             <Link
               to="/download"
-              className="maids-cinematic-btn-pink"
+              className="maids-cinematic-btn-purple"
             >
               <span>Download Now</span>
             </Link>

@@ -44,7 +44,7 @@ export default function MaidsNavbar({ onOpenBooking }) {
               borderRadius: '8px',
             }}
           >
-            <PhoneCall size={16} color="#D97706" />
+            <PhoneCall size={16} color="#7C3AED" />
             <span>+91 91218 63117</span>
           </a>
 
