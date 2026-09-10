@@ -10,8 +10,9 @@ export default function MaidsCategoryHero({
   onOpenBooking
 }) {
   return (
-    <>
-      <section className="maids-cat-hero-section">
+    <section className="maids-cat-hero-viewport">
+      {/* Top / Middle Hero Content Body */}
+      <div className="maids-cat-hero-body">
         <div className="maids-cat-hero-container">
           {/* Left Column: Text & CTA */}
           <div className="maids-cat-hero-left">
@@ -89,33 +90,33 @@ export default function MaidsCategoryHero({
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* Dark Bottom Strip with 3 Key Guarantees */}
-      <section className="maids-cat-strip-section">
+      {/* Dark Bottom Strip with 3 Key Guarantees Docked In Same Screen */}
+      <div className="maids-cat-strip-section">
         <div className="maids-cat-strip-container">
           <div className="maids-cat-strip-item">
             <div className="maids-cat-strip-icon-box">
-              <ShieldCheck size={26} color="#7C3AED" />
+              <ShieldCheck size={24} color="#7C3AED" />
             </div>
             <span className="maids-cat-strip-text">Verified &amp; Trained Experts</span>
           </div>
 
           <div className="maids-cat-strip-item">
             <div className="maids-cat-strip-icon-box">
-              <Users size={26} color="#7C3AED" />
+              <Users size={24} color="#7C3AED" />
             </div>
             <span className="maids-cat-strip-text">Trusted By 15L+ Families</span>
           </div>
 
           <div className="maids-cat-strip-item">
             <div className="maids-cat-strip-icon-box">
-              <CreditCard size={26} color="#7C3AED" />
+              <CreditCard size={24} color="#7C3AED" />
             </div>
             <span className="maids-cat-strip-text">No lock-ins, No hidden fees</span>
           </div>
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }

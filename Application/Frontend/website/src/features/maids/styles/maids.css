@@ -1684,27 +1684,43 @@
 }
 
 /* ==========================================================================
-   Maids Category Page Hero & Guarantee Strip (Matching Reference)
+   Maids Category Page Hero & Guarantee Strip (Docked on Same Screen)
    ========================================================================== */
 
-.maids-cat-hero-section {
-  min-height: calc(100vh - 76px);
+.maids-cat-hero-viewport {
+  min-height: calc(100vh - 72px);
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3rem 2.5rem 3.5rem;
+  flex-direction: column;
+  justify-content: space-between;
   background: #ffffff;
   position: relative;
   box-sizing: border-box;
 }
 
+@media (min-width: 960px) and (min-height: 640px) {
+  .maids-cat-hero-viewport {
+    height: calc(100vh - 72px);
+    overflow: hidden;
+  }
+}
+
+.maids-cat-hero-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.75rem 2.5rem 1.25rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .maids-cat-hero-container {
   width: 100%;
-  max-width: 1360px;
+  max-width: 1340px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1.05fr 1.2fr;
-  gap: 4.5rem;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 3.5rem;
   align-items: center;
 }
 
@@ -1713,7 +1729,7 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.95rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   font-family: 'Inter', sans-serif;
 }
 
@@ -1738,11 +1754,11 @@
 }
 
 .maids-cat-hero-title {
-  font-size: 3.85rem;
+  font-size: 3.5rem;
   font-weight: 800;
   color: #18181B;
   line-height: 1.12;
-  margin: 0 0 1.5rem;
+  margin: 0 0 1.25rem;
   font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
   letter-spacing: -0.03em;
 }
@@ -1753,29 +1769,29 @@
 }
 
 .maids-cat-hero-subtitle {
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   line-height: 1.6;
   color: #64748B;
-  margin: 0 0 2.25rem;
-  max-width: 520px;
+  margin: 0 0 1.75rem;
+  max-width: 480px;
   font-family: 'Inter', sans-serif;
 }
 
 .maids-cat-cta-wrapper {
-  margin-bottom: 2.25rem;
+  margin-bottom: 1.75rem;
 }
 
 .maids-cat-download-btn {
   background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
   color: #ffffff;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   font-weight: 700;
-  padding: 16px 42px;
-  border-radius: 14px;
+  padding: 14px 38px;
+  border-radius: 12px;
   border: none;
   cursor: pointer;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 12px 28px -6px rgba(124, 58, 237, 0.45);
+  box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.45);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1784,18 +1800,18 @@
 
 .maids-cat-download-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 36px -6px rgba(124, 58, 237, 0.6);
+  box-shadow: 0 14px 32px -5px rgba(124, 58, 237, 0.6);
   background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
 }
 
 .maids-cat-trust-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.85rem;
+  gap: 0.75rem;
   background: #FAF5FF;
   border: 1px solid #EDE9FE;
   border-radius: 999px;
-  padding: 8px 20px 8px 10px;
+  padding: 6px 18px 6px 8px;
 }
 
 .maids-cat-avatars-group {
@@ -1804,22 +1820,22 @@
 }
 
 .maids-cat-avatar {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   border: 2px solid #ffffff;
   object-fit: cover;
 }
 
 .maids-cat-avatar.overlap {
-  margin-left: -10px;
+  margin-left: -9px;
 }
 
 .maids-cat-trust-text {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: #475569;
   display: flex;
-  gap: 5px;
+  gap: 4px;
 }
 
 .maids-cat-trust-count {
@@ -1829,31 +1845,31 @@
 
 .maids-cat-trust-dot {
   color: #CBD5E1;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
 }
 
 .maids-cat-trust-stars-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .maids-cat-stars {
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 2px;
 }
 
 .maids-cat-ratings-label {
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: #1E293B;
   font-weight: 700;
 }
 
 .maids-cat-image-wrapper {
-  border-radius: 32px;
+  border-radius: 28px;
   overflow: hidden;
-  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.15);
+  box-shadow: 0 20px 45px -12px rgba(15, 23, 42, 0.14);
   border: 1px solid #F1F5F9;
   background: #F8FAFC;
   width: 100%;
@@ -1862,20 +1878,23 @@
 .maids-cat-hero-image {
   width: 100%;
   height: auto;
-  max-height: 520px;
+  max-height: 440px;
   object-fit: cover;
   display: block;
 }
 
-/* Dark Bottom Guarantee Strip */
+/* Dark Bottom Guarantee Strip Docked on Same Viewport Screen */
 .maids-cat-strip-section {
   background-color: #1C1917;
-  padding: 1.75rem 1.5rem;
+  padding: 1.15rem 1.5rem;
   border-top: 1px solid #292524;
+  flex-shrink: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .maids-cat-strip-container {
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -1887,13 +1906,13 @@
 .maids-cat-strip-item {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 12px;
 }
 
 .maids-cat-strip-icon-box {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
   background: rgba(124, 58, 237, 0.2);
   display: flex;
   align-items: center;
@@ -1902,7 +1921,7 @@
 }
 
 .maids-cat-strip-text {
-  font-size: 1.05rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #ffffff;
   font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
@@ -1910,6 +1929,13 @@
 }
 
 @media (max-width: 960px) {
+  .maids-cat-hero-viewport {
+    height: auto;
+    min-height: auto;
+  }
+  .maids-cat-hero-body {
+    padding: 2.5rem 1.5rem 2rem;
+  }
   .maids-cat-hero-container {
     grid-template-columns: 1fr;
     gap: 2.5rem;
@@ -1925,8 +1951,8 @@
 }
 
 @media (max-width: 640px) {
-  .maids-cat-hero-section {
-    padding: 2.5rem 1.25rem 3rem;
+  .maids-cat-hero-body {
+    padding: 2rem 1.25rem 1.75rem;
   }
   .maids-cat-hero-title {
     font-size: 2.15rem;
@@ -1934,7 +1960,7 @@
   .maids-cat-strip-container {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1.25rem;
+    gap: 1.15rem;
   }
 }
 
