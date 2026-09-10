@@ -4,7 +4,7 @@ import BazaarQuickHeader from '../../features/bazaar/components/BazaarQuickHeade
 import BazaarCategoryCarousel from '../../features/bazaar/components/BazaarCategoryCarousel';
 import BazaarHeroBanner from '../../features/bazaar/components/BazaarHeroBanner';
 import BazaarPromoBanners from '../../features/bazaar/components/BazaarPromoBanners';
-import BazaarVeggieSubscription from '../../features/bazaar/components/BazaarVeggieSubscription';
+import BazaarDailyPassBuilder from '../../features/bazaar/components/BazaarDailyPassBuilder';
 import BazaarProductShelf from '../../features/bazaar/components/BazaarProductShelf';
 import BazaarStickyCartBar from '../../features/bazaar/components/BazaarStickyCartBar';
 import BazaarCartDrawer from '../../features/bazaar/components/BazaarCartDrawer';
@@ -60,20 +60,15 @@ function BazaarMarketplaceContent() {
           <>
             {/* Hero Essentials Banner (Screenshot Match) */}
             <BazaarHeroBanner />
-
-            {/* Daily Vegetable Subscription & 7-Day Rotating Menu */}
-            <BazaarVeggieSubscription />
-
             <BazaarPromoBanners />
           </>
         )}
 
         {/* If search query or specific category is selected */}
         {(searchQuery.trim() || activeCategory !== 'all') ? (
-          <>
-            {activeCategory === 'vegetables' && !searchQuery && (
-              <BazaarVeggieSubscription />
-            )}
+          activeCategory === 'daily-pass' && !searchQuery.trim() ? (
+            <BazaarDailyPassBuilder />
+          ) : (
             <BazaarProductShelf
               title={
                 searchQuery.trim() 
@@ -84,7 +79,7 @@ function BazaarMarketplaceContent() {
               count={filteredProducts.length}
               products={filteredProducts}
             />
-          </>
+          )
         ) : (
           /* Default Quick Commerce Bento Shelves */
           <>
@@ -122,6 +117,9 @@ function BazaarMarketplaceContent() {
               count={papadProducts.length}
               products={papadProducts}
             />
+
+            {/* Custom Daily Society Pass Builder (Placed after Papad section) */}
+            <BazaarDailyPassBuilder />
 
             <BazaarProductShelf
               title="100% Pure Raw Honey, Ghee & Cold-Pressed Oils"

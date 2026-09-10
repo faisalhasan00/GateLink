@@ -40,6 +40,12 @@ export const BAZAAR_CATEGORIES = [
     name: 'Handmade Papad',
     icon: '🍘',
     tagline: 'Sun-Dried Artisanal'
+  },
+  {
+    id: 'daily-pass',
+    name: 'Daily Society Pass',
+    icon: '🎟️',
+    tagline: 'Custom Daily Basket'
   }
 ];
 
