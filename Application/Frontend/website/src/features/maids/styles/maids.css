@@ -2322,6 +2322,243 @@
   }
 }
 
+/* ==========================================================================
+   Transparent Hourly Pricing for House Help (Matching Reference)
+   ========================================================================== */
+
+.maids-hourly-pricing-section {
+  padding: 5rem 1.5rem 5.5rem;
+  background: #ffffff;
+  border-top: 1px solid #F1F5F9;
+}
+
+.maids-hourly-pricing-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.maids-hourly-pricing-header {
+  text-align: center;
+  margin-bottom: 3.5rem;
+}
+
+.maids-hourly-pricing-title {
+  font-size: 2.75rem;
+  font-weight: 800;
+  color: #18181B;
+  margin: 0;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.maids-hourly-pricing-highlight {
+  color: #7C3AED;
+  font-weight: 800;
+}
+
+.maids-hourly-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2.5rem;
+}
+
+.maids-hourly-card {
+  background: #ffffff;
+  border: 1.5px solid #EDE9FE;
+  border-radius: 24px;
+  padding: 2.5rem 2.25rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.maids-hourly-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px -4px rgba(124, 58, 237, 0.12);
+  border-color: #DDD6FE;
+}
+
+.maids-hourly-card-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.maids-hourly-icon-box {
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background: #FAF5FF;
+  border: 1px solid #EDE9FE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.maids-hourly-card-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #18181B;
+  margin: 0 0 0.4rem;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+  letter-spacing: -0.01em;
+}
+
+.maids-hourly-card-sub {
+  font-size: 0.95rem;
+  color: #64748B;
+  margin: 0;
+  line-height: 1.5;
+  font-family: 'Inter', sans-serif;
+}
+
+.maids-hourly-card-divider {
+  height: 1px;
+  background: #F1F5F9;
+  margin-bottom: 1.5rem;
+}
+
+.maids-hourly-checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+.maids-hourly-check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.maids-hourly-check-circle {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #16A34A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.maids-hourly-check-text {
+  font-size: 0.98rem;
+  color: #334155;
+  line-height: 1.5;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Bottom App Download Banner */
+.maids-hourly-bottom-banner {
+  background: #FAF5FF;
+  border: 1.5px solid #EDE9FE;
+  border-radius: 20px;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.maids-hourly-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.maids-hourly-banner-icon-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #FFFFFF;
+  border: 1px solid #EDE9FE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.maids-hourly-banner-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #18181B;
+  margin: 0 0 0.2rem;
+  font-family: 'Manrope', 'Plus Jakarta Sans', sans-serif;
+}
+
+.maids-hourly-banner-desc {
+  font-size: 0.92rem;
+  color: #64748B;
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.maids-hourly-banner-btn {
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  padding: 13px 28px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+  flex-shrink: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.maids-hourly-banner-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(124, 58, 237, 0.45);
+  background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%);
+}
+
+@media (max-width: 960px) {
+  .maids-hourly-cards-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .maids-hourly-pricing-title {
+    font-size: 2.25rem;
+  }
+  .maids-hourly-bottom-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+  .maids-hourly-banner-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .maids-hourly-pricing-section {
+    padding: 3.5rem 1.25rem 4rem;
+  }
+  .maids-hourly-pricing-title {
+    font-size: 1.85rem;
+  }
+  .maids-hourly-card {
+    padding: 1.75rem 1.25rem;
+  }
+}
+
+
 
 
 

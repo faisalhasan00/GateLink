@@ -3,6 +3,7 @@ import MaidsNavbar from '../../features/maids/components/MaidsNavbar';
 import MaidsCategoryHero from '../../features/maids/components/MaidsCategoryHero';
 import MaidsHouseHelpScope from '../../features/maids/components/MaidsHouseHelpScope';
 import MaidsWhyFamiliesTrust from '../../features/maids/components/MaidsWhyFamiliesTrust';
+import MaidsHouseHelpPricing from '../../features/maids/components/MaidsHouseHelpPricing';
 import MaidsQualityVetting from '../../features/maids/components/MaidsQualityVetting';
 import MaidsServingCities from '../../features/maids/components/MaidsServingCities';
 import MaidsTestimonials from '../../features/maids/components/MaidsTestimonials';
@@ -46,6 +47,9 @@ export default function HouseHelpLandingPage() {
 
         {/* Why Families Trust GateLink for House Help (Matching Reference Design) */}
         <MaidsWhyFamiliesTrust />
+
+        {/* Transparent Hourly Pricing for House Help (Matching Reference Design) */}
+        <MaidsHouseHelpPricing onOpenBooking={handleOpenBooking} />
 
         {/* Experts Vetted for Quality */}
         <MaidsQualityVetting />
