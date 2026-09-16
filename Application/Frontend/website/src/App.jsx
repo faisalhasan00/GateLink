@@ -39,6 +39,9 @@ const SecurityManagementLanding = lazy(() => import('./pages/landing/SecurityMan
 const SecurityCenterPage = lazy(() => import('./pages/landing/SecurityCenterPage'))
 const NotFoundPage = lazy(() => import('./pages/landing/NotFoundPage'))
 
+// Consumer Vertical Pages
+const InteriorsPage = lazy(() => import('./pages/interiors/InteriorsPage'))
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -86,6 +89,9 @@ export default function App() {
             <Route path="/dpa" element={<Navigate to="/data-processing" replace />} />
             <Route path="/grievance" element={<GrievancePolicyPage />} />
             <Route path="/grievance-redressal" element={<Navigate to="/grievance" replace />} />
+
+            {/* Consumer Vertical Routes */}
+            <Route path="/interiors" element={<InteriorsPage />} />
 
             {/* 404 Catch-All Route */}
             <Route path="*" element={<NotFoundPage />} />
